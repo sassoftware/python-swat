@@ -442,7 +442,8 @@ class CASTablePlotter(object):
         '''
         Make a line plot of all columns in a table
 
-        See Also: pandas.DataFrame.plot (for arguments)
+        This method simply fetches the data and uses the
+        :meth:`pandas.DataFrame.plot` method to plot it.
 
         '''
         return self._table._fetch(grouped=True).plot(*args, **kwargs)
@@ -451,7 +452,8 @@ class CASTablePlotter(object):
         '''
         Area plot
 
-        See Also: pandas.DataFrame.area (for arguments)
+        This method simply fetches the data and uses the
+        :meth:`pandas.DataFrame.area` method to plot it.
 
         '''
         return self._table._fetch(grouped=True).plot.area(*args, **kwargs)
@@ -585,22 +587,22 @@ class CASTable(ParamManager, ActionParamManager):
 
     def append_varlist(self, *items, **kwargs):
         '''
-        Append variable names to varlist parameter
+        Append variable names to tbl.varlist parameter
 
         Parameters
         ----------
         *items : strings or lists-of-strings
             Names to append.
         inplace : boolean, optional
-            If True, the current varlist is appended.
-            If False, the new varlist is returned.
+            If `True`, the current tbl.varlist is appended.
+            If `False`, the new varlist is returned.
 
         Returns
         -------
         None
-            if inplace=True
+            if inplace == True
         list of strings
-            if inplace=False
+            if inplace == False
 
         '''
         varlist = self.get_param('varlist', [])
@@ -619,22 +621,22 @@ class CASTable(ParamManager, ActionParamManager):
 
     def append_compvars(self, *items, **kwargs):
         '''
-        Append variable names to compvars parameter
+        Append variable names to tbl.compvars parameter
 
         Parameters
         ----------
         *items : strings or lists-of-strings
             Names to append.
         inplace : boolean, optional
-            If True (the default), the current compvars is appended.
-            If False, the new compvars is returned.
+            If `True` (the default), tbl.compvars is appended.
+            If `False`, a new compvars is returned.
 
         Returns
         -------
         None
-            if inplace=True
+            if inplace == True
         list of strings
-            if inplace=False
+            if inplace == False
 
         '''
         varlist = self.get_param('compvars', [])
@@ -651,22 +653,22 @@ class CASTable(ParamManager, ActionParamManager):
 
     def append_groupby(self, *items, **kwargs):
         '''
-        Append variable names to groupby parameter
+        Append variable names to tbl.groupby parameter
 
         Parameters
         ----------
         *items : strings or lists-of-strings
             Names to append.
         inplace : boolean, optional
-            If True (the default), the current groupby is appended.
-            If False, the new groupby is returned.
+            If `True` (the default), tbl.groupby is appended.
+            If `False`, a new groupby is returned.
 
         Returns
         -------
         None
-            if inplace=True
+            if inplace == True
         list of strings
-            if inplace=False
+            if inplace == False
 
         '''
         varlist = self.get_param('groupby', [])
@@ -683,22 +685,22 @@ class CASTable(ParamManager, ActionParamManager):
 
     def append_comppgm(self, *items, **kwargs):
         '''
-        Append code to comppgm parameter
+        Append code to tbl.comppgm parameter
 
         Parameters
         ----------
         *items : strings or lists-of-strings
             Code to append.
         inplace : boolean, optional
-            If True, the current comppgm is appended.
-            If False, the new comppgm is returned.
+            If `True`, tbl.comppgm is appended.
+            If `False`, a new comppgm is returned.
 
         Returns
         -------
         None
-            if inplace=True
+            if inplace == True
         string
-            if inplace=False
+            if inplace == False
 
         '''
         code = self.get_param('comppgm', [])
@@ -727,15 +729,15 @@ class CASTable(ParamManager, ActionParamManager):
         code : string or list-of-strings
             Code blocks for computed columns.
         inplace : boolean, True
-            If True, the computed column specification is appended.
-            If False, the computed column specification is returned.
+            If `True`, the computed column specifications are appended.
+            If `False`, new computed column specifications are returned.
 
         Returns
         -------
         None
-            if inplace=True
+            if inplace == True
         (compvars, comppgm)
-            if inplace=False
+            if inplace == False
 
         '''
         out = (self.append_compvars(names, inplace=inplace),
@@ -753,15 +755,15 @@ class CASTable(ParamManager, ActionParamManager):
         *items : strings or lists-of-strings
             Code to append.
         inplace : boolean, optional
-            If True, the current where is appended.
-            If False, the new where is returned.
+            If `True`, tbl.where is appended.
+            If `False`, a new where is returned.
 
         Returns
         -------
         None
-            if inplace=True
+            if inplace == True
         string
-            if inplace=False
+            if inplace == False
 
         '''
         code = self.get_param('where', [])
@@ -786,15 +788,15 @@ class CASTable(ParamManager, ActionParamManager):
             Sorting parameters.  Each item can be a name of a column,
             or a dictionary containing 'name', 'order', and 'formatted' keys.
         inplace : boolean, optional
-            If True (the default), the orderby parameter is appended.
-            If False, the new orderby parameter is returned.
+            If `True` (the default), the tbl.orderby parameter is appended.
+            If `False`, a new orderby parameter is returned.
 
         Returns
         -------
         None
-            if inplace=True
+            if inplace == True
         list of dicts
-            if inplace=False
+            if inplace == False
 
         '''
         name = 'orderby'
@@ -893,7 +895,7 @@ class CASTable(ParamManager, ActionParamManager):
         Parameters
         ----------
         connection : CAS instance
-           CAS connection to use for reflection
+           CAS connection to use for reflection.
 
         Returns
         -------
@@ -937,14 +939,25 @@ class CASTable(ParamManager, ActionParamManager):
         '''
         Set the connection to use for action calls
 
+        When a connection is registered with a :class:`CASTable` object, 
+        CAS actions can be called on it as if they were instance methods.
+
         Parameters
         ----------
-        connection : CAS object
-            The connection object to use
+        connection : :class:`CAS` object
+            The connection object to use.
 
         Note: This method creates a weak reference to the connection.
               If the connection is released, actions will no longer
               be able to be called from the CASTable object.
+
+        Examples
+        --------
+        >>> conn = swat.CAS()
+        >>> tbl = CASTable('my-table')
+        >>> tbl.set_connection(conn)
+        >>> conn is tbl.get_connection()
+        True
 
         Returns
         -------
@@ -958,7 +971,10 @@ class CASTable(ParamManager, ActionParamManager):
 
     def get_connection(self):
         '''
-        Get the connection object
+        Get the registered connection object
+
+        When a connection is registered with a :class:`CASTable` object, 
+        CAS actions can be called on it as if they were instance methods.
 
         Raises
         ------
@@ -966,9 +982,17 @@ class CASTable(ParamManager, ActionParamManager):
             If no connection is available either because it wasn't
             set, or because the connection object was released.
 
+        Examples
+        --------
+        >>> conn = swat.CAS()
+        >>> tbl = CASTable('my-table')
+        >>> tbl.set_connection(conn)
+        >>> conn is tbl.get_connection()
+        True
+
         Returns
         -------
-        CAS object
+        :class:`CAS` object
             If a connection exists on the CASTable
 
         '''
@@ -983,7 +1007,35 @@ class CASTable(ParamManager, ActionParamManager):
         return conn
 
     def __eq__(self, other):
-        ''' Test for equality '''
+        ''' 
+        Test for equality 
+        
+        CASTable objects are considered equal if they contain the exact
+        same set of parameters.
+
+        Parameters
+        ----------
+        other : :class:`CASTable` object
+            The CASTable object to compare to.
+
+        Examples
+        --------
+        >>> t1 = CASTable('one', replace=True)
+        >>> t2 = CASTable('two', where='a < 1')
+        >>> t3 = CASTable('two')
+        >>> t3.where = 'a < 1'
+
+        >>> t1 == t2
+        False
+
+        >>> t2 == t3
+        True
+
+        Returns
+        -------
+        boolean
+        
+        '''
         if isinstance(other, CASTable):
             if self.params == other.params:
                 return True
@@ -992,6 +1044,14 @@ class CASTable(ParamManager, ActionParamManager):
     def __copy__(self):
         '''
         Make a shallow copy of the CASTable object
+
+        Examples
+        --------
+        >>> import copy
+        >>> tbl = CASTable('my-table')
+        >>> tbl2 = copy.copy(tbl)
+        >>> tbl == tbl2
+        True
 
         Returns
         -------
@@ -1018,6 +1078,14 @@ class CASTable(ParamManager, ActionParamManager):
         memo : any
            Storage for deepcopy mechanism
 
+        Examples
+        --------
+        >>> import copy
+        >>> tbl = CASTable('my-table')
+        >>> tbl2 = copy.deepcopy(tbl)
+        >>> tbl == tbl2
+        True
+
         Returns
         -------
         CASTable object
@@ -1033,15 +1101,143 @@ class CASTable(ParamManager, ActionParamManager):
         return tbl
 
     def __setattr__(self, name, value):
-        ''' Set attribute value '''
+        ''' 
+        Set attribute or parameter value 
+
+        When an attribute is set on a CASTable object it can end up
+        in one of two locations.  If the name of the attribute given
+        matches the name of a CAS table parameter, the attribute value
+        is stored in the `CASTable.params` dictionary and used in calls
+        to CAS actions.
+
+        If the specified name does not match a CAS table parameter, the
+        attribute is set on the CASTable object as a standard Python 
+        attribute.
+
+        Parameters
+        ----------
+        name : string
+            Name of the attribute to set.
+        value : any
+            The value of the attribute to set.
+
+        Examples
+        --------
+        >>> tbl = CASTable('my-table')
+        >>> tbl.where = 'a < 2'
+        >>> tbl.noattr = True
+
+        >>> print(tbl.where)
+        'a < 2'
+
+        >>> print(tbl.params)
+        {'name': 'my-table', 'where': 'a < 2'}
+
+        >>> print(tbl.noattr)
+        True
+
+        Returns
+        -------
+        None
+        
+        '''
         return super(CASTable, self).__setattr__(name.lower(), value)
 
     def __delattr__(self, name):
-        ''' Delete attribute '''
+        ''' 
+        Delete an attribute 
+
+        When an attribute is deleted from a CASTable object, it can be
+        deleted from one of two areas.  If the name specified matches the 
+        name of a CAS table parameter, the key is deleted from the 
+        `CASTable.params` object dictionary which holds parameters used
+        when the CASTable is used in a CAS action call.
+
+        If the attribute name is not a valid CAS table parameter, the 
+        attribute is deleted from the CASTable object as a standard Python
+        attribute.
+        
+        Parameters
+        ----------
+        name : string
+            Name of the attribute to delete.
+
+        Examples
+        --------
+        >>> tbl = CASTable('my-table')
+        >>> tbl.where = 'a < 2'
+        >>> tbl.noattr = True
+
+        >>> print(tbl.where)
+        'a < 2'
+
+        >>> print(tbl.params)
+        {'name': 'my-table', 'where': 'a < 2'}
+
+        >>> print(tbl.noattr)
+        True
+
+        >>> del tbl.where
+        >>> del tbl.noattr
+        >>> print(tbl.params)
+        {'name': 'my-table'}
+
+        Returns
+        -------
+        None
+        
+        '''
         return super(CASTable, self).__delattr__(name.lower())
 
     def __getattr__(self, name):
-        ''' Get named attribute '''
+        ''' 
+        Get named parameter, CAS action, or table column
+
+        When attributes are accessed on a CASTable object, they lookup
+        goes through several levels.  First, if the attribute is a real
+        Python attribute on the CASTable object, that value will get 
+        returned.
+
+        Second, if the requested attribute is the name of a CAS table
+        parameter and the parameter has been set, the value of that 
+        parameter will be returned.
+
+        Third, if the CASTable object has a connection registered with
+        it and the requested attribute name matches the name of a CAS action
+        or CAS action set, that object will be returned.
+
+        Finally, if the attribute value matches the name of a CAS table
+        column, a CASColumn is returned.
+        
+        Parameters
+        ----------
+        name : string
+            Name of the attribute to locate.
+
+        Examples
+        --------
+        >>> conn = swat.CAS()
+        >>> tbl = CASTable('my-table')
+        >>> tbl.where = 'a > 2'
+        >>> tbl.noattr = True
+
+        >>> print(tbl.params)
+        {'name': 'my-table', 'where': 'a > 2'}
+
+        >>> print(tbl.noattr)
+        True
+
+        >>> print(tbl.datacol)
+        CASColumn('my-table', varlist=['datacol'])
+
+        >>> print(tbl.summary)
+        ?.simple.Summary()
+
+        Returns
+        -------
+        any
+        
+        '''
         origname = name
         name = name.lower()
 
@@ -1094,9 +1290,17 @@ class CASTable(ParamManager, ActionParamManager):
         Parameters
         ----------
         _name_ : string
-            Action name
+            Action name.
         **kwargs : any, optional
-            Keyword arguments to the action
+            Keyword arguments to the CAS action.
+
+        Examples
+        --------
+        >>> conn = swat.CAS()
+        >>> conn.invoke('summary', table=CASTable('my-table'))
+        >>> for resp in conn:
+        ...     for k, v in result:
+        ...         print(k, v)
 
         Returns
         -------
@@ -1113,9 +1317,15 @@ class CASTable(ParamManager, ActionParamManager):
         Parameters
         ----------
         _name_ : string
-            Action name
+            Action name.
         **kwargs : any, optional
-            Keyword arguments to the action
+            Keyword arguments to the CAS action.
+
+        Examples
+        --------
+        >>> conn = swat.CAS()
+        >>> out = conn.retrieve('summary', table=CASTable('my-table'))
+        >>> print(out.Summary)
 
         Returns
         -------
@@ -1125,13 +1335,23 @@ class CASTable(ParamManager, ActionParamManager):
         return getattr(self, _name_).retrieve(**kwargs)
 
     def _retrieve(self, _name_, **kwargs):
-        ''' Same as retrieve, but marked as a UI call '''
+        '''
+        Same as retrieve, but marked as a UI call 
+
+        This is used for behind-the-scenes calls to CASTable.retrieve.
+        
+        Returns
+        -------
+        CASResults object
+        
+        '''
         out = self.retrieve(_name_, _apptag='UI', _messagelevel='none', **kwargs)
         if out.severity > 1:
             raise SWATError(out.status)
         return out
 
     def __str__(self):
+        ''' Return string representation of the CASTable object '''
         parts = [
             repr(self.params['name']),
             dict2kwargs(self.to_params(), ignore=['name'], fmt='%s')
@@ -1169,21 +1389,49 @@ class CASTable(ParamManager, ActionParamManager):
         return str(self)
 
     def get_action_names(self):
-        ''' Return a list of available actions '''
+        ''' 
+        Return a list of available CAS actions 
+
+        If a CAS connection is registered with the CASTable object,
+        this method returns the list of CAS actions names available
+        to the connection.
+        
+        Returns
+        -------
+        list of strings
+        
+        '''
         return self.get_connection().get_action_names()
 
     def get_actionset_names(self):
-        ''' Return a list of available actionsets '''
+        ''' 
+        Return a list of available actionsets 
+
+        If a CAS connection is registered with the CASTable object,
+        this method returns the list of CAS action set names available
+        to the connection.
+        
+        Returns
+        -------
+        list of strings
+        
+        '''
         return self.get_connection().get_actionset_names()
 
     def to_table_params(self):
         '''
-        Create a copy of the table using only input table parameters
+        Create a copy of the table parameters containing only input table parameters
+
+        Examples
+        --------
+        >>> tbl = CASTable('my-table', where='a < 2', replace=True)
+        >>> print(tbl.to_table_params())
+        {'name': 'my-table', 'where': 'a < 2'}
 
         Returns
         -------
-        CASTable object
-           Table object with only input table parameters
+        dict
+           Dictionary with only input table parameters
 
         '''
         if type(self).table_params:
@@ -1201,7 +1449,13 @@ class CASTable(ParamManager, ActionParamManager):
 
     def to_table(self):
         '''
-        Create a copy of the table with only input table paramaters
+        Create a copy of the CASTable object with only input table paramaters
+
+        Examples
+        --------
+        >>> tbl = CASTable('my-table', where='a < 2', replace=True)
+        >>> print(tbl.to_table())
+        CASTable('my-table', where='a < 2')
 
         Returns
         -------
@@ -1219,12 +1473,18 @@ class CASTable(ParamManager, ActionParamManager):
 
     def to_outtable_params(self):
         '''
-        Create a copy of the table using only the output table parameters
+        Create a copy of the CASTable parameters using only the output table parameters
+
+        Examples
+        --------
+        >>> tbl = CASTable('my-table', where='a < 2', replace=True)
+        >>> print(tbl.to_outtable_params())
+        {'name': 'my-table', replace=True}
 
         Returns
         -------
-        CASTable object
-           Table object with only output table parameters
+        dict
+           Dictionary with only output table parameters
 
         '''
         if type(self).outtable_params:
@@ -1242,7 +1502,13 @@ class CASTable(ParamManager, ActionParamManager):
 
     def to_outtable(self):
         '''
-        Create a copy of the table with only output table paramaters
+        Create a copy of the CASTable object with only output table paramaters
+
+        Examples
+        --------
+        >>> tbl = CASTable('my-table', where='a < 2', replace=True)
+        >>> print(tbl.to_table())
+        CASTable('my-table', replace=True)
 
         Returns
         -------
@@ -1260,7 +1526,13 @@ class CASTable(ParamManager, ActionParamManager):
 
     def to_table_name(self):
         '''
-        Return name of table for isTableName parameters
+        Return the name of the table
+
+        Examples
+        --------
+        >>> tbl = CASTable('my-table', where='a < 2', replace=True)
+        >>> print(tbl.to_table_name())
+        my-table
 
         Returns
         -------
@@ -1322,7 +1594,7 @@ class CASTable(ParamManager, ActionParamManager):
 
     @getattr_safe_property
     def columns(self):
-        ''' Return names of the visible columns in the table '''
+        ''' The visible columns in the table '''
         varlist = self.get_param('varlist', [])
         if varlist:
             return pd.Index(varlist)
@@ -1330,11 +1602,31 @@ class CASTable(ParamManager, ActionParamManager):
 
     @getattr_safe_property
     def index(self):
-        ''' Return the table index '''
+        ''' The table index '''
         return
 
     def _intersect_varlist(self, columns, inplace=False):
-        ''' Return the intersection of `columns` and `self.varlist` '''
+        ''' 
+        Return the intersection of `columns` and `self.varlist` 
+        
+        This is used to generate a new column list that contains the
+        intersection of the names in `columns` with the names of the
+        current table's varlist.
+
+        Examples
+        --------
+        >>> tbl = CASTable('my-table', varlist=['a', 'b', 'c'])
+        >>> print(tbl._intersect_varlist(['a', 'c', 'd']))
+        ['a', 'c']
+
+        Returns
+        -------
+        list
+            If inplace == False
+        None
+            If inplace == True
+        
+        '''
         if columns is None:
             columns = []
         elif not isinstance(columns, items_types):
@@ -1364,14 +1656,18 @@ class CASTable(ParamManager, ActionParamManager):
         Parameters
         ----------
         columns : list of strings, optional
-            The names of the columns to add to the matrix
+            The names of the columns to add to the matrix.
         n : int or long, optional
             The maximum number of rows to fetch.  If None, then the value
-            in swat.options.dataset.max_rows_fetched is used.
+            in ``swat.options.dataset.max_rows_fetched`` is used.
+
+        See Also
+        --------
+        :meth:`pandas.DataFrame.as_matrix`
 
         Returns
         -------
-        numpy.array
+        :class:`numpy.array`
 
         '''
         if n is None:
@@ -1413,7 +1709,7 @@ class CASTable(ParamManager, ActionParamManager):
 
     def select_dtypes(self, include=None, exclude=None):
         '''
-        Return a subset CASTable including/excluding columns based on data type
+        Return a subset ``CASTable`` including/excluding columns based on data type
 
         Parameters
         ----------
@@ -1434,7 +1730,7 @@ class CASTable(ParamManager, ActionParamManager):
 
         Returns
         -------
-        CASTable object
+        ``CASTable`` object
 
         '''
         if include is None:
@@ -1497,7 +1793,7 @@ class CASTable(ParamManager, ActionParamManager):
 
     @getattr_safe_property
     def values(self):
-        ''' Numy representation of the table '''
+        ''' Numpy representation of the table '''
         return self._fetch().values
 
     @getattr_safe_property
@@ -1534,16 +1830,25 @@ class CASTable(ParamManager, ActionParamManager):
 
     def copy(self, deep=False):
         '''
-        Make a copy of the CASTable object
+        Make a copy of the ``CASTable`` object
 
         Parameters
         ----------
         deep : boolean, optional
             Should all list / dict-type objects be deep copied?
 
+        Examples
+        --------
+        >>> tbl = CASTable('my-table', where='a < 2')
+        >>> tbl2 = tbl.copy()
+        >>> print(tbl2)
+        {'name': 'my-table', 'where': 'a < 2'}
+        >>> print(tbl is tbl2)
+        False
+
         Returns
         -------
-        CASTable object
+        ``CASTable`` object
 
         '''
         if deep:
@@ -1562,15 +1867,78 @@ class CASTable(ParamManager, ActionParamManager):
     # Indexing, iteration
 
     def head(self, n=5, columns=None):
-        ''' Retrieve the specified number of rows '''
+        ''' 
+        Retrieve first `n` rows 
+
+        Parameters
+        ----------
+        n : int or long, optional
+            The number of rows to return.
+        columns : list-of-strings, optional
+            A subset of columns to return.
+        
+        Notes
+        -----
+        Since CAS tables can be distributed across a grid of computers,
+        the order is not guaranteed.  If you do not apply a sort order
+        using :meth:`sort_values` the results are not predictable.
+
+        Returns
+        -------
+        :class:`pandas.DataFrame`
+        
+        '''
         return self.slice(start=0, stop=n - 1, columns=columns)
 
     def tail(self, n=5, columns=None):
-        ''' Retrieve the specified number of rows from the end '''
+        ''' 
+        Retrieve last `n` rows
+
+        Parameters
+        ----------
+        n : int or long, optional
+            The number of rows to return.
+        columns : list-of-strings, optional
+            A subset of columns to return.
+        
+        Notes
+        -----
+        Since CAS tables can be distributed across a grid of computers,
+        the order is not guaranteed.  If you do not apply a sort order
+        using :meth:`sort_values` the results are not predictable.
+
+        Returns
+        -------
+        :class:`pandas.DataFrame`
+        
+        '''
         return self.slice(start=-n, stop=-1, columns=columns)
 
     def slice(self, start=0, stop=None, columns=None):
-        ''' Retrieve the specified rows '''
+        ''' 
+        Retrieve the specified rows 
+        
+        Parameters
+        ----------
+        start : int or long, optional
+            The index of the first row to return.
+        stop : int or long, optional
+            The index of the last row to return.  If not specified, all
+            rows until the end are retrieved.
+        columns : list-of-strings, optional
+            A subset of columns to return.
+        
+        Notes
+        -----
+        Since CAS tables can be distributed across a grid of computers,
+        the order is not guaranteed.  If you do not apply a sort order
+        using :meth:`sort_values` the results are not predictable.
+
+        Returns
+        -------
+        :class:`pandas.DataFrame`
+        
+        '''
         tbl = self
 
         if columns is not None:
@@ -1647,20 +2015,26 @@ class CASTable(ParamManager, ActionParamManager):
         Parameters
         ----------
         key : string or int
-            Label contained in the index
+            Label contained in the index.
         axis : int, optional
-            Axis to retrieve from (0=row, 1=column)
-        level : object
-            Unsupported
-        copy : boolean
-            Unsupported
-        drop_level : boolean
-            Unsupported
+            Axis to retrieve from (0=row, 1=column).
+        level : object, optional
+            Not implemented.
+        copy : boolean, optional
+            Not implemented.
+        drop_level : boolean, optional
+            Not implemented.
+
+        See Also
+        --------
+        :meth:`pandas.DataFrame.xs`
 
         Returns
         -------
-        Series for axis=0 indexing
-        CASColumn for axis=1 indexing
+        Series
+            For axis == 0 indexing
+        CASColumn
+            For axis == 1 indexing
 
         '''
         if axis == 0:
@@ -1673,16 +2047,48 @@ class CASTable(ParamManager, ActionParamManager):
 #       raise NotImplementedError
 
     def __iter__(self):
+        '''
+        Iterate through all visible column names in ``self`` 
+        
+        Yields
+        ------
+        string
+        
+        '''
         for col in self.columns:
             yield col
 
     def iteritems(self):
-        ''' Iterate over column names '''
+        '''
+        Iterate over column names and ``CASColumn`` objects
+        
+        Yields
+        ------
+        (string, ``CASColumn``)
+            Two-element tuple containing a column name and a ``CASColumn`` object
+        
+        '''
         for col in self.columns:
             yield (col, self._to_column(col))
 
     def _generic_iter(self, name, *args, **kwargs):
-        ''' Generic iterator for various iteration implementations '''
+        ''' 
+        Generic iterator for various iteration implementations 
+        
+        Parameters
+        ----------
+        name : string
+            The name of the iterator type.
+        *args : one or more arguments
+            Positional arguments to the iterator.
+        **kwargs : keyword parameters
+            Keyword arguments to the iterator.
+
+        Yields
+        ------
+        iterator result
+        
+        '''
         kwargs = kwargs.copy()
 
         has_index = 'index' in kwargs
@@ -1730,11 +2136,47 @@ class CASTable(ParamManager, ActionParamManager):
             stop = start + chunksize
 
     def iterrows(self, chunksize=None):
-        ''' Iterate over rows '''
+        '''
+        Iterate over the rows of a CAS table as (index, :class:`pandas.Series`) pairs
+
+        Parameters
+        ----------
+        chunksize : int or long, optional
+            The number of rows to retrieve in each fetch.
+
+        See Also
+        --------
+        iteritems
+        itertuples
+        
+        Returns
+        -------
+        iterator of (index, :class:`pandas.Series`) tuples
+
+        '''
         return self._generic_iter('iterrows', chunksize=chunksize)
 
     def itertuples(self, index=True, chunksize=None):
-        ''' Iterate over rows as tuples '''
+        '''
+        Iterate over rows as tuples
+        
+        Parameters
+        ----------
+        index : boolean, optional
+            If True, return the index as the first item of the tuple.
+        chunksize : int or long, optional
+            The number of rows to retrieve in each fetch.
+
+        See Also
+        --------
+        iterrows
+        iteritems
+
+        Returns
+        -------
+        iterator of row tuples
+        
+        '''
         return self._generic_iter('itertuples', index=index, chunksize=chunksize)
 
     def get_value(self, index, col, **kwargs):
@@ -2576,6 +3018,8 @@ class CASTable(ParamManager, ActionParamManager):
         numeric_only : boolean, optional
             Should only numeric columns be used?
 
+        Returns
+        -------
         Series
             if no by groups are specified
         Dataframe

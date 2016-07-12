@@ -94,6 +94,25 @@ Constructor
 
    CASTable
 
+CAS Connections
+~~~~~~~~~~~~~~~
+
+.. autosummary::
+   :toctree: generated/
+
+   CASTable.get_connection
+   CASTable.set_connection
+
+Setters and Getters
+~~~~~~~~~~~~~~~~~~~
+
+.. autosummary::
+   :toctree: generated/
+
+   CASTable.__setattr__
+   CASTable.__getattr__
+   CASTable.__delattr__
+
 Attributes and Underlying Data
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
