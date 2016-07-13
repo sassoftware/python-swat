@@ -23,7 +23,7 @@ automatically choose the appropriate download for your platform.
 
 .. code-block:: bash
 
-   conda install -c http://developer.sas.com/viya/python/swat swat
+   conda install -c conda-forge swat
 
 Pip
 ---
@@ -36,5 +36,5 @@ prerequesites specified, so ``pip`` should install those if they aren't installe
 .. code-block:: bash
 
    # Linux 64
-   pip install http://developer.sas.com/viya/python/swat/swat-1.0.0-linux64.tar.gz
+   pip install http://github.com/sassoftware/python-swat/releases/0.9.0/swat-0.9.0-linux64.tar.gz
 

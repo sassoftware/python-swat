@@ -338,7 +338,7 @@ class CAS(object):
         self._id_generator = _id_generator()
 
     def _gen_id(self):
-        ''' Generate a unique ID '''
+        ''' Generate an ID unique to the session '''
         import numpy
         return numpy.base_repr(next(self._id_generator), 36)
 
@@ -591,6 +591,9 @@ class CAS(object):
     def SASFormatter(self):
         '''
         Create a SASFormatter instance
+
+        :class:`SASFormatters` can be used to format Python values using
+        SAS data formats.
 
         Returns
         -------
@@ -982,7 +985,7 @@ class CAS(object):
 
         This method is a thin wrapper around the `table.upload` CAS action.
         The primary difference between this data loader and the other data
-        loaders on this class is that in this case the parsing of the data
+        loaders on this class is that, in this case, the parsing of the data
         is done on the server.  This method simply uploads the file as 
         binary data which is then parsed by `table.loadtable` on the server.
 
@@ -992,10 +995,16 @@ class CAS(object):
 
         Notes
         -----
-        When uploading a :class:`pandas.DataFrame`, the data is exported to
+        This method uses paths that are on the **client side**.  This means 
+        you need to use paths to files that are **on the same machine that Python
+        is running on**.  If you want to load files from the CAS server side, you
+        would use the `table.loadtable` action.
+
+        Also, when uploading a :class:`pandas.DataFrame`, the data is exported to
         a CSV file, then the CSV file is uploaded.  This can cause a loss of
         metadata about the columns since the server parser will guess at the
-        data types of the columns.
+        data types of the columns.  You can use `importoptions=` to specify more
+        information about the data.
 
         Parameters
         ----------
@@ -1114,17 +1123,16 @@ class CAS(object):
         '''
         Call an action on the server
 
-        The `invoke` method only calls the action on the server.  It
+        The :meth:`invoke` method only calls the action on the server.  It
         does not retrieve the responses.  To get the responses, you iterate
         over the connection object.
 
         Parameters
         ----------
         _name_ : string
-           Name of the action
-
+            Name of the action
         **kwargs : any, optional
-           Arbitrary keyword arguments
+            Arbitrary keyword arguments
 
         Returns
         -------
@@ -1132,7 +1140,8 @@ class CAS(object):
 
         See Also
         --------
-        retrieve : Calls action and retrievs results
+        :meth:`retrieve` : Calls action and retrieves results
+        :meth:`__iter__` : Iterates over responses
 
         Examples
         --------
@@ -1166,17 +1175,16 @@ class CAS(object):
         ----------
         _name_ : string
            Name of the action
-
         **kwargs : any, optional
            Arbitrary keyword arguments
 
         Returns
         -------
-        CASResults object
+        :class:`CASResults` object
 
         See Also
         --------
-        invoke : Calls action, but does not retrieve results
+        :meth:`invoke` : Calls action, but does not retrieve results
 
         Examples
         --------
@@ -1670,11 +1678,30 @@ class CAS(object):
 
     def __iter__(self):
         '''
-        Iterate over response objects
+        Iterate over responses from CAS
 
-        Returns
-        -------
-        CASResponse object
+        If you used the :meth:`invoke` method to call a CAS action, the
+        responses from the server are not automatically retrieved.  You
+        will need to pull them down manually.  Iterating over the CAS
+        connection object after calling :meth:`invoke` will pull responses
+        down until they have been exhausted.
+
+        Examples
+        --------
+        >>> conn = swat.CAS()
+        >>> conn.invoke('serverstatus')
+        >>> for resp in conn:
+        ...     for k, v in resp:
+        ...        print(k, v)
+
+        See Also
+        --------
+        :meth:`invoke` : Calls a CAS action without retrieving results
+        :meth:`retrieve` : Calls a CAS action and retrieves results
+
+        Yields
+        ------
+        :class:`CASResponse` object
 
         '''
         for response, conn in getnext(self, timeout=0):
@@ -1714,13 +1741,31 @@ class CAS(object):
                   groupbymode=None, orderby=None, nosource=None, returnwhereinfo=None,
                   **kwargs):
         '''
-        Read a path from a CASLib
+        Read a server-side path from a CASLib
 
-        The parameters for this are the same as for the builtins.loadtable action.
+        The parameters for this are the same as for the `builtins.loadtable`
+        CAS action.  This method is simply a convenience method that loads a
+        table and returns a :class:`CASTable` in one step.
+
+        Notes
+        -----
+        The path specified must exist on the **server side**.  For loading 
+        data from the client side, see the `read_*` and :meth:`upload` methods.
+
+        Examples
+        --------
+        >>> conn = swat.CAS()
+        >>> tbl = conn.read_path('data/iris.csv')
+        >>> print(tbl.head())
+
+        See Also
+        --------
+        :meth:`read_csv`
+        :meth:`upload`
 
         Returns
         -------
-        DataFrame
+        :class:`CASTable`
 
         '''
         args = {k: v for k, v in dict(path=path, readahead=readahead,
@@ -1739,7 +1784,26 @@ class CAS(object):
             raise SWATError(out.status)
 
     def _read_any(self, _method_, *args, **kwargs):
-        ''' Generic data file reader '''
+        '''
+        Generic data file reader
+
+        Parameters
+        ----------
+        _method_ : string
+            The name of the pandas data reader function.
+        *args : one or more arguments
+            Arguments to pass to the data reader.
+        **kwargs : keyword arguments
+            Keyword arguments to pass to the data reader function.
+            The keyword parameters 'table', 'caslib', 'promote', and
+            'replace' will be stripped to use for the output CAS
+            table parameters.
+
+        Returns
+        -------
+        :class:`CASTable`
+
+        '''
         if self._protocol.startswith('http'):
             raise SWATError('The table.addtable action is not supported ' +
                             'in the REST interface')
@@ -1750,58 +1814,377 @@ class CAS(object):
         table.update(dmh.PandasDataFrame(dframe).args.addtable)
         return self.retrieve('table.addtable', **table).casTable
 
-    def read_pickle(self, *args, **kwargs):
-        ''' Load pickled pandas object '''
-        return self._read_any('read_pickle', *args, **kwargs)
+    def read_pickle(self, path, **kwargs):
+        '''
+        Load pickled pandas object from the specified path
 
-    def read_table(self, *args, **kwargs):
-        ''' Read general delimited file into CASTable '''
+        This method calls :meth:`pandas.DataFrame.read_pickle` with the
+        given arguments, then uploads the resulting :class:`pandas.DataFrame`
+        to a CAS table.
+
+        Parameters
+        ----------
+        path : string
+            Path to a local pickle file.
+        table : string, optional
+            Name of the output CAS table.
+        caslib : string, optional
+            CASLib for the output CAS table.
+        promote : boolean, optional
+            If True, the output CAS table will be visible in all sessions.
+        replace : boolean, optional
+            If True, the output CAS table will replace any existing CAS.
+            table with the same name.
+        **kwargs : any, optional
+            Keyword arguments to :func:`pandas.read_pickle`.
+
+        Notes
+        -----
+        Paths to specified files point to files on the client machine.
+
+        Examples
+        --------
+        >>> conn = swat.CAS()
+        >>> tbl = conn.read_pickle('dataframe.pkl')
+        >>> print(tbl.head())
+
+        See Also
+        --------
+        :func:`pandas.read_pickle` 
+
+        Returns
+        -------
+        :class:`CASTable`
+
+        '''
+        return self._read_any('read_pickle', path, **kwargs)
+
+    def read_table(filepath_or_buffer, **kwargs):
+        '''
+        Read general delimited file into a CAS table
+
+        This method calls :meth:`pandas.DataFrame.read_table` with the
+        given arguments, then uploads the resulting :class:`pandas.DataFrame`
+        to a CAS table.
+
+        Parameters
+        ----------
+        filepath_or_buffer : str or any object with a read() method
+            Path, URL, or buffer to read.
+        table : string, optional
+            Name of the output CAS table.
+        caslib : string, optional
+            CASLib for the output CAS table.
+        promote : boolean, optional
+            If True, the output CAS table will be visible in all sessions.
+        replace : boolean, optional
+            If True, the output CAS table will replace any existing CAS.
+        **kwargs : any, optional
+            Keyword arguments to :func:`pandas.read_table`.
+      
+        Notes
+        -----
+        Paths to specified files point to files on the client machine.
+
+        Examples
+        --------
+        >>> conn = swat.CAS()
+        >>> tbl = conn.read_table('iris.tsv')
+        >>> print(tbl.head())
+
+        See Also
+        --------
+        :func:`pandas.read_table` 
+        :meth:`upload`
+
+        Returns
+        -------
+        :class:`CASTable`
+
+        '''
         if self._protocol.startswith('http'):
             raise SWATError('The table.addtable action is not supported ' +
                             'in the REST interface')
         from swat import datamsghandlers as dmh
-        table, kwargs = self._get_table_args(*args, **kwargs)
-        table.update(dmh.Text(*args, **kwargs).args.addtable)
+        table, kwargs = self._get_table_args(filepath_or_buffer, **kwargs)
+        table.update(dmh.Text(filepath_or_buffer, **kwargs).args.addtable)
         return self.retrieve('table.addtable', **table).casTable
 
-    def read_csv(self, *args, **kwargs):
-        ''' Read CSV file into CASTable '''
+    def read_csv(self, filepath_or_buffer, **kwargs):
+        '''
+        Read CSV file into a CAS table
+
+        This method calls :meth:`pandas.DataFrame.read_csv` with the
+        given arguments, then uploads the resulting :class:`pandas.DataFrame`
+        to a CAS table.
+
+        Parameters
+        ----------
+        filepath_or_buffer : str or any object with a read() method
+            Path, URL, or buffer to read.
+        table : string, optional
+            Name of the output CAS table.
+        caslib : string, optional
+            CASLib for the output CAS table.
+        promote : boolean, optional
+            If True, the output CAS table will be visible in all sessions.
+        replace : boolean, optional
+            If True, the output CAS table will replace any existing CAS.
+        **kwargs : any, optional
+            Keyword arguments to :func:`pandas.read_csv`.
+
+        Notes
+        -----
+        Paths to specified files point to files on the client machine.
+
+        Examples
+        --------
+        >>> conn = swat.CAS()
+        >>> tbl = conn.read_csv('iris.csv')
+        >>> print(tbl.head())
+
+        See Also
+        --------
+        :func:`pandas.read_table`
+        :meth:`upload`
+
+        Returns
+        -------
+        :class:`CASTable`
+
+        '''
         if self._protocol.startswith('http'):
             raise SWATError('The table.addtable action is not supported ' +
                             'in the REST interface')
         from swat import datamsghandlers as dmh
-        table, kwargs = self._get_table_args(*args, **kwargs)
-        table.update(dmh.CSV(*args, **kwargs).args.addtable)
+        table, kwargs = self._get_table_args(filepath_or_buffer, **kwargs)
+        table.update(dmh.CSV(filepath_or_buffer, **kwargs).args.addtable)
         return self.retrieve('table.addtable', **table).casTable
 
-    def read_fwf(self, *args, **kwargs):
-        ''' Read a table of fixed-width formatted lines into CASTable '''
+    def read_fwf(self, filepath_or_buffer, **kwargs):
+        '''
+        Read a table of fixed-width formatted lines into a CAS table
+
+        This method calls :meth:`pandas.DataFrame.read_fwf` with the
+        given arguments, then uploads the resulting :class:`pandas.DataFrame`
+        to a CAS table.
+
+        Parameters
+        ----------
+        filepath_or_buffer : str or any object with a read() method
+            Path, URL, or buffer to read.
+        table : string, optional
+            Name of the output CAS table.
+        caslib : string, optional
+            CASLib for the output CAS table.
+        promote : boolean, optional
+            If True, the output CAS table will be visible in all sessions.
+        replace : boolean, optional
+            If True, the output CAS table will replace any existing CAS.
+        **kwargs : any, optional
+            Keyword arguments to :func:`pandas.read_table`.
+
+        Notes
+        -----
+        Paths to specified files point to files on the client machine.
+
+        Examples
+        --------
+        >>> conn = swat.CAS()
+        >>> tbl = conn.read_table('iris.dat')
+        >>> print(tbl.head())
+
+        See Also
+        --------
+        :func:`pandas.read_table`
+        :meth:`upload`
+
+        Returns
+        -------
+        :class:`CASTable`
+
+        '''
         if self._protocol.startswith('http'):
             raise SWATError('The table.addtable action is not supported ' +
                             'in the REST interface')
         from swat import datamsghandlers as dmh
-        table, kwargs = self._get_table_args(*args, **kwargs)
-        table.update(dmh.FWF(*args, **kwargs).args.addtable)
+        table, kwargs = self._get_table_args(filepath_or_buffer, **kwargs)
+        table.update(dmh.FWF(filepath_or_buffer, **kwargs).args.addtable)
         return self.retrieve('table.addtable', **table).casTable
 
     def read_clipboard(self, *args, **kwargs):
-        ''' Read text from clipboard and pass to read_table '''
+        '''
+        Read text from clipboard and pass to :meth:`read_table`
+
+        Parameters
+        ----------
+        table : string, optional
+            Name of the output CAS table.
+        caslib : string, optional
+            CASLib for the output CAS table.
+        promote : boolean, optional
+            If True, the output CAS table will be visible in all sessions.
+        replace : boolean, optional
+            If True, the output CAS table will replace any existing CAS.
+        **kwargs : any, optional
+            Keyword arguments to :func:`pandas.read_table`.
+
+        See Also
+        --------
+        :func:`pandas.read_clipboard`
+        :func:`pandas.read_table`
+        :meth:`read_table`
+
+        Returns
+        -------
+        :class:`CASTable`
+
+        '''
         return self._read_any('read_clipboard', *args, **kwargs)
 
-    def read_excel(self, *args, **kwargs):
-        ''' Read an Excel table into a CASTable '''
-        return self._read_any('read_excel', *args, **kwargs)
+    def read_excel(self, io, **kwargs):
+        '''
+        Read an Excel table into a CAS table
 
-    def read_json(self, *args, **kwargs):
-        ''' Read a JSON string into a CASTable '''
-        return self._read_any('read_json', *args, **kwargs)
+        Parameters
+        ----------
+        io : string or path object
+            File-like object, URL, or pandas ExcelFile.
+        table : string, optional
+            Name of the output CAS table.
+        caslib : string, optional
+            CASLib for the output CAS table.
+        promote : boolean, optional
+            If True, the output CAS table will be visible in all sessions.
+        replace : boolean, optional
+            If True, the output CAS table will replace any existing CAS.
+        **kwargs : any, optional
+            Keyword arguments to :func:`pandas.read_table`.
 
-    def json_normalize(self, *args, **kwargs):
-        ''' "Normalize" semi-structured JSON data into a flat table '''
-        return self._read_any('json_normalize', *args, **kwargs)
+        Examples
+        --------
+        >>> conn = swat.CAS()
+        >>> tbl = conn.read_excel('iris.xlsx')
+        >>> print(tbl.head())
 
-    def read_html(self, *args, **kwargs):
-        ''' Read HTML tables into a list of CASTable objects '''
+        See Also
+        --------
+        :func:`pandas.read_excel`
+        :meth:`upload`
+
+        Returns
+        -------
+        :class:`CASTable`
+
+        '''
+        return self._read_any('read_excel', io, **kwargs)
+
+    def read_json(self, path_or_buf=None, **kwargs):
+        '''
+        Read a JSON string into a CAS table
+
+        Parameters
+        ----------
+        path_or_buf : string or file-like object
+            The path, URL, or file object that contains the JSON data.
+        table : string, optional
+            Name of the output CAS table.
+        caslib : string, optional
+            CASLib for the output CAS table.
+        promote : boolean, optional
+            If True, the output CAS table will be visible in all sessions.
+        replace : boolean, optional
+            If True, the output CAS table will replace any existing CAS.
+        **kwargs : any, optional
+            Keyword arguments to :func:`pandas.read_table`.
+
+        Examples
+        --------
+        >>> conn = swat.CAS()
+        >>> tbl = conn.read_json('iris.json')
+        >>> print(tbl.head())
+
+        See Also
+        --------
+        :func:`pandas.read_json`
+
+        Returns
+        -------
+        :class:`CASTable`
+
+        '''
+        return self._read_any('read_json', path_or_buf, **kwargs)
+
+    def json_normalize(self, data, **kwargs):
+        '''
+        "Normalize" semi-structured JSON data into a flat table and upload to a CAS table
+
+        Parameters
+        ----------
+        data : dict or list of dicts
+            Unserialized JSON objects
+        table : string, optional
+            Name of the output CAS table.
+        caslib : string, optional
+            CASLib for the output CAS table.
+        promote : boolean, optional
+            If True, the output CAS table will be visible in all sessions.
+        replace : boolean, optional
+            If True, the output CAS table will replace any existing CAS.
+        **kwargs : any, optional
+            Keyword arguments to :func:`pandas.json_normalize`.
+
+        Examples
+        --------
+        >>> conn = swat.CAS()
+        >>> tbl = conn.json_normalize('iris.json')
+        >>> print(tbl.head())
+
+        See Also
+        --------
+        :func:`pandas.json_normalize`
+
+        Returns
+        -------
+        :class:`CASTable`
+
+        '''
+        return self._read_any('json_normalize', data, **kwargs)
+
+    def read_html(self, io, **kwargs):
+        '''
+        Read HTML tables into a list of CASTable objects
+
+        Parameters
+        ----------
+        io : string or file-like object
+            The path, URL, or file object that contains the HTML data.
+        table : string, optional
+            Name of the output CAS table.
+        caslib : string, optional
+            CASLib for the output CAS table.
+        promote : boolean, optional
+            If True, the output CAS table will be visible in all sessions.
+        replace : boolean, optional
+            If True, the output CAS table will replace any existing CAS.
+        **kwargs : any, optional
+            Keyword arguments to :func:`pandas.read_html`.
+
+        Examples
+        --------
+        >>> conn = swat.CAS()
+        >>> tbl = conn.read_html('iris.html')
+        >>> print(tbl.head())
+
+        See Also
+        --------
+        :func:`pandas.read_html`
+
+        Returns
+        -------
+        :class:`CASTable`
+
+        '''
         if self._protocol.startswith('http'):
             raise SWATError('The table.addtable action is not supported ' +
                             'in the REST interface')
@@ -1809,97 +2192,286 @@ class CAS(object):
         from swat import datamsghandlers as dmh
         kwargs = kwargs.copy()
         out = []
-        table, kwargs = self._get_table_args(*args, **kwargs)
-        for i, dframe in enumerate(pd.read_html(*args, **kwargs)):
+        table, kwargs = self._get_table_args(io, **kwargs)
+        for i, dframe in enumerate(pd.read_html(io, **kwargs)):
             if i and not table['table'].startswith('_PY_'):
                 table['table'] += str(i)
             table.update(dmh.PandasDataFrame(dframe).args.addtable)
             out.append(self.retrieve('table.addtable', **table).casTable)
         return out
 
-    def read_hdf(self, *args, **kwargs):
-        ''' Read from the store and create a CASTable '''
-        return self._read_any('read_hdf', *args, **kwargs)
+    def read_hdf(self, path_or_buf, **kwargs):
+        '''
+        Read from the HDF store and create a CAS table
 
-    def read_sas(self, *args, **kwargs):
-        ''' Read SAS files stored as XPORT or SAS7BDAT into a CASTable '''
-        return self._read_any('read_sas', *args, **kwargs)
+        Parameters
+        ----------
+        path_or_buf : string or file-like object
+            The path, URL, or file object that contains the HDF data.
+        table : string, optional
+            Name of the output CAS table.
+        caslib : string, optional
+            CASLib for the output CAS table.
+        promote : boolean, optional
+            If True, the output CAS table will be visible in all sessions.
+        replace : boolean, optional
+            If True, the output CAS table will replace any existing CAS.
+        **kwargs : any, optional
+            Keyword arguments to :func:`pandas.read_hdf`.
 
-    def read_sql_table(self, *args, **kwargs):
-        ''' Read SQL database table into a CASTable '''
-        return self._read_any('read_sql_table', *args, **kwargs)
+        Examples
+        --------
+        >>> conn = swat.CAS()
+        >>> tbl = conn.read_hdf('iris.html')
+        >>> print(tbl.head())
 
-    def read_sql_query(self, *args, **kwargs):
-        ''' Read SQL query table into a CASTable '''
-        return self._read_any('read_sql_query', *args, **kwargs)
+        See Also
+        --------
+        :func:`pandas.read_hdf`
 
-    def read_sql(self, *args, **kwargs):
-        ''' Read SQL query or database table into a CASTable '''
-        return self._read_any('read_sql', *args, **kwargs)
+        Returns
+        -------
+        :class:`CASTable`
 
-    def read_gbq(self, *args, **kwargs):
-        ''' Load data from a Google BigQuery into a CASTable '''
-        return self._read_any('read_gbq', *args, **kwargs)
+        '''
+        return self._read_any('read_hdf', path_or_buf, **kwargs)
 
-    def read_stata(self, *args, **kwargs):
-        ''' Read Stata file into a CASTable '''
-        return self._read_any('read_stata', *args, **kwargs)
+    def read_sas(self, filepath_or_buffer, **kwargs):
+        '''
+        Read SAS files stored as XPORT or SAS7BDAT into a CAS table
 
-    # Top-level missing data
+        Parameters
+        ----------
+        filepath_or_buffer : string or file-like object
+            The path, URL, or file object that contains the HDF data.
+        table : string, optional
+            Name of the output CAS table.
+        caslib : string, optional
+            CASLib for the output CAS table.
+        promote : boolean, optional
+            If True, the output CAS table will be visible in all sessions.
+        replace : boolean, optional
+            If True, the output CAS table will replace any existing CAS.
+        **kwargs : any, optional
+            Keyword arguments to :func:`pandas.read_sas`.
 
-    def isnull(self, *args, **kwargs):
-        ''' Detect missing values (NaN in numeric arrays, None/NaN in object arrays '''
-        import pandas as pd
-        return pd.isnull(*args, **kwargs)
+        Examples
+        --------
+        >>> conn = swat.CAS()
+        >>> tbl = conn.read_sas('iris.sas7bdat')
+        >>> print(tbl.head())
 
-    def notnull(self, *args, **kwargs):
-        ''' Replacement for numpy.isfinite / -numpy.isnan '''
-        import pandas as pd
-        return pd.notnull(*args, **kwargs)
+        See Also
+        --------
+        :func:`pandas.read_sas`
 
-    # Top-level conversions
+        Returns
+        -------
+        :class:`CASTable`
 
-    def to_numeric(self, *args, **kwargs):
-        ''' Convert argument to a numeric type '''
-        import pandas as pd
-        return pd.to_numeric(*args, **kwargs)
+        '''
+        return self._read_any('read_sas', filepath_or_buffer, **kwargs)
 
-    # Top-level dealing with datetime-like
+    def read_sql_table(self, table_name, con, **kwargs):
+        '''
+        Read SQL database table into a CAS table
 
-    def to_datetime(self, *args, **kwargs):
-        ''' Convert argument to datetime '''
-        import pandas as pd
-        return pd.to_datetime(*args, **kwargs)
+        Parameters
+        ----------
+        table_name : string
+            Name of SQL table in database.
+        con : SQLAlchemy connectable (or database string URI)
+            Database connection.
+        table : string, optional
+            Name of the output CAS table.
+        caslib : string, optional
+            CASLib for the output CAS table.
+        promote : boolean, optional
+            If True, the output CAS table will be visible in all sessions.
+        replace : boolean, optional
+            If True, the output CAS table will replace any existing CAS.
+        **kwargs : any, optional
+            Keyword arguments to :func:`pandas.read_sql_table`.
 
-    def to_timedelta(self, *args, **kwargs):
-        ''' Convert argument to timedelta '''
-        import pandas as pd
-        return pd.to_timedelta(*args, **kwargs)
+        Examples
+        --------
+        >>> conn = swat.CAS()
+        >>> tbl = conn.read_sql_table('iris', dbcon)
+        >>> print(tbl.head())
 
-    def date_range(self, *args, **kwargs):
-        ''' Return a fixed frequency datetime index, with calendar day as the default '''
-        import pandas as pd
-        return pd.date_range(*args, **kwargs)
+        Notes
+        -----
+        The data from the database will be pulled to the client machine
+        in the form of a :class:`pandas.DataFrame` then uploaded to CAS.
+        If you are moving large amounts of data, you may want to use 
+        a direct database connecter from CAS.
 
-    def bdate_range(self, *args, **kwargs):
-        ''' Return a fixed frequency datetime index, with business day as the default '''
-        import pandas as pd
-        return pd.bdate_range(*args, **kwargs)
+        See Also
+        --------
+        :func:`pandas.read_sql_table`
+        :meth:`read_sql_query`
+        :meth:`read_sql`
 
-    def period_range(self, *args, **kwargs):
-        ''' Return a fixed frequency datetime index, with calendar day as the default '''
-        import pandas as pd
-        return pd.bdate_range(*args, **kwargs)
+        Returns
+        -------
+        :class:`CASTable`
 
-    def timedelta_range(self, *args, **kwargs):
-        ''' Return a fixed frequency timedelta index, with day as the default '''
-        import pandas as pd
-        return pd.timedelta_range(*args, **kwargs)
+        '''
+        return self._read_any('read_sql_table', table_name, con, **kwargs)
 
-    def infer_freq(self, *args, **kwargs):
-        ''' Infer the most likely frequncy given the input index '''
-        import pandas as pd
-        return pd.infer_freq(*args, **kwargs)
+    def read_sql_query(self, sql, con, **kwargs):
+        '''
+        Read SQL query table into a CAS table
+
+        Parameters
+        ----------
+        sql : string
+            SQL to be executed.
+        con : SQLAlchemy connectable (or database string URI)
+            Database connection.
+        table : string, optional
+            Name of the output CAS table.
+        caslib : string, optional
+            CASLib for the output CAS table.
+        promote : boolean, optional
+            If True, the output CAS table will be visible in all sessions.
+        replace : boolean, optional
+            If True, the output CAS table will replace any existing CAS.
+        **kwargs : any, optional
+            Keyword arguments to :func:`pandas.read_sql_query`.
+
+        Examples
+        --------
+        >>> conn = swat.CAS()
+        >>> tbl = conn.read_sql_query('select * from iris', dbcon)
+        >>> print(tbl.head())
+
+        Notes
+        -----
+        The data from the database will be pulled to the client machine
+        in the form of a :class:`pandas.DataFrame` then uploaded to CAS.
+        If you are moving large amounts of data, you may want to use 
+        a direct database connecter from CAS.
+
+        See Also
+        --------
+        :func:`pandas.read_sql_query`
+        :meth:`read_sql_table`
+        :meth:`read_sql`
+
+        Returns
+        -------
+        :class:`CASTable`
+
+        '''
+        return self._read_any('read_sql_query', sql, con, **kwargs)
+
+    def read_sql(self, sql, con, **kwargs):
+        '''
+        Read SQL query or database table into a CAS table
+
+        Parameters
+        ----------
+        sql : string
+            SQL to be executed or table name.
+        con : SQLAlchemy connectable (or database string URI)
+            Database connection.
+        table : string, optional
+            Name of the output CAS table.
+        caslib : string, optional
+            CASLib for the output CAS table.
+        promote : boolean, optional
+            If True, the output CAS table will be visible in all sessions.
+        replace : boolean, optional
+            If True, the output CAS table will replace any existing CAS.
+        **kwargs : any, optional
+            Keyword arguments to :func:`pandas.read_sql`.
+
+        Examples
+        --------
+        >>> conn = swat.CAS()
+        >>> tbl = conn.read_sql('select * from iris', dbcon)
+        >>> print(tbl.head())
+
+        Notes
+        -----
+        The data from the database will be pulled to the client machine
+        in the form of a :class:`pandas.DataFrame` then uploaded to CAS.
+        If you are moving large amounts of data, you may want to use
+        a direct database connecter from CAS.
+
+        See Also
+        --------
+        :func:`pandas.read_sql`
+        :meth:`read_sql_table`
+        :meth:`read_sql_query`
+
+        Returns
+        -------
+        :class:`CASTable`
+
+        '''
+        return self._read_any('read_sql', sql, con, **kwargs)
+
+    def read_gbq(self, query, **kwargs):
+        '''
+        Load data from a Google BigQuery into a CAS table
+
+        Parameters
+        ----------
+        query : string
+            SQL-like query to return data values.
+        table : string, optional
+            Name of the output CAS table.
+        caslib : string, optional
+            CASLib for the output CAS table.
+        promote : boolean, optional
+            If True, the output CAS table will be visible in all sessions.
+        replace : boolean, optional
+            If True, the output CAS table will replace any existing CAS.
+        **kwargs : any, optional
+            Keyword arguments to :func:`pandas.read_gbq`.
+
+        See Also
+        --------
+        :func:`pandas.read_gbq`
+
+        Returns
+        -------
+        :class:`CASTable`
+
+        '''
+        return self._read_any('read_gbq', query, **kwargs)
+
+    def read_stata(self, filepath_or_buffer, **kwargs):
+        '''
+        Read Stata file into a CAS table
+
+        Parameters
+        ----------
+        filepath_or_buffer : string or file-like object
+            Path to .dta file or file-like object containing data.
+        table : string, optional
+            Name of the output CAS table.
+        caslib : string, optional
+            CASLib for the output CAS table.
+        promote : boolean, optional
+            If True, the output CAS table will be visible in all sessions.
+        replace : boolean, optional
+            If True, the output CAS table will replace any existing CAS.
+        **kwargs : any, optional
+            Keyword arguments to :func:`pandas.read_stata`.
+
+        See Also
+        --------
+        :func:`pandas.read_stata`
+
+        Returns
+        -------
+        :class:`CASTable`
+
+        '''
+        return self._read_any('read_stata', filepath_or_buffer, **kwargs)
 
 
 def getone(connection, datamsghandler=None):
@@ -1908,16 +2480,24 @@ def getone(connection, datamsghandler=None):
 
     Parameters
     ----------
-    connection : CAS object
-       The connection/CASAction to get the response from
+    connection : :class:`CAS` object
+        The connection/CASAction to get the response from.
+    datamsghandler : :class:`CASDataMsgHandler` object, optional
+        The object to use for data messages from the server.
 
-    datamsghandler : CASDataMsgHandler object, optional
-       The object to use for data messages from the server
+    Examples
+    --------
+    >>> conn = swat.CAS()
+    >>> conn.invoke('serverstatus')
+    >>> print(getone(conn))
+
+    See Also
+    --------
+    :meth:`CAS.invoke`
 
     Returns
     -------
-    CASResponse object
-       The next response from the connection
+    :class:`CASResponse` object
 
     '''
     output = None, connection
@@ -1969,18 +2549,30 @@ def getnext(*objs, **kwargs):
 
     Parameters
     ----------
-    *objs : CAS objects and/or CASAction objects
-       Connection/CASAction objects to watch for responses
+    *objs : :class:`CAS` objects and/or :class:`CASAction` objects
+        Connection/CASAction objects to watch for responses.
+    timeout : int, optional
+        Timeout for waiting for a response on each connection.
+    datamsghandler : :class:`CASDataMsgHandler` object, optional
+        The object to use for data messages from the server.
 
-    timeout : int or long, optional
-       Timeout for waiting for a response on each connection
-    datamsghandler : CASDataMsgHandler object, optional
-       The object to use for data messages from the server
+    Examples
+    --------
+    >>> conn1 = swat.CAS()
+    >>> conn2 = swat.CAS()
+    >>> conn1.invoke('serverstatus')
+    >>> conn2.invoke('userinfo')
+    >>> for resp in getnext(conn1, conn2):
+    ...     for k, v in resp:
+    ...         print(k, v)
+
+    See Also
+    --------
+    :meth:`CAS.invoke`
 
     Returns
     -------
-    CASResponse object
-       The next response from the connection(s)/action(s)
+    :class:`CASResponse` object
 
     '''
     timeout = kwargs.get('timeout', 0)

@@ -552,8 +552,8 @@ class CASResults(OrderedDict, RendererMixin):
                     p.text(line)
             p.break_()
             p.break_()
-            if getattr(self, 'performance'):
-                p.text(self._performance_str_())
+        if getattr(self, 'performance'):
+            p.text(self._performance_str_())
 
     def _performance_str_(self):
         if getattr(self, 'performance'):

@@ -8,7 +8,7 @@ SWAT (SAS Wrapper for Analytics Transfer)
 
 **Date**: |today| **Version**: |version|
 
-**Binary Installers:** http://developer.sas.com/viya/python/swat
+**Binary Installers:** http://github.com/sassoftware/python-swat/releases
 
 **Source Repository:** http://github.com/sassoftware/python-swat
 
