@@ -21,12 +21,24 @@ Constructor
 
    CAS
 
+Session Management
+~~~~~~~~~~~~~~~~~~
+
+.. autosummary::
+   :toctree: generated/
+
+   CAS.close
+   CAS.session_context
+   CAS.copy
+   CAS.fork
+
 Reading Data
 ~~~~~~~~~~~~
 
 .. autosummary::
    :toctree: generated/
 
+   CAS.read_path
    CAS.read_pickle
    CAS.read_table
    CAS.read_csv
@@ -52,24 +64,8 @@ Running Actions
    CAS.retrieve
    CAS.invoke
    CAS.__iter__
-
-Utilities
-~~~~~~~~~
-
-.. autosummary::
-   :toctree: generated/
-
-   CAS.copy
-   CAS.fork
-
-Session Options
-~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. autosummary::
-   :toctree: generated/
-
-   CAS.session_context
-
+   getone
+   getnext
 
 CASResults
 ----------
@@ -84,6 +80,17 @@ Constructor
 
    CASResults
 
+By Group Processing
+~~~~~~~~~~~~~~~~~~~
+
+.. autosummary::
+   :toctree: generated/
+
+   CASResults.get_tables
+   CASResults.groups
+   CASResults.get_group
+   CASResults.sets
+   CASResults.get_set
 
 SASDataFrame
 ------------
@@ -223,7 +230,7 @@ Sorting
    CASTable.to_xarray
 
 Plotting
-~~~~~~~
+~~~~~~~~
 
 :meth:`CASTable.plot` is both a callable method and a namespace attribute for
 specific plotting methods of the form `CASTable.plot.<kind>`.
