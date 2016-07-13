@@ -442,8 +442,14 @@ class CASTablePlotter(object):
         '''
         Make a line plot of all columns in a table
 
-        This method simply fetches the data and uses the
-        :meth:`pandas.DataFrame.plot` method to plot it.
+        This method fetches the data from the CAS table and uses the
+        :meth:`pandas.DataFrame.plot` method to plot it.  All 
+        arguments used in the call to this method are passed to
+        the DataFrame's `plot` method.
+
+        Returns
+        -------
+        :class:`matplotlib.AxesSubplot` or :class:`np.array` of them.
 
         '''
         return self._table._fetch(grouped=True).plot(*args, **kwargs)
@@ -452,8 +458,10 @@ class CASTablePlotter(object):
         '''
         Area plot
 
-        This method simply fetches the data and uses the
-        :meth:`pandas.DataFrame.area` method to plot it.
+        This method fetches the data from the CAS table and uses the
+        :meth:`pandas.DataFrame.area` method to plot it.  All
+        arguments used in the call to this method are passed to
+        the DataFrame's `area` method.
 
         '''
         return self._table._fetch(grouped=True).plot.area(*args, **kwargs)
@@ -462,7 +470,10 @@ class CASTablePlotter(object):
         '''
         Bar plot
 
-        See Also: pandas.DataFrame.bar (for arguments)
+        This method fetches the data from the CAS table and uses the
+        :meth:`pandas.DataFrame.bar` method to plot it.  All
+        arguments used in the call to this method are passed to
+        the DataFrame's `bar` method.
 
         '''
         return self._table._fetch(grouped=True).plot.bar(*args, **kwargs)
@@ -471,7 +482,10 @@ class CASTablePlotter(object):
         '''
         Horizontal bar plot
 
-        See Also: pandas.DataFrame.barh (for arguments)
+        This method fetches the data from the CAS table and uses the
+        :meth:`pandas.DataFrame.barh` method to plot it.  All
+        arguments used in the call to this method are passed to
+        the DataFrame's `barh` method.
 
         '''
         return self._table._fetch(grouped=True).plot.barh(*args, **kwargs)
@@ -480,7 +494,10 @@ class CASTablePlotter(object):
         '''
         Boxplot
 
-        See Also: pandas.DataFrame.box (for arguments)
+        This method fetches the data from the CAS table and uses the
+        :meth:`pandas.DataFrame.box` method to plot it.  All
+        arguments used in the call to this method are passed to
+        the DataFrame's `box` method.
 
         '''
         return self._table._fetch(grouped=True).plot.box(*args, **kwargs)
@@ -489,7 +506,10 @@ class CASTablePlotter(object):
         '''
         Kernel density estimate plot
 
-        See Also: pandas.DataFrame.density (for arguments)
+        This method fetches the data from the CAS table and uses the
+        :meth:`pandas.DataFrame.density` method to plot it.  All
+        arguments used in the call to this method are passed to
+        the DataFrame's `density` method.
 
         '''
         return self._table._fetch(grouped=True).plot.density(*args, **kwargs)
@@ -1659,7 +1679,7 @@ class CASTable(ParamManager, ActionParamManager):
             The names of the columns to add to the matrix.
         n : int or long, optional
             The maximum number of rows to fetch.  If None, then the value
-            in ``swat.options.dataset.max_rows_fetched`` is used.
+            in `swat.options.dataset.max_rows_fetched` is used.
 
         See Also
         --------
@@ -1679,7 +1699,7 @@ class CASTable(ParamManager, ActionParamManager):
 
     @getattr_safe_property
     def dtypes(self):
-        ''' Return the data types in the table '''
+        ''' Series of the data types in the table '''
         out = self._columninfo.copy()
         index = out['Column']
         index.name = None
@@ -1690,7 +1710,7 @@ class CASTable(ParamManager, ActionParamManager):
 
     @getattr_safe_property
     def ftypes(self):
-        ''' Return the ftypes (indication of sparse/dense and dtype) in the table '''
+        ''' Series of the ftypes (indication of sparse/dense and dtype) in the table '''
         out = self._columninfo.copy()
         index = out['Column']
         index.name = None
@@ -1709,7 +1729,7 @@ class CASTable(ParamManager, ActionParamManager):
 
     def select_dtypes(self, include=None, exclude=None):
         '''
-        Return a subset ``CASTable`` including/excluding columns based on data type
+        Return a subset `CASTable` including/excluding columns based on data type
 
         Parameters
         ----------
@@ -1718,8 +1738,8 @@ class CASTable(ParamManager, ActionParamManager):
         exclude : list-of-strings, optional
             List of data type names to exclude from result
 
-        Note
-        ----
+        Notes
+        -----
         In addition to data type names, the names 'number' and 'numeric'
         can be used to refer to all numeric types.  The name 'character'
         can be used to refer to all character types.
@@ -1730,7 +1750,7 @@ class CASTable(ParamManager, ActionParamManager):
 
         Returns
         -------
-        ``CASTable`` object
+        :class:`CASTable` object
 
         '''
         if include is None:
@@ -1798,7 +1818,7 @@ class CASTable(ParamManager, ActionParamManager):
 
     @getattr_safe_property
     def axes(self):
-        ''' Return a list with the row axis labels and column axis labels '''
+        ''' List of the row axis labels and column axis labels '''
         # TODO: Create an index proxy object
         return [[], self.columns]
 
@@ -1830,7 +1850,7 @@ class CASTable(ParamManager, ActionParamManager):
 
     def copy(self, deep=False):
         '''
-        Make a copy of the ``CASTable`` object
+        Make a copy of the `CASTable` object
 
         Parameters
         ----------
@@ -1848,7 +1868,7 @@ class CASTable(ParamManager, ActionParamManager):
 
         Returns
         -------
-        ``CASTable`` object
+        :class:`CASTable` object
 
         '''
         if deep:
@@ -1885,7 +1905,7 @@ class CASTable(ParamManager, ActionParamManager):
 
         Returns
         -------
-        :class:`pandas.DataFrame`
+        :class:`swat.SASDataFrame`
         
         '''
         return self.slice(start=0, stop=n - 1, columns=columns)
@@ -1909,7 +1929,7 @@ class CASTable(ParamManager, ActionParamManager):
 
         Returns
         -------
-        :class:`pandas.DataFrame`
+        :class:`swat.SASDataFrame`
         
         '''
         return self.slice(start=-n, stop=-1, columns=columns)
@@ -1936,7 +1956,7 @@ class CASTable(ParamManager, ActionParamManager):
 
         Returns
         -------
-        :class:`pandas.DataFrame`
+        :class:`swat.SASDataFrame`
         
         '''
         tbl = self
@@ -2031,9 +2051,9 @@ class CASTable(ParamManager, ActionParamManager):
 
         Returns
         -------
-        Series
+        :class:`pandas.Series`
             For axis == 0 indexing
-        CASColumn
+        :class:`CASColumn`
             For axis == 1 indexing
 
         '''
@@ -2048,7 +2068,7 @@ class CASTable(ParamManager, ActionParamManager):
 
     def __iter__(self):
         '''
-        Iterate through all visible column names in ``self`` 
+        Iterate through all visible column names in `self` 
         
         Yields
         ------
@@ -2060,12 +2080,12 @@ class CASTable(ParamManager, ActionParamManager):
 
     def iteritems(self):
         '''
-        Iterate over column names and ``CASColumn`` objects
+        Iterate over column names and `CASColumn` objects
         
         Yields
         ------
-        (string, ``CASColumn``)
-            Two-element tuple containing a column name and a ``CASColumn`` object
+        (string, :class:`CASColumn`)
+            Two-element tuple containing a column name and a `CASColumn` object
         
         '''
         for col in self.columns:
@@ -2146,8 +2166,8 @@ class CASTable(ParamManager, ActionParamManager):
 
         See Also
         --------
-        iteritems
-        itertuples
+        :meth:`iteritems`
+        :meth:`itertuples`
         
         Returns
         -------
@@ -2169,8 +2189,8 @@ class CASTable(ParamManager, ActionParamManager):
 
         See Also
         --------
-        iterrows
-        iteritems
+        :meth:`iterrows`
+        :meth:`iteritems`
 
         Returns
         -------
@@ -2226,7 +2246,7 @@ class CASTable(ParamManager, ActionParamManager):
 
         Returns
         -------
-        CASColumn object
+        :class:`CASColumn` object
 
         '''
         out = self.copy(deep=True)._to_column(colname)
@@ -2234,7 +2254,25 @@ class CASTable(ParamManager, ActionParamManager):
         return out
 
     def __delitem__(self, colname):
-        ''' Remove a column from the CASTable '''
+        '''
+        Remove a column from the visible columns in a CASTable
+
+        Notes
+        -----
+        This method does not actually remove a column from the table on 
+        the CAS server.  It merely removes it from the list of visible 
+        columns in `self`.
+
+        Parameters
+        ----------
+        colname : string
+           The name of the column to remove from the visible variable list.
+
+        Returns
+        -------
+        None
+
+        '''
         varlist = self.columns.tolist()
         lcolname = colname.lower()
         newvarlist = [x for x in varlist if x.lower() != lcolname]
@@ -2253,13 +2291,13 @@ class CASTable(ParamManager, ActionParamManager):
         casout : dict, optional
             The name and caslib of the output table.
         *args : any, optional
-            Arbitrary positional arguments to the datastep.runcode action
+            Arbitrary positional arguments to the datastep.runcode action.
         **kwargs : any, optional
-            Arbitrary keyword arguments to the datastep.runcode action
+            Arbitrary keyword arguments to the datastep.runcode action.
 
         Returns
         -------
-        CASResults object
+        :class:`CASResults` object
 
         '''
         view = self.to_view(name=_gen_ds_name())
@@ -2431,7 +2469,25 @@ class CASTable(ParamManager, ActionParamManager):
 #       raise NotImplementedError
 
     def corr(self, method=None, min_periods=None):
-        ''' Compute pairwise correlation of columns '''
+        ''' 
+        Compute pairwise correlation of columns 
+
+        Parameters
+        ----------
+        method : string, optional
+            Not implemented.
+        min_periods : int or long, optional
+            Not implemented.
+
+        See Also
+        --------
+        :meth:`pandas.DataFrame.corr`
+
+        Returns
+        -------
+        :class:`SASDataFrame`
+
+        '''
         # TODO: Need groupby support once simple.correlation adds it
         tbl = self.select_dtypes(include='numeric')
         out = tbl._retrieve('simple.correlation', simple=False)['Correlation']
@@ -2449,15 +2505,19 @@ class CASTable(ParamManager, ActionParamManager):
         Parameters
         ----------
         axis : int, optional
-            Unsupported
+            Not impelmented.
         level : int or level name, optional
-            Unsupported
+            Not implemented.
         numeric_only : boolean, optional
             Include only numeric columns.
 
+        See Also
+        --------
+        :meth:`pandas.DataFrame.count`
+
         Returns
         -------
-        pandas.Series object
+        :class:`pandas.Series` object
 
         '''
         tbl = self
@@ -2500,7 +2560,7 @@ class CASTable(ParamManager, ActionParamManager):
 
         Returns
         -------
-        DataFrame
+        :class:`pandas.DataFrame`
 
         '''
         self._loadactionset('percentile')
@@ -2535,7 +2595,19 @@ class CASTable(ParamManager, ActionParamManager):
         return out
 
     def _topk_frequency(self, maxtie=0):
-        ''' Return the top value by frequency '''
+        ''' 
+        Return the top value by frequency 
+
+        Parameters
+        ----------
+        maxtie : int or long, optional
+            Maximum number of tied values to include.  Zero means no limit.
+
+        Returns
+        -------
+        :class:`DataFrame`
+
+        '''
         out = self._retrieve('simple.topk', topk=1, bottomk=0,
                              maxtie=maxtie, order='freq').get_tables('Topk')
         out = [x.reshape_bygroups(bygroup_columns='formatted', bygroup_as_index=True) for x in out]
@@ -2572,12 +2644,12 @@ class CASTable(ParamManager, ActionParamManager):
 
         include, exclude : list or 'all' or None (default), optional
             Specify the data types to include in the result.
-            * If both are None, The result will include only numeric columns, or
-              if no numeric columns are present, all columns are included.
-            * A list of dtypes or strings.  To select all numerics, use the
-              value 'number' or 'numeric'.  For all character columns, use
-              the value 'character'.
-            * If the value is 'all', all columns will be used.
+                * If both are None, The result will include only numeric columns, or
+                  if no numeric columns are present, all columns are included.
+                * A list of dtypes or strings.  To select all numerics, use the
+                  value 'number' or 'numeric'.  For all character columns, use
+                  the value 'character'.
+                * If the value is 'all', all columns will be used.
 
         stats : list-of-strings or 'all' or None (default), optional
             The statistics to include in the output.  By default, numeric
@@ -2591,7 +2663,7 @@ class CASTable(ParamManager, ActionParamManager):
 
         Returns
         -------
-        DataFrame
+        :class:`pandas.DataFrame`
 
         '''
         numrows = self._numrows
@@ -2770,9 +2842,9 @@ class CASTable(ParamManager, ActionParamManager):
 
         Returns
         -------
-        DataFrame
+        :class:`pandas.DataFrame`
             for multi-index output on CASTable
-        Series
+        :class:`pandas.Series`
             for single index output on CASTable, or multi-index output on CASColumn
         scalar
             for single index output on CASColumn
@@ -2799,7 +2871,7 @@ class CASTable(ParamManager, ActionParamManager):
 
         Returns
         -------
-        DataFrame
+        :class:`pandas.DataFrame`
 
         '''
         from ..dataframe import reshape_bygroups
@@ -2894,20 +2966,24 @@ class CASTable(ParamManager, ActionParamManager):
         Parameters
         ----------
         axis : int, optional
-            Unsupported
+            Not implemented.
         skipna : boolean, optional
             Exclude missing values from the computation.
         level : int or string, optional
-            Unsupported
+            Not implemented.
         numeric_only : boolean, optional
-            Include only numeric columns in the computation.
+            Include only numeric columns.
+
+        See Also
+        --------
+        :meth:`pandas.DataFrame.max`
 
         Returns
         -------
-        Series
-            if no by groups are specified
-        Dataframe
-            if by groups are specified
+        :class:`pandas.Series`
+            If no by groups are specified.
+        :class:`pandas.DataFrame`
+            If by groups are specified.
 
         '''
         return self._topk_values('max', axis=axis, skipna=skipna, level=level,
@@ -2920,20 +2996,24 @@ class CASTable(ParamManager, ActionParamManager):
         Parameters
         ----------
         axis : int, optional
-            Unsupported
+            Not implemented.
         skipna : boolean, optional
-            Unsupported
+            Not implemented.
         level : int or string, optional
-            Unsupported
+            Not implemented.
         numeric_only : boolean, optional
-            Include only numeric columns in the computation.
+            Include only numeric columns.
+
+        See Also
+        --------
+        :meth:`pandas.DataFrame.mean`
 
         Returns
         -------
-        Series
-            if no by groups are specified
-        Dataframe
-            if by groups are specified
+        :class:`pandas.Series`
+            If no by groups are specified.
+        :class:`pandas.DataFrame`
+            If by groups are specified.
 
         '''
         return self._get_summary_stat('mean')
@@ -2945,20 +3025,24 @@ class CASTable(ParamManager, ActionParamManager):
         Parameters
         ----------
         axis : int, optional
-            Unsupported
+            Not implemented.
         skipna : boolean, optional
             Exclude missing values from the computation.
         level : int or string, optional
-            Unsupported
+            Not implemented.
         numeric_only : boolean, optional
-            Include only numeric columns in the computation.
+            Include only numeric columns.
+
+        See Also
+        --------
+        :meth:`pandas.DataFrame.median`
 
         Returns
         -------
-        Series
-            if no by groups are specified
-        Dataframe
-            if by groups are specified
+        :class:`pandas.Series`
+            If no by groups are specified.
+        :class:`pandas.Dataframe`
+            If by groups are specified.
 
         '''
         return self.quantile(0.5, axis=axis, interpolation='nearest')
@@ -2970,27 +3054,51 @@ class CASTable(ParamManager, ActionParamManager):
         Parameters
         ----------
         axis : int, optional
-            Unsupported
+            Not implemented.
         skipna : boolean, optional
             Exclude missing values from the computation.
         level : int or string, optional
-            Unsupported
+            Not implemented.
         numeric_only : boolean, optional
-            Include only numeric columns in the computation.
+            Include only numeric columns.
+
+        See Also
+        --------
+        :meth:`pandas.DataFrame.min`
 
         Returns
         -------
-        Series
-            if no by groups are specified
-        Dataframe
-            if by groups are specified
+        :class:`pandas.Series`
+            If no by groups are specified.
+        :class:`pandas.Dataframe`
+            If by groups are specified.
 
         '''
         return self._topk_values('min', axis=axis, skipna=skipna, level=level,
                                  numeric_only=numeric_only, **kwargs)
 
     def nlargest(self, n, columns, keep='first'):
-        ''' Return the `n` largest values ordered by `columns` '''
+        ''' 
+        Return the `n` largest values ordered by `columns`
+
+        Parameters
+        ----------
+        n : int
+            Return this many descending sorted values.
+        columns : list-of-strings or string
+            Column name or names to order by.
+        keep : string, optional
+            Not implemented.
+
+        See Also
+        --------
+        :meth:`pandas.DataFrame.nlargest`
+
+        Returns
+        -------
+        :class:`pandas.Series`
+
+        '''
         if not isinstance(columns, items_types):
             columns = [columns]
         columns = [dict(name=x, order='DESCENDING', formatted='RAW') for x in columns]
@@ -2999,7 +3107,27 @@ class CASTable(ParamManager, ActionParamManager):
         return col._fetch(from_=1, to=n, sortby=columns)
 
     def nsmallest(self, n, columns, keep='first'):
-        ''' Return the `n` smallest values ordered by `columns` '''
+        '''
+        Return the `n` smallest values ordered by `columns`
+
+        Parameters
+        ----------
+        n : int
+            Return this many ascending sorted values.
+        columns : list-of-strings or string
+            Column name or names to order by.
+        keep : string, optional
+            Not implemented.
+
+        See Also
+        --------
+        :meth:`pandas.DataFrame.nlargest`
+
+        Returns
+        -------
+        :class:`pandas.Series`
+
+        '''
         if not isinstance(columns, items_types):
             columns = [columns]
         columns = [dict(name=x, order='ASCENDING', formatted='RAW') for x in columns]
@@ -3014,16 +3142,22 @@ class CASTable(ParamManager, ActionParamManager):
         Parameters
         ----------
         axis : int, optional
-            Unsupported
+            Not implemented.
         numeric_only : boolean, optional
-            Should only numeric columns be used?
+            Include only numeric columns.
+        max_tie : int, optional
+            The maximum number of tied values to return.
+
+        See Also
+        --------
+        :meth:`pandas.DataFrame.mode`
 
         Returns
         -------
-        Series
-            if no by groups are specified
-        Dataframe
-            if by groups are specified
+        :class:`pandas.Series`
+            If no By groups are specified.
+        :class:`pandas.Dataframe`
+            If By groups are specified.
 
         '''
         # TODO: If a column has all unique values, it should just be set to NaN.
@@ -3109,18 +3243,24 @@ class CASTable(ParamManager, ActionParamManager):
         Parameters
         ----------
         q : float, optional
-            The quantiles to compute (0 <= q <= 1)
+            The quantiles to compute (0 <= q <= 1).
         axis : int, optional
-            Unsupported
+            Not implemented.
+        numeric_only : boolean, optional
+            Include only numeric columns.
         interpolation : string, optional
-            Only 'nearest' is supported
+            Only 'nearest' is supported.
+
+        See Also
+        --------
+        :meth:`pandas.DataFrame.quantile`
 
         Returns
         -------
-        Series
-            if no by groups are specified, or only a single quantile is requested
-        Dataframe
-            if by groups are specified
+        :class:`pandas.Series`
+            If no By groups are specified, or only a single quantile is requested.
+        :class:`pandas.Dataframe`
+            If By groups are specified.
 
         '''
         tbl = self
@@ -3157,46 +3297,195 @@ class CASTable(ParamManager, ActionParamManager):
 #       raise NotImplementedError
 
     def sum(self, axis=None, skipna=None, level=None, numeric_only=True):
-        ''' Return the sum of each column '''
+        ''' 
+        Return the sum of the values of each column
+
+        Parameters
+        ----------
+        axis : int, optional
+            Not implemented.
+        skipna : boolean, optional
+            Not implemented.
+        level : int, optional
+            Not implemented.
+        numeric_only : boolean, optional
+            Include only numeric columns.
+
+        See Also
+        --------
+        :meth:`pandas.DataFrame.sum`
+
+        Returns
+        -------
+        :class:`pandas.Series`
+            If no By groups are specified.
+        :class:`pandas.DataFrame`
+            If By groups are specified.
+
+        '''
         # TODO: Need character variables (??)
         return self._get_summary_stat('sum')
 
     def std(self, axis=None, skipna=None, level=None, ddof=1, numeric_only=True):
-        ''' Return the standard deviation of each column '''
+        ''' 
+        Return the standard deviation of the values of each column 
+
+        Parameters
+        ----------
+        axis : int, optional
+            Not implemented.
+        skipna : boolean, optional
+            Not implemented.
+        level : int, optional
+            Not implemented.
+        ddof : int, optional
+            Not implemented.
+        numeric_only : boolean, optional
+            Include only numeric columns.
+
+        See Also
+        --------
+        :meth:`pandas.DataFrame.std`
+
+        Returns
+        -------
+        :class:`pandas.Series`
+            If no By groups are specified.
+        :class:`pandas.DataFrame`
+            If By groups are specified.
+
+        '''
         return self._get_summary_stat('std')
 
     def var(self, axis=None, skipna=None, level=None, ddof=1, numeric_only=True):
-        ''' Return the variance of each column '''
+        '''
+        Return the variance of the values of each column 
+
+        Parameters
+        ----------
+        axis : int, optional
+            Not implemented.
+        skipna : boolean, optional
+            Not implemented.
+        level : int, optional
+            Not implemented.
+        ddof : int, optional
+            Not implemented.
+        numeric_only : boolean, optional
+            Include only numeric columns.
+
+        See Also
+        --------
+        :meth:`pandas.DataFrame.var`
+
+        Returns
+        -------
+        :class:`pandas.Series`
+            If no By groups are specified.
+        :class:`pandas.DataFrame`
+            If By groups are specified.
+
+        '''
         return self._get_summary_stat('var')
 
     # Not DataFrame methods, but they are available statistics.
 
     def nmiss(self):
-        ''' Return the number of missing values in each column '''
+        ''' 
+        Return the number of missing values in each column 
+
+        Returns
+        -------
+        :class:`pandas.Series`
+            If no By groups are specified.
+        :class:`pandas.DataFrame`
+            If By groups are specified.
+
+        '''
         return self._get_summary_stat('nmiss').astype(np.int64)
 
     def stderr(self):
-        ''' Return the standard error of each column '''
+        ''' 
+        Return the standard error of the values of each column 
+
+        Returns
+        -------
+        :class:`pandas.Series`
+            If no By groups are specified.
+        :class:`pandas.DataFrame`
+            If By groups are specified.
+
+        '''
         return self._get_summary_stat('stderr')
 
     def uss(self):
-        ''' Return the uncorrected sum of squares of each column '''
+        ''' 
+        Return the uncorrected sum of squares of the values of each column
+
+        Returns
+        -------
+        :class:`pandas.Series`
+            If no By groups are specified.
+        :class:`pandas.DataFrame`
+            If By groups are specified.
+
+        '''
         return self._get_summary_stat('uss')
 
     def css(self):
-        ''' Return the corrected sum of squares of each column '''
+        ''' 
+        Return the corrected sum of squares of the values of each column
+
+        Returns
+        -------
+        :class:`pandas.Series`
+            If no By groups are specified.
+        :class:`pandas.DataFrame`
+            If By groups are specified.
+
+        '''
         return self._get_summary_stat('css')
 
     def cv(self):
-        ''' Return the coefficient of variation of each column '''
+        ''' 
+        Return the coefficient of variation of the values of each column
+
+        Returns
+        -------
+        :class:`pandas.Series`
+            If no By groups are specified.
+        :class:`pandas.DataFrame`
+            If By groups are specified.
+
+        '''
         return self._get_summary_stat('cv')
 
     def tvalue(self):
-        ''' Return the value of T-statistics for hypothesis testing for each column '''
+        '''
+        Return the value of T-statistics for hypothesis testing of the values of each column
+
+        Returns
+        -------
+        :class:`pandas.Series`
+            If no By groups are specified.
+        :class:`pandas.DataFrame`
+            If By groups are specified.
+
+        '''
         return self._get_summary_stat('tvalue')
 
     def probt(self):
-        ''' Return the p-value of the T-statistics for each column '''
+        ''' 
+        Return the p-value of the T-statistics of the values of each column
+
+        Returns
+        -------
+        :class:`pandas.Series`
+            If no By groups are specified.
+        :class:`pandas.DataFrame`
+            If By groups are specified.
+
+        '''
         return self._get_summary_stat('probt')
 
     # Reindexing / Selection / Label manipulation
@@ -3286,14 +3575,14 @@ class CASTable(ParamManager, ActionParamManager):
     def sort_values(self, by, axis=0, ascending=True, inplace=False,
                     kind='quicksort', na_position='last'):
         '''
-        Sort data in CAS table
+        Specify sort parameters for data in a CAS table
 
         Parameters
         ----------
         by : string or list-of-strings
             The name or names of columns to sort by.
         axis : int, optional
-            Unsupported
+            Not implemented.
         ascending : boolean or list-of-booleans, optional
             Sort ascending or descending.  Specify a list of booleanss
             if sort orders are not all one type.
@@ -3302,16 +3591,22 @@ class CASTable(ParamManager, ActionParamManager):
             instance.  If False, a new CASTable is returned with the
             sort parameters embedded.
         kind : string, optional
-            Unsupported
+            Not implemented.
         na_position : string, optional
-            Unsupported
+            Not implemented.
+
+        Notes
+        -----
+        Since CAS tables can be distributed across a grid of machines
+        the order that they are stored in is not guaranteed.  A sort order
+        is required to retrieve data in a predictable order.
 
         Returns
         -------
         None
-            If inplace = True
-        CASTable
-            If inplace = False
+            If inplace == True.
+        :class:`CASTable`
+            If inplace == False.
 
         '''
         if inplace:
@@ -3357,17 +3652,13 @@ class CASTable(ParamManager, ActionParamManager):
         '''
         Create a view using the current CASTable parameters
 
-        The parameters to this method are the same as the table.view
-        action.  `self` will automatically be added as the `tables`
+        The parameters to this method are the same as the `table.view`
+        action.  `self` will automatically be added as the `tables=`
         parameter.
-
-        See Also
-        --------
-        table.view action
 
         Returns
         -------
-        CASTable object
+        :class:`CASTable` object
 
         '''
         kwargs = kwargs.copy()
@@ -3435,7 +3726,19 @@ class CASTable(ParamManager, ActionParamManager):
     # Plotting
 
     def _fetch(self, grouped=False, **kwargs):
-        ''' Return the fetched DataFrame given the fetch parameters '''
+        ''' 
+        Return the fetched DataFrame given the fetch parameters
+
+        Parameters
+        ----------
+        grouped : boolean, optional
+            Should the output DataFrame be returned as By groups?
+        
+        Returns
+        -------
+        :class:`SASDataFrame`
+
+        '''
         kwargs = kwargs.copy()
         if 'to' not in kwargs:
             kwargs['to'] = get_option('cas.dataset.max_rows_fetched')
@@ -3450,7 +3753,18 @@ class CASTable(ParamManager, ActionParamManager):
         '''
         Make a boxplot from the table data
 
-        See Also: pandas.DataFrame.boxplot (for arguments)
+        This method fetches the data from the CAS table and
+        calls the :meth:`pandas.DataFrame.boxplot` method to do the
+        rendering.  All arguments passed to this method are passed
+        to the DataFrame's :meth:`boxplot` method.
+
+        See Also
+        --------
+        :meth:`pandas.DataFrame.boxplot`
+
+        Returns
+        -------
+        :class:`matplotlib.AxesSubplot` or :func:`numpy.array` of them.
 
         '''
         return self._fetch(grouped=True).boxplot(*args, **kwargs)
@@ -3459,7 +3773,18 @@ class CASTable(ParamManager, ActionParamManager):
         '''
         Make a histogram from the table data
 
-        See Also: pandas.DataFrame.hist (for arguments)
+        This method fetches the data from the CAS table and
+        calls the :meth:`pandas.DataFrame.hist` method to do the
+        rendering.  All arguments passed to this method are passed
+        to the DataFrame's :meth:`hist` method.
+
+        See Also
+        --------
+        :meth:`pandas.DataFrame.hist`
+
+        Returns
+        -------
+        :class:`matplotlib.AxesSubplot` or :func:`numpy.array` of them.
 
         '''
         return self._fetch(grouped=True).hist(*args, **kwargs)

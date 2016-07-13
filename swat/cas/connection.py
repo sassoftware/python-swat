@@ -116,42 +116,42 @@ class CAS(object):
     Parameters
     ----------
     hostname : string or list-of-strings, optional
-       Host to connect to.  If not specified, the value will come
-       from the cas.hostname option or CASHOST environment variable.
+        Host to connect to.  If not specified, the value will come
+        from the `cas.hostname` option or ``CASHOST`` environment variable.
     port : int or long, optional
-       Port number.  If not specified, the value will come from the
-       cas.port option or CASPORT environment variable.
+        Port number.  If not specified, the value will come from the
+        `cas.port` option or ``CASPORT`` environment variable.
     username : string, optional
-       Name of user on machine.
+        Name of user on CAS host.
     password : string, optional
-       Password of user on machine.
+        Password of user on CAS host.
     session : string, optional
-       ID of existing session to connect to.
+        ID of existing session to reconnect to.
     locale : string, optional
-       Name of locale used for the session.
+        Name of locale used for the session.
     name : string, optional
-       User-definable name for the session.
+        User-definable name for the session.
     nworkers : int or long, optional
-       Number of worker nodes to use.
+        Number of worker nodes to use.
     authinfo : string or list-of-strings, optional
-       The filename or list of filenames of authinfo/netrc files used
-       for authentication.
+        The filename or list of filenames of authinfo/netrc files used
+        for authentication.
     protocol : string, optional
-       The protocol to use for communicating with the server.
-       This protocol must match the protocol spoken by the specified
-       server port.  If not specified, the value will come from the
-       cas.protocol option or CASPROTOCOL environment variable.
+        The protocol to use for communicating with the server.
+        This protocol must match the protocol spoken by the specified
+        server port.  If not specified, the value will come from the
+        `cas.protocol` option or ``CASPROTOCOL`` environment variable.
     **kwargs : any, optional
-       Arbitrary keyword arguments used for internal purposes only.
+        Arbitrary keyword arguments used for internal purposes only.
 
     Raises
     ------
     IOError
-       When a connection can not be established.
+        When a connection can not be established.
 
     Returns
     -------
-    CAS object
+    :class:`CAS` object
 
     Examples
     --------
@@ -343,7 +343,24 @@ class CAS(object):
         return numpy.base_repr(next(self._id_generator), 36)
 
     def _detect_protocol(self, hostname, port, protocol=None):
-        ''' Detect the protocol type '''
+        '''
+        Detect the protocol type for the given host and port
+
+        Parameters
+        ----------
+        hostname : string
+            The CAS host to connect to.
+        port : int
+            The CAS port to connect to.
+        protocol : string, optional
+            The protocol override value.
+
+        Returns
+        -------
+        string
+            'cas' or 'http'
+
+        '''
         if protocol is None:
             protocol = cf.get_option('cas.protocol')
 
@@ -371,9 +388,11 @@ class CAS(object):
         return protocol
 
     def __enter__(self):
+        ''' Enter a context '''
         return self
 
     def __exit__(self, type, value, traceback):
+        ''' Exit the context '''
         self.retrieve('session.endsession', _apptag='UI', _messagelevel='error')
         self.close()
 
@@ -382,12 +401,31 @@ class CAS(object):
         '''
         Create a context of session options
 
+        This method is intended to be used in conjunction with Python's
+        ``with`` statement.  It allows you to set CAS session options within
+        that context, then revert them back to their previous state.
+
+        For all possible session options, see the `sessionprop.getsessopt`
+        CAS action documentation.
+
         Parameters
         ----------
         *args : string / any pairs
-            Name / value pairs of options in consecutive arguments (not tuples)
+            Name / value pairs of options in consecutive arguments, name / value
+            pairs in tuples, or dictionaries.
         **kwargs : string / any pairs
             Key / value pairs of session options
+
+        Examples
+        --------
+        >>> conn = swat.CAS()
+        >>> print(conn.getsessopt('locale').locale)
+        en_US
+        >>> with conn.session_context(locale='fr'):
+        ...     print(conn.getsessopt('locale').locale)
+        fr
+        >>>  print(conn.getsessopt('locale').locale)
+        en_US
 
         '''
         state = {}
@@ -405,31 +443,105 @@ class CAS(object):
                       _apptag='UI', **state)
 
     def get_action_names(self):
-        ''' Return the list of action classes '''
+        '''
+        Return the list of action classes
+
+        Returns
+        -------
+        list of strings
+
+        '''
         return self._action_classes.keys()
 
     def get_actionset_names(self):
-        ''' Return the list of actionset classes '''
+        '''
+        Return the list of actionset classes
+
+        Returns
+        -------
+        list of strings
+
+        '''
         return self._actionset_classes.keys()
 
     def has_action(self, name):
-        ''' Does the given action name exist? '''
+        '''
+        Does the given action name exist?
+
+        Parameters
+        ----------
+        name : string
+            The name of the CAS action to look for.
+
+        Returns
+        -------
+        boolean
+
+        '''
         return name in self._action_classes
 
     def has_actionset(self, name):
-        ''' Does the given actionset name exist? '''
+        ''' 
+        Does the given actionset name exist?
+
+        Parameters
+        ----------
+        name : string
+            The name of the CAS action set to look for.
+ 
+        Returns
+        -------
+        boolean
+
+        '''
         return name in self._actionset_classes
 
     def get_action(self, name):
-        ''' Get the action instance for the given action name '''
+        '''
+        Get the CAS action instance for the given action name
+
+        Parameters
+        ----------
+        name : string
+            The name of the CAS action to look for.
+
+        Returns
+        -------
+        :class:`CASAction` object
+
+        '''
         return self.__getattr__(name, atype='action')
 
     def get_action_class(self, name):
-        ''' Get the action class for the given action name '''
+        '''
+        Get the CAS action class for the given action name
+
+        Parameters
+        ----------
+        name : string
+            The name of the CAS action to look for.
+
+        Returns
+        -------
+        :class:`CASAction`
+
+        '''
         return self.__getattr__(name, atype='action_class')
 
     def get_actionset(self, name):
-        ''' Get the actionset instance for the given actionset name '''
+        '''
+        Get the CAS action set instance for the given action set name
+
+        Parameters
+        ----------
+        name : string
+            The name of the CAS action set to look for.
+
+        Returns
+        -------
+        :class:`CASActionSet` object
+
+        '''
         return self.__getattr__(name, atype='actionset')
 
     def __dir__(self):
@@ -453,18 +565,23 @@ class CAS(object):
         '''
         Create a CASTable instance
 
+        The primary difference between constructing a :class:`CASTable`
+        object through this method rather than directly, is that the
+        current session will be automatically registered with the
+        :class:`CASTable` object so that CAS actions can be called on
+        it directly.
+
         Parameters
         ----------
         name : string
-           Name of the table in CAS
+           Name of the table in CAS.
         **kwargs : any, optional
-           Arbitrary keyword arguments.  These keyword arguments become
-           CASTable parameters.
+           Arbitrary keyword arguments.  These keyword arguments are
+           passed to the :class:`CASTable` constructor.
 
         Returns
         -------
-        CASTable object
-           New CASTable object using given parameters
+        :class:`CASTable` object
 
         '''
         table = CASTable(name, **kwargs)
@@ -477,8 +594,7 @@ class CAS(object):
 
         Returns
         -------
-        SASFormatter object
-           New SASFormatter using soptions from `self`
+        :class:`SASFormatter` object
 
         '''
         return SASFormatter(soptions=self._soptions)
@@ -487,8 +603,8 @@ class CAS(object):
         '''
         Add a post-processing function for results
 
-        The function will be called with two arguments: the connection
-        object and the CASResult object.
+        The function will be called with two arguments: the CAS connection
+        object and the :class:`CASResult` object.
 
         Parameters
         ----------
@@ -497,13 +613,10 @@ class CAS(object):
         func : function
            Function to call for result set
 
-        Returns
-        -------
-        None
-
         See Also
         --------
-        del_results_hook, del_results_hooks
+        :meth:`del_results_hook`
+        :meth:`del_results_hooks`
 
         Examples
         --------
@@ -534,13 +647,10 @@ class CAS(object):
         func : function
            The function to remove
 
-        Returns
-        -------
-        None
-
         See Also
         --------
-        add_results_hook, del_results_hooks
+        :meth:`add_results_hook`
+        :meth:`del_results_hooks`
 
         Examples
         --------
@@ -565,18 +675,15 @@ class CAS(object):
         name : string
            Full name of action (actionset.actionname)
 
-        Returns
-        -------
-        None
-
         See Also
         --------
-        add_results_hook, del_results_hook
+        :meth:`add_results_hook`
+        :meth:`del_results_hook`
 
         Examples
         --------
         The following code removes all post-processing functions registered to
-        the 'myactionset.myaction' action.
+        the `myactionset.myaction` action.
 
         >>> s.del_results_hooks('myactionset.myaction')
 
@@ -586,14 +693,7 @@ class CAS(object):
             del self._results_hooks[name]
 
     def close(self):
-        '''
-        Close the CAS connection
-
-        Returns
-        -------
-        None
-
-        '''
+        ''' Close the CAS connection '''
         errorcheck(self._sw_connection.close(), self._sw_connection)
 
     def _set_option(self, **kwargs):
@@ -609,7 +709,7 @@ class CAS(object):
         Returns
         -------
         True
-           If all options were set successfully
+            If all options were set successfully
 
         '''
         for name, value in six.iteritems(kwargs):
@@ -651,14 +751,23 @@ class CAS(object):
         The copy of the connection will use the same parameters as this
         object, but it will create a new session.
 
-        Returns
-        -------
-        CAS object
-           Copy of `self`
+        Examples
+        --------
+        >>> conn = swat.CAS()
+        >>> print(conn)
+        CAS(..., session='76dd2bbe-de65-554f-a94f-a5e0e1abfdc8')
+
+        >>> conn2 = conn.copy()
+        >>> print(conn2)
+        CAS(..., session='19cef586-6997-ae40-b62c-036f44cb60fc')
 
         See Also
         --------
-        fork
+        :meth:`fork`
+
+        Returns
+        -------
+        :class:`CAS` object
 
         '''
         return type(self)(None, None, prototype=self)
@@ -675,27 +784,28 @@ class CAS(object):
 
         Parameters
         ----------
-        num : int or long
+        num : int, optional
            Number of returned connections.  The first element of the returned
            list is always the object that the fork method was called on.
-
-        Returns
-        -------
-        list of CAS objects
-
-        See Also
-        --------
-        copy
 
         Examples
         --------
         The code below demonstrates how to get four unique connections.
 
-        >>> c1, c2, c3, c4 = s.fork(4)
-        >>> c1 is s
+        >>> conn = swat.CAS()
+        >>> c1, c2, c3, c4 = conn.fork(4)
+        >>> c1 is conn
         True
-        >>> c2 is s
+        >>> c2 is conn
         False
+
+        See Also
+        --------
+        :meth:`copy`
+
+        Returns
+        -------
+        list of :class:`CAS` objects
 
         '''
         output = [self]
@@ -710,14 +820,14 @@ class CAS(object):
         Parameters
         ----------
         _name_ : string
-           Name of the action
+            Name of the action.
 
         **kwargs : any, optional
-           Arbitrary keyword arguments
+            Arbitrary keyword arguments.
 
         Returns
         -------
-        `self`
+        :obj:`self`
 
         '''
         if isinstance(self._sw_connection, rest.REST_CASConnection):
@@ -739,15 +849,11 @@ class CAS(object):
         Parameters
         ----------
         parmlist : list
-           Parameter list
+            Parameter list.
         kwargs : dict
-           Dictionary of keyword arguments
+            Dictionary of keyword arguments.
         action : string
-           Name of the action
-
-        Returns
-        -------
-        None
+            Name of the action.
 
         '''
         if action is None:
@@ -821,14 +927,14 @@ class CAS(object):
         Parameters
         ----------
         name : string
-            Name of the action being executed
+            Name of the action being executed.
         kwargs : dict
-            Action parameter dictionary
+            Action parameter dictionary.
 
         Returns
         -------
         dict
-            The new set of action parameters
+            The new set of action parameters.
 
         '''
         newkwargs = kwargs.copy()
@@ -844,15 +950,14 @@ class CAS(object):
         Parameters
         ----------
         _name_ : string
-           Name of the action
-
+            Name of the action.
         **kwargs : any, optional
-           Arbitrary keyword arguments
+            Arbitrary keyword arguments.
 
         Returns
         -------
         dict
-           Signature of the action
+            Signature of the action
 
         '''
         # Get the signature of the action
@@ -873,30 +978,56 @@ class CAS(object):
     def upload(self, data, importoptions=None, resident=None,
                promote=None, casout=None):
         '''
-        Upload data from a file into a CAS table
+        Upload data from a local file into a CAS table
+
+        This method is a thin wrapper around the `table.upload` CAS action.
+        The primary difference between this data loader and the other data
+        loaders on this class is that in this case the parsing of the data
+        is done on the server.  This method simply uploads the file as 
+        binary data which is then parsed by `table.loadtable` on the server.
+
+        While the server parsers may not be quite a flexible as Python, they
+        are generally much faster.  Files such as CSV can be parsed on the 
+        server in multiple threads across many machines in the grid.
+
+        Notes
+        -----
+        When uploading a :class:`pandas.DataFrame`, the data is exported to
+        a CSV file, then the CSV file is uploaded.  This can cause a loss of
+        metadata about the columns since the server parser will guess at the
+        data types of the columns.
 
         Parameters
         ----------
-        data : string or DataFrame
+        data : string or :class:`pandas.DataFrame`
             If the value is a string, it can be either a filename
             or a URL.  DataFrames will be converted to CSV before
             uploading.
         importoptions : dict, optional
-            Import options for the table.upload action
+            Import options for the table.upload action.
         resident : boolean, optional
-            Internal use only
+            Internal use only.
         promote : boolean, optional
             Should the resulting table be in the global namespace?
         casout : dict, optional
-            Output table definition for the table.upload action
+            Output table definition for the `table.upload` action.
 
-        See Also
+        Examples
         --------
-        builtins.help(action='table.upload')
+        >>> conn = swat.CAS()
+        >>> out = conn.upload('data/iris.csv')
+        >>> tbl = out.casTable
+        >>> print(tbl.head())
+           sepal_length  sepal_width  petal_length  petal_width species
+        0           5.1          3.5           1.4          0.2  setosa
+        1           4.9          3.0           1.4          0.2  setosa
+        2           4.7          3.2           1.3          0.2  setosa
+        3           4.6          3.1           1.5          0.2  setosa
+        4           5.0          3.6           1.4          0.2  setosa
 
         Returns
         -------
-        CASResults
+        :class:`CASResults`
 
         '''
         delete = False

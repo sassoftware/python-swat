@@ -44,7 +44,7 @@ Call an action from the library
 
 from __future__ import print_function, division, absolute_import, unicode_literals
 
-__version__ = '1.0.0'
+__version__ = '0.9.0'
 
 # Configuration
 from . import config

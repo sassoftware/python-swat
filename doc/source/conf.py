@@ -49,6 +49,12 @@ numpydoc_show_class_members = False
 autodoc_default_flags = ['show-inheritance']
 autoclass_content = 'class'
 
+intersphinx_mapping = {'python': ('https://docs.python.org/3.5', None),
+                       'pandas': ('http://pandas.pydata.org/pandas-docs/version/0.18.0', None),
+                       'numpy': ('http://docs.scipy.org/doc/numpy/', None),
+                       'scipy': ('http://docs.scipy.org/doc/scipy/reference/', None),
+                       'matplotlib': ('http://matplotlib.sourceforge.net/', None)} 
+
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
 
@@ -65,7 +71,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'SWAT'
-copyright = '2016, SAS'
+copyright = 'SAS Institute Inc. All Rights Reserved.'
 author = 'SAS'
 
 # The version info for the project you're documenting, acts as replacement for

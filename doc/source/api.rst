@@ -41,6 +41,7 @@ Reading Data
    CAS.read_sql
    CAS.read_gbq
    CAS.read_stata
+   CAS.upload
 
 Running Actions
 ~~~~~~~~~~~~~~~
@@ -51,6 +52,23 @@ Running Actions
    CAS.retrieve
    CAS.invoke
    CAS.__iter__
+
+Utilities
+~~~~~~~~~
+
+.. autosummary::
+   :toctree: generated/
+
+   CAS.copy
+   CAS.fork
+
+Session Options
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. autosummary::
+   :toctree: generated/
+
+   CAS.session_context
 
 
 CASResults
@@ -116,6 +134,8 @@ Setters and Getters
 Attributes and Underlying Data
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+   * **columns**: column labels
+
 .. autosummary::
    :toctree: generated/
 
@@ -130,7 +150,6 @@ Attributes and Underlying Data
    CASTable.ndim
    CASTable.size
    CASTable.shape
-   CASTable.memory_usage
 
 Indexing, Iteration
 ~~~~~~~~~~~~~~~~~~~
@@ -159,63 +178,117 @@ For more information on ``.at``, ``.iat``, ``.ix``, ``.loc``, and
 
 Computations / Descriptive Stats
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 .. autosummary::
    :toctree: generated/
 
-   CASTable.abs
-   CASTable.all
-   CASTable.any
-   CASTable.clip
-   CASTable.clip_lower
-   CASTable.clip_upper
    CASTable.corr
-   CASTable.corrwith
    CASTable.count
-   CASTable.cov
-   CASTable.cummax
-   CASTable.cummin
-   CASTable.cumprod
-   CASTable.cumsum
    CASTable.describe
-   CASTable.diff
-   CASTable.eval
-   CASTable.kurt
-   CASTable.mad
    CASTable.max
    CASTable.mean
    CASTable.median
    CASTable.min
    CASTable.mode
-   CASTable.pct_change
-   CASTable.prod
    CASTable.quantile
-   CASTable.rank
-   CASTable.round
-   CASTable.sem
-   CASTable.skew
    CASTable.sum
    CASTable.std
    CASTable.var
+   CASTable.nmiss
+   CASTable.stderr
+   CASTable.uss
+   CASTable.css
+   CASTable.cv
+   CASTable.tvalue
+   CASTable.probt
 
 Reindexing / Selection / Label manipulation
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 .. autosummary::
    :toctree: generated/
 
-   CASTable.filter
-   CASTable.first
    CASTable.head
-   CASTable.idxmax
-   CASTable.idxmin
-   CASTable.last
-   CASTable.sample
-   CASTable.select
    CASTable.tail
-   CASTable.take
+
+Sorting
+~~~~~~~
+
+.. autosummary::
+   :toctree: generated/
+
+   CASTable.sort_values
+   CASTable.nlargest
+   CASTable.nsmallest
+   CASTable.to_xarray
+
+Plotting
+~~~~~~~
+
+:meth:`CASTable.plot` is both a callable method and a namespace attribute for
+specific plotting methods of the form `CASTable.plot.<kind>`.
+
+.. note:: In all of the plotting methods, the rendering is done completely 
+          on the client side.  This means that all of the data is fetched
+          in the background prior to doing the plotting.
+
+.. autosummary::
+   :toctree: generated/
+
+   CASTable.plot
+
+.. autosummary::
+   :toctree: generated/
+
+   CASTable.plot.area
+   CASTable.plot.bar
+   CASTable.plot.barh
+   CASTable.plot.box
+   CASTable.plot.density
+   CASTable.plot.hexbin
+   CASTable.plot.hist
+   CASTable.plot.kde
+   CASTable.plot.line
+   CASTable.plot.pie
+   CASTable.plot.scatter
+
+.. autosummary::
+   :toctree: generated/
+
+   CASTable.boxplot
+   CASTable.hist
+
+Serialization / IO / Conversion
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.. autosummary::
+   :toctree: generated/
+
+   CASTable.from_csv
+   CASTable.from_dict
+   CASTable.from_items
+   CASTable.from_records
+   CASTable.info
+   CASTable.to_pickle
+   CASTable.to_csv
+   CASTable.to_hdf
+   CASTable.to_sql
+   CASTable.to_dict
+   CASTable.to_excel
+   CASTable.to_json
+   CASTable.to_html
+   CASTable.to_latex
+   CASTable.to_stata
+   CASTable.to_msgpack
+   CASTable.to_gbq
+   CASTable.to_records
+   CASTable.to_sparse
+   CASTable.to_dense
+   CASTable.to_string
+   CASTable.to_clipboard
 
 
 CASColumn
---------
+---------
 
 Constructor
 ~~~~~~~~~~~
