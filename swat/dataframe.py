@@ -60,18 +60,30 @@ def split_format(fmt):
 
 def concat(objs, **kwargs):
     '''
-    Concatenate SASDataFrames while preserving table and column metadata
+    Concatenate :class:`SASDataFrames` while preserving table and column metadata
+
+    This function is equivalent to :func:`pandas.concat` except that it also
+    preserves metadata in :class:`SASDataFrames`.  It can be used on standard
+    :class:`pandas.DataFrames` as well.
 
     Parameters
     ----------
     objs : a sequence of mapping of Series, (SAS)DataFrame, or Panel objects
         The DataFrames to concatenate.
     **kwargs : any, optional
-        Additional arguments to pass to pd.concat.
+        Additional arguments to pass to :func:`pandas.concat`.
+
+    Examples
+    --------
+    >>> conn = swat.CAS()
+    >>> tbl = conn.read_csv('data/cars.csv')
+    >>> out = tbl.groupby('Origin').summary()
+    >>> print(concat([out['ByGroup1.Summary'], out['ByGroup2.Summary'],
+    ...               out['ByGroup3.Summary']]))
 
     Returns
     -------
-    SASDataFrame
+    :class:`SASDataFrame`
 
     '''
     proto = objs[0]
@@ -105,12 +117,24 @@ def reshape_bygroups(items, bygroup_columns='formatted',
 
     Parameters
     ----------
-    items : SASDataFrame or list of SASDataFrames
+    items : :class:`SASDataFrame` or list of :class:`SASDataFrames`
         The DataFrames to process.
+    bygroup_columns : string, optional
+        The way By group columns should be represented in the output table.  The
+        options are 'none' (only use metadata), 'formatted', 'raw', or 'both'.
+    bygroup_as_index : boolean, optional
+        Specifies whether the By group columns should be converted to indices.
+    bygroup_suffix : string, optional
+        The suffix to use on formatted columns if the names collide with existing
+        columns.
+
+    See Also
+    --------
+    :meth:`SASDataFrame.reshape_bygroups`
 
     Returns
     -------
-    SASDataFrame or list of SASDataFrames
+    :class:`SASDataFrame` or list of :class:`SASDataFrame` objects
 
     '''
     if hasattr(items, 'reshape_bygroups'):
@@ -132,28 +156,28 @@ def reshape_bygroups(items, bygroup_columns='formatted',
 @six.python_2_unicode_compatible
 class SASColumnSpec(object):
     '''
-    Create a SASDataFrame column information object
+    Create a :class:`SASDataFrame` column information object
 
     Parameters
     ----------
     name : string
-       Name of the column
+       Name of the column.
     label : string
-       Label for the column
+       Label for the column.
     type : string
-       SAS/CAS data type of the column
+       SAS/CAS data type of the column.
     width : int or long
-       Width of the formatted column
+       Width of the formatted column.
     format : string
-       SAS format
+       SAS format.
     size : two-element tuple
-       Dimensions of the data
+       Dimensions of the data.
     attrs : dict
-       Extended attributes of the column
+       Extended attributes of the column.
 
     Returns
     -------
-    SASColumnSpec object
+    :class:`SASColumnSpec` object
 
     '''
 
@@ -185,7 +209,7 @@ class SASColumnSpec(object):
 
         Returns
         -------
-        SASColumnSpec object
+        :class:`SASColumnSpec` object
 
         '''
         name = errorcheck(a2u(_sw_table.getColumnName(col), 'utf-8'), _sw_table)
@@ -267,40 +291,55 @@ class SASColumnSpec(object):
 @six.python_2_unicode_compatible
 class SASDataFrame(pd.DataFrame):
     '''
-    Create a SASDataFrame object
+    Two-dimensional tabular data structure with SAS metadata added
+
+    Attributes
+    ----------
+    name : string
+        The name given to the table.
+    label : string
+        The SAS label for the table.
+    title : string
+        Displayed title for the table.
+    attr : dict
+        Table extended attributes.
+    formatter : :class:`SASFormatter`
+        A :class:`SASFormatter` object for applying SAS data formats.
+    colinfo : dict
+        Metadata for the columns in the :class:`SASDataFrame`.
 
     Parameters
     ----------
-    data : numpy.ndarray or dict or DataFrame
-       Dict can contain Series, arrays, constants, or list-like objects
-    index : Index or list, optional
-       Index to use for resulting frame
-    columns : Index or list, optional
-       Column labels to use for resulting frame
+    data : :func:`numpy.ndarray` or dict or :class:`pandas.DataFrame`
+       Dict can contain :class:`pandas.Series`, arrays, constants, or list-like objects.
+    index : :class:`pandas.Index` or list, optional
+       Index to use for resulting frame.
+    columns : :class:`pandas.Index` or list, optional
+       Column labels to use for resulting frame.
     dtype : data-type, optional
-       Data type to force, otherwise infer
+       Data type to force, otherwise infer.
     copy : boolean, optional
        Copy data from inputs.  Default is False.
     colinfo : dict, optional
-       Dictionary of SASColumnSpec objects containing column metadata
+       Dictionary of SASColumnSpec objects containing column metadata.
     name : string, optional
-       Name of the table
+       Name of the table.
     label : string, optional
-       Label on the table
+       Label on the table.
     title : string, optional
-       Title of the table
-    formatter : SASFormatter object, optional
-       SASFormatter to use for all formatting operations
+       Title of the table.
+    formatter : :class:`SASFormatter` object, optional
+       :class:`SASFormatter` to use for all formatting operations.
     attrs : dict, optional
-       Table attributes
+       Table extended attributes.
 
     See Also
     --------
-    pandas.DataFrame
+    :class:`pandas.DataFrame`
 
     Returns
     -------
-    SASDataFrame object
+    :class:`SASDataFrame` object
 
     '''
 
@@ -389,11 +428,21 @@ class SASDataFrame(pd.DataFrame):
 
     def pop(self, k, *args):
         '''
-        Pop item from a SASDataFrame
+        Pop item from a :class:`SASDataFrame`
 
-        See
-        ---
-        pandas.DataFrame.pop
+        Parameters
+        ----------
+        k : string
+            The key to remove.
+
+        See Also
+        --------
+        :meth:`pandas.DataFrame.pop`
+
+        Returns
+        -------
+        any
+            The value stored in `k`.
 
         '''
         self.colinfo.pop(k, None)
@@ -403,9 +452,9 @@ class SASDataFrame(pd.DataFrame):
         '''
         Set an item in a SASDataFrame
 
-        See
-        ---
-        pandas.DataFrame.__setitem__
+        See Also
+        --------
+        :meth:`pandas.DataFrame.__setitem__`
 
         '''
         result = super(SASDataFrame, self).__setitem__(*args, **kwargs)
@@ -418,9 +467,9 @@ class SASDataFrame(pd.DataFrame):
         '''
         Retrieve items from a SASDataFrame
 
-        See
-        ---
-        pandas.DataFrame.__getitem__
+        See Also
+        --------
+        :meth:`pandas.DataFrame.__getitem__`
 
         '''
         result = super(SASDataFrame, self).__getitem__(*args, **kwargs)
@@ -440,9 +489,9 @@ class SASDataFrame(pd.DataFrame):
         '''
         Insert an item at a particular position in a SASDataFrame
 
-        See
-        ---
-        pandas.DataFrame.insert
+        See Also
+        --------
+        :meth:`pandas.DataFrame.insert`
 
         '''
         result = super(SASDataFrame, self).insert(*args, **kwargs)
@@ -730,8 +779,8 @@ class SASDataFrame(pd.DataFrame):
 
         Parameters
         ----------
-        self : SASDataFrame
-            The DataFrame to process.
+        self : :class:`SASDataFrame`
+            The :class:`DataFrame` to process.
         bygroup_columns : string, optional
             The way By group columns should be represented in the output table.  The
             options are 'none' (only use metadata), 'formatted', 'raw', or 'both'.
@@ -743,7 +792,7 @@ class SASDataFrame(pd.DataFrame):
 
         Returns
         -------
-        SASDataFrame
+        :class:`SASDataFrame`
 
         '''
         if not self.attrs.get('ByVar1'):

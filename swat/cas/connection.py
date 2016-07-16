@@ -1714,34 +1714,36 @@ class CAS(object):
 
     def _get_table_args(self, *args, **kwargs):
         ''' Extract table paramaters from function arguments '''
-        import uuid
         out = {}
         kwargs = kwargs.copy()
-        table = kwargs.pop('table', {})
-        if not isinstance(table, dict):
-            table = dict(name=table)
-        out['table'] = table.get('name', None)
-        out['caslib'] = table.get('caslib', None)
-        out['replace'] = table.get('replace', None)
-        out['promote'] = table.get('promote', None)
+        casout = kwargs.pop('casout', {})
+        if not isinstance(casout, dict):
+            casout = dict(name=casout)
+        out['table'] = casout.get('name', None)
+        out['caslib'] = casout.get('caslib', None)
+        out['replace'] = casout.get('replace', None)
+        out['label'] = casout.get('label', None)
+        out['promote'] = casout.get('promote', None)
         if not out['table']:
-            out['table'] = '_PY_%s_' % str(uuid.uuid4()).replace('-', '_')
+            out.pop('table')
         if not out['caslib']:
             out.pop('caslib')
         if out['replace'] is None:
             out.pop('replace')
+        if out['label'] is None:
+            out.pop('label')
         if out['promote'] is None:
             out.pop('promote')
         return out, kwargs
 
-    def read_path(self, path=None, readahead=None, importoptions=None,
-                  resident=None, promote=None, ondemand=None, attrtable=None,
-                  caslib=None, options=None, casout=None, singlepass=None,
-                  where=None, varlist=None, groupby=None, groupbyfmts=None,
-                  groupbymode=None, orderby=None, nosource=None, returnwhereinfo=None,
-                  **kwargs):
+    def read_cas_path(self, path=None, readahead=None, importoptions=None,
+                      resident=None, promote=None, ondemand=None, attrtable=None,
+                      caslib=None, options=None, casout=None, singlepass=None,
+                      where=None, varlist=None, groupby=None, groupbyfmts=None,
+                      groupbymode=None, orderby=None, nosource=None, returnwhereinfo=None,
+                      **kwargs):
         '''
-        Read a server-side path from a CASLib
+        Read a path from a CASLib
 
         The parameters for this are the same as for the `builtins.loadtable`
         CAS action.  This method is simply a convenience method that loads a
@@ -1755,7 +1757,7 @@ class CAS(object):
         Examples
         --------
         >>> conn = swat.CAS()
-        >>> tbl = conn.read_path('data/iris.csv')
+        >>> tbl = conn.read_cas_path('data/iris.csv')
         >>> print(tbl.head())
 
         See Also
@@ -1818,7 +1820,7 @@ class CAS(object):
         '''
         Load pickled pandas object from the specified path
 
-        This method calls :meth:`pandas.DataFrame.read_pickle` with the
+        This method calls :func:`pandas.read_pickle` with the
         given arguments, then uploads the resulting :class:`pandas.DataFrame`
         to a CAS table.
 
@@ -1826,21 +1828,25 @@ class CAS(object):
         ----------
         path : string
             Path to a local pickle file.
-        table : string, optional
-            Name of the output CAS table.
-        caslib : string, optional
-            CASLib for the output CAS table.
-        promote : boolean, optional
-            If True, the output CAS table will be visible in all sessions.
-        replace : boolean, optional
-            If True, the output CAS table will replace any existing CAS.
-            table with the same name.
+        casout : string or :class:`CASTable`, optional
+            The output table specification.  This includes the following parameters.
+                table : string, optional
+                    Name of the output CAS table.
+                caslib : string, optional
+                    CASLib for the output CAS table.
+                label : string, optional
+                    The label to apply to the output CAS table. 
+                promote : boolean, optional
+                    If True, the output CAS table will be visible in all sessions.
+                replace : boolean, optional
+                    If True, the output CAS table will replace any existing CAS.
+                    table with the same name.
         **kwargs : any, optional
             Keyword arguments to :func:`pandas.read_pickle`.
 
         Notes
         -----
-        Paths to specified files point to files on the client machine.
+        Paths to specified files point to files on the **client machine**.
 
         Examples
         --------
@@ -1863,7 +1869,7 @@ class CAS(object):
         '''
         Read general delimited file into a CAS table
 
-        This method calls :meth:`pandas.DataFrame.read_table` with the
+        This method calls :func:`pandas.read_table` with the
         given arguments, then uploads the resulting :class:`pandas.DataFrame`
         to a CAS table.
 
@@ -1871,14 +1877,19 @@ class CAS(object):
         ----------
         filepath_or_buffer : str or any object with a read() method
             Path, URL, or buffer to read.
-        table : string, optional
-            Name of the output CAS table.
-        caslib : string, optional
-            CASLib for the output CAS table.
-        promote : boolean, optional
-            If True, the output CAS table will be visible in all sessions.
-        replace : boolean, optional
-            If True, the output CAS table will replace any existing CAS.
+        casout : string or :class:`CASTable`, optional
+            The output table specification.  This includes the following parameters.
+                table : string, optional
+                    Name of the output CAS table.
+                caslib : string, optional
+                    CASLib for the output CAS table.
+                label : string, optional
+                    The label to apply to the output CAS table.
+                promote : boolean, optional
+                    If True, the output CAS table will be visible in all sessions.
+                replace : boolean, optional
+                    If True, the output CAS table will replace any existing CAS.
+                    table with the same name.
         **kwargs : any, optional
             Keyword arguments to :func:`pandas.read_table`.
       
@@ -1914,7 +1925,7 @@ class CAS(object):
         '''
         Read CSV file into a CAS table
 
-        This method calls :meth:`pandas.DataFrame.read_csv` with the
+        This method calls :func:`pandas.read_csv` with the
         given arguments, then uploads the resulting :class:`pandas.DataFrame`
         to a CAS table.
 
@@ -1922,14 +1933,19 @@ class CAS(object):
         ----------
         filepath_or_buffer : str or any object with a read() method
             Path, URL, or buffer to read.
-        table : string, optional
-            Name of the output CAS table.
-        caslib : string, optional
-            CASLib for the output CAS table.
-        promote : boolean, optional
-            If True, the output CAS table will be visible in all sessions.
-        replace : boolean, optional
-            If True, the output CAS table will replace any existing CAS.
+        casout : string or :class:`CASTable`, optional
+            The output table specification.  This includes the following parameters.
+                table : string, optional
+                    Name of the output CAS table.
+                caslib : string, optional
+                    CASLib for the output CAS table.
+                label : string, optional
+                    The label to apply to the output CAS table.
+                promote : boolean, optional
+                    If True, the output CAS table will be visible in all sessions.
+                replace : boolean, optional
+                    If True, the output CAS table will replace any existing CAS.
+                    table with the same name.
         **kwargs : any, optional
             Keyword arguments to :func:`pandas.read_csv`.
 
@@ -1965,7 +1981,7 @@ class CAS(object):
         '''
         Read a table of fixed-width formatted lines into a CAS table
 
-        This method calls :meth:`pandas.DataFrame.read_fwf` with the
+        This method calls :func:`pandas.read_fwf` with the
         given arguments, then uploads the resulting :class:`pandas.DataFrame`
         to a CAS table.
 
@@ -1973,14 +1989,19 @@ class CAS(object):
         ----------
         filepath_or_buffer : str or any object with a read() method
             Path, URL, or buffer to read.
-        table : string, optional
-            Name of the output CAS table.
-        caslib : string, optional
-            CASLib for the output CAS table.
-        promote : boolean, optional
-            If True, the output CAS table will be visible in all sessions.
-        replace : boolean, optional
-            If True, the output CAS table will replace any existing CAS.
+        casout : string or :class:`CASTable`, optional
+            The output table specification.  This includes the following parameters.
+                table : string, optional
+                    Name of the output CAS table.
+                caslib : string, optional
+                    CASLib for the output CAS table.
+                label : string, optional
+                    The label to apply to the output CAS table.
+                promote : boolean, optional
+                    If True, the output CAS table will be visible in all sessions.
+                replace : boolean, optional
+                    If True, the output CAS table will replace any existing CAS.
+                    table with the same name.
         **kwargs : any, optional
             Keyword arguments to :func:`pandas.read_table`.
 
@@ -2018,14 +2039,19 @@ class CAS(object):
 
         Parameters
         ----------
-        table : string, optional
-            Name of the output CAS table.
-        caslib : string, optional
-            CASLib for the output CAS table.
-        promote : boolean, optional
-            If True, the output CAS table will be visible in all sessions.
-        replace : boolean, optional
-            If True, the output CAS table will replace any existing CAS.
+        casout : string or :class:`CASTable`, optional
+            The output table specification.  This includes the following parameters.
+                table : string, optional
+                    Name of the output CAS table.
+                caslib : string, optional
+                    CASLib for the output CAS table.
+                label : string, optional
+                    The label to apply to the output CAS table.
+                promote : boolean, optional
+                    If True, the output CAS table will be visible in all sessions.
+                replace : boolean, optional
+                    If True, the output CAS table will replace any existing CAS.
+                    table with the same name.
         **kwargs : any, optional
             Keyword arguments to :func:`pandas.read_table`.
 
@@ -2046,18 +2072,27 @@ class CAS(object):
         '''
         Read an Excel table into a CAS table
 
+        This method calls :func:`pandas.read_excel` with the
+        given arguments, then uploads the resulting :class:`pandas.DataFrame`
+        to a CAS table.
+
         Parameters
         ----------
         io : string or path object
             File-like object, URL, or pandas ExcelFile.
-        table : string, optional
-            Name of the output CAS table.
-        caslib : string, optional
-            CASLib for the output CAS table.
-        promote : boolean, optional
-            If True, the output CAS table will be visible in all sessions.
-        replace : boolean, optional
-            If True, the output CAS table will replace any existing CAS.
+        casout : string or :class:`CASTable`, optional
+            The output table specification.  This includes the following parameters.
+                table : string, optional
+                    Name of the output CAS table.
+                caslib : string, optional
+                    CASLib for the output CAS table.
+                label : string, optional
+                    The label to apply to the output CAS table.
+                promote : boolean, optional
+                    If True, the output CAS table will be visible in all sessions.
+                replace : boolean, optional
+                    If True, the output CAS table will replace any existing CAS.
+                    table with the same name.
         **kwargs : any, optional
             Keyword arguments to :func:`pandas.read_table`.
 
@@ -2083,18 +2118,27 @@ class CAS(object):
         '''
         Read a JSON string into a CAS table
 
+        This method calls :func:`pandas.read_json` with the
+        given arguments, then uploads the resulting :class:`pandas.DataFrame`
+        to a CAS table.
+
         Parameters
         ----------
         path_or_buf : string or file-like object
             The path, URL, or file object that contains the JSON data.
-        table : string, optional
-            Name of the output CAS table.
-        caslib : string, optional
-            CASLib for the output CAS table.
-        promote : boolean, optional
-            If True, the output CAS table will be visible in all sessions.
-        replace : boolean, optional
-            If True, the output CAS table will replace any existing CAS.
+        casout : string or :class:`CASTable`, optional
+            The output table specification.  This includes the following parameters.
+                table : string, optional
+                    Name of the output CAS table.
+                caslib : string, optional
+                    CASLib for the output CAS table.
+                label : string, optional
+                    The label to apply to the output CAS table.
+                promote : boolean, optional
+                    If True, the output CAS table will be visible in all sessions.
+                replace : boolean, optional
+                    If True, the output CAS table will replace any existing CAS.
+                    table with the same name.
         **kwargs : any, optional
             Keyword arguments to :func:`pandas.read_table`.
 
@@ -2119,18 +2163,27 @@ class CAS(object):
         '''
         "Normalize" semi-structured JSON data into a flat table and upload to a CAS table
 
+        This method calls :func:`pandas.json_normalize` with the
+        given arguments, then uploads the resulting :class:`pandas.DataFrame`
+        to a CAS table.
+
         Parameters
         ----------
         data : dict or list of dicts
             Unserialized JSON objects
-        table : string, optional
-            Name of the output CAS table.
-        caslib : string, optional
-            CASLib for the output CAS table.
-        promote : boolean, optional
-            If True, the output CAS table will be visible in all sessions.
-        replace : boolean, optional
-            If True, the output CAS table will replace any existing CAS.
+        casout : string or :class:`CASTable`, optional
+            The output table specification.  This includes the following parameters.
+                table : string, optional
+                    Name of the output CAS table.
+                caslib : string, optional
+                    CASLib for the output CAS table.
+                label : string, optional
+                    The label to apply to the output CAS table.
+                promote : boolean, optional
+                    If True, the output CAS table will be visible in all sessions.
+                replace : boolean, optional
+                    If True, the output CAS table will replace any existing CAS.
+                    table with the same name.
         **kwargs : any, optional
             Keyword arguments to :func:`pandas.json_normalize`.
 
@@ -2155,18 +2208,27 @@ class CAS(object):
         '''
         Read HTML tables into a list of CASTable objects
 
+        This method calls :func:`pandas.read_html` with the
+        given arguments, then uploads the resulting :class:`pandas.DataFrame`
+        to a CAS table.
+
         Parameters
         ----------
         io : string or file-like object
             The path, URL, or file object that contains the HTML data.
-        table : string, optional
-            Name of the output CAS table.
-        caslib : string, optional
-            CASLib for the output CAS table.
-        promote : boolean, optional
-            If True, the output CAS table will be visible in all sessions.
-        replace : boolean, optional
-            If True, the output CAS table will replace any existing CAS.
+        casout : string or :class:`CASTable`, optional
+            The output table specification.  This includes the following parameters.
+                table : string, optional
+                    Name of the output CAS table.
+                caslib : string, optional
+                    CASLib for the output CAS table.
+                label : string, optional
+                    The label to apply to the output CAS table.
+                promote : boolean, optional
+                    If True, the output CAS table will be visible in all sessions.
+                replace : boolean, optional
+                    If True, the output CAS table will replace any existing CAS.
+                    table with the same name.
         **kwargs : any, optional
             Keyword arguments to :func:`pandas.read_html`.
 
@@ -2194,7 +2256,7 @@ class CAS(object):
         out = []
         table, kwargs = self._get_table_args(io, **kwargs)
         for i, dframe in enumerate(pd.read_html(io, **kwargs)):
-            if i and not table['table'].startswith('_PY_'):
+            if i and table['table']:
                 table['table'] += str(i)
             table.update(dmh.PandasDataFrame(dframe).args.addtable)
             out.append(self.retrieve('table.addtable', **table).casTable)
@@ -2204,18 +2266,27 @@ class CAS(object):
         '''
         Read from the HDF store and create a CAS table
 
+        This method calls :func:`pandas.read_hdf` with the
+        given arguments, then uploads the resulting :class:`pandas.DataFrame`
+        to a CAS table.
+
         Parameters
         ----------
         path_or_buf : string or file-like object
             The path, URL, or file object that contains the HDF data.
-        table : string, optional
-            Name of the output CAS table.
-        caslib : string, optional
-            CASLib for the output CAS table.
-        promote : boolean, optional
-            If True, the output CAS table will be visible in all sessions.
-        replace : boolean, optional
-            If True, the output CAS table will replace any existing CAS.
+        casout : string or :class:`CASTable`, optional
+            The output table specification.  This includes the following parameters.
+                table : string, optional
+                    Name of the output CAS table.
+                caslib : string, optional
+                    CASLib for the output CAS table.
+                label : string, optional
+                    The label to apply to the output CAS table.
+                promote : boolean, optional
+                    If True, the output CAS table will be visible in all sessions.
+                replace : boolean, optional
+                    If True, the output CAS table will replace any existing CAS.
+                    table with the same name.
         **kwargs : any, optional
             Keyword arguments to :func:`pandas.read_hdf`.
 
@@ -2240,18 +2311,27 @@ class CAS(object):
         '''
         Read SAS files stored as XPORT or SAS7BDAT into a CAS table
 
+        This method calls :func:`pandas.read_sas` with the
+        given arguments, then uploads the resulting :class:`pandas.DataFrame`
+        to a CAS table.
+
         Parameters
         ----------
         filepath_or_buffer : string or file-like object
             The path, URL, or file object that contains the HDF data.
-        table : string, optional
-            Name of the output CAS table.
-        caslib : string, optional
-            CASLib for the output CAS table.
-        promote : boolean, optional
-            If True, the output CAS table will be visible in all sessions.
-        replace : boolean, optional
-            If True, the output CAS table will replace any existing CAS.
+        casout : string or :class:`CASTable`, optional
+            The output table specification.  This includes the following parameters.
+                table : string, optional
+                    Name of the output CAS table.
+                caslib : string, optional
+                    CASLib for the output CAS table.
+                label : string, optional
+                    The label to apply to the output CAS table.
+                promote : boolean, optional
+                    If True, the output CAS table will be visible in all sessions.
+                replace : boolean, optional
+                    If True, the output CAS table will replace any existing CAS.
+                    table with the same name.
         **kwargs : any, optional
             Keyword arguments to :func:`pandas.read_sas`.
 
@@ -2276,20 +2356,29 @@ class CAS(object):
         '''
         Read SQL database table into a CAS table
 
+        This method calls :func:`pandas.read_sql_table` with the
+        given arguments, then uploads the resulting :class:`pandas.DataFrame`
+        to a CAS table.
+
         Parameters
         ----------
         table_name : string
             Name of SQL table in database.
         con : SQLAlchemy connectable (or database string URI)
             Database connection.
-        table : string, optional
-            Name of the output CAS table.
-        caslib : string, optional
-            CASLib for the output CAS table.
-        promote : boolean, optional
-            If True, the output CAS table will be visible in all sessions.
-        replace : boolean, optional
-            If True, the output CAS table will replace any existing CAS.
+        casout : string or :class:`CASTable`, optional
+            The output table specification.  This includes the following parameters.
+                table : string, optional
+                    Name of the output CAS table.
+                caslib : string, optional
+                    CASLib for the output CAS table.
+                label : string, optional
+                    The label to apply to the output CAS table.
+                promote : boolean, optional
+                    If True, the output CAS table will be visible in all sessions.
+                replace : boolean, optional
+                    If True, the output CAS table will replace any existing CAS.
+                    table with the same name.
         **kwargs : any, optional
             Keyword arguments to :func:`pandas.read_sql_table`.
 
@@ -2323,20 +2412,29 @@ class CAS(object):
         '''
         Read SQL query table into a CAS table
 
+        This method calls :func:`pandas.read_sql_query` with the
+        given arguments, then uploads the resulting :class:`pandas.DataFrame`
+        to a CAS table.
+
         Parameters
         ----------
         sql : string
             SQL to be executed.
         con : SQLAlchemy connectable (or database string URI)
             Database connection.
-        table : string, optional
-            Name of the output CAS table.
-        caslib : string, optional
-            CASLib for the output CAS table.
-        promote : boolean, optional
-            If True, the output CAS table will be visible in all sessions.
-        replace : boolean, optional
-            If True, the output CAS table will replace any existing CAS.
+        casout : string or :class:`CASTable`, optional
+            The output table specification.  This includes the following parameters.
+                table : string, optional
+                    Name of the output CAS table.
+                caslib : string, optional
+                    CASLib for the output CAS table.
+                label : string, optional
+                    The label to apply to the output CAS table.
+                promote : boolean, optional
+                    If True, the output CAS table will be visible in all sessions.
+                replace : boolean, optional
+                    If True, the output CAS table will replace any existing CAS.
+                    table with the same name.
         **kwargs : any, optional
             Keyword arguments to :func:`pandas.read_sql_query`.
 
@@ -2370,20 +2468,29 @@ class CAS(object):
         '''
         Read SQL query or database table into a CAS table
 
+        This method calls :func:`pandas.read_sql` with the
+        given arguments, then uploads the resulting :class:`pandas.DataFrame`
+        to a CAS table.
+
         Parameters
         ----------
         sql : string
             SQL to be executed or table name.
         con : SQLAlchemy connectable (or database string URI)
             Database connection.
-        table : string, optional
-            Name of the output CAS table.
-        caslib : string, optional
-            CASLib for the output CAS table.
-        promote : boolean, optional
-            If True, the output CAS table will be visible in all sessions.
-        replace : boolean, optional
-            If True, the output CAS table will replace any existing CAS.
+        casout : string or :class:`CASTable`, optional
+            The output table specification.  This includes the following parameters.
+                table : string, optional
+                    Name of the output CAS table.
+                caslib : string, optional
+                    CASLib for the output CAS table.
+                label : string, optional
+                    The label to apply to the output CAS table.
+                promote : boolean, optional
+                    If True, the output CAS table will be visible in all sessions.
+                replace : boolean, optional
+                    If True, the output CAS table will replace any existing CAS.
+                    table with the same name.
         **kwargs : any, optional
             Keyword arguments to :func:`pandas.read_sql`.
 
@@ -2417,18 +2524,27 @@ class CAS(object):
         '''
         Load data from a Google BigQuery into a CAS table
 
+        This method calls :func:`pandas.read_gbq` with the
+        given arguments, then uploads the resulting :class:`pandas.DataFrame`
+        to a CAS table.
+
         Parameters
         ----------
         query : string
             SQL-like query to return data values.
-        table : string, optional
-            Name of the output CAS table.
-        caslib : string, optional
-            CASLib for the output CAS table.
-        promote : boolean, optional
-            If True, the output CAS table will be visible in all sessions.
-        replace : boolean, optional
-            If True, the output CAS table will replace any existing CAS.
+        casout : string or :class:`CASTable`, optional
+            The output table specification.  This includes the following parameters.
+                table : string, optional
+                    Name of the output CAS table.
+                caslib : string, optional
+                    CASLib for the output CAS table.
+                label : string, optional
+                    The label to apply to the output CAS table.
+                promote : boolean, optional
+                    If True, the output CAS table will be visible in all sessions.
+                replace : boolean, optional
+                    If True, the output CAS table will replace any existing CAS.
+                    table with the same name.
         **kwargs : any, optional
             Keyword arguments to :func:`pandas.read_gbq`.
 
@@ -2447,18 +2563,27 @@ class CAS(object):
         '''
         Read Stata file into a CAS table
 
+        This method calls :func:`pandas.read_stata` with the
+        given arguments, then uploads the resulting :class:`pandas.DataFrame`
+        to a CAS table.
+
         Parameters
         ----------
         filepath_or_buffer : string or file-like object
             Path to .dta file or file-like object containing data.
-        table : string, optional
-            Name of the output CAS table.
-        caslib : string, optional
-            CASLib for the output CAS table.
-        promote : boolean, optional
-            If True, the output CAS table will be visible in all sessions.
-        replace : boolean, optional
-            If True, the output CAS table will replace any existing CAS.
+        casout : string or :class:`CASTable`, optional
+            The output table specification.  This includes the following parameters.
+                table : string, optional
+                    Name of the output CAS table.
+                caslib : string, optional
+                    CASLib for the output CAS table.
+                label : string, optional
+                    The label to apply to the output CAS table.
+                promote : boolean, optional
+                    If True, the output CAS table will be visible in all sessions.
+                replace : boolean, optional
+                    If True, the output CAS table will replace any existing CAS.
+                    table with the same name.
         **kwargs : any, optional
             Keyword arguments to :func:`pandas.read_stata`.
 

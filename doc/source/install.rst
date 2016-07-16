@@ -10,6 +10,9 @@ requirements:
 * **64-bit** Python 2.7 or **64-bit** Python 3.4+
 * Pandas 0.16.0+
 
+Also, this package is merely a client to a CAS server.  It has no utility unless you 
+have a licensed CAS server to connect to.
+
 Conda
 -----
 

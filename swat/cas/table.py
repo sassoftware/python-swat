@@ -30,30 +30,30 @@ from .actions import format_params
 
 patch_pandas_sort()
 
-CASTABLE_DOCSTRING = '''
-Create a CASTable instance
-
-Parameters
-----------
-name : string
-   Name of the table in CAS
-
-**kwargs : keyword arguments, optional
-   Table / output table parameters
-
-Table Parameters
-----------------
-%s
-
-Output Table Parameters
------------------------
-%s
-
-Returns
--------
-CASTable object
-
-'''
+#CASTABLE_DOCSTRING = '''
+#Create a CASTable instance
+#
+#Parameters
+#----------
+#name : string
+#   Name of the table in CAS
+#
+#**kwargs : keyword arguments, optional
+#   Table / output table parameters
+#
+#Table Parameters
+#----------------
+#%s
+#
+#Output Table Parameters
+#-----------------------
+#%s
+#
+#Returns
+#-------
+#CASTable object
+#
+#'''
 
 OPERATOR_NAMES = {
     '+': 'add',
@@ -571,7 +571,150 @@ class CASTablePlotter(object):
 
 @six.python_2_unicode_compatible
 class CASTable(ParamManager, ActionParamManager):
-    # Docstring purposely left blank.  It will be populated dynamically.
+    '''
+    Object for interacting with CAS tables
+
+    :class:`CASTable` objects can be used in multiple ways.  They can be used
+    as simply a container of table parameters and used as CAS action parameter
+    values.  If a connection is associated with it (either by instantiating it
+    from :meth:`CAS.CASTable` or using :meth:`set_connection`), it can be used
+    to call CAS actions on the table.  Finally, it supports much of the 
+    :class:`pandas.DataFrame` API, so it can interact with CAS tables in much
+    the same way you interact with local data.
+
+    The parameters below are a superset of all of the available parameters.
+    Some CAS actions may not support all parameters.  You will need to see the 
+    help for each CAS action on what it supports.
+
+    Parameters
+    ----------
+    name : string
+        specifies the name of the table to use.
+    caslib : string, optional
+        specifies the caslib containing the table that you want to use
+        with the action. By default, the active caslib is used. Specify a
+        value only if you need to access a table from a different caslib.
+    where : string, optional
+        specifies an expression for subsetting the input data.
+    groupby : list of strings, optional
+        specifies the names of the variables to use for grouping
+        results.
+        Default: []
+    groupbyfmts : list, optional
+        specifies the format to apply to each group-by variable. To
+        avoid specifying a format for a group-by variable, use "" (no
+        format).
+        Default: []
+    orderby : list of strings, optional
+        specifies the variables to use for ordering observations within
+        partitions. This parameter applies to partitioned tables or it
+        can be combined with groupBy variables when groupByMode is set to
+        REDISTRIBUTE.
+        Default: []
+    varlist : list of dicts, optional
+        specifies the variables to use in the action.
+    compvars : list of strings, optional
+        specifies the names of the computed variables to create. Specify
+        an expression for each parameter in the compPgm parameter.
+        Default: []
+    comppgm : string, optional
+        specifies an expression for each variable that you included in
+        the compVars parameter.
+    groupbymode : string, optional
+        specifies how the server creates groups.
+        Default: NOSORT
+        Values: NOSORT, REDISTRIBUTE
+    compondemand : boolean, optional
+        when set to True, the computed variables specified in the
+        compVars parameter are created when the table is loaded instead
+        of when the action begins.
+        Default: False
+    singlepass : boolean, optional
+        when set to True, the data does not create a transient table in
+        the server. Setting this parameter to True can be efficient, but
+        the data might not have stable ordering upon repeated runs.
+        Default: False
+    importoptions : dict, optional
+        specifies the settings for reading a table from a data source.
+    ondemand : boolean, optional
+        when set to True, table access is less aggressive with virtual
+        memory use.
+        Default: True
+    timestamp : string, optional
+        specifies the timestamp to apply to the table. Specify the value
+        in the form that is appropriate for your session locale.
+        **Used only on output table definitions.**
+    compress : boolean, optional
+        when set to True, data compression is applied to the table.
+        **Used only on output table definitions.**
+        Default: False
+    replace : boolean, optional
+        specifies whether to overwrite an existing table with the same
+        name.
+        **Used only on output table definitions.**
+        Default: False
+    replication : int32, optional
+        specifies the number of copies of the table to make for fault
+        tolerance. Larger values result in slower performance and use
+        more memory, but provide high availability for data in the event
+        of a node failure.  **Used only on output table definitions.**
+        Default: 1
+        Note: Value range is 0 <= n < 2147483647
+    threadblocksize : int64, optional
+        specifies the number of bytes to use for blocks that are read by
+        threads. Increase this value only if you have a large table and
+        CPU utilization by threads shows thread starvation.
+        **Used only on output table definitions.**
+        Note: Value range is 0 <= n < 9223372036854775807
+    label : string, optional
+        specifies the descriptive label to associate with the table.
+        **Used only on output table definitions.**
+    maxmemsize : int64, optional
+        specifies the maximum amount of physical memory, in bytes, to
+        allocate for the table. After this threshold is reached, the
+        server uses temporary files and operating system facilities for
+        memory management.  **Used only on output table definitions.**
+        Default: 0
+    promote : boolean, optional
+        when set to True, the output table is added with a global scope.
+        This enables other sessions to access the table, subject to
+        access controls. The target caslib must also have a global scope.
+        **Used only on output table definitions.**
+        Default: False
+
+    Examples
+    --------
+    Create a :class:`CASTable` registered to `conn`.
+
+    >>> conn = swat.CAS()
+    >>> iris = conn.CASTable('iris')
+
+    Use the table as a CAS action parameter.
+
+    >>> summ = conn.summary(table=iris)
+    >>> print(summ)
+
+    Call a CAS action directly on the :class:`CASTable`.
+
+    >>> summ = iris.summary() 
+    >>> print(summ)
+
+    Use a :class:`CASTable` as an output table definition.
+
+    >>> summout = conn.summary(table=iris,
+    ...                        casout=swat.CASTable('summout', replace=True))
+    >>> print(summout)
+
+    Use a :class:`CASTable` like a :class:`pandas.DataFrame`
+
+    >>> print(iris.head())
+    >>> print(iris[['petal_length', 'petal_width']].describe())
+
+    Returns
+    -------
+    :class:`CASTable`
+
+    '''
 
     table_params = set()
     outtable_params = set()
@@ -579,8 +722,8 @@ class CASTable(ParamManager, ActionParamManager):
 
     getdoc = None
 
-    def __init__(self, name, **kwargs):
-        ParamManager.__init__(self, name=name, **kwargs)
+    def __init__(self, name, **table_params):
+        ParamManager.__init__(self, name=name, **table_params)
         ActionParamManager.__init__(self)
         self._connection = None
         self._contexts = []
@@ -917,10 +1060,6 @@ class CASTable(ParamManager, ActionParamManager):
         connection : CAS instance
            CAS connection to use for reflection.
 
-        Returns
-        -------
-        None
-
         '''
         if not cls.table_params or not cls.outtable_params:
             tblparams = 'Unknown'
@@ -950,10 +1089,10 @@ class CASTable(ParamManager, ActionParamManager):
 
             cls.param_names = cls.table_params.union(cls.outtable_params)
 
-            init = cls.__init__
-            if hasattr(init, '__func__'):
-                init = init.__func__
-            init.__doc__ = CASTABLE_DOCSTRING % (tblparams, outtblparams)
+#           init = cls.__init__
+#           if hasattr(init, '__func__'):
+#               init = init.__func__
+#           init.__doc__ = CASTABLE_DOCSTRING % (tblparams, outtblparams)
 
     def set_connection(self, connection):
         '''
@@ -967,9 +1106,11 @@ class CASTable(ParamManager, ActionParamManager):
         connection : :class:`CAS` object
             The connection object to use.
 
-        Note: This method creates a weak reference to the connection.
-              If the connection is released, actions will no longer
-              be able to be called from the CASTable object.
+        Note
+        ----
+        This method creates a weak reference to the connection.
+        If the connection is released, actions will no longer
+        be able to be called from the CASTable object.
 
         Examples
         --------
@@ -978,10 +1119,6 @@ class CASTable(ParamManager, ActionParamManager):
         >>> tbl.set_connection(conn)
         >>> conn is tbl.get_connection()
         True
-
-        Returns
-        -------
-        None
 
         '''
         if connection is None:

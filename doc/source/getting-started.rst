@@ -1,3 +1,5 @@
+.. currentmodule:: swat
+
 Getting Started
 ===============
 
@@ -162,7 +164,7 @@ for pandas to handle.  Here are a few simple examples.
 
    tbl[['MSRP', 'Invoice']].describe(percentiles=[0.3, 0.7])
 
-For more information about :class:`CASTable`, see the API Reference.
+For more information about :class:`CASTable`, see the :ref:`API Reference <api>`.
 
 Closing the Connection
 ----------------------

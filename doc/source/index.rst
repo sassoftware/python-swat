@@ -36,7 +36,7 @@ its large collection of open source packages, the **SWAT** package gives you acc
 to the best of both worlds.
 
 .. toctree::
-   :maxdepth: 4
+   :maxdepth: 3
 
    install
    getting-started

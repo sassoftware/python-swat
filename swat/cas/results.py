@@ -33,7 +33,7 @@ class RendererMixin(object):
         Returns
         -------
         string
-           HTML representation of CASResults object
+            HTML representation of CASResults object
 
         '''
         if pdcom.in_qtconsole():
@@ -136,7 +136,7 @@ class RendererMixin(object):
         for key, value in self.items():
             if key.startswith('$'):
                 continue
-            if key.startswith('ByGroupInfo'):
+            if key.endswith('ByGroupInfo'):
                 continue
 
             if isinstance(value, SASDataFrame):
@@ -176,26 +176,33 @@ class CASResults(OrderedDict, RendererMixin):
     '''
     Ordered collection of results from a CAS action
 
+    The output of all CAS actions is a :class:`CASResults` object.
+    This is a Python ordered dictionary with a few methods added to 
+    assist in handling the output keys, and attributes added to
+    report information from the CAS action.
+
     Attributes
     ----------
     performance : CASPerformance object
-       Performance metrics of the action
-    messages : list
-       List of message strings
+       Performance metrics of the action.
+    messages : list-of-strings
+       List of message strings.
     signature : dict
-       The action call's signature
+       The action call's signature.
     session : string
-       Unique identifier of CAS session where action was executed
-    updateflags : set
-       Set of resources updated in the last action
-    severity : int or long
-       Severity level of the action response
+       Unique identifier of CAS session where action was executed.
+    updateflags : set-of-strings
+       Set of resources updated in the last action.
+    severity : int
+       Severity level of the action response. A value of zero means
+       that no problems were reported.  A value of 1 means that warnings
+       were reported.  A value of 2 means that errors were reported.
     reason : string
-       Reason for error
+       Reason for error.
     status : string
-       Formatted status message
+       Formatted status message.
     status_code : int
-       Status code for the result
+       Status code for the result.
 
     Parameters
     ----------
@@ -204,9 +211,53 @@ class CASResults(OrderedDict, RendererMixin):
     **kwargs : any
        Arbitrary keyword arguments passed to OrderedDict constructor
 
+    Examples
+    --------
+    >>> conn = swat.CAS()
+    >>> out = conn.serverstatus()
+
+    Calling standard Python dictionary methods.
+
+    >>> print(list(out.keys()))
+    ['About', 'server', 'nodestatus']
+
+    Accessing keys.
+
+    >>> print(out['About'])
+    {'license': {'siteNum': 1, 'warningPeriod': 31, 'expires': '08Sep2016:00:00:00', ... }}
+
+    You can also access keys using attribute syntax as long as the 
+    key name doesn't collide with an existing attribute or method.
+
+    >>> print(out.About)
+    {'license': {'siteNum': 1, 'warningPeriod': 31, 'expires': '08Sep2016:00:00:00', ... }}
+
+    Iterating over items.
+
+    >>> for key, value in out.items():
+    ...     print(key)
+    About
+    server
+    nodestatus
+
+    Display status information and performance metrics for the CAS action.
+
+    >>> print(out.status)
+    None
+
+    >>> print(out.severity)
+    0
+    
+    >>> print(out.performance)
+    CASPerformance(cpu_system_time=0.004999, cpu_user_time=0.020997,
+                   data_movement_bytes=0, data_movement_time=0.0,
+                   elapsed_time=0.025089, memory=704160, memory_os=9228288,
+                   memory_quota=19746816, system_cores=24, system_nodes=1,
+                   system_total_memory=101427879936)
+
     Returns
     -------
-    CASResults object
+    :class:`CASResults` object
 
     '''
 
@@ -225,140 +276,139 @@ class CASResults(OrderedDict, RendererMixin):
         self.status = None
         self.status_code = None
         self.debug = None
-        self._bykeys = None
-        self._bygroups = None
-        self._fmt_bygroups = None
-        self._raw_bygroups = None
 
     def __getattr__(self, name):
         if name in self:
             return self[name]
         return super(CASResults, self).__getattribute__(name)
 
-    @property
-    def groups(self, set=1):
-        ''' Return unique values of all By group variables '''
-        if 'ByGroupInfo' not in self:
-            return {}
-        self._cache_bygroups()
-        info = self['ByGroupInfo']
-        out = {}
-        for item in self._bykeys:
-            out[item] = list(info.ix[:, item].unique())
-        return out
+    def get_set(self, num):
+        '''
+        Return a :class:`CASResults` object of the By group set
 
-    def _bygroup_keys(self, tbl):
-        ''' Construct a unique By group key for raw and formatted values '''
-        set_bykeys = False
-        if not self._bykeys:
-            set_bykeys = True
-        fmtkey = []
-        rawkey = []
-        nstrip = lambda x: hasattr(x, 'strip') and x.strip() or x
-        i = 1
-        while True:
-            bykey = 'ByVar%d' % i
-            if bykey not in tbl.attrs:
-                break
-            if set_bykeys:
-                self._bykeys.append(tbl.attrs[bykey])
-            rawkey.append((tbl.attrs[bykey],
-                           nstrip(tbl.attrs[bykey + 'Value'])))
-            fmtkey.append((tbl.attrs[bykey],
-                           tbl.attrs[bykey + 'ValueFormatted'].strip()))
-            i += 1
-        if rawkey and fmtkey:
-            return tuple(sorted(rawkey, key=lambda x: x[0])), \
-                   tuple(sorted(fmtkey, key=lambda x: x[0])) 
-        if fmtkey:
-            return None, tuple(sorted(fmtkey, key=lambda x: x[0]))
-        return tuple(sorted(rawkey, key=lambda x: x[0])), None
-
-    def _cache_bygroups(self):
-        ''' Cache results by By group '''
-        if self._bygroups is not None:
-            return self._bygroups
-
-        self._bykeys = []
-        self._bygroups = OrderedDict()
-        self._fmt_bygroups = OrderedDict()
-        self._raw_bygroups = OrderedDict()
-
-        if 'ByGroupInfo' not in self and 'ByGroupSet1.ByGroupInfo' not in self:
-            return self._bygroups
-
-        bygroup_re = re.compile('^(?:ByGroupSet(\d+)\.)?ByGroup(\d+)\.')
-        for key, value in six.iteritems(self):
-            if re.match(r'^(ByGroupSet\d+\.)?ByGroupInfo', key):
-                continue
-
-            # Table name
-            tblname = re.search(r'((?:\.\w+)+)$', key).group(1)[1:]
-
-            # Get bygroup index
-            setnum = 1
-            if 'ByGroupIndex' in getattr(value, 'attrs', {}):
-                groupnum = value.attrs['ByGroupIndex']
-                if 'ByGroupSet' in getattr(value, 'attrs', {}):
-                    setnum = value.attrs['ByGroupSet']
-            elif bygroup_re.match(key):
-                keymatch = bygroup_re.match(key)
-                setnum = int(keymatch.group(1))
-                groupnum = int(keymatch.group(2))
-
-            # Add group number key
-            if groupnum not in self._bygroups:
-                self._bygroups[groupnum] = RenderableXADict()
-            self._bygroups[groupnum][tblname] = value
-
-            rawkey, fmtkey = self._bygroup_keys(value)
-
-            # Add group formatted value key
-            if fmtkey not in self._fmt_bygroups:
-                self._fmt_bygroups[fmtkey] = RenderableXADict()
-            self._fmt_bygroups[fmtkey][tblname] = value
-
-            # Add group raw value key
-            if rawkey not in self._raw_bygroups:
-                self._raw_bygroups[rawkey] = RenderableXADict()
-            self._raw_bygroups[rawkey][tblname] = value
-
-        return self._bygroups
-
-    def get_group(_self_, *_num_, **kwargs):
-        ''' 
-        Return a dictionary of the tables in By group `num` 
+        Some CAS actions support multiple By group sets.  This 
+        method can be used to retrieve the values for a particular
+        set index.
 
         Parameters
         ----------
-        _num_ : int or long, optional
-            The index of the By group to retrieve.
+        num : int
+            The By group set index to return.
 
-        **kwargs : any, optional
-            Key value pairs containing the variable name and value
-            of the desired By group.    
+        Examples
+        --------
+        >>> conn = swat.CAS()
+        >>> tbl = conn.read_csv('data/cars.csv')
+        >>> out = tbl.mdsummary(sets=[dict(groupby=['Origin']),
+                                      dict(groupby=['Cylinders'])])
+
+        Return the first By group set objects       
+
+        >>> print(out.get_set(1))
+
+        Return the second By group set objects       
+
+        >>> print(out.get_set(2))
 
         Returns
         -------
-        list of results
+        :class:`CASResults`
 
         '''
-        bygroups = _self_._cache_bygroups()
+        if 'ByGroupSet1.ByGroupInfo' not in self:
+            raise IndexError('There are no By group sets defined.')
 
-        if _num_:
-            if _num_[0] in bygroups:
-                return bygroups[_num_[0]]
-            raise SWATError('%s is an invalid By group number' % _num_[0])
+        out = CASResults()
+        prefix = 'ByGroupSet%s.' % num
+        for key, value in six.iteritems(self):
+            if key.startswith(prefix):
+                out[key.replace(prefix, '', 1)] = value 
 
-        if kwargs:
-            bykey = tuple(sorted(six.iteritems(kwargs)))
-            if bykey in _self_._fmt_bygroups:
-                return _self_._fmt_bygroups[bykey]
-            if bykey in _self_._raw_bygroups:
-                return _self_._raw_bygroups[bykey]
-            raise SWATError('%s is an invalid By group key' % kwargs)
+        if out:
+            return out
 
-        raise SWATError('No By group identifiers were specified')
+        raise IndexError('No By group set matched the given index.')
+
+    def get_group(_self_, *name, **kwargs):
+        ''' 
+        Return a :class:`CASResults` object of the specified By group tables
+
+        Parameters
+        ----------
+        *name : one or more strings, optional
+            The values of the By variable to choose.
+        **kwargs : any, optional
+            Key / value pairs containing the variable name and value
+            of the desired By group.
+
+        Examples
+        --------
+        >>> conn = swat.CAS()
+        >>> tbl = conn.read_csv('data/cars.csv')
+        >>> out = tbl.groupby(['Origin', 'Cylinders']).summary()
+
+        Specify the By group values (in order).
+
+        >>> print(out.get_group('Asia', 4))
+
+        Or, specify the By group values as keyword parameters.
+
+        >>> print(out.get_group(Origin='Asia', Cylinders=4))
+
+        Returns
+        -------
+        :class:`CASResults`
+
+        '''
+        self = _self_
+
+        if 'ByGroupSet1.ByGroupInfo' in self:
+            raise IndexError('Multiple By group sets are defined, use get_set to '
+                             'to select a By group set first.')
+
+        if not isinstance(name, (tuple, list)):
+            name = [name]
+
+        out = CASResults()
+
+        def set_bykey(attrs, bykey=[]):
+            if bykey:
+                return bykey
+            i = 1
+            while True:
+                if ('ByVar%s' % i) not in attrs:
+                    break
+                bykey.append(attrs['ByVar%s' % i])
+                i = i + 1
+            return bykey
+
+        for key, value in six.iteritems(self):
+            if not isinstance(value, SASDataFrame):
+                continue
+            if not re.match(r'^ByGroup\d+\.', key):
+                continue
+            attrs = value.attrs
+            match = True
+            i = 1
+            for byname in set_bykey(attrs):
+                if kwargs:
+                    if attrs['ByVar%sValue' % i] != kwargs[byname] and \
+                            attrs['ByVar%sValueFormatted' % i] != kwargs[byname]:
+                        match = False 
+                        break 
+                elif name:
+                    if attrs['ByVar%sValue' % i] != name[i-1] and \
+                            attrs['ByVar%sValueFormatted' % i] != name[i-1]:
+                        match = False 
+                        break 
+                i = i + 1
+            if match:
+                out[re.sub(r'^ByGroup\d+\.', '', key)] = value
+
+        if out:
+            return out
+
+        raise KeyError('No matching By group keys were found.')
 
     def get_tables(self, name, set=None, concat=False, **kwargs):
         '''
@@ -368,14 +418,32 @@ class CASResults(OrderedDict, RendererMixin):
         ----------
         name : string
             The name of the tables to retrieve.  This name does not include
-            the "ByGroup#." prefix if By groups are involved.
-        set : int or long, optional
+            the "ByGroup#." prefix if By groups are involved.  It also does
+            not include "ByGroupSet#.' if By group sets are involved.
+        set : int, optional
             The index of the By group set (if the action supports multiple
             sets of By groups).
         concat : boolean, optional
             Should the tables be concatenated into one DataFrame?
         **kwargs : any, optional
-            Additional parameters to pass to pd.concat.
+            Additional parameters to pass to :func:`pandas.concat`.
+
+        Examples
+        --------
+        >>> conn = swat.CAS()
+        >>> tbl = conn.read_csv('data/cars.csv')
+
+        >>> out = tbl.summary()
+        >>> print(list(out.keys()))
+        ['Summary']
+        >>> print(len(out.get_tables('Summary')))
+        1
+
+        >>> out = tbl.groupby('Origin').summary()
+        >>> print(list(out.keys()))
+        ['ByGroupInfo', 'ByGroup1.Summary', 'ByGroup2.Summary', 'ByGroup3.Summary']
+        >>> print(len(out.get_tables('Summary')))
+        3
 
         Returns
         -------
@@ -389,7 +457,7 @@ class CASResults(OrderedDict, RendererMixin):
             raise ValueError('Multiple By group sets exist, but no set index was specified.')
 
         out = []
-        by_re = re.compile(r'^(ByGroupSet%s\.)?ByGroup\d+\.%s' % (set, re.escape(name)))
+        by_re = re.compile(r'^(ByGroupSet%s\.)?ByGroup\d+\.%s$' % (set, re.escape(name)))
         for key, value in six.iteritems(self):
             if by_re.match(key):
                 out.append(value)
@@ -416,6 +484,33 @@ class CASResults(OrderedDict, RendererMixin):
     def concat_bygroups(self, inplace=False, **kwargs):
         '''
         Concatenate all tables within a By group into a single table
+
+        Parameters
+        ----------
+        inplace : boolean, optional
+            Should the :class:`CASResults` object be modified in place?
+        **kwargs : keyword arguments, optional
+            Additional parameters to the :func:`concat` function.
+
+        Examples
+        --------
+        >>> conn = swat.CAS()
+        >>> tbl = conn.read_csv('data/cars.csv')
+        >>> out = tbl.groupby('Origin').summary()
+
+        >>> print(list(out.keys()))
+        ['ByGroupInfo', 'ByGroup1.Summary', 'ByGroup2.Summary', 'ByGroup3.Summary']
+ 
+        >>> out.concat_bygroups(inplace=True)
+        >>> print(list(out.keys())) 
+        ['Summary']
+
+        Returns
+        -------
+        :class:`CASResults`
+            If inplace == False
+        None
+            If inplace == True
 
         '''
         if 'ByGroupSet1.ByGroupInfo' in self:
@@ -526,14 +621,17 @@ class CASResults(OrderedDict, RendererMixin):
             return pretty(self)
         except ImportError:
             out = []
+
             for key, item in six.iteritems(self):
                 out.append('[%s]' % key)
                 out.append('')
                 out.append('%s' % item)
                 out.append('')
                 out.append('')
+
             if getattr(self, 'performance'):
                 out.append(self._performance_str_())
+
             return '\n'.join(out)
 
     def _repr_pretty_(self, p, cycle):
@@ -552,6 +650,7 @@ class CASResults(OrderedDict, RendererMixin):
                     p.text(line)
             p.break_()
             p.break_()
+
         if getattr(self, 'performance'):
             p.text(self._performance_str_())
 

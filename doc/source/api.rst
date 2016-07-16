@@ -14,7 +14,7 @@ CAS
 Constructor
 ~~~~~~~~~~~
 
-.. currentmodule:: swat.cas.connection
+.. currentmodule:: swat
 
 .. autosummary::
    :toctree: generated/
@@ -38,7 +38,7 @@ Reading Data
 .. autosummary::
    :toctree: generated/
 
-   CAS.read_path
+   CAS.read_cas_path
    CAS.read_pickle
    CAS.read_table
    CAS.read_csv
@@ -87,10 +87,10 @@ By Group Processing
    :toctree: generated/
 
    CASResults.get_tables
-   CASResults.groups
    CASResults.get_group
-   CASResults.sets
    CASResults.get_set
+   CASResults.concat_bygroups
+
 
 SASDataFrame
 ------------
@@ -98,12 +98,55 @@ SASDataFrame
 Constructor
 ~~~~~~~~~~~
 
-.. currentmodule:: swat.dataframe
+.. currentmodule:: swat
 
 .. autosummary::
    :toctree: generated/
 
    SASDataFrame
+
+Column Metadata
+~~~~~~~~~~~~~~~
+
+.. currentmodule:: swat.dataframe
+
+.. autosummary::
+   :toctree: generated/
+
+   SASColumnSpec
+
+Utilities
+~~~~~~~~~
+
+.. currentmodule:: swat
+
+.. autosummary::
+   :toctree: generated/
+
+   concat
+   reshape_bygroups
+
+
+SASFormatter
+------------
+
+Constructor
+~~~~~~~~~~~
+
+.. currentmodule:: swat
+
+.. autosummary::
+   :toctree: generated/
+
+   SASFormatter
+
+Formatting Data
+~~~~~~~~~~~~~~~
+
+.. autosummary::
+   :toctree: generated/
+
+   SASFormatter.format
 
 
 CASTable
@@ -112,7 +155,7 @@ CASTable
 Constructor
 ~~~~~~~~~~~
 
-.. currentmodule:: swat.cas.table
+.. currentmodule:: swat
 
 .. autosummary::
    :toctree: generated/
@@ -320,3 +363,55 @@ Constructor
    :toctree: generated/
 
    CASResponse
+
+Response Properties
+~~~~~~~~~~~~~~~~~~~
+
+.. autosummary::
+   :toctree: generated/
+
+   CASDisposition
+   CASPerformance
+
+Date and Time Functions
+-----------------------
+
+.. currentmodule:: swat.cas.utils.datetime
+
+CAS Dates and Times
+~~~~~~~~~~~~~~~~~~~
+
+.. autosummary::
+   :toctree: generated/
+
+   cas2python_timestamp
+   cas2python_datetime
+   cas2python_date
+   cas2python_time
+   python2cas_timestamp
+   python2cas_datetime
+   python2cas_date
+   python2cas_time
+   str2cas_timestamp
+   str2cas_datetime
+   str2cas_date
+   str2cas_time
+
+SAS Dates and Times
+~~~~~~~~~~~~~~~~~~~
+
+.. autosummary::
+   :toctree: generated/
+
+   sas2python_timestamp
+   sas2python_datetime
+   sas2python_date
+   sas2python_time
+   python2sas_timestamp
+   python2sas_datetime
+   python2sas_date
+   python2sas_time
+   str2sas_timestamp
+   str2sas_datetime
+   str2sas_date
+   str2sas_time

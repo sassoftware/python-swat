@@ -27,16 +27,25 @@ class SASFormatter(object):
     '''
     Create a locale-aware SAS value formatter
 
+    This class is typically constructed by calling the :meth:`CAS.SASFormatter`
+    method.  When used in that way, the options for the :class:`SASFormatter'
+    match the :class:`CAS` settings.
+
     Parameters
     ----------
     locale : string, optional
-       POSIX locale to use for formatting
+        POSIX locale to use for formatting.
     soptions : string, optional
-       SOptions string from connection object (internal use only)
+        SOptions string from connection object (internal use only).
+
+    Notes
+    -----
+    This class requires the binary SAS support libraries to function. It will
+    not work in pure Python mode.
 
     Returns
     -------
-    SASFormatter object
+    :class:`SASFormatter` object
 
     '''
 
@@ -70,17 +79,26 @@ class SASFormatter(object):
         Parameters
         ----------
         value : any
-           The value to format
-
+            The value to format.
         sasfmt : string, optional
-           The SAS format to use
-        width : int, long, optional
-           The width of the field to format to
+            The SAS format to use.
+        width : int, optional
+            The width of the field to format to.
+
+        Examples
+        --------
+        >>> fmt = SASFormatter()
+
+        >>> fmt.format(123.45678, 'F8.2')
+        123.45
+
+        >>> fmt.format(123.45678, 'DATE.')
+        '03-MAY-1960'
 
         Returns
         -------
         string
-           Formatted form of input value
+            Formatted form of input value.
 
         '''
         self._load_formatter()

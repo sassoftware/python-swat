@@ -22,19 +22,70 @@ CAS_EPOCH = datetime.datetime(month=1, day=1, year=1960)
 
 
 def str2cas_timestamp(dts):
-    ''' Convert a string to a CAS timestamp '''
+    ''' 
+    Convert a string to a CAS timestamp
+
+    Parameters
+    ----------
+    dts : string
+        The string representation of a timestamp.
+
+    See Also
+    --------
+    :func:`pandas.to_datetime`
+
+    Returns
+    -------
+    int
+        CAS timestamp
+
+    '''
     return python2cas_datetime(pd.to_datetime(dts))
 
 str2cas_datetime = str2cas_timestamp
 
 
 def str2cas_date(dts):
-    ''' Convert a string to a CAS date '''
+    '''
+    Convert a string to a CAS date
+
+    Parameters
+    ----------
+    dts : string
+        The string representation of a date.
+
+    See Also
+    --------
+    :func:`pandas.to_datetime`
+
+    Returns
+    -------
+    int
+        CAS date
+
+    '''
     return python2cas_date(pd.to_datetime(dts))
 
 
 def str2cas_time(dts):
-    ''' Convert a string to a CAS time '''
+    ''' 
+    Convert a string to a CAS time
+
+    Parameters
+    ----------
+    dts : string
+        The string representation of a time.
+
+    See Also
+    --------
+    :func:`pandas.to_datetime`
+
+    Returns
+    -------
+    int
+        CAS time
+
+    '''
     return python2cas_time(pd.to_datetime(dts))
 
 
@@ -96,19 +147,55 @@ def sas2cas_time(sts):
 
 
 def cas2python_timestamp(cts):
-    ''' Convert a CAS datetime to Python datetime '''
+    '''
+    Convert a CAS datetime to Python datetime
+
+    Parameters
+    ----------
+    cts : int
+        CAS timestamp.
+
+    Returns
+    -------
+    :class:`python.datetime.datetime`
+
+    '''
     return CAS_EPOCH + datetime.timedelta(microseconds=cts)
 
 cas2python_datetime = cas2python_timestamp
 
 
 def cas2python_date(cdt):
-    ''' Convert a CAS date to a Python date '''
+    '''
+    Convert a CAS date to a Python date
+
+    Parameters
+    ----------
+    cdt : int
+        CAS date.
+
+    Returns
+    -------
+    :class:`python.datetime.date`
+
+    '''
     return (CAS_EPOCH + datetime.timedelta(days=cdt)).date()
 
 
 def cas2python_time(ctm):
-    ''' Convert a CAS time to a Python time '''
+    '''
+    Convert a CAS time to a Python time
+
+    Parameters
+    ----------
+    cdt : int
+        CAS time.
+
+    Returns
+    -------
+    :class:`python.datetime.time`
+
+    '''
     return cas2python_datetime(ctm).time()
 
 
@@ -133,7 +220,20 @@ def cas2sas_time(cdt):
 
 
 def python2cas_timestamp(pyts):
-    ''' Convert a Python datetime to CAS datetime '''
+    '''
+    Convert a Python datetime to CAS datetime
+ 
+    Parameters
+    ----------
+    pyts : :class:`python.datetime.datetime`
+        Python timestamp.
+
+    Returns
+    -------
+    int
+        CAS timestamp
+
+    '''
     delta = pyts - CAS_EPOCH
     if isinstance(delta, pd.tslib.NaTType):
         # TODO: Change when integers support missing values
@@ -145,13 +245,39 @@ python2cas_datetime = python2cas_timestamp
 
 
 def python2cas_time(pytm):
-    ''' Convert a Python time to a CAS time '''
+    '''
+    Convert a Python time to a CAS time
+
+    Parameters
+    ----------
+    pyts : :class:`python.datetime.time`
+        Python time.
+
+    Returns
+    -------
+    int
+        CAS time
+
+    '''
     return int64(pytm.hour * (60 * 60 * 10**6) + (pytm.minute * 60 * 10**6) +
                  (pytm.second * 10**6) + pytm.microsecond)
 
 
 def python2cas_date(pydt):
-    ''' Convert a Python date to a CAS date '''
+    '''
+    Convert a Python date to a CAS date
+
+    Parameters
+    ----------
+    pyts : :class:`python.datetime.date`
+        Python date.
+
+    Returns
+    -------
+    int
+        CAS date
+
+    '''
     if isinstance(pydt, datetime.datetime):
         delta = pydt.date() - CAS_EPOCH.date()
     elif isinstance(pydt, datetime.time):
