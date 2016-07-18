@@ -45,10 +45,8 @@ to the best of both worlds.
    about
 
 
-Indices and tables
+Index
 ==================
 
 * :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
 

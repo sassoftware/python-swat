@@ -53,6 +53,18 @@ clean:
 
 html:
 	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(BUILDDIR)/html
+	find $(BUILDDIR)/html -type f -name '*.html' | xargs perl -i -pe 's/DatetimeColumnMethods/CASColumn.dt/g;'
+	find $(BUILDDIR)/html -type f -name '*.html' | xargs perl -i -pe 's/CharacterColumnMethods/CASColumn.str/g;'
+	find $(BUILDDIR)/html -type f -name '*.html' | xargs perl -i -pe 's/CASTablePlotter/CASTable.plot/g;'
+	find $(BUILDDIR)/html -type f -name '*.html' | xargs perl -i -pe 's/swat.cas.connection.CAS/swat.CAS/g;'
+	find $(BUILDDIR)/html -type f -name '*.html' | xargs perl -i -pe 's/swat.dataframe.SASDataFrame/swat.SASDataFrame/g;'
+	find $(BUILDDIR)/html -type f -name '*.html' | xargs perl -i -pe 's/swat.formatter.SASFormatter/swat.SASFormatter/g;'
+	find $(BUILDDIR)/html -type f -name '*.html' | xargs perl -i -pe 's/CASColumn\.dt(\.\w+\.html)/DatetimeColumnMethods\1/g;'
+	find $(BUILDDIR)/html -type f -name '*.html' | xargs perl -i -pe 's/CASColumn\.str(\.\w+\.html)/CharacterColumnMethods\1/g;'
+	find $(BUILDDIR)/html -type f -name '*.html' | xargs perl -i -pe 's/CASTable\.plot(\.\w+\.html)/CASTablePlotter\1/g;'
+	find $(BUILDDIR)/html -type f -name '*.html' | xargs perl -i -pe 's/swat.CAS((\.\w+)?\.html)/swat.cas.connection.CAS\1/g;'
+	find $(BUILDDIR)/html -type f -name '*.html' | xargs perl -i -pe 's/swat.SASDataFrame((\.\w+)?\.html)/swat.dataframe.SASDataFrame\1/g;'
+	find $(BUILDDIR)/html -type f -name '*.html' | xargs perl -i -pe 's/swat.SASFormatter((\.\w+)?\.html)/swat.formatter.SASFormatter\1/g;'
 	@echo
 	@echo "Build finished. The HTML pages are in $(BUILDDIR)/html."
 

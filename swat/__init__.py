@@ -48,12 +48,12 @@ __version__ = '0.9.0'
 
 # Configuration
 from . import config
-from .config import (set_option, get_option, reset_option, describe_option, options,
-                     option_context)
+from .config import (set_option, get_option, reset_option, describe_option,
+                     options, option_context)
 
 # CAS utilities
-from .cas import (InitializeTK, CAS, vl, nil, getone, getnext, CASResults, CASAction,
-                  CASActionSet, datamsghandlers, blob, initialize_tk)
+from .cas import (InitializeTK, CAS, vl, nil, getone, getnext,
+                  datamsghandlers, blob, initialize_tk)
 from .cas.table import CASTable
 
 # Conflicts with .cas.table, so we import it excplicitly here
@@ -70,7 +70,7 @@ from .formatter import SASFormatter
 
 __all__ = ['config', 'set_option', 'get_option', 'reset_option', 'describe_option',
            'options', 'option_context', 'InitializeTK', 'CAS', 'vl', 'nil', 'getone',
-           'getnext', 'CASResults', 'CASAction', 'CASActionSet', 'datamsghandlers',
+           'getnext', 'datamsghandlers',
            'blob', 'initialize_tk', 'table', 'SASDataFrame', 'SWATError', 
            'SWATOptionError', 'SWATCASActionError', 'SASFormatter', 'CASTable',
            'concat', 'reshape_bygroups']

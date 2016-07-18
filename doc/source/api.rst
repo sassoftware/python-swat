@@ -14,7 +14,7 @@ CAS
 Constructor
 ~~~~~~~~~~~
 
-.. currentmodule:: swat
+.. currentmodule:: swat.cas.connection
 
 .. autosummary::
    :toctree: generated/
@@ -98,7 +98,7 @@ SASDataFrame
 Constructor
 ~~~~~~~~~~~
 
-.. currentmodule:: swat
+.. currentmodule:: swat.dataframe
 
 .. autosummary::
    :toctree: generated/
@@ -118,8 +118,6 @@ Column Metadata
 Utilities
 ~~~~~~~~~
 
-.. currentmodule:: swat
-
 .. autosummary::
    :toctree: generated/
 
@@ -133,7 +131,7 @@ SASFormatter
 Constructor
 ~~~~~~~~~~~
 
-.. currentmodule:: swat
+.. currentmodule:: swat.formatter
 
 .. autosummary::
    :toctree: generated/
@@ -155,7 +153,7 @@ CASTable
 Constructor
 ~~~~~~~~~~~
 
-.. currentmodule:: swat
+.. currentmodule:: swat.cas.table
 
 .. autosummary::
    :toctree: generated/
@@ -224,6 +222,16 @@ Indexing, Iteration
 For more information on ``.at``, ``.iat``, ``.ix``, ``.loc``, and
 ``.iloc``,  see the :ref:`indexing documentation <indexing>`.
 
+
+GroupBy
+~~~~~~~
+
+.. autosummary::
+   :toctree: generated/
+
+   CASTable.groupby
+
+
 .. _api.dataframe.stats:
 
 Computations / Descriptive Stats
@@ -276,7 +284,7 @@ Plotting
 ~~~~~~~~
 
 :meth:`CASTable.plot` is both a callable method and a namespace attribute for
-specific plotting methods of the form `CASTable.plot.<kind>`.
+specific plotting methods of the form ``CASTable.plot.<kind>``.
 
 .. note:: In all of the plotting methods, the rendering is done completely 
           on the client side.  This means that all of the data is fetched
@@ -290,17 +298,17 @@ specific plotting methods of the form `CASTable.plot.<kind>`.
 .. autosummary::
    :toctree: generated/
 
-   CASTable.plot.area
-   CASTable.plot.bar
-   CASTable.plot.barh
-   CASTable.plot.box
-   CASTable.plot.density
-   CASTable.plot.hexbin
-   CASTable.plot.hist
-   CASTable.plot.kde
-   CASTable.plot.line
-   CASTable.plot.pie
-   CASTable.plot.scatter
+   CASTablePlotter.area
+   CASTablePlotter.bar
+   CASTablePlotter.barh
+   CASTablePlotter.box
+   CASTablePlotter.density
+   CASTablePlotter.hexbin
+   CASTablePlotter.hist
+   CASTablePlotter.kde
+   CASTablePlotter.line
+   CASTablePlotter.pie
+   CASTablePlotter.scatter
 
 .. autosummary::
    :toctree: generated/
@@ -350,6 +358,202 @@ Constructor
 
    CASColumn
 
+Attributes
+~~~~~~~~~~
+
+.. autosummary::
+   :toctree: generated/
+
+   CASColumn.values
+   CASColumn.dtype
+   CASColumn.ftype
+   CASColumn.shape
+   CASColumn.ndim
+   CASColumn.size
+
+Indexing, Iteration
+~~~~~~~~~~~~~~~~~~~
+
+.. autosummary::
+   :toctree: generated/
+
+   CASColumn.get
+   CASColumn.at
+   CASColumn.iat
+   CASColumn.ix
+   CASColumn.loc
+   CASColumn.iloc
+   CASColumn.__iter__
+   CASColumn.iteritems
+
+For more information on ``.at``, ``.iat``, ``.ix``, ``.loc``, and
+``.iloc``,  see the :ref:`indexing documentation <indexing>`.
+
+Binary Operator Functions
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. autosummary::
+   :toctree: generated/
+
+   CASColumn.add
+   CASColumn.sub
+   CASColumn.mul
+   CASColumn.div
+   CASColumn.truediv
+   CASColumn.floordiv
+   CASColumn.mod
+   CASColumn.pow
+   CASColumn.radd
+   CASColumn.rsub
+   CASColumn.rmul
+   CASColumn.rdiv
+   CASColumn.rtruediv
+   CASColumn.rfloordiv
+   CASColumn.rmod
+   CASColumn.rpow
+   CASColumn.round
+   CASColumn.lt
+   CASColumn.gt
+   CASColumn.le
+   CASColumn.ge
+   CASColumn.ne
+   CASColumn.eq
+
+GroupBy
+~~~~~~~
+
+.. autosummary::
+   :toctree: generated/
+
+   CASColumn.groupby
+
+Computations / Descriptive Stats
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. autosummary::
+   :toctree: generated/
+
+   CASColumn.abs
+   CASColumn.all
+   CASColumn.any
+   CASColumn.between
+   CASColumn.clip
+   CASColumn.clip_lower
+   CASColumn.clip_upper
+   CASColumn.count
+   CASColumn.describe
+   CASColumn.max
+   CASColumn.mean
+   CASColumn.median
+   CASColumn.min
+   CASColumn.mode
+   CASColumn.nlargest
+   CASColumn.nsmallest
+   CASColumn.quantile
+   CASColumn.std
+   CASColumn.sum
+   CASColumn.var
+   CASColumn.nmiss
+   CASColumn.stderr
+   CASColumn.uss
+   CASColumn.css
+   CASColumn.cv
+   CASColumn.tvalue
+   CASColumn.probt
+   CASColumn.unique
+   CASColumn.nunique
+   CASColumn.is_unique
+   CASColumn.value_counts
+
+Selection
+~~~~~~~~~
+
+.. autosummary::
+   :toctree: generated/
+
+   CASColumn.head
+   CASColumn.isin
+   CASColumn.tail
+
+Sorting
+~~~~~~~
+
+.. autosummary::
+   :toctree: generated/
+
+   CASColumn.sort_values
+
+Datetime Properties
+~~~~~~~~~~~~~~~~~~~
+
+:attr:`CASColumn.dt` can be used to access the values of a CAS table 
+column as datetime-like properties.  They are accessed as
+``CASColumn.dt.<property>``.
+
+.. autosummary::
+   :toctree: generated/
+
+   DatetimeColumnMethods.year
+   DatetimeColumnMethods.month
+   DatetimeColumnMethods.day
+   DatetimeColumnMethods.hour
+   DatetimeColumnMethods.minute
+   DatetimeColumnMethods.second
+   DatetimeColumnMethods.microsecond
+   DatetimeColumnMethods.nanosecond
+   DatetimeColumnMethods.week
+   DatetimeColumnMethods.weekofyear
+   DatetimeColumnMethods.dayofweek
+   DatetimeColumnMethods.weekday
+   DatetimeColumnMethods.dayofyear
+   DatetimeColumnMethods.quarter
+   DatetimeColumnMethods.is_month_start
+   DatetimeColumnMethods.is_month_end
+   DatetimeColumnMethods.is_quarter_start
+   DatetimeColumnMethods.is_quarter_end
+   DatetimeColumnMethods.is_year_start
+   DatetimeColumnMethods.is_year_end
+   DatetimeColumnMethods.daysinmonth
+   DatetimeColumnMethods.days_in_month
+
+
+String Handling
+~~~~~~~~~~~~~~~
+
+:attr:`CASColumn.str` can be used to access the values of a CAS table 
+column as stings and apply operations. They are accessed as
+``CASColumn.str.<method/property>``.
+
+.. autosummary::
+   :toctree: generated/
+
+   CharacterColumnMethods.capitalize
+   CharacterColumnMethods.contains
+   CharacterColumnMethods.count
+   CharacterColumnMethods.endswith
+   CharacterColumnMethods.find
+   CharacterColumnMethods.index
+   CharacterColumnMethods.len
+   CharacterColumnMethods.lower
+   CharacterColumnMethods.lstrip
+   CharacterColumnMethods.repeat
+   CharacterColumnMethods.replace
+   CharacterColumnMethods.rfind
+   CharacterColumnMethods.rindex
+   CharacterColumnMethods.rstrip
+   CharacterColumnMethods.startswith
+   CharacterColumnMethods.strip
+   CharacterColumnMethods.title
+   CharacterColumnMethods.upper
+   CharacterColumnMethods.isalpha
+   CharacterColumnMethods.isdigit
+   CharacterColumnMethods.isspace
+   CharacterColumnMethods.islower
+   CharacterColumnMethods.isupper
+   CharacterColumnMethods.istitle
+   CharacterColumnMethods.isnumeric
+   CharacterColumnMethods.isdecimal
+
 
 CASResponse
 -----------
@@ -372,6 +576,30 @@ Response Properties
 
    CASDisposition
    CASPerformance
+
+
+Data Message Handlers
+---------------------
+
+.. currentmodule:: swat.cas.datamsghandlers
+
+.. autosummary::
+   :toctree: generated/
+
+   CASDataMsgHandler
+   PandasDataFrame
+   SAS7BDAT
+   CSV
+   Text
+   FWF
+   JSON
+   HTML
+   SQLTable
+   SQLQuery
+   Excel
+   Clipboard
+   DBAPI
+
 
 Date and Time Functions
 -----------------------
@@ -396,6 +624,10 @@ CAS Dates and Times
    str2cas_datetime
    str2cas_date
    str2cas_time
+   cas2sas_timestamp
+   cas2sas_datetime
+   cas2sas_date
+   cas2sas_time
 
 SAS Dates and Times
 ~~~~~~~~~~~~~~~~~~~
@@ -415,3 +647,7 @@ SAS Dates and Times
    str2sas_datetime
    str2sas_date
    str2sas_time
+   sas2cas_timestamp
+   sas2cas_datetime
+   sas2cas_date
+   sas2cas_time

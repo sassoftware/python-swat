@@ -30,31 +30,6 @@ from .actions import format_params
 
 patch_pandas_sort()
 
-#CASTABLE_DOCSTRING = '''
-#Create a CASTable instance
-#
-#Parameters
-#----------
-#name : string
-#   Name of the table in CAS
-#
-#**kwargs : keyword arguments, optional
-#   Table / output table parameters
-#
-#Table Parameters
-#----------------
-#%s
-#
-#Output Table Parameters
-#-----------------------
-#%s
-#
-#Returns
-#-------
-#CASTable object
-#
-#'''
-
 OPERATOR_NAMES = {
     '+': 'add',
     '-': 'sub',
@@ -1088,11 +1063,6 @@ class CASTable(ParamManager, ActionParamManager):
             cls.all_params = set(param_names)
 
             cls.param_names = cls.table_params.union(cls.outtable_params)
-
-#           init = cls.__init__
-#           if hasattr(init, '__func__'):
-#               init = init.__func__
-#           init.__doc__ = CASTABLE_DOCSTRING % (tblparams, outtblparams)
 
     def set_connection(self, connection):
         '''
@@ -3928,23 +3898,86 @@ class CASTable(ParamManager, ActionParamManager):
 
     @getattr_safe_property
     def plot(self):
-        ''' Table plotting accessor and method '''
+        '''
+        Make plots of the data in the CAS table
+
+        This method requires all of the data in the CAS table to be
+        fetched to the **client side**.  The data is then plotted using
+        :meth:`pandas.DataFrame.plot`.
+
+        The ``plot`` attribute can be used as both a method and an 
+        object.  When called as a method, the parameters are the same
+        as :meth:`pandas.DataFrame.plot`.  When used as an attribute
+        each of the plot types are available as methods.  For example,
+        ``tbl.plot(kind='bar')`` is equivalent to ``tbl.plot.bar()``. 
+
+        Parameters
+        ----------
+        *args : positional arguments
+            Positional arguments to :meth:`pandas.DataFrame.plot`.
+        **kwargs : keyword arguments
+            Keyword arguments to :meth:`pandas.DataFrame.plot`.
+
+        Returns
+        -------
+        :class:`matplotlib.AxesSubplot` or :func:`numpy.array` of them
+
+        '''
         return self._plot
 
     # Serialization / IO / Conversion
 
     @classmethod
-    def from_csv(cls, connection, path, header=0, sep=',', index_col=0, parse_dates=True,
-                 tupleize_cols=False, infer_datetime_format=False, **kwargs):
-        ''' Create a CASTable from a CSV file '''
-        return connection.read_csv(path, header=header, sep=sep, index_col=index_col,
-                                   parse_dates=parse_dates, tupleize_cols=tupleize_cols,
-                                   infer_datetime_format=infer_datetime_format,
-                                   **kwargs)
+    def from_csv(cls, connection, path, *args, **kwargs):
+        '''
+        Create a CASTable from a CSV file
+        
+        Parameters
+        ----------
+        connection : :class:`CAS`
+            The CAS connection to read the data into.
+        path : string or file-like object
+            The path, URL, or file-like object to get the data from.
+        *args : positional arguments
+            Positional arguments to pass to :func:`pandas.read_csv`.
+        **kwargs : keyword arguments
+            Keyword arguments to pass to :func:`pandas.read_csv`.
+
+        See Also
+        --------
+        :meth:`CAS.read_csv`
+        :func:`pandas.read_csv`
+
+        Returns
+        -------
+        :class:`CASTable`
+        
+        '''
+        return connection.read_csv(path, *args, **kwargs)
 
     @classmethod
     def _from_any(cls, name, connection, data, *args, **kwargs):
-        ''' Upload data from various sources '''
+        '''
+        Upload data from various sources
+        
+        Parameters
+        ----------
+        name : string
+            The data reader method to call.
+        connection : :class:`CAS`
+            The CAS connection to read the data into.
+        data : :class:`pandas.DataFrame`
+            The :class:`pandas.DataFrame` to upload.
+        *args : positional parameters
+            Positional parameters sent to data reader method.
+        **kwargs : keyword parameters
+            Keyword parameters sent to data reader method.
+
+        Returns
+        -------
+        :class:`CASTable`
+        
+        '''
         from swat.cas.datamsghandlers import PandasDataFrame
         table, kwargs = connection._get_table_args(*args, **kwargs)
         dmh = PandasDataFrame(getattr(pd.DataFrame, 'from_' + name)(data,
@@ -3955,22 +3988,109 @@ class CASTable(ParamManager, ActionParamManager):
 
     @classmethod
     def from_dict(cls, connection, data, *args, **kwargs):
-        ''' Create a CASTable from a dictionary '''
+        '''
+        Create a CASTable from a dictionary
+        
+        Parameters
+        ----------
+        connection : :class:`CAS`
+            The :class:`CAS` connection to read the data into.
+        data : dict
+            The dictionary containing the data.
+        *args : positional arguments
+            Positional arguments sent to :meth:`pandas.DataFrame.from_dict`.
+        **kwargs : keyword arguments
+            Keyword arguments sent to :meth:`pandas.DataFrame.from_dict`.
+
+        See Also
+        --------
+        :meth:`pandas.DataFrame.from_dict`
+
+        Returns
+        -------
+        :class:`CASTable`
+        
+        '''
         return cls._from_any('dict', connection, data, *args, **kwargs)
 
     @classmethod
     def from_items(cls, connection, items, *args, **kwargs):
-        ''' Create a CASTable from a (key, value) pairs '''
+        '''
+        Create a CASTable from a (key, value) pairs
+        
+        Parameters
+        ----------
+        connection : :class:`CAS`
+            The :class:`CAS` connection to read the data into.
+        items : tuples
+            The tuples containing the data.  The values should be arrays
+            or :class:`pandas.Series`.
+        *args : positional arguments
+            Positional arguments sent to :meth:`pandas.DataFrame.from_items`.
+        **kwargs : keyword arguments
+            Keyword arguments sent to :meth:`pandas.DataFrame.from_items`.
+
+        See Also
+        --------
+        :meth:`pandas.DataFrame.from_items`
+
+        Returns
+        -------
+        :class:`CASTable`
+        
+        '''
         return cls._from_any('items', connection, items, *args, **kwargs)
 
     @classmethod
     def from_records(cls, connection, data, *args, **kwargs):
-        ''' Create a CASTable from records '''
+        '''
+        Create a CASTable from records
+        
+        Parameters
+        ----------
+        connection : :class:`CAS`
+            The :class:`CAS` connection to read the data into.
+        data : :func:`numpy.ndarray` (structured dtype), list-of-tuples,dict, or :class:`pandas.DataFrame`
+            The data to upload.
+        *args : positional arguments
+            Positional arguments sent to :meth:`pandas.DataFrame.from_records`.
+        **kwargs : keyword arguments
+            Keyword arguments sent to :meth:`pandas.DataFrame.from_records`.
+
+        See Also
+        --------
+        :meth:`pandas.DataFrame.from_records`
+
+        Returns
+        -------
+        :class:`CASTable`
+        
+        '''
         return cls._from_any('records', connection, data, *args, **kwargs)
 
     def info(self, verbose=None, buf=sys.stdout, max_cols=None,
              memory_usage=None, null_counts=None):
-        ''' Concise summary of a CASTable '''
+        '''
+        Print summary of :class:`CASTable` information
+
+        Parameters
+        ----------
+        verbose : boolean, optional
+            Should the full summary be printed?
+        buf : writeable file-like object
+            Where the summary is printed to.
+        max_cols : int, optional
+            The maximum number of columns to include in the summary.
+        memory_usage : boolean, optional
+            Should the memory usage be displayed?
+        null_counts : boolean, optional
+            Should missing values be displayed?
+
+        See Also
+        --------
+        :meth:`pandas.DataFrame.info`
+        
+        '''
         buf.write(u'%s\n' % self)
 
         nrows, ncols = self.shape
@@ -4013,180 +4133,478 @@ class CASTable(ParamManager, ActionParamManager):
             buf.write(u'vardata size: %s\n' % details['VardataSize'])
             buf.write(u'memory usage: %s\n' % details['AllocatedMemory'])
 
-    def to_frame(self, *args, **kwargs):
-        ''' Retrieve entire table as a DataFrame '''
-        return pd.concat(list(self._retrieve('table.fetch', sastypes=False,
-                                            to=MAX_INT64_INDEX,
-                                            noindex=True).values()))
+    def to_frame(self, **kwargs):
+        '''
+        Retrieve entire table as a :class:`SASDataFrame`
+        
+        Parameters
+        ----------
+        **kwargs : keyword arguments, optional
+            Additional keyword parameters to the ``table.fetch`` CAS action.
+
+        Returns
+        -------
+        :class:`SASDataFrame`
+        
+        '''
+        from ..dataframe import concat
+        return concat(list(self._retrieve('table.fetch', sastypes=False,
+                                          to=MAX_INT64_INDEX,
+                                          noindex=True, **kwargs).values()))
 
     def _to_any(self, method, *args, **kwargs):
-        ''' Generic converter to various output types '''
+        '''
+        Generic converter to various output types
+        
+        Parameters
+        ----------
+        method : string
+            The name of the export method.
+        *args : positional arguments
+            Positional arguments to the export method.
+        **kwargs : keyword arguments
+            Keyword arguments to the export method.
+
+        '''
+        from ..dataframe import concat
         standard_dataframe = kwargs.pop('standard_dataframe', False)
-        dframe = pd.concat(list(self._retrieve('table.fetch', sastypes=False,
-                                                to=get_option('cas.dataset.max_rows_fetched'),
-                                                noindex=True).values()))
+        dframe = concat(list(self._retrieve('table.fetch', sastypes=False,
+                                            to=get_option('cas.dataset.max_rows_fetched'),
+                                            noindex=True).values()))
         if standard_dataframe:
             dframe = pd.DataFrame(dframe)
         return getattr(dframe, 'to_' + method)(*args, **kwargs)
 
     def to_xarray(self, *args, **kwargs):
         '''
-        Return an xarray from the CASTable
+        Return an :func:`numpy.xarray` from the CAS table
 
-        See Also: pandas.DataFrame.to_xarray (for arguments)
+        This method creates an object on the **client side**.  This means
+        that **all of the data in the table must all be fetched**.  
+        If you want to save a file on the server side, use the 
+        ``table.save`` CAS action.
+
+        Parameters
+        ----------
+        *args : positional arguments
+            Positional arguments to :meth:`pandas.DataFrame.to_xarray`
+        **kwargs : keyword arguments
+            Keyword arguments to :meth:`pandas.DataFrame.to_xarray`
+
+        See Also
+        --------
+        :meth:`pandas.DataFrame.to_xarray`
 
         '''
         return self._to_any('xarray', standard_dataframe=True, *args, **kwargs)
 
     def to_pickle(self, *args, **kwargs):
         '''
-        Pickle (serialize) table data
+        Pickle (serialize) the CAS table data
 
-        See Also: pandas.DataFrame.to_pickle (for arguments)
+        This method writes a file on the **client side**.  This means
+        that **all of the data in the table must all be fetched**.  
+        If you want to save a file on the server side, use the 
+        ``table.save`` CAS action.
+
+        Parameters
+        ----------
+        *args : positional arguments
+            Positional arguments to :meth:`pandas.DataFrame.to_pickle`
+        **kwargs : keyword arguments
+            Keyword arguments to :meth:`pandas.DataFrame.to_pickle`
+
+        See Also
+        --------
+        :meth:`pandas.DataFrame.to_pickle`
 
         '''
         return self._to_any('pickle', standard_dataframe=True, *args, **kwargs)
 
     def to_csv(self, *args, **kwargs):
         '''
-        Write table data to comma separated values (CSV)
+        Write CAS table data to comma separated values (CSV)
 
-        See Also: pandas.DataFrame.to_csv (for arguments)
+        This method writes a file on the **client side**.  This means
+        that **all of the data in the table must all be fetched**.  
+        If you want to save a file on the server side, use the 
+        ``table.save`` CAS action.
+
+        Parameters
+        ----------
+        *args : positional arguments
+            Positional arguments to :meth:`pandas.DataFrame.to_csv`
+        **kwargs : keyword arguments
+            Keyword arguments to :meth:`pandas.DataFrame.to_csv`
+
+        See Also
+        --------
+        :meth:`pandas.DataFrame.to_csv`
 
         '''
         return self._to_any('csv', *args, **kwargs)
 
     def to_hdf(self, *args, **kwargs):
         '''
-        Write table data to HDF
+        Write CAS table data to HDF
 
-        See Also: pandas.DataFrame.to_hdf (for arguments)
+        This method writes a file on the **client side**.  This means
+        that **all of the data in the table must all be fetched**.  
+        If you want to save a file on the server side, use the 
+        ``table.save`` CAS action.
+
+        Parameters
+        ----------
+        *args : positional arguments
+            Positional arguments to :meth:`pandas.DataFrame.to_hdf`
+        **kwargs : keyword arguments
+            Keyword arguments to :meth:`pandas.DataFrame.to_hdf`
+
+        See Also
+        --------
+        :class:`pandas.DataFrame.to_hdf`
 
         '''
         return self._to_any('hdf', standard_dataframe=True, *args, **kwargs)
 
     def to_sql(self, *args, **kwargs):
         '''
-        Write table records to SQL database
+        Write CAS table records to SQL database
 
-        See Also: pandas.DataFrame.to_sql (for arguments)
+        This method depends on data on the **client side**.  This means
+        that **all of the data in the table must all be fetched**.  
+        If you want to save a file on the server side, use the 
+        ``table.save`` CAS action.
+
+        Parameters
+        ----------
+        *args : positional arguments
+            Positional arguments to :meth:`pandas.DataFrame.to_sql`
+        **kwargs : keyword arguments
+            Keyword arguments to :meth:`pandas.DataFrame.to_sql`
+
+        See Also
+        --------
+        :class:`pandas.DataFrame.to_sql`
 
         '''
         return self._to_any('sql', *args, **kwargs)
 
     def to_dict(self, *args, **kwargs):
         '''
-        Convert table data to dictionary
+        Convert CAS table data to a Python dictionary
 
-        See Also: pandas.DataFrame.to_dict (for arguments)
+        This method writes an object on the **client side**.  This means
+        that **all of the data in the table must all be fetched**.  
+        If you want to save a file on the server side, use the 
+        ``table.save`` CAS action.
+
+        Parameters
+        ----------
+        *args : positional arguments
+            Positional arguments to :meth:`pandas.DataFrame.to_dict`
+        **kwargs : keyword arguments
+            Keyword arguments to :meth:`pandas.DataFrame.to_dict`
+
+        See Also
+        --------
+        :meth:`pandas.DataFrame.to_dict`
+
+        Returns
+        -------
+        dict
 
         '''
         return self._to_any('dict', *args, **kwargs)
 
     def to_excel(self, *args, **kwargs):
         '''
-        Write table data to an Excel spreadsheet
+        Write CAS table data to an Excel spreadsheet
 
-        See Also: pandas.DataFrame.to_excel (for arguments)
+        This method writes a file on the **client side**.  This means
+        that **all of the data in the table must all be fetched**.  
+        If you want to save a file on the server side, use the 
+        ``table.save`` CAS action.
+
+        Parameters
+        ----------
+        *args : positional arguments
+            Positional arguments to :meth:`pandas.DataFrame.to_excel`
+        **kwargs : keyword arguments
+            Keyword arguments to :meth:`pandas.DataFrame.to_excel`
+
+        See Also
+        --------
+        :meth:`pandas.DataFrame.to_excel`
 
         '''
         return self._to_any('excel', *args, **kwargs)
 
     def to_json(self, *args, **kwargs):
         '''
-        Convert the table data to a JSON string
+        Convert the CAS table data to a JSON string
 
-        See Also: pandas.DataFrame.to_json (for arguments)
+        This method writes a file on the **client side**.  This means
+        that **all of the data in the table must all be fetched**.  
+        If you want to save a file on the server side, use the 
+        ``table.save`` CAS action.
+
+        Parameters
+        ----------
+        *args : positional arguments
+            Positional arguments to :meth:`pandas.DataFrame.to_json`
+        **kwargs : keyword arguments
+            Keyword arguments to :meth:`pandas.DataFrame.to_json`
+
+        See Also
+        --------
+        :meth:`pandas.DataFrame.to_json`
 
         '''
         return self._to_any('json', *args, **kwargs)
 
     def to_html(self, *args, **kwargs):
         '''
-        Render the table data to an HTML table
+        Render the CAS table data to an HTML table
 
-        See Also: pandas.DataFrame.to_html (for arguments)
+        This method writes a file on the **client side**.  This means
+        that **all of the data in the table must all be fetched**.  
+        If you want to save a file on the server side, use the 
+        ``table.save`` CAS action.
+
+        Parameters
+        ----------
+        *args : positional arguments
+            Positional arguments to :meth:`pandas.DataFrame.to_html`
+        **kwargs : keyword arguments
+            Keyword arguments to :meth:`pandas.DataFrame.to_html`
+
+        See Also
+        --------
+        :meth:`pandas.DataFrame.to_html`
 
         '''
         return self._to_any('html', *args, **kwargs)
 
     def to_latex(self, *args, **kwargs):
         '''
-        Render the table data to a LaTeX tabular environment
+        Render the CAS table data to a LaTeX tabular environment
 
-        See Also: pandas.DataFrame.to_latex (for arguments)
+        This method writes a file on the **client side**.  This means
+        that **all of the data in the table must all be fetched**.  
+        If you want to save a file on the server side, use the 
+        ``table.save`` CAS action.
+
+        Parameters
+        ----------
+        *args : positional arguments
+            Positional arguments to :meth:`pandas.DataFrame.to_latex`
+        **kwargs : keyword arguments
+            Keyword arguments to :meth:`pandas.DataFrame.to_latex`
+
+        See Also
+        --------
+        :meth:`pandas.DataFrame.to_latex`
 
         '''
         return self._to_any('latex', *args, **kwargs)
 
     def to_stata(self, *args, **kwargs):
         '''
-        Write table data to Stata file
+        Write CAS table data to Stata file
 
-        See Also: pandas.DataFrame.to_stata (for arguments)
+        This method writes a file on the **client side**.  This means
+        that **all of the data in the table must all be fetched**.  
+        If you want to save a file on the server side, use the 
+        ``table.save`` CAS action.
+
+        Parameters
+        ----------
+        *args : positional arguments
+            Positional arguments to :meth:`pandas.DataFrame.to_stata`
+        **kwargs : keyword arguments
+            Keyword arguments to :meth:`pandas.DataFrame.to_stata`
+
+        See Also
+        --------
+        :meth:`pandas.DataFrame.to_stata`
 
         '''
         return self._to_any('stata', *args, **kwargs)
 
     def to_msgpack(self, *args, **kwargs):
         '''
-        Write table data to msgpack object
+        Write CAS table data to msgpack object
 
-        See Also: pandas.DataFrame.to_msgpack (for arguments)
+        This method writes a file on the **client side**.  This means
+        that **all of the data in the table must all be fetched**.  
+        If you want to save a file on the server side, use the 
+        ``table.save`` CAS action.
+
+        Parameters
+        ----------
+        *args : positional arguments
+            Positional arguments to :meth:`pandas.DataFrame.to_msgpack`
+        **kwargs : keyword arguments
+            Keyword arguments to :meth:`pandas.DataFrame.to_msgpack`
+
+        See Also
+        --------
+        :meth:`pandas.DataFrame.to_msgpack`
 
         '''
         return self._to_any('msgpack', standard_dataframe=True, *args, **kwargs)
 
     def to_gbq(self, *args, **kwargs):
         '''
-        Write table data to a Google BigQuery table
+        Write CAS table data to a Google BigQuery table
 
-        See Also: pandas.DataFrame.to_gbq (for arguments)
+        This method depends on data on the **client side**.  This means
+        that **all of the data in the table must all be fetched**.  
+        If you want to save a file on the server side, use the 
+        ``table.save`` CAS action.
+
+        Parameters
+        ----------
+        *args : positional arguments
+            Positional arguments to :meth:`pandas.DataFrame.to_gbq`
+        **kwargs : keyword arguments
+            Keyword arguments to :meth:`pandas.DataFrame.to_gbq`
+
+        See Also
+        --------
+        :meth:`pandas.DataFrame.to_gbq`
 
         '''
         return self._to_any('gbq', *args, **kwargs)
 
     def to_records(self, *args, **kwargs):
         '''
-        Convert table data to record array
+        Convert CAS table data to record array
 
-        See Also: pandas.DataFrame.to_records (for arguments)
+        This method writes objects on the **client side**.  This means
+        that **all of the data in the table must all be fetched**.  
+        If you want to save a file on the server side, use the 
+        ``table.save`` CAS action.
+
+        Parameters
+        ----------
+        *args : positional arguments
+            Positional arguments to :meth:`pandas.DataFrame.to_records`
+        **kwargs : keyword arguments
+            Keyword arguments to :meth:`pandas.DataFrame.to_records`
+
+        See Also
+        --------
+        :meth:`pandas.DataFrame.to_records`
+
+        Returns
+        -------
+        :func:`numpy.recarray`
 
         '''
         return self._to_any('records', *args, **kwargs)
 
     def to_sparse(self, *args, **kwargs):
         '''
-        Convert table data to SparseDataFrame
+        Convert CAS table data to SparseDataFrame
 
-        See Also: pandas.DataFrame.to_sparse (for arguments)
+        This method writes an object on the **client side**.  This means
+        that **all of the data in the table must all be fetched**.  
+        If you want to save a file on the server side, use the 
+        ``table.save`` CAS action.
+
+        Parameters
+        ----------
+        *args : positional arguments
+            Positional arguments to :meth:`pandas.DataFrame.to_sparse`
+        **kwargs : keyword arguments
+            Keyword arguments to :meth:`pandas.DataFrame.to_sparse`
+
+        See Also
+        --------
+        :meth:`pandas.DataFrame.to_sparse`
+
+        Returns
+        -------
+        :class:`pandas.SparseDataFrame`
 
         '''
         return self._to_any('sparse', *args, **kwargs)
 
     def to_dense(self, *args, **kwargs):
         '''
-        Return dense representation of table data
+        Return dense representation of CAS table data
 
-        See Also: pandas.DataFrame.to_dense (for arguments)
+        This method writes an object on the **client side**.  This means
+        that **all of the data in the table must all be fetched**.  
+        If you want to save a file on the server side, use the 
+        ``table.save`` CAS action.
+
+        Parameters
+        ----------
+        *args : positional arguments
+            Positional arguments to :meth:`pandas.DataFrame.to_dense`
+        **kwargs : keyword arguments
+            Keyword arguments to :meth:`pandas.DataFrame.to_dense`
+
+        See Also
+        --------
+        :meth:`pandas.DataFrame.to_dense`
+
+        Returns
+        -------
+        :class:`pandas.SparseDataFrame`
 
         '''
         return self._to_any('dense', *args, **kwargs)
 
     def to_string(self, *args, **kwargs):
         '''
-        Render the table to a console-friendly tabular output
+        Render the CAS table to a console-friendly tabular output
 
-        See Also: pandas.DataFrame.to_string (for arguments)
+        This method writes a string on the **client side**.  This means
+        that **all of the data in the table must all be fetched**.  
+        If you want to save a file on the server side, use the 
+        ``table.save`` CAS action.
+
+        Parameters
+        ----------
+        *args : positional arguments
+            Positional arguments to :meth:`pandas.DataFrame.to_string`
+        **kwargs : keyword arguments
+            Keyword arguments to :meth:`pandas.DataFrame.to_string`
+
+        See Also
+        --------
+        :meth:`pandas.DataFrame.to_string`
+
+        Returns
+        -------
+        string
 
         '''
         return self._to_any('string', *args, **kwargs)
 
     def to_clipboard(self, *args, **kwargs):
         '''
-        Write the table data to the clipboard
+        Write the CAS table data to the clipboard
 
-        See Also: pandas.DataFrame.to_clipboard (for arguments)
+        This method writes the clipboard on the **client side**.  This means
+        that **all of the data in the table must all be fetched**.  
+        If you want to save a file on the server side, use the 
+        ``table.save`` CAS action.
+
+        Parameters
+        ----------
+        *args : positional arguments
+            Positional arguments to :meth:`pandas.DataFrame.to_clipboard`
+        **kwargs : keyword arguments
+            Keyword arguments to :meth:`pandas.DataFrame.to_clipboard`
+
+        See Also
+        --------
+        :meth:`pandas.DataFrame.to_clipboard`
 
         '''
         return self._to_any('clipboard', *args, **kwargs)
@@ -4200,9 +4618,9 @@ class CASTable(ParamManager, ActionParamManager):
         Parameters
         ----------
         key : string
-            The name of the column
-        value : CASColumn or any
-            The value of the column
+            The name of the column.
+        value : :class:`CASColumn` or any
+            The value of the column.
 
         '''
         compvars = [key]
@@ -4224,16 +4642,16 @@ class CASTable(ParamManager, ActionParamManager):
 
     def __getitem__(self, key):
         '''
-        Retrieve a slice of a CASTable / CASColumn
+        Retrieve a slice of a :class:`CASTable` / :class:`CASColumn`
 
         Returns
         -------
-        CASTable for the following:
+        :class:`CASTable` for the following:
             tbl[collist]
             tbl[rowslice|int]
             tbl[rowslice|int|rowlist, colslice|int|colname|collist]
 
-        CASColumn for the following:
+        :class:`CASColumn` for the following:
             tbl[colname] => CASColumn
 
         Scalar for the following:
@@ -4301,7 +4719,33 @@ class CASTable(ParamManager, ActionParamManager):
 
     def groupby(self, by, axis=0, level=None, as_index=True, sort=True,
                 group_keys=True, squeeze=False, **kwargs):
-        ''' Specify grouping variables for the table '''
+        '''
+        Specify grouping variables for the table
+        
+        Parameters
+        ----------
+        by : string or list-of-strings
+            The column names that specify the grouping variables.
+        axis : int, optional
+            Not implemented.
+        level : int, optional
+            Not implemented.
+        as_index : boolean, optional
+            Should the grouping variables be set as index levels?
+        sort : boolean, optional
+            Should output be sorted by group keys?
+        squeeze : boolean, optional
+            Not implemented.
+
+        See Also
+        --------
+        :meth:`pandas.DataFrame.groupby`
+
+        Returns
+        -------
+        :class:`CASTableGroupBy`
+        
+        '''
         return CASTableGroupBy(self, by, axis=axis, level=level, as_index=as_index,
                                sort=sort, group_keys=group_keys, squeeze=squeeze,
                                **kwargs)
@@ -4316,17 +4760,19 @@ class CASTable(ParamManager, ActionParamManager):
             The query string to evaluate.  The expression must be a valid
             CAS expression.
         inplace : boolean, optional
-            Whether the CASTable should be modified in place, or a copy
+            Whether the :class:`CASTable` should be modified in place, or a copy
             should be returned.
+        engine : string, optional
+            The type of expression used in the expression.
         **kwargs : dict, optional
-            Unsupported.
+            Not implemented.
 
         Returns
         -------
         None
-            if inplace=True
-        CASTable object
-            if inplace=False
+            If inplace == True
+        :class:`CASTable` object
+            If inplace == False
 
         '''
         if engine != 'cas':
@@ -4363,7 +4809,7 @@ class CASTable(ParamManager, ActionParamManager):
 #           return out
 
     def get_groupby_vars(self):
-        ''' Return a list of groupby variables '''
+        ''' Return a list of By group variable names '''
         groups = []
         if self.has_groupby_vars():
             groups = self.get_param('groupby')
@@ -4407,7 +4853,14 @@ class CharacterColumnMethods(object):
         return re_flags
 
     def capitalize(self):
-        ''' Capitalize first letter, lowercase the rest '''
+        '''
+        Capitalize first letter, lowercase the rest
+        
+        Returns
+        -------
+        :class:`CASColumn`
+        
+        '''
         return self._compute('capitalize',
                              'upcase(substr({value}, 1, 1)) || ' +
                              'lowcase(substr({value}, 2))',
@@ -4421,7 +4874,31 @@ class CharacterColumnMethods(object):
 #       return self._compute('center', 'put({value}, ${width}., -c)', width=width)
 
     def contains(self, pat, case=True, flags=0, na=np.nan, regex=True):
-        ''' Return booleans indicating whether or not the pattern exists '''
+        '''
+        Does the value contain the specified pattern?
+        
+        Parameters
+        ----------
+        pat : string or :class:`CASColumn`
+            The pattern to search for.
+        case : boolean, optional
+            Should pattern matching be case-sensitive?
+        flags : int, optional
+            Regular expression matching flags.
+        na : string, optional
+            Not implemented.
+        regex : boolean, optional
+            Should the pattern be treated as a regular expression?
+
+        See Also
+        --------
+        :meth:`pandas.Series.str.contains`
+
+        Returns
+        -------
+        :class:`CASColumn`
+        
+        '''
         if regex:
             if isinstance(pat, CASColumn):
                 return self._compute('regex',
@@ -4440,23 +4917,53 @@ class CharacterColumnMethods(object):
                              pat=pat)
 
     def count(self, pat, flags=0, **kwargs):
-        ''' Count occurrences of pattern in each value '''
+        '''
+        Count occurrences of pattern in each value
+        
+        Parameters
+        ----------
+        pat : string or :class:`CASColumn`
+            The pattern to match.
+        flags : int, optional
+            Not implemented.
+    
+        See Also
+        --------
+        :meth:`pandas.Series.str.count`
+
+        Returns
+        -------
+        :class:`CASColumn`
+        
+        '''
         if flags & re.IGNORECASE:
             return self._compute('count', 'count({value}, {pat})', pat=pat)
         return self._compute('count', 'count(lowcase({value}), lowcase({pat}))', pat=pat)
 
     def endswith(self, pat, case=True, flags=0, na=np.nan, regex=True):
         '''
-        Does the table column end with `arg`?
+        Does the table column end with the given pattern?
 
         Parameters
         ----------
-        pat : CASColumn or string
-            The string to compare to
+        pat : string or :class:`CASColumn`
+            The string to search for.
+        case : boolean, optional
+            Should the pattern matching be case-sensitive?
+        flags : int, optional
+            Regular expression flags.
+        na : string, optional
+            Not implemented.
+        regex : boolean, optional
+            Should the pattern be considered a regular expression?
+
+        See Also
+        --------
+        :meth:`pandas.Series.str.endswith`
 
         Returns
         -------
-        CASColumn
+        :class:`CASColumn`
 
         '''
         return self._compute('endswith',
@@ -4465,7 +4972,27 @@ class CharacterColumnMethods(object):
                              use_quotes=False)
 
     def find(self, sub, start=0, end=None):
-        ''' Return lowest index of pattern in each value '''
+        '''
+        Return lowest index of pattern in each value, or -1 on failure
+        
+        Parameters
+        ----------
+        sub : string or :class:`CASColumn`
+            The pattern to locate.
+        start : int, optional
+            The position in the source string to start looking.
+        end : int, optional
+            The position in the source string to stop looking.
+
+        See Also
+        --------
+        :meth:`pandas.Series.str.find`
+
+        Returns
+        -------
+        :class:`CASColumn`
+        
+        '''
         if end is None:
             return self._compute('find',
                                  'find({value}, {sub}, {start}) - 1',
@@ -4475,26 +5002,109 @@ class CharacterColumnMethods(object):
                              sub=sub, start=start + 1, end=end - start + 1)
 
     def index(self, sub, start=0, end=None):
-        ''' Return lowest index of pattern in each value '''
+        '''
+        Return lowest index of pattern in each value
+
+        This method works the same way as :meth:`find` except that
+        an exception is raised when the pattern is not found.
+        
+        Parameters
+        ----------
+        sub : string or :class:`CASColumn`
+            The substring to search for.
+        start : int, optional
+            The position in the source string to start looking.
+        end : int, optional
+            The position in the source string to stop looking.
+
+        See Also
+        --------
+        :meth:`find`
+        :meth:`pandas.Series.str.index`
+
+        Returns
+        -------
+        :class:`CASColumn`
+
+        Raises
+        ------
+        :exc:`ValueError`
+            If the substring is not found in a data element
+        
+        '''
         col = self.find(sub, start=start, end=end)
         if col[col < 0]._numrows:
             raise ValueError('substring not found')
         return col
 
     def len(self):
-        ''' Compute the length of each value '''
+        '''
+        Compute the length of each value
+
+        See Also
+        --------
+        :meth:`pandas.Series.str.len`
+        
+        Returns
+        -------
+        :class:`CASColumn`
+        
+        '''
         return self._compute('len', 'lengthn({value})')
 
     def lower(self):
-        ''' Lowercase the value '''
+        '''
+        Lowercase the value
+
+        See Also
+        --------
+        :meth:`pandas.Series.str.lower`
+        
+        Returns
+        -------
+        :class:`CASColumn`
+        
+        '''
         return self._compute('lower', 'lowcase({value})', add_length=True)
 
     def lstrip(self, to_strip=None):
-        ''' Strip leading spaces '''
+        '''
+        Strip leading spaces
+        
+        Parameters
+        ----------
+        to_strip 
+            Not implemented.
+
+        See Also
+        --------
+        :meth:`pandas.Series.str.lstrip`
+
+        Returns
+        -------
+        :class:`CASColumn`
+        
+        '''
         return self._compute('lstrip', 'strip({value})', add_length=True)
 
     def repeat(self, repeats):
-        ''' Duplicate value the specified number of times '''
+        '''
+        Duplicate value the specified number of times
+        
+        Parameters
+        ----------
+        repeats : int
+            Duplicate value the specified number of times.
+
+        See Also
+        --------
+        :meth:`pandas.Series.str.repeat`
+
+        Returns
+        -------
+        :class:`CASColumn`
+        
+        '''
         trim = ''
         if not re.match(r'^_\w+_[A-Za-z0-9]+_$', self._column.name):
             trim = 'trim'
@@ -4502,7 +5112,31 @@ class CharacterColumnMethods(object):
                              repeats=repeats, add_length=True)
 
     def replace(self, pat, repl, n=-1, case=True, flags=0):
-        ''' Replace a pattern in the data '''
+        '''
+        Replace a pattern in the data
+        
+        Parameters
+        ----------
+        pat : string or :class:`CASColumn`
+            The pattern to search for.
+        repl : string or :class:`CASColumn`
+            The replacement string.
+        n : int, optional
+            The maximum number of replacements.
+        case : boolean, optional
+            Should the pattern matching be case-insensitive?
+        flags : int, optional
+            Regular expression flags.
+
+        See Also
+        --------
+        :meth:`pandas.Series.str.replace`
+
+        Returns
+        -------
+        :class:`CASColumn`
+        
+        '''
         if isinstance(pat, CASColumn) and isinstance(repl, CASColumn):
             rgx = "prxchange('s/'|| trim({pat}) ||'/' trim({repl}) || '/%s',{n},{value})"
         elif isinstance(pat, CASColumn):
@@ -4515,14 +5149,56 @@ class CharacterColumnMethods(object):
                              pat=pat, repl=repl, n=n, use_quotes=False, add_length=True)
 
     def rfind(self, sub, start=0, end=None):
-        ''' Return highest index of the pattern '''
+        '''
+        Return highest index of the pattern
+        
+        Parameters
+        ----------
+        sub : string or :class:`CASColumn`
+            Substring to search for.
+        start : int, optional
+            Not implemented.
+        end : int, optional
+            Not implemented.
+        
+        See Also
+        --------
+        :meth:`find`
+        :meth:`pandas.Series.str.rfind`
+
+        Returns
+        -------
+        :class:`CASColumn`
+        
+        '''
         # TODO: start / end
         return self._compute('find',
                              'find({value}, {sub}, -lengthn({value})-1) - 1',
                              sub=sub, start=start + 1)
 
     def rindex(self, sub, start=0, end=None):
-        ''' Return highest index of the pattern '''
+        '''
+        Return highest index of the pattern
+        
+        Parameters
+        ----------
+        sub : string or :class:`CASColumn`
+            Substring to search for.
+        start : int, optional
+            Position in the string to start the search.
+        end : int, optional
+            Position in the string to stop the search.
+
+        See Also
+        --------
+        :meth:`index`
+        :meth:`pandas.Series.str.rindex`
+
+        Returns
+        -------
+        :class:`CASColumn`
+        
+        '''
         # TODO: start / end
         col = self.rfind(sub, start=start, end=end)
         if col[col < 0]._numrows:
@@ -4530,11 +5206,43 @@ class CharacterColumnMethods(object):
         return col
 
     def rstrip(self, to_strip=None):
-        ''' Strip trailing whitespace '''
+        '''
+        Strip trailing whitespace
+
+        See Also
+        --------
+        :meth:`strip`
+        :meth:`pandas.Series.str.rstrip`
+        
+        Returns
+        -------
+        :class:`CASColumn`
+        
+        '''
         return self._compute('rstrip', 'trimn({value})', add_length=True)
 
     def slice(self, start=0, stop=None, step=None):
-        ''' Slice a substring from the value '''
+        '''
+        Slice a substring from the value
+        
+        Parameters
+        ----------
+        start : int, optional
+            Starting position of the slice.
+        stop : int, optional
+            Ending position of the slice.
+        step : int, optional
+            Not implemented.
+
+        See Also
+        --------
+        :meth:`pandas.Series.str.slice`
+
+        Returns
+        -------
+        :class:`CAScolumn`
+        
+        '''
         # TODO: step
         if stop is None:
             stop = 'lengthn({value})+1'
@@ -4545,16 +5253,29 @@ class CharacterColumnMethods(object):
 
     def startswith(self, pat, case=True, flags=0, na=np.nan, regex=True):
         '''
-        Does the table column start with `pat`?
+        Does the table column start with the given pattern?
 
         Parameters
         ----------
-        pat : CASColumn or string
-            The string to compare to
+        pat : string or :class:`CASColumn`
+            The pattern to search for.
+        case : boolean, optional
+            Should the matching be case-sensitive?
+        flags : int, optional
+            Regular expression flags.
+        na : string, optional
+            Not implemented.
+        regex : boolean, optional
+            Is the pattern a regular expression?
+
+        See Also
+        --------
+        :meth:`endswith`
+        :meth:`pandas.Series.str.endswith`
 
         Returns
         -------
-        CASColumn
+        :class:`CASColumn`
 
         '''
         return self._compute('startswith',
@@ -4563,51 +5284,183 @@ class CharacterColumnMethods(object):
                              use_quotes=False)
 
     def strip(self, to_strip=None):
-        ''' Strip leading and trailing whitespace '''
+        '''
+        Strip leading and trailing whitespace
+        
+        See Also
+        --------
+        :meth:`pandas.Series.str.strip`
+
+        Returns
+        -------
+        :class:`CASColumn`
+        
+        '''
         return self._compute('strip', 'strip({value})', add_length=True)
 
     def title(self):
-        ''' Capitalize each word in the value '''
+        '''
+        Capitalize each word in the value
+        
+        See Also
+        --------
+        :meth:`pandas.Series.str.title`
+
+        Returns
+        -------
+        :class:`CASColumn`
+        
+        '''
         return self._compute('title', 'propcase({value})', add_length=True)
 
     def upper(self):
-        ''' Uppercase the value '''
+        '''
+        Uppercase the value
+        
+        See Also
+        --------
+        :meth:`pandas.Series.str.upper`
+        
+        Returns
+        -------
+        :class:`CASColumn`
+        
+        '''
         return self._compute('upper', 'upcase({value})', add_length=True)
 
     def isalnum(self):
-        ''' Does the value contain only alphanumeric characters? '''
+        '''
+        Does the value contain only alphanumeric characters?
+        
+        See Also
+        --------
+        :meth:`pandas.Series.str.isalnum`
+
+        Returns
+        -------
+        :class:`CASColumn`
+        
+        '''
         return self._compute('isalnum', 'notalnum({value}) < 1')
 
     def isalpha(self):
-        ''' Does the value contain only alpha characters? '''
+        '''
+        Does the value contain only alpha characters?
+        
+        See Also
+        --------
+        :meth:`pandas.Series.str.isalpha`
+
+        Returns
+        -------
+        :class:`CASColumn`
+        
+        '''
         return self._compute('isalpha', 'notalpha({value}) < 1')
 
     def isdigit(self):
-        ''' Does the value contain only digits? '''
+        '''
+        Does the value contain only digits?
+        
+        See Also
+        --------
+        :meth:`pandas.Series.str.isdigit`
+
+        Returns
+        -------
+        :class:`CASColumn`
+        
+        '''
         return self._compute('isdigit', 'notdigit({value}) < 1')
 
     def isspace(self):
-        ''' Does the value contain only whitespace? '''
+        '''
+        Does the value contain only whitespace?
+        
+        See Also
+        --------
+        :meth:`pandas.Series.str.isspace`
+
+        Returns
+        -------
+        :class:`CASColumn`
+        
+        '''
         return self._compute('isspace', 'notspace({value}) < 1')
 
     def islower(self):
-        ''' Does the value contain only lowercase characters? '''
+        '''
+        Does the value contain only lowercase characters?
+        
+        See Also
+        --------
+        :meth:`pandas.Series.str.islower`
+
+        Returns
+        -------
+        :class:`CASColumn`
+        
+        '''
         return self._compute('islower', '(lowcase({value}) = {value})')
 
     def isupper(self):
-        ''' Does the value contain only uppercase characters? '''
+        '''
+        Does the value contain only uppercase characters?
+        
+        See Also
+        --------
+        :meth:`pandas.Series.str.isupper`
+
+        Returns
+        -------
+        :class:`CASColumn`
+        
+        '''
         return self._compute('isupper', '(upcase({value}) = {value})')
 
     def istitle(self):
-        ''' Is the value equivalent to the title representation? '''
+        '''
+        Is the value equivalent to the title representation?
+        
+        See Also
+        --------
+        :meth:`pandas.Series.str.istitle`
+
+        Returns
+        -------
+        :class:`CASColumn`
+        
+        '''
         return self._compute('istitle', '(propcase({value}) = {value})')
 
     def isnumeric(self):
-        ''' Does the value contain a numeric representation? '''
+        '''
+        Does the value contain a numeric representation?
+        
+        See Also
+        --------
+        :meth:`pandas.Series.str.isnumeric`
+
+        Returns
+        -------
+        :class:`CASColumn`
+        
+        '''
         return self._compute('isnumeric', r"prxmatch('/^\s*\d+\s*$/', {value}) > 0")
 
     def isdecimal(self):
-        ''' Does the value contain a decimal representation? '''
+        '''
+        Does the value contain a decimal representation?
+        
+        See Also
+        --------
+        :meth:`pandas.Series.str.isdecimal`
+
+        Returns
+        -------
+        :class:`CASColumn`
+        
+        '''
         return self._compute('isnumeric',
                              r"prxmatch('/^\s*(0?\.\d+|\d+(\.\d*)?)\s*$/', " +
                              r"{value}) > 0")
@@ -4826,7 +5679,7 @@ class CASColumn(CASTable):
 
     @getattr_safe_property
     def values(self):
-        ''' Return column data as numpy.ndarray '''
+        ''' Return column data as :func:`numpy.ndarray` '''
         return self._fetch().ix[:, 0].values
 
     @getattr_safe_property
@@ -4856,15 +5709,33 @@ class CASColumn(CASTable):
         return self._columninfo['RawLength'][0]
 
     def isnull(self):
-        ''' Return a boolean CASColumn indicating if the values are null '''
+        ''' Return a boolean :class:`CASColumn` indicating if the values are null '''
         return self._compute('isnull', 'missing({value})')
 
     def notnull(self):
-        ''' Return a boolean CASColumn indicating if the values are not null '''
+        ''' Return a boolean :class:`CASColumn` indicating if the values are not null '''
         return self._compute('notnull', '(missing({value}) = 0)')
 
     def get(self, key, default=None):
-        ''' Get item from CASColumn for the given key '''
+        '''
+        Get item from CASColumn for the given key
+        
+        Parameters
+        ----------
+        key : int
+            The index of the item to return.
+        default : any, optional
+            The value to return if the index doesn't exist.
+
+        See Also
+        --------
+        :meth:`pandas.Series.get`
+
+        Returns
+        -------
+        any
+        
+        '''
         out = self._fetch(from_=key + 1, to=key + 1)
         try:
             return out.get_value(0, self.varlist[0])
@@ -4874,6 +5745,41 @@ class CASColumn(CASTable):
 
     def sort_values(self, axis=0, ascending=True, inplace=False,
                     kind='quicksort', na_position='last'):
+        '''
+        Apply sort order parameters to fetches of the data in this column
+
+        CAS tables do not have a predictable order due to the fact that the
+        data may be distributed across machines in a grid.  By using the
+        :meth:`sort_values` method, you are simply applying a ``sortby=``
+        parameter to any ``table.fetch`` actions executed on the
+        :class:`CASColumn`.  This gives the appearance of sorted data when
+        it is being retrieved.
+
+        Parameters
+        ----------
+        axis : int, optional
+            Not implemented.
+        ascending : boolean, optional
+            Should the sort order be ascending?
+        inplace : boolean, optional
+            Should the :class:`CASColumn` be modified in place?
+        kind : string, optional
+            Not implemented.
+        na_position : string, optional
+            Not implemented.
+
+        See Also
+        --------
+        :class:`pandas.Series.sort_values`
+
+        Returns
+        -------
+        None
+            If inplace == True
+        :class:`CASColumn
+            If inplace == False`
+        
+        '''
         return CASTable.sort_values(self, self.name, axis=axis, ascending=ascending,
                                     inplace=inplace, kind=kind, na_position=na_position)
 

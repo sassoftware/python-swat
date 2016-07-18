@@ -36,7 +36,8 @@ def _import_pyswat():
         else:
             exec('from .lib.%s import _pyswat as _pyswat' % platform, _globals, _locals)
     except ImportError:
-        raise ValueError(('Unsupported Python version in binary mode: %d.%d.  ' +
+        raise ValueError(('Could not import import _py%d%dswat.  This is likely due to an '
+                          'incorrect TK path or an error while loading the TK subsystem. ' 
                           'Try using the HTTP port for the REST interface.') %
                          sys.version_info[:2])
     _pyswat = _locals['_pyswat']

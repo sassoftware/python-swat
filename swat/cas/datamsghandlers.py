@@ -53,41 +53,61 @@ class CASDataMsgHandler(object):
     '''
     Base class for all CAS data message handlers
 
+    All CAS data message handlers should inherit from this class.
+    The communication between the client and CAS server requires
+    several steps and error handling that is implemented in this 
+    class.
+
+    When subclassing :class:`CASDataMsgHandler`, you only need to 
+    implement two pieces: `__init__` (the constructor) and `getrow`.
+    The constructor must create the `vars=` parameter for the 
+    `table.addtable` CAS action and store it in the `vars` instance
+    attribute.  The `getrow` method, must return a single row of data
+    values to be added to the data buffer.
+
+    Parameters
+    ----------
+    vars : list-of-dicts
+        The list of variables to upload.  This has the same format as
+        the `vars=` argument to the `table.addtable` action.  Each dict should
+        at least have the keys: name, rtype, and length.
+    nrecs : int, optional
+        The number of records in the buffer.
+    reclen : int, optional
+        The length of each record in the buffer.
+    locale : string, optional
+        The locale to use for messages.
+    transformers : dict-of-functions
+        Transformers to use for variables.  Keys are the column names.
+        Values are the function that does the transformation.
+
+    Examples
+    --------
+    The example below creates a custom data message handler with hard-coded
+    data and variable definitions.  The `getrow` method is defined to simply
+    return the requested row in the data array.
+    
+    >>> conn = swat.CAS()
+    >>> import swat.cas.datamsghandlers as dmh
+    >>> class MyDMH(dmh.CASDataMsgHandler):
+    ...       ...     def __init__(self):    ...         self.data = [    ...             ('A', 1, 100.2),    ...             ('B', 2, 234.5),    ...             ('C', 3, 999.0)    ...         ]     ...    ...         vars = [    ...             dict(name='name', label='Name', length=16,    ...                  type='varchar', rtype='char', offset=0),    ...             dict(name='index', label='Index', length=4,    ...                  type='int32', rtype='numeric', offset=16),    ...             dict(name='value', label='Value', length=8,    ...                  type='sas', rtype='numeric', offset=20),    ...         ]    ...    ...         super(MyDMH, self).__init__(vars)    ...    ...     def getrow(self, row):    ...         try:    ...             return self.data[row]    ...         except IndexError:    ...             return
+    ...
+    >>> mydmh = MyDMH()
+    >>> out = conn.addtable(table='mytable', **mydmh.args.addtable)
+    >>> tbl = out.casTable
+    >>> print(tbl.head())
+
+    Returns
+    -------
+    :class:`CASDataMsgHandler` object
+
     '''
 
     class CASDataMsgHandlerArgs(object):
-        '''
-        Container to hang data message handler arguments from
-
-        '''
+        ''' Generic object to hold data message handler arguments '''
         pass
 
     def __init__(self, vars, nrecs=1000, reclen=None, locale=None, transformers=None):
-        '''
-        Create a data handler object
-
-        Parameters
-        ----------
-        vars : list of dicts
-           The list of variables to upload.  This has the same format as
-           the vars= argument to the addtable action.  Each dict should
-           at least have the keys: name, rtype, and length.
-
-        nrecs : int or long, optional
-           The number of records in the buffer.
-        reclen : int or long, optional
-           The length of each record in the buffer.
-        locale : string, optional
-           The locale to use for messages.
-        transformers : dict of functions
-           Transformers to use for variables.  Keys are the column names.
-           Values are the function that does the transformation.
-
-        Returns
-        -------
-        CASDataMsgHandler object
-
-        '''
         for item in vars:
             if item.get('type', '').upper() == 'SAS' and \
                     item.get('rtype', '').upper() == 'CHAR':
@@ -127,8 +147,12 @@ class CASDataMsgHandler(object):
 
     @property
     def args(self):
-        '''
-        Property that contains prepopulated keyword arguments for common data actions
+        ''' 
+        Property that generates the CAS action parameters
+        for CAS actions that use a data message handler.  To use it,
+        you specify the CAS action name as an attribute name.  The
+        resulting dictionary can be expanded into keyword parameters
+        as follows: `conn.addtable(**mydmh.args.addtable)`.
 
         '''
         args = type(self).CASDataMsgHandlerArgs()
@@ -141,15 +165,15 @@ class CASDataMsgHandler(object):
 
         Parameters
         ----------
-        request : CASRequest object
-           Request object that came from the server.
-        connection : CAS object
-           Connection where the request came from.
+        request : :class:`CASRequest` object
+            Request object that came from the server.
+        connection : :class:`CAS` object
+            Connection where the request came from.
 
         Returns
         -------
-        CASResponse object
-           The response object retrieved after sending a batch of data
+        :class:`CASResponse` object
+            The response object retrieved after sending a batch of data
 
         '''
         if self._finished:
@@ -207,25 +231,21 @@ class CASDataMsgHandler(object):
 
         Parameters
         ----------
-        row : int or long
-           The row (or record) number to write to.
-        values : list of int, long, string, float
-           The values to write.
-
-        Returns
-        -------
-        None
+        row : int
+            The row (or record) number to write to.
+        values : list of int, long, string, or float
+            The values to write.
 
         Raises
         ------
-        SWATError
-           If any error occurs in writing the data
+        :exc:`SWATError`
+            If any error occurs in writing the data
 
         '''
         row = int64(row)
 
         def identity(val):
-            ''' Return val '''
+            ''' Return `val` '''
             return val
 
         def get(arr, idx, default=0):
@@ -288,16 +308,15 @@ class CASDataMsgHandler(object):
 
         Parameters
         ----------
-        connection : CAS object
-           The connection to get the response from.
-
-        **kwargs : dict, optional
-           Arbitrary keyword arguments.
+        connection : :class:`CAS` object
+            The connection to get the response from.
+        **kwargs : keyword arguments, optional
+             Keyword arguments to pass to :func:`getone`
 
         Returns
         -------
-        CASResponse object
-           The next response from the connection
+        :class:`CASResponse` object
+            The next response from the connection
 
         '''
         return getone(connection, **kwargs)
@@ -308,14 +327,10 @@ class CASDataMsgHandler(object):
 
         Parameters
         ----------
-        connection : CASConnection object
-           The connection that will receive the data.
-        nrecs : int or long
-           The number of records to send.
-
-        Returns
-        -------
-        None
+        connection : :class:`CAS` object
+            The connection that will receive the data.
+        nrecs : int
+            The number of records to send.
 
         '''
         errorcheck(self._sw_databuffer.send(
@@ -327,12 +342,8 @@ class CASDataMsgHandler(object):
 
         Parameters
         ----------
-        connection : CASConnection object
-           The connection that has been receiving the data.
-
-        Returns
-        -------
-        None
+        connection : :class:`CAS` object
+            The connection that has been receiving the data.
 
         '''
         self._finished = True
@@ -342,17 +353,17 @@ class CASDataMsgHandler(object):
         '''
         Return the list of values for the requested row
 
-        This method must be overridden by the subclass
+        This method must be overridden by the subclass.
 
         Parameters
         ----------
-        row : int or long
-           The row number for the values to retrieve
+        row : int
+            The row number for the values to retrieve.
 
         Returns
         -------
-        list of any
-           One row of data values
+        list-of-any
+            One row of data values
 
         '''
         raise NotImplementedError
@@ -360,29 +371,29 @@ class CASDataMsgHandler(object):
 
 class PandasDataFrame(CASDataMsgHandler):
     '''
-    Pandas DataFrame data message handler
+    CAS data message handler for :class:`pandas.DataFrame` objects
+
+    Parameters
+    ----------
+    data : :class:`pandas.DataFrame` object
+       The data to be uploaded.
+    nrecs : int, optional
+       The number of rows to allocate in the buffer.  This can be
+       smaller than the number of totals rows since they are uploaded
+       in batches `nrecs` long.
+
+    See Also
+    --------
+    :class:`pandas.DataFrame`
+    :class:`CASDataMsgHandler`
+
+    Returns
+    -------
+    :class:`PandasDataFrame` object
 
     '''
 
     def __init__(self, data, nrecs=1000, dtype=None, labels=None, formats=None):
-        '''
-        Create a Pandas data message handler
-
-        Parameters
-        ----------
-        data : pandas.DataFrame object
-           The data to be uploaded
-
-        nrecs : int or long, optional
-           The number of rows to allocate in the buffer.  This can be
-           smaller than the number of totals rows since they are uploaded
-           in batches nrecs long.
-
-        Returns
-        -------
-        PandasDataFrame object
-
-        '''
         transformers = {}
 
         def typemap(name, typ, dtype=dtype):
@@ -392,18 +403,18 @@ class PandasDataFrame(CASDataMsgHandler):
             Parameters
             ----------
             name : string
-                Name of the column
+                Name of the column.
             typ : Numpy data type
 
             Returns
             -------
             tuple
-               ( width, SAS data type string, CAS data type string )
+                ( width, SAS data type string, CAS data type string )
 
             Raises
             ------
-            TypeError
-               If an unrecognized type in encountered
+            :exc:`TypeError`
+                If an unrecognized type in encountered
 
             '''
             # pylint: disable=unused-variable
@@ -526,17 +537,17 @@ class PandasDataFrame(CASDataMsgHandler):
 
     def getrow(self, row):
         '''
-        Get a row of values
+        Get a row of values from the data source
 
         Parameters
         ----------
-        row : int or long
-           The row index to return
+        row : int
+            The row index to return.
 
         Returns
         -------
-        list of any
-           One row of data values
+        list-of-any
+            One row of data values
 
         '''
         if self.data is None:
@@ -569,236 +580,236 @@ class PandasDataFrame(CASDataMsgHandler):
 
 class SAS7BDAT(PandasDataFrame):
     '''
-    SAS7BDAT data message handler
+    Create a SAS7BDAT data message handler
+
+    Parameters
+    ----------
+    path : string
+       Path to SAS7BDAT file.
+    nrecs : int, optional
+       Number of records sent at a time.
+    **kwargs : keyword arguments, optional
+       Arguments sent to the :class:`sas7bdat.SAS7BDAT` constructor.
+
+    See Also
+    --------
+    :class:`sas7bdat.SAS7BDAT`
+    :class:`PandasDataFrame`
+
+    Returns
+    -------
+    :class:`SAS7BDAT` data message handler object
 
     '''
 
-    def __init__(self, f, nrecs=1000, **kwargs):
-        '''
-        Create a SAS7BDAT data message handler
-
-        Parameters
-        ----------
-        f : string
-           Path to SAS7BDAT file
-
-        nrecs : int, long (optional)
-           Number of records sent at a time
-        **kwargs : any (optional)
-           Arguments sent to the sas7bdat.SAS7BDAT constructor
-
-        Returns
-        -------
-        SAS7BDAT data message handler object
-
-        '''
+    def __init__(self, path, nrecs=1000, **kwargs):
         import sas7bdat
         super(SAS7BDAT, self).__init__(
-            sas7bdat.SAS7BDAT(f, **kwargs).to_data_frame(), nrecs)
+            sas7bdat.SAS7BDAT(path, **kwargs).to_data_frame(), nrecs)
 
 
 class CSV(PandasDataFrame):
     '''
-    CSV data message handler
+    Create a CSV data messsage handler
+
+    Parameters
+    ----------
+    path : string
+        Path to CSV file.
+    nrecs : int, optional
+        Number of records to send at a time.
+    **kwargs : keyword arguments, optional
+        Arguments sent to :func:`pandas.read_csv`.
+
+    See Also
+    --------
+    :func:`pandas.read_csv`
+    :class:`PandasDataFrame`
+
+    Returns
+    -------
+    :class:`CSV` data message handler object
 
     '''
 
-    def __init__(self, f, nrecs=1000, **kwargs):
-        '''
-        Create a CSV data messsage handler
-
-        Parameters
-        ----------
-        f : string
-           Path to CSV file
-
-        nrecs : int or long, optional
-           Number of records to send at a time
-        **kwargs : any, optional
-           Arguments sent to pandas.io.parsers.read_csv
-
-        Returns
-        -------
-        CSV data message handler object
-
-        '''
+    def __init__(self, path, nrecs=1000, **kwargs):
         kwargs.setdefault('chunksize', nrecs)
         try:
-            super(CSV, self).__init__(pd.io.parsers.read_csv(f, **kwargs), nrecs)
+            super(CSV, self).__init__(pd.io.parsers.read_csv(path, **kwargs), nrecs)
         except StopIteration:
             del kwargs['chunksize']
-            super(CSV, self).__init__(pd.io.parsers.read_csv(f, **kwargs), nrecs)
+            super(CSV, self).__init__(pd.io.parsers.read_csv(path, **kwargs), nrecs)
 
 
 class Text(PandasDataFrame):
     '''
-    Text data message handler
+    Create a Text data message handler
+
+    Parameters
+    ----------
+    path : string
+        Path to text file.
+    nrecs : int, optional
+        Number of records to send at a time.
+    **kwargs : keyword arguments, optional
+        Arguments sent to :func:`pandas.io.parsers.read_table`.
+
+    See Also
+    --------
+    :func:`pandas.io.parsers.read_table`
+    :class:`PandasDataFrame`
+
+    Returns
+    -------
+    :class:`Text` data message handler object
 
     '''
 
-    def __init__(self, f, nrecs=1000, **kwargs):
-        '''
-        Create a Text data message handler
-
-        Parameters
-        ----------
-        f : string
-           Path to text file
-
-        nrecs : int or long, optional
-           Number of records to send at a time
-        **kwargs : any, optional
-           Arguments sent to pandas.io.parsers.read_table
-
-        Returns
-        -------
-        Text data message handler object
-
-        '''
+    def __init__(self, path, nrecs=1000, **kwargs):
         kwargs.setdefault('chunksize', nrecs)
         try:
-            super(Text, self).__init__(pd.io.parsers.read_table(f, **kwargs), nrecs)
+            super(Text, self).__init__(pd.io.parsers.read_table(path, **kwargs), nrecs)
         except StopIteration:
             del kwargs['chunksize']
-            super(Text, self).__init__(pd.io.parsers.read_table(f, **kwargs), nrecs)
+            super(Text, self).__init__(pd.io.parsers.read_table(path, **kwargs), nrecs)
 
 
 class FWF(PandasDataFrame):
     '''
-    Fixed-width formatted data message handler
+    Create an FWF data message handler
+
+    Parameters
+    ----------
+    path : string
+       Path to text file.
+    nrecs : int, optional
+       Number of records to send at a time.
+    **kwargs : keyword arguments, optional
+       Arguments sent to :func:`pandas.io.parsers.read_table`.
+
+    See Also
+    --------
+    :func:`pandas.io.parsers.read_table`
+    :class:`PandasDataFrame`
+
+    Returns
+    -------
+    :class:`FWF` data message handler object
 
     '''
 
-    def __init__(self, f, nrecs=1000, **kwargs):
-        '''
-        Create an FWF data message handler
-
-        Parameters
-        ----------
-        f : string
-           Path to text file
-
-        nrecs : int or long, optional
-           Number of records to send at a time
-        **kwargs : any, optional
-           Arguments sent to pandas.io.parsers.read_table
-
-        Returns
-        -------
-        FWF data message handler object
-
-        '''
+    def __init__(self, path, nrecs=1000, **kwargs):
         kwargs.setdefault('chunksize', nrecs)
         try:
-            super(FWF, self).__init__(pd.io.parsers.read_fwf(f, **kwargs), nrecs)
+            super(FWF, self).__init__(pd.io.parsers.read_fwf(path, **kwargs), nrecs)
         except StopIteration:
             del kwargs['chunksize']
-            super(FWF, self).__init__(pd.io.parsers.read_fwf(f, **kwargs), nrecs)
+            super(FWF, self).__init__(pd.io.parsers.read_fwf(path, **kwargs), nrecs)
 
 
 class JSON(PandasDataFrame):
     '''
-    JSON data message handler
+    Create a JSON data message handler
+
+    Parameters
+    ----------
+    path : string
+        Path to JSON file.
+    nrecs : int, optional
+        Number of records to send at a time
+    **kwargs : keyword arguments, optional
+        Arguments sent to :func:`pandas.read_json`.
+
+    See Also
+    --------
+    :func:`pandas.read_json`
+    :class:`PandasDataFrame`
+
+    Returns
+    -------
+    :func:`JSON` data message handler object
 
     '''
 
-    def __init__(self, f, nrecs=1000, **kwargs):
-        '''
-        Create a JSON data message handler
-
-        Parameters
-        ----------
-        f : string
-           Path to JSON file
-
-        nrecs : int or long, optional
-           Number of records to send at a time
-        **kwargs : any, optional
-           Arguments sent to pandas.read_json
-
-        Returns
-        -------
-        JSON data message handler object
-
-        '''
-        super(JSON, self).__init__(pd.read_json(f, **kwargs), nrecs)
+    def __init__(self, path, nrecs=1000, **kwargs):
+        super(JSON, self).__init__(pd.read_json(path, **kwargs), nrecs)
 
 
 class HTML(PandasDataFrame):
     '''
-    HTML data message handler
+    Create an HTML data message handler
+
+    Parameters
+    ----------
+    path : string
+        Path or URL to HTML file.
+    index : int, optional
+        Index of table in the file.
+    nrecs : int, optional
+        Number of records to send at a time.
+    **kwargs : keyword arguments, optional
+        Arguments sent to :func:`pandas.read_html`.
+
+    See Also
+    --------
+    :func:`pandas.read_html`
+    :class:`PandasDataFrame`
+
+    Returns
+    -------
+    :class:`HTML` data message handler object
 
     '''
 
-    def __init__(self, f, index=0, nrecs=1000, **kwargs):
-        '''
-        Create an HTML data message handler
-
-        Parameters
-        ----------
-        f : string
-           Path/URL to HTML file
-
-        index : int or long, optional
-           Index of table in the file
-        nrecs : int or long, optional
-           Number of records to send at a time
-        **kwargs : any, optional
-           Arguments sent to pandas.read_html
-
-        Returns
-        -------
-        HTML data message handler object
-
-        '''
-        super(HTML, self).__init__(pd.read_html(f, **kwargs)[index], nrecs)
+    def __init__(self, path, index=0, nrecs=1000, **kwargs):
+        super(HTML, self).__init__(pd.read_html(path, **kwargs)[index], nrecs)
 
 
 class SQLTable(PandasDataFrame):
     '''
-    SQL Alchemy table data message handler
+    Create an SQLTable data message handler
+
+    Parameters
+    ----------
+    table : string
+        Name of table in database to fetch.
+    engine : sqlalchemy engine
+        sqlalchemy engine.
+    nrecs : int, optional
+        Number of records to send at a time.
+    **kwargs : keyword arguments, optional
+        Arguments sent to :class:`pandas.io.read_sql_table`.
+
+    Returns
+    -------
+    :class:`SQLTable` data message handler object
+    :class:`PandasDataFrame`
 
     '''
 
     def __init__(self, table, engine, nrecs=1000, **kwargs):
-        '''
-        Create an SQLTable data message handler
-
-        Parameters
-        ----------
-        table : string
-           Name of table in database to fetch
-        engine : sqlalchemy engine
-           sqlalchemy engine
-
-        nrecs : int or long, optional
-           Number of records to send at a time
-        **kwargs : any, optional
-           Arguments sent to pandas.io.read_sql_table
-
-        Returns
-        -------
-        SQLTable data message handler object
-
-        '''
         super(SQLTable, self).__init__(
             pd.io.sql.read_sql_table(table, engine, **kwargs), nrecs)
 
     @classmethod
     def create_engine(cls, *args, **kwargs):
         '''
-        Return engine from sqlalchemy.create_engine
+        Return engine from :func:`sqlalchemy.create_engine`
 
         Parameters
         ----------
         *args : any
-           Positional arguments to sqlalchemy.create_engine
+            Positional arguments to :func:`sqlalchemy.create_engine`.
         **kwargs : any
-           Keyword arguments to sqlalchemy.create_engine
+            Keyword arguments to :func:`sqlalchemy.create_engine`.
+
+        See Also
+        --------
+        :func:`sqlalchemy.create_engine`
 
         Returns
         -------
-        SQLAlchemy engine
+        :class:`SQLAlchemy` engine
 
         '''
         from sqlalchemy import create_engine
@@ -807,49 +818,53 @@ class SQLTable(PandasDataFrame):
 
 class SQLQuery(PandasDataFrame):
     '''
-    SQL Alchemy query data message handler
+    Create an SQLQuery data message handler
+
+    Parameters
+    ----------
+    query : string
+        SQL query.
+    engine : sqlalchemy engine
+        sqlalchemy engine.
+    nrecs : int or long, optional
+        Number of records to send at a time.
+    **kwargs : any, optional
+        Arguments sent to :func:`pandas.io.sql.read_sql_query`.
+
+    See Also
+    --------
+    :func:`pandas.io.sql.read_sql_query`
+    :class:`PandasDataFrame`
+
+    Returns
+    -------
+    :class:`SQLQuery` data message handler object
 
     '''
 
     def __init__(self, query, engine, nrecs=1000, **kwargs):
-        '''
-        Create an SQLQuery data message handler
-
-        Parameters
-        ----------
-        query : string
-           SQL query
-        engine : sqlalchemy engine
-           sqlalchemy engine
-
-        nrecs : int or long, optional
-           Number of records to send at a time
-        **kwargs : any, optional
-           Arguments sent to pandas.io.sql.read_sql_query
-
-        Returns
-        -------
-        SQLQuery data message handler object
-
-        '''
         super(SQLQuery, self).__init__(
             pd.io.sql.read_sql_query(query, engine, **kwargs), nrecs)
 
     @classmethod
     def create_engine(cls, *args, **kwargs):
         '''
-        Return engine from sqlalchemy.create_engine
+        Return engine from :func:`sqlalchemy.create_engine`
 
         Parameters
         ----------
         *args : any
-           Positional arguments to sqlalchemy.create_engine
+            Positional arguments to :func:`sqlalchemy.create_engine`.
         **kwargs : any
-           Keyword arguments to sqlalchemy.create_engine
+            Keyword arguments to :func:`sqlalchemy.create_engine`.
+
+        See Also
+        --------
+        :func:`sqlalchemy.create_engine`
 
         Returns
         -------
-        SQLAlchemy engine
+        :class:`SQLAlchemy` engine
 
         '''
         from sqlalchemy import create_engine
@@ -858,56 +873,57 @@ class SQLQuery(PandasDataFrame):
 
 class Excel(PandasDataFrame):
     '''
-    Excel data message handler
+    Create an Excel data message handler
+
+    Arguments
+    ---------
+    path : string
+        Path to Excel file.
+    sheet : string or int, optional
+        Sheet name or index to import.
+    nrecs : int, optional
+        Number of records to send at a time.
+    **kwargs : keyword arguments, optional
+        Arguments sent to :func:`pandas.read_excel`.
+
+    See Also
+    --------
+    :func:`pandas.read_excel`
+    :class:`PandasDataFrame`
+
+    Returns
+    -------
+    :class:`Excel` data message handler object
 
     '''
 
-    def __init__(self, f, sheet=0, nrecs=1000, **kwargs):
-        '''
-        Create an Excel data message handler
-
-        Arguments
-        ---------
-        f : string
-           Path to Excel file
-        sheet : string or int or long
-           Sheet name or index to import
-
-        nrecs : int or long, optional
-           Number of records to send at a time
-        **kwargs : any, optional
-           Arguments sent to pandas.read_excel
-
-        Returns
-        -------
-        Excel data message handler object
-
-        '''
-        super(Excel, self).__init__(pd.read_excel(f, sheet, **kwargs), nrecs)
+    def __init__(self, path, sheet=0, nrecs=1000, **kwargs):
+        super(Excel, self).__init__(pd.read_excel(path, sheet, **kwargs), nrecs)
 
 
 class Clipboard(PandasDataFrame):
     '''
-    Clipboard data message handler
+    Create a Clipboard data message handler
+
+    Parameters
+    ----------
+    nrecs : int, optional
+        Number of recods to send at a time.
+    **kwargs : keyword arguments, optional
+        Arguments sent to :func:`pandas.read_clipboard`.
+
+    See Also
+    --------
+    :func:`pandas.read_clipboard`
+    :class:`PandasDataFrame`
+
+    Returns
+    -------
+    :class:`Clipboard` data message handler object
 
     '''
 
     def __init__(self, nrecs=1000, **kwargs):
-        '''
-        Create a Clipboard data message handler
-
-        Parameters
-        ----------
-        nrecs : int or long, optional
-           Number of recods to send at a time
-        **kwargs : any, optional
-           Arguments sent to pandas.read_clipboard
-
-        Returns
-        -------
-        Clipboard data message handler object
-
-        '''
         super(Clipboard, self).__init__(pd.read_clipboard(**kwargs), nrecs)
 
 
@@ -922,28 +938,30 @@ class DBAPITypeObject(object):
 
 
 class DBAPI(CASDataMsgHandler):
-    ''' DBAPI data message handler '''
+    '''
+    Create a Python DB-API 2.0 compliant data message handler
+
+    Parameters
+    ----------
+    module : database module
+        The database module used to create the cursor.  This is used
+        for the data type constants for determining column types.
+    cursor : Cursor object
+        The cursor where the results should be fetched from.
+    nrecs : int, optional
+        The number of records to fetch and upload at a time.
+
+    See Also
+    --------
+    :class:`CASDataMsgHandler`
+
+    Returns
+    -------
+    :class:`DBAPI` data message handler object
+
+    '''
 
     def __init__(self, module, cursor, nrecs=1000):
-        '''
-        Create a Python DB-API 2.0 compliant data message handler
-
-        Parameters
-        ----------
-        module : Python module
-           The database module used to create the cursor.  This is used
-           for the data type constants for determining column types.
-        cursor : Cursor object
-           The cursor where the results should be fetched from.
-
-        nrecs : int or long, optional
-           The number of records to fetch and upload at a time.
-
-        Returns
-        -------
-        DBAPI data message handler object
-
-        '''
         self.cursor = cursor
         self.cursor.arraysize = nrecs
 
@@ -1020,17 +1038,17 @@ class DBAPI(CASDataMsgHandler):
 
     def getrow(self, row):
         '''
-        Return a row of values
+        Return a row of values from the data source
 
         Parameters
         ----------
-        row : int or long
-           Index of row to return
+        row : int
+            Index of row to return.
 
         Returns
         -------
         list of any
-           One row of data values
+            One row of data values
 
         '''
         if hasattr(self, '_firstrow'):
