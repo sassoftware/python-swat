@@ -4,12 +4,12 @@
 Workflows
 *********
 
-The **SWAT** package includes the ability to call **CAS** actions and process the 
-output in various ways.  These range from simple (calling **CAS** actions as Python
-methods and getting a dictionary of results back) to complex (invoking **CAS**
+The SWAT package includes the ability to call CAS actions and process the 
+output in various ways.  These range from simple (calling CAS actions as Python
+methods and getting a dictionary of results back) to complex (invoking CAS
 actions in multiple sessions and handling server responses from them directly).
 The various workflows are described in the following sections to give you an idea
-of how the classes in **SWAT** interact with each other.
+of how the classes in SWAT interact with each other.
 
 The Easy Way
 ============
@@ -18,13 +18,13 @@ In the most basic form of calling CAS actions, the actions are called directly
 on the connection object or a :class:`CASTable` object.  When you load a CAS
 action set (using `builtins.loadactionset`), the CAS actions in that action set
 are added to the connection object as Python methods.  For example, when the 
-`simple` action set is loaded, the CAS connection object is extended with 
-methods for `summary`, `freq`, `crosstab`, etc.  These can then be called on 
+``simple`` action set is loaded, the CAS connection object is extended with 
+methods for ``summary``, ``freq``, ``crosstab``, etc.  These can then be called on 
 the CAS connection object directly.
 
 In addition, any :class:`CASTable` objects that are registered with that connection
 also get methods for those actions.  When you call a CAS action on a :class:`CASTable`
-object, the `table=` (or `name=` and `caslib=` in some cases) parameter get populated
+object, the ``table=`` (or ``name=`` and ``caslib=`` in some cases) parameter get populated
 automatically with that table object before it is sent to the CAS server.
 
 Here is a simple example.  We are reading a CSV file using the :meth:`CAS.read_csv`
@@ -67,13 +67,18 @@ This is simply an ordered Python dictionary with a few extra attributes and
 methods added.  You can see the keys printed in the output above (surround by 
 square brackets).  This output only contains a single key: **Summary**.
 
+Here is a diagram showing the process of calling and action and consuming
+the responses into the :class:`CASResults` object.
+
+.. image:: _static/easyway-workflow.png
+
 Using Response and Result Callbacks
 ===================================
 
 The next workflow is to use callback functions to handle either the responses
 from the CAS server, or the individual result keys in the responses.  You
 still use the CAS action methods on the :class:`CAS` connection object, but this
-time you add either a `responsefunc=` or `resultfunc=` function argument.
+time you add either a ``responsefunc=`` or ``resultfunc=`` function argument.
 
 The result callback function takes five arguments: `key`, `value`, `response`,
 `connection`, and `userdata`.  Those are the result key and value, the response the result
@@ -109,15 +114,18 @@ Here is an example demonstrating both styles of callbacks.
    tbl.summary(resultfunc=result_cb) 
 
    def response_cb(response, connection, userdata):
-       for result in response:
-           for k, v in result.items():
-               print('>>> RESPONSE', k, v)
+       for k, v in response:
+           print('>>> RESPONSE', k, v)
        return userdata
 
    tbl.summary(responsefunc=response_cb) 
 
    conn.close()
 
+Here is the flow diagram for using callbacks.  Note that only the result **or**
+response callback is called.  It will not call both.
+   
+.. image:: _static/callbacks-workflow.png
 
 Handling Multiple Actions Simultaneously
 ========================================
@@ -151,7 +159,7 @@ thread on the client.
                          'sassoftware/sas-viya-programming/master/data/cars.csv')
    print(tbl2.head())
 
-Now that we have the tables loaded, we can invoke the `summary` action on each
+Now that we have the tables loaded, we can invoke the ``summary`` action on each
 one and retrieve the responses from both connections.
 
 .. ipython:: python
@@ -160,10 +168,12 @@ one and retrieve the responses from both connections.
    tbl2.invoke('summary');
 
    for resp, conn in swat.getnext(conn1, conn2):
-       for result in resp:
-           for k, v in result.items():
-               print('>>> RESULT', k, v)
+       for k, v in resp:
+           print('>>> RESULT', k, v)
 
    conn1.close()
    conn2.close()
 
+The flow diagram for handling multiple connections simultaneously is shown below.
+
+.. image:: _static/simultaneous-workflow.png
