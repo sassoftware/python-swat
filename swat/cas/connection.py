@@ -1122,6 +1122,60 @@ class CAS(object):
 
         return self._get_results([(CASResponse(resp, connection=self), self)])
 
+    def upload_file(self, data, importoptions=None, promote=None, casout=None):
+        '''
+        Upload a client-side data file to CAS and parse it into a CAS table
+        
+        Parameters
+        ----------
+        data : string
+            Either a filename or URL.
+            or a URL.  DataFrames will be converted to CSV before
+            uploading.
+        importoptions : dict, optional
+            Import options for the table.upload action.
+        promote : boolean, optional
+            Should the resulting table be in the global namespace?
+        casout : dict, optional
+            Output table definition for the `table.upload` action.
+
+        Returns
+        -------
+        :class:`CASTable`
+
+        '''
+        out = self.upload(data, importoptions=importoptions,
+                          promote=promote, casout=casout)
+        if out.severity > 1:
+            raise SWATError(out.status)
+        return out['casTable']
+
+    def upload_frame(self, data, importoptions=None, promote=None, casout=None):
+        '''
+        Upload a client-side data file to CAS and parse it into a CAS table
+        
+        Parameters
+        ----------
+        data : :class:`pandas.DataFrame`
+            DataFrames will be converted to CSV before uploading.
+        importoptions : dict, optional
+            Import options for the table.upload action.
+        promote : boolean, optional
+            Should the resulting table be in the global namespace?
+        casout : dict, optional
+            Output table definition for the `table.upload` action.
+
+        Returns
+        -------
+        :class:`CASTable`
+
+        '''
+        out = self.upload(data, importoptions=importoptions,
+                          promote=promote, casout=casout)
+        if out.severity > 1:
+            raise SWATError(out.status)
+        return out['casTable']
+
     def invoke(self, _name_, **kwargs):
         '''
         Call an action on the server

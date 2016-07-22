@@ -43,8 +43,8 @@ to the best of both worlds.
    install
    getting-started
    workflows
-   table-vs-dataframe
    loading-data
+   table-vs-dataframe
    api
    troubleshooting
    about

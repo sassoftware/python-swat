@@ -35,10 +35,20 @@ Session Management
 Reading Data
 ~~~~~~~~~~~~
 
+Server-Side Files
+................
+
 .. autosummary::
    :toctree: generated/
 
    CAS.read_cas_path
+
+Client-Side Files
+.................
+
+.. autosummary::
+   :toctree: generated/
+
    CAS.read_pickle
    CAS.read_table
    CAS.read_csv
@@ -53,7 +63,15 @@ Reading Data
    CAS.read_sql
    CAS.read_gbq
    CAS.read_stata
-   CAS.upload
+   CAS.upload_file
+
+Client-Side DataFrames
+......................
+   
+.. autosummary::
+   :toctree: generated/
+
+   CAS.upload_frame
 
 Running Actions
 ~~~~~~~~~~~~~~~

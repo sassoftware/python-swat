@@ -9,11 +9,12 @@ and how large the data is.  For small data sets or data that you want to use a c
 parser for, you can use client-side data.  For large data sets, you would use 
 server-side data files.
 
-The Easy Method
-===============
 
-Client-Side Parsed Data
------------------------
+Client-Side Data Files and Sources
+==================================
+
+Using Client-Side Parsers
+-------------------------
 
 The easiest way to get data into CAS is using the data loading methods on the 
 :class:`CAS` object that parallel data reading operations in the :mod:`pandas`
@@ -59,8 +60,50 @@ all of the Pandas parsing options.
    cars.head()
 
 
-Client-Side Data Parsed on Server
----------------------------------
+Parsing Client-Side Data on the Server
+--------------------------------------
+
+If you don't need the full power of Pandas' parsers, you may be better off uploading
+the file to CAS and parse it there.  This offers some advantages as well.  The server
+parsers will likely be faster than a client-side parser (especially in MPP mode where
+parsing of some file types can happen in parallel).  Doing server-side parsing is also
+more efficient since it doesn't require the data to be converted to Python objects
+before creating the data buffer to be sent to the server.
+
+The :meth:`CAS.upload_file` method uploads a data file as-is to CAS and invokes the 
+``table.loadtable`` action in the background to parse it.  Let's use the same data
+file as the previous examples, but let the server do the parsing.  Just as before,
+if a URL is specified, it must be downloaded to the client then uploaded CAS.
+
+.. ipython:: python
+
+   cars = conn.upload_file('https://raw.githubusercontent.com/'
+                           'sassoftware/sas-viya-programming/master/data/cars.csv')
+   cars.head()
+
+
+Creating Custom Data Loaders
+----------------------------
+
+
+Server-Side Data Files and Sources
+==================================
+
+Using Server-Side Parsers
+-------------------------
+
+If you have data files on the server, you can load them directly from the CASLib that 
+they are in.  Paths to files in a CASLib are always relative paths.  This is the 
+recommended method for large data files.
+
+.. ipython:: python
+
+   cars = conn.read_cas_path('data/cars.csv', caslib='casuser')
+   cars.head()
+
+
+Loading Data from Other Sources
+-------------------------------
 
 
 .. ipython:: python
