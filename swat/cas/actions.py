@@ -431,6 +431,11 @@ class CASActionSet(object):
         for act in asinfo.get('actions', []):
             actcls = CASAction.from_reflection(asname, act, connection)
             clsname = actcls.__name__.split('.', 1)[-1].lower()
+
+            # Don't include table.upload, it can't be called directly.
+            if asname == 'table' and clsname.lower() == 'upload':
+                continue
+
             actions[clsname] = actcls
 
         # Generate action set class

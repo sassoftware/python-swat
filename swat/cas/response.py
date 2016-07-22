@@ -310,14 +310,12 @@ class CASResponse(object):
         ''' Iterate over all results in the response '''
         _sw_result = errorcheck(self._sw_response.getNextResult(), self._sw_response)
         while _sw_result:
-            output = {}
             key = errorcheck(_sw_result.getKey(), _sw_result)
             if key is None:
                 key = 0
             elif isinstance(key, binary_types):
                 key = a2u(key, 'utf-8')
-            output[key] = cas2py(_sw_result, self.soptions, connection=self._connection)
-            yield output
+            yield key, cas2py(_sw_result, self.soptions, connection=self._connection)
             _sw_result = errorcheck(self._sw_response.getNextResult(), self._sw_response)
 
     def __str__(self):

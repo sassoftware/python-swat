@@ -48,7 +48,7 @@ such as :meth:`pandas.DataFrame.head` to interact with the CAS table on the serv
 
    tbl = conn.read_csv('https://raw.githubusercontent.com/'
                        'sassoftware/sas-viya-programming/master/data/cars.csv')
-   print(tbl.head())
+   tbl.head()
 
 You can call CAS actions directly on the :class:`CAS` connection object and 
 pass in the table argument, or you can call the CAS action directly on the 
@@ -56,9 +56,9 @@ pass in the table argument, or you can call the CAS action directly on the
 
 .. ipython:: python
 
-   print(conn.summary(table=tbl))
+   conn.summary(table=tbl)
 
-   print(tbl.summary())
+   tbl.summary()
 
    conn.close()
 
@@ -105,7 +105,7 @@ Here is an example demonstrating both styles of callbacks.
 
    tbl = conn.read_csv('https://raw.githubusercontent.com/'
                        'sassoftware/sas-viya-programming/master/data/cars.csv')
-   print(tbl.head())
+   tbl.head()
 
    def result_cb(key, value, response, connection, userdata):
        print('>>> RESULT', key, value)
@@ -153,11 +153,11 @@ thread on the client.
 
    tbl1 = conn1.read_csv('https://raw.githubusercontent.com/'
                          'sassoftware/sas-viya-programming/master/data/class.csv')
-   print(tbl1.head())
+   tbl1.head()
 
    tbl2 = conn2.read_csv('https://raw.githubusercontent.com/'
                          'sassoftware/sas-viya-programming/master/data/cars.csv')
-   print(tbl2.head())
+   tbl2.head()
 
 Now that we have the tables loaded, we can invoke the ``summary`` action on each
 one and retrieve the responses from both connections.

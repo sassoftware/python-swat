@@ -90,7 +90,30 @@ class CASDataMsgHandler(object):
     >>> conn = swat.CAS()
     >>> import swat.cas.datamsghandlers as dmh
     >>> class MyDMH(dmh.CASDataMsgHandler):
-    ...       ...     def __init__(self):    ...         self.data = [    ...             ('A', 1, 100.2),    ...             ('B', 2, 234.5),    ...             ('C', 3, 999.0)    ...         ]     ...    ...         vars = [    ...             dict(name='name', label='Name', length=16,    ...                  type='varchar', rtype='char', offset=0),    ...             dict(name='index', label='Index', length=4,    ...                  type='int32', rtype='numeric', offset=16),    ...             dict(name='value', label='Value', length=8,    ...                  type='sas', rtype='numeric', offset=20),    ...         ]    ...    ...         super(MyDMH, self).__init__(vars)    ...    ...     def getrow(self, row):    ...         try:    ...             return self.data[row]    ...         except IndexError:    ...             return
+    ...   
+    ...     def __init__(self):
+    ...         self.data = [
+    ...             ('A', 1, 100.2),
+    ...             ('B', 2, 234.5),
+    ...             ('C', 3, 999.0)
+    ...         ] 
+    ...
+    ...         vars = [
+    ...             dict(name='name', label='Name', length=16,
+    ...                  type='varchar', rtype='char', offset=0),
+    ...             dict(name='index', label='Index', length=4,
+    ...                  type='int32', rtype='numeric', offset=16),
+    ...             dict(name='value', label='Value', length=8,
+    ...                  type='sas', rtype='numeric', offset=20),
+    ...         ]
+    ...
+    ...         super(MyDMH, self).__init__(vars)
+    ...
+    ...     def getrow(self, row):
+    ...         try:
+    ...             return self.data[row]
+    ...         except IndexError:
+    ...             return
     ...
     >>> mydmh = MyDMH()
     >>> out = conn.addtable(table='mytable', **mydmh.args.addtable)
@@ -126,6 +149,19 @@ class CASDataMsgHandler(object):
         for v in self.vars:
             if v.get('length', 0) <= 0:
                 v['length'] = _SIZES[v['type'].lower()]
+            # Map CAS names to SAS names
+            if v.get('type', '').upper() == 'DOUBLE':
+                v['type'] = 'sas'
+                v['rtype'] = 'numeric'
+            elif v.get('type', '').upper() == 'CHAR':
+                v['type'] = 'sas'
+                v['rtype'] = 'char'
+            # Fill in missing rtypes
+            if 'rtype' not in v:
+                if v['type'].upper() in ['VARCHAR', 'CHAR', 'BINARY', 'VARBINARY']:
+                    v['rtype'] = 'CHAR'
+                else:
+                    v['rtype'] = 'NUMERIC'
 
         # Compute reclen
         if reclen is None:
@@ -263,6 +299,17 @@ class CASDataMsgHandler(object):
             transformer = self.transformers.get(v['name'], identity)
             vtype = v.get('type', '').upper()
             vrtype = v.get('rtype', '').upper()
+            if transformer is identity:
+                if vtype == 'DATE' and isinstance(value, (datetime.datetime,
+                                                          datetime.date)):
+                    value = python2cas_date(value) 
+                elif vtype == 'TIME' and isinstance(value, (datetime.datetime,
+                                                            datetime.time)):
+                    value = python2cas_time(value) 
+                elif vtype == 'DATETIME' and isinstance(value, (datetime.date,
+                                                                datetime.time,
+                                                                datetime.datetime)):
+                    value = python2cas_datetime(value) 
             if vrtype == 'CHAR' or vtype in ['VARCHAR', 'CHAR']:
                 if isinstance(value, binary_types) or isinstance(value, text_types):
                     errorcheck(self._sw_databuffer.setString(row, offset,
@@ -393,8 +440,9 @@ class PandasDataFrame(CASDataMsgHandler):
 
     '''
 
-    def __init__(self, data, nrecs=1000, dtype=None, labels=None, formats=None):
-        transformers = {}
+    def __init__(self, data, nrecs=1000, dtype=None, labels=None, formats=None, transformers=None):
+        if transformers is None:
+            transformers = {}
 
         def typemap(name, typ, dtype=dtype):
             '''
@@ -487,11 +535,11 @@ class PandasDataFrame(CASDataMsgHandler):
         variables = []
         for name, nptype in zip(data.columns, data.dtypes):
             length, rtype, subtype = typemap(name, nptype)
-            if subtype == 'DATETIME':
+            if subtype == 'DATETIME' and name not in transformers:
                 transformers[name] = lambda x: str2cas_timestamp(x)
-            elif subtype == 'DATE':
+            elif subtype == 'DATE' and name not in transformers:
                 transformers[name] = lambda x: str2cas_date(x)
-            elif subtype == 'TIME':
+            elif subtype == 'TIME' and name not in transformers:
                 transformers[name] = lambda x: str2cas_time(x)
 
             variables.append({'name': name, 'rtype': rtype, 'type': subtype,
@@ -602,10 +650,11 @@ class SAS7BDAT(PandasDataFrame):
 
     '''
 
-    def __init__(self, path, nrecs=1000, **kwargs):
+    def __init__(self, path, nrecs=1000, transformers=None, **kwargs):
         import sas7bdat
         super(SAS7BDAT, self).__init__(
-            sas7bdat.SAS7BDAT(path, **kwargs).to_data_frame(), nrecs)
+            sas7bdat.SAS7BDAT(path, **kwargs).to_data_frame(), nrecs=nrecs,
+            transformers=transformers)
 
 
 class CSV(PandasDataFrame):
@@ -632,13 +681,15 @@ class CSV(PandasDataFrame):
 
     '''
 
-    def __init__(self, path, nrecs=1000, **kwargs):
+    def __init__(self, path, nrecs=1000, transformers=None, **kwargs):
         kwargs.setdefault('chunksize', nrecs)
         try:
-            super(CSV, self).__init__(pd.io.parsers.read_csv(path, **kwargs), nrecs)
+            super(CSV, self).__init__(pd.io.parsers.read_csv(path, **kwargs),
+                                      nrecs=nrecs, transformers=transformers)
         except StopIteration:
             del kwargs['chunksize']
-            super(CSV, self).__init__(pd.io.parsers.read_csv(path, **kwargs), nrecs)
+            super(CSV, self).__init__(pd.io.parsers.read_csv(path, **kwargs),
+                                      nrecs=nrecs, transformers=transformers)
 
 
 class Text(PandasDataFrame):
@@ -665,13 +716,15 @@ class Text(PandasDataFrame):
 
     '''
 
-    def __init__(self, path, nrecs=1000, **kwargs):
+    def __init__(self, path, nrecs=1000, transformers=None, **kwargs):
         kwargs.setdefault('chunksize', nrecs)
         try:
-            super(Text, self).__init__(pd.io.parsers.read_table(path, **kwargs), nrecs)
+            super(Text, self).__init__(pd.io.parsers.read_table(path, **kwargs),
+                                       nrecs=nrecs, transformers=transformers)
         except StopIteration:
             del kwargs['chunksize']
-            super(Text, self).__init__(pd.io.parsers.read_table(path, **kwargs), nrecs)
+            super(Text, self).__init__(pd.io.parsers.read_table(path, **kwargs),
+                                       nrecs=nrecs, transformers=transformers)
 
 
 class FWF(PandasDataFrame):
@@ -698,13 +751,15 @@ class FWF(PandasDataFrame):
 
     '''
 
-    def __init__(self, path, nrecs=1000, **kwargs):
+    def __init__(self, path, nrecs=1000, transformers=None, **kwargs):
         kwargs.setdefault('chunksize', nrecs)
         try:
-            super(FWF, self).__init__(pd.io.parsers.read_fwf(path, **kwargs), nrecs)
+            super(FWF, self).__init__(pd.io.parsers.read_fwf(path, **kwargs),
+                                      nrecs=nrecs, transformers=transformers)
         except StopIteration:
             del kwargs['chunksize']
-            super(FWF, self).__init__(pd.io.parsers.read_fwf(path, **kwargs), nrecs)
+            super(FWF, self).__init__(pd.io.parsers.read_fwf(path, **kwargs),
+                                      nrecs=nrecs, transformers=transformers)
 
 
 class JSON(PandasDataFrame):
@@ -731,8 +786,9 @@ class JSON(PandasDataFrame):
 
     '''
 
-    def __init__(self, path, nrecs=1000, **kwargs):
-        super(JSON, self).__init__(pd.read_json(path, **kwargs), nrecs)
+    def __init__(self, path, nrecs=1000, transformers=None, **kwargs):
+        super(JSON, self).__init__(pd.read_json(path, **kwargs), 
+                                   nrecs=nrecs, transformers=transformers)
 
 
 class HTML(PandasDataFrame):
@@ -761,8 +817,9 @@ class HTML(PandasDataFrame):
 
     '''
 
-    def __init__(self, path, index=0, nrecs=1000, **kwargs):
-        super(HTML, self).__init__(pd.read_html(path, **kwargs)[index], nrecs)
+    def __init__(self, path, index=0, nrecs=1000, transformers=None, **kwargs):
+        super(HTML, self).__init__(pd.read_html(path, **kwargs)[index],
+                                   nrecs=nrecs, transformers=transformers)
 
 
 class SQLTable(PandasDataFrame):
@@ -787,9 +844,10 @@ class SQLTable(PandasDataFrame):
 
     '''
 
-    def __init__(self, table, engine, nrecs=1000, **kwargs):
+    def __init__(self, table, engine, nrecs=1000, transformers=None, **kwargs):
         super(SQLTable, self).__init__(
-            pd.io.sql.read_sql_table(table, engine, **kwargs), nrecs)
+            pd.io.sql.read_sql_table(table, engine, **kwargs),
+            nrecs=nrecs, transformers=transformers)
 
     @classmethod
     def create_engine(cls, *args, **kwargs):
@@ -842,9 +900,10 @@ class SQLQuery(PandasDataFrame):
 
     '''
 
-    def __init__(self, query, engine, nrecs=1000, **kwargs):
+    def __init__(self, query, engine, nrecs=1000, transformers=None, **kwargs):
         super(SQLQuery, self).__init__(
-            pd.io.sql.read_sql_query(query, engine, **kwargs), nrecs)
+            pd.io.sql.read_sql_query(query, engine, **kwargs),
+            nrecs=nrecs, transformers=transformers)
 
     @classmethod
     def create_engine(cls, *args, **kwargs):
@@ -875,8 +934,8 @@ class Excel(PandasDataFrame):
     '''
     Create an Excel data message handler
 
-    Arguments
-    ---------
+    Parameters
+    ----------
     path : string
         Path to Excel file.
     sheet : string or int, optional
@@ -897,8 +956,9 @@ class Excel(PandasDataFrame):
 
     '''
 
-    def __init__(self, path, sheet=0, nrecs=1000, **kwargs):
-        super(Excel, self).__init__(pd.read_excel(path, sheet, **kwargs), nrecs)
+    def __init__(self, path, sheet=0, nrecs=1000, transformers=None, **kwargs):
+        super(Excel, self).__init__(pd.read_excel(path, sheet, **kwargs),
+                                    nrecs=nrecs, transformers=transformers)
 
 
 class Clipboard(PandasDataFrame):
@@ -923,8 +983,9 @@ class Clipboard(PandasDataFrame):
 
     '''
 
-    def __init__(self, nrecs=1000, **kwargs):
-        super(Clipboard, self).__init__(pd.read_clipboard(**kwargs), nrecs)
+    def __init__(self, nrecs=1000, transformers=None, **kwargs):
+        super(Clipboard, self).__init__(pd.read_clipboard(**kwargs),
+                                        nrecs=nrecs, transformers=transformers)
 
 
 class DBAPITypeObject(object):
@@ -961,12 +1022,13 @@ class DBAPI(CASDataMsgHandler):
 
     '''
 
-    def __init__(self, module, cursor, nrecs=1000):
+    def __init__(self, module, cursor, nrecs=1000, transformers=None):
         self.cursor = cursor
         self.cursor.arraysize = nrecs
 
         # array of functions to transform data types that don't match SAS types
-        transformers = {}
+        if transformers is None:
+            transformers = {}
 
         DATETIME = getattr(module, 'DATETIME', datetime.datetime)
         STRING = getattr(module, 'STRING', DBAPITypeObject(*text_types))
@@ -1004,7 +1066,7 @@ class DBAPI(CASDataMsgHandler):
         variables = []
         for item in self._get_description(module):
             name, rtype, dtype, length = typemap(item)
-            if dtype == 'DATETIME':
+            if dtype == 'DATETIME' and name not in transformers:
                 transformers[name] = lambda x: str2cas_timestamp(x)
 
             variables.append({'name': name, 'rtype': rtype, 'type': dtype,

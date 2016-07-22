@@ -18,19 +18,9 @@ class SWATInstaller(install):
             print('Exiting.')
             print('This version of Python is %dbit:' % (size*8))
             print(sys.version)
-            raise Exception('requires 64bit')
+            raise Exception('This packages requires 64bit Python')
         install.run(self)
 
-#
-# The resulting directory structure will look like:
-#
-#    lib/(SWAT precompiled libraries)
-#        python#.#/
-#            site-packages/
-#                swat/
-#                    __init__.py
-#                    others.py
-#
 
 setup(
     cmdclass = {'install': SWATInstaller},
@@ -45,7 +35,7 @@ setup(
     license = 'LICENSE.txt',
     packages = find_packages(),
     package_data = {
-        'swat': ['lib/*/*.so', 'lib/*/*.pyd*', 'lib/*/*.dll'],
+        'swat': ['lib/*/*'],
     },
     install_requires = [
         "pandas >= 0.16.0",

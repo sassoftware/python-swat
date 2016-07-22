@@ -1076,8 +1076,8 @@ class CASTable(ParamManager, ActionParamManager):
         connection : :class:`CAS` object
             The connection object to use.
 
-        Note
-        ----
+        Notes
+        -----
         This method creates a weak reference to the connection.
         If the connection is released, actions will no longer
         be able to be called from the CASTable object.
@@ -2547,8 +2547,10 @@ class CASTable(ParamManager, ActionParamManager):
 
     def _summary(self, **kwargs):
         ''' Get summary DataFrame '''
+        bygroup_columns = 'raw'
         out = self._retrieve('simple.summary', **kwargs).get_tables('Summary')
-        out = [x.reshape_bygroups(bygroup_columns='formatted', bygroup_as_index=True) for x in out]
+        out = [x.reshape_bygroups(bygroup_columns=bygroup_columns,
+                                  bygroup_as_index=True) for x in out]
         out = pd.concat(out)
         out = out.set_index('Column', append=self.has_groupby_vars())
         out = out.rename(columns=dict((k, k.lower()) for k in out.columns))
@@ -2677,8 +2679,10 @@ class CASTable(ParamManager, ActionParamManager):
         else:
             percentiles = list(percentiles)
 
-        out = self._retrieve('percentile.percentile', values=percentiles)
-        out = [x.reshape_bygroups(bygroup_columns='formatted', bygroup_as_index=True)
+        bygroup_columns = 'raw'
+
+        out = self._retrieve('percentile.percentile', multitable=True, values=percentiles)
+        out = [x.reshape_bygroups(bygroup_columns=bygroup_columns, bygroup_as_index=True)
                for x in out.get_tables('Percentile')]
         out = pd.concat(out)
 
@@ -2715,9 +2719,11 @@ class CASTable(ParamManager, ActionParamManager):
         :class:`DataFrame`
 
         '''
+        bygroup_columns = 'raw'
         out = self._retrieve('simple.topk', topk=1, bottomk=0,
                              maxtie=maxtie, order='freq').get_tables('Topk')
-        out = [x.reshape_bygroups(bygroup_columns='formatted', bygroup_as_index=True) for x in out]
+        out = [x.reshape_bygroups(bygroup_columns=bygroup_columns,
+                                  bygroup_as_index=True) for x in out]
         out = pd.concat(out)
         out = out.set_index('Column', append=self.has_groupby_vars())
         out = out.drop('Rank', axis=1)
@@ -2996,6 +3002,8 @@ class CASTable(ParamManager, ActionParamManager):
         out = tbl.simple.topk(order='value', includemissing=not skipna,
                               topk=1, bottomk=1, **kwargs)
 
+        bygroup_columns = 'raw'
+
         groups = tbl.get_groupby_vars()
         groupset = set(groups)
         columns = [x for x in tbl.columns if x not in groupset]
@@ -3003,10 +3011,9 @@ class CASTable(ParamManager, ActionParamManager):
         # Minimum / Maximum
         minmax = None
         if 'min' in stats or 'max' in stats:
-            minmax = [x.reshape_bygroups(bygroup_columns='formatted', bygroup_as_index=False)
+            minmax = [x.reshape_bygroups(bygroup_columns=bygroup_columns, bygroup_as_index=False)
                       for x in out.get_tables('Topk')]
             minmax = pd.concat(minmax) 
-            #minmax = out['Topk']
             minmax.loc[:, 'stat'] = ['max', 'min'] * int(len(minmax) / 2)
             if 'NumVar' in minmax.columns and 'CharVar' in minmax.columns:
                 minmax['NumVar'].fillna(minmax['CharVar'], inplace=True)
@@ -3037,10 +3044,9 @@ class CASTable(ParamManager, ActionParamManager):
         # Unique
         unique = None
         if 'unique' in stats:
-            unique = [x.reshape_bygroups(bygroup_columns='formatted', bygroup_as_index=False)
+            unique = [x.reshape_bygroups(bygroup_columns=bygroup_columns, bygroup_as_index=False)
                       for x in out.get_tables('TopkMisc')]
             unique = pd.concat(unique) 
-            #unique = out['TopkMisc']
             unique.loc[:, 'unique'] = 'unique'
             unique.rename(columns=dict(N='value', Column='column'), inplace=True)
             unique = unique.loc[:, groups + ['unique', 'column', 'value']]
@@ -3276,14 +3282,17 @@ class CASTable(ParamManager, ActionParamManager):
 
         columns = list(tbl.columns)
 
-        out = tbl._retrieve('simple.topk', order='freq', topk=1,
-                            bottomk=0, maxtie=max_tie)['Topk']
+        bygroup_columns = 'raw'
 
-        out['Rank'] = out['Rank'] - 1
+        out = tbl._retrieve('simple.topk', order='freq', topk=1,
+                            bottomk=0, maxtie=max_tie)
 
         groups = tbl.get_groupby_vars()
         if groups:
-            out = out.drop(out.columns[1:len(groups)*2:2], axis=1)
+            out = [x.reshape_bygroups(bygroup_columns=bygroup_columns, bygroup_as_index=False)
+                   for x in out.get_tables('Topk')]
+            out = pd.concat(out) 
+            out['Rank'] = out['Rank'] - 1
             items = []
             for key, item in out.groupby(groups):
                 if not isinstance(key, items_types):
@@ -3316,6 +3325,8 @@ class CASTable(ParamManager, ActionParamManager):
             out = pd.concat(items)
 
         else:
+            out = out['Topk']
+            out['Rank'] = out['Rank'] - 1
             charout = numout = None
             if 'CharVar' in out.columns:
                 charout = out.pivot(columns='Column', values='CharVar',
@@ -3953,6 +3964,9 @@ class CASTable(ParamManager, ActionParamManager):
         :class:`CASTable`
         
         '''
+        kwargs = kwargs.copy()
+        kwargs.setdefault('index_col', 0)
+        kwargs.setdefault('parse_dates', True)
         return connection.read_csv(path, *args, **kwargs)
 
     @classmethod
@@ -5776,8 +5790,8 @@ class CASColumn(CASTable):
         -------
         None
             If inplace == True
-        :class:`CASColumn
-            If inplace == False`
+        :class:`CASColumn`
+            If inplace == False
         
         '''
         return CASTable.sort_values(self, self.name, axis=axis, ascending=ascending,
@@ -6382,15 +6396,19 @@ class CASColumn(CASTable):
         Series
 
         '''
+        bygroup_columns = 'raw'
         out = self._retrieve('simple.freq',
-                             includemissing=includemissing)['Frequency']
+                             includemissing=includemissing).get_tables('Frequency')
+        out = [x.reshape_bygroups(bygroup_columns=bygroup_columns,
+                                  bygroup_as_index=True) for x in out]
+        out = pd.concat(out)
 
         if 'CharVar' in out.columns:
             out.rename(columns=dict(CharVar=self.name), inplace=True)
         else:
             out.rename(columns=dict(NumVar=self.name), inplace=True)
 
-        out.set_index(self.get_groupby_vars() + [self.name], inplace=True)
+        out.set_index(self.name, append=self.has_groupby_vars(), inplace=True)
 
         out = out['Frequency'].astype(np.int64)
         out.name = self.name

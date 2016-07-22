@@ -205,7 +205,10 @@ class CAS(object):
             port = cf.get_option('cas.port')
 
         # Detect protocol
-        protocol = self._detect_protocol(hostname, port, protocol=protocol)
+        if hostname.startswith('http:') or hostname.startswith('https:'):
+            protocol = hostname.split(':', 1)[0]
+        else:
+            protocol = self._detect_protocol(hostname, port, protocol=protocol)
 
         # Use the prototype to make a copy
         prototype = kwargs.get('prototype')
@@ -673,7 +676,7 @@ class CAS(object):
         '''
         Delete all post-processing functions for an action
 
-        Arguments
+        Parameters
         ---------
         name : string
            Full name of action (actionset.actionname)
@@ -703,7 +706,7 @@ class CAS(object):
         '''
         Set connection options
 
-        Arguments
+        Parameters
         ---------
         **kwargs : any
            Arbitrary keyword arguments.  Each key/value pair will be
@@ -1151,10 +1154,9 @@ class CAS(object):
         >>> s.invoke('help')
         <swat.CAS object at 0x7fab0a9031d0>
         >>> for response in s:
-        ...    for result in response:
-        ...       for key, value in list(result.items()):
-        ...          print(key)
-        ...          print(value)
+        ...     for key, value in response:
+        ...         print(key)
+        ...         print(value)
         builtins
                       name                                        description
         0          addnode                           Add a node to the server
@@ -1245,12 +1247,11 @@ class CAS(object):
         This function closely mimics what the `retrieve` method does by default.
 
         >>> def myfunc(response, connection, userdata):
-        ...    if userdata is None:
-        ...        userdata = {}
-        ...    for result in response:
-        ...       for key, value in list(result.items()):
-        ...          userdata[key] = value
-        ...    return userdata
+        ...     if userdata is None:
+        ...         userdata = {}
+        ...     for key, value in response:
+        ...         userdata[key] = value
+        ...     return userdata
         >>> out = s.retrieve('help', responsefunc=myfunc)
         >>> print(out['builtins'])
                       name                                        description
@@ -1380,31 +1381,29 @@ class CAS(object):
                 tablename = None
                 castable = None
 
-                for result in response:
+                for key, value in response:
 
-                    for key, value in six.iteritems(result):
+                    if resultfunc is not None:
+                        resultdata = resultfunc(key, value, response,
+                                                conn, resultdata)
+                        continue
 
-                        if resultfunc is not None:
-                            resultdata = resultfunc(key, value, response,
-                                                    conn, resultdata)
-                            continue
-
-                        if key is None or isinstance(key, int_types):
-                            results[idx] = value
-                            idx += 1
+                    if key is None or isinstance(key, int_types):
+                        results[idx] = value
+                        idx += 1
+                    else:
+                        lowerkey = key.lower()
+                        if lowerkey == 'tablename':
+                            tablename = value
+                        elif lowerkey == 'caslib':
+                            caslib = value
+                        elif lowerkey == 'castable':
+                            castable = True
+                        # Event results start with '$'
+                        if key.startswith('$'):
+                            events[key] = value
                         else:
-                            lowerkey = key.lower()
-                            if lowerkey == 'tablename':
-                                tablename = value
-                            elif lowerkey == 'caslib':
-                                caslib = value
-                            elif lowerkey == 'castable':
-                                castable = True
-                            # Event results start with '$'
-                            if key.startswith('$'):
-                                events[key] = value
-                            else:
-                                results[key] = value
+                            results[key] = value
 
                 # Create a CASTable instance if all of the pieces are there
                 if caslib and tablename and not castable:
@@ -1622,11 +1621,10 @@ class CAS(object):
                                                            actionset=name,
                                                            _messagelevel='error',
                                                            _apptag='UI'):
-                for result in response:
-                    for key, value in six.iteritems(result):
-                        if value:
-                            asname = name.lower()
-                        break
+                for key, value in response:
+                    if value:
+                        asname = name.lower()
+                    break
 
         if asname is None:
             idx = 0
@@ -1635,13 +1633,12 @@ class CAS(object):
                                                            name=name,
                                                            _messagelevel='error',
                                                            _apptag='UI'):
-                for result in response:
-                    for key, value in six.iteritems(result):
-                        if key is None or isinstance(key, int_types):
-                            out[idx] = value
-                            idx += 1
-                        else:
-                            out[key] = value
+                for key, value in response:
+                    if key is None or isinstance(key, int_types):
+                        out[idx] = value
+                        idx += 1
+                    else:
+                        out[key] = value
 
             asname = out.get('actionSet')
             actname = out.get('action')
@@ -1659,13 +1656,12 @@ class CAS(object):
             for response in self._invoke_without_signature('builtins.reflect',
                                                            _messagelevel='error',
                                                            _apptag='UI', **query):
-                for result in response:
-                    for key, value in six.iteritems(result):
-                        if key is None or isinstance(key, int_types):
-                            out[idx] = value
-                            idx += 1
-                        else:
-                            out[key] = value
+                for key, value in response:
+                    if key is None or isinstance(key, int_types):
+                        out[idx] = value
+                        idx += 1
+                    else:
+                        out[key] = value
 
             # Normalize the output
             asinfo = _lower_actionset_keys(out[0])
@@ -1865,7 +1861,7 @@ class CAS(object):
         '''
         return self._read_any('read_pickle', path, **kwargs)
 
-    def read_table(filepath_or_buffer, **kwargs):
+    def read_table(self, filepath_or_buffer, **kwargs):
         '''
         Read general delimited file into a CAS table
 
@@ -2256,7 +2252,7 @@ class CAS(object):
         out = []
         table, kwargs = self._get_table_args(io, **kwargs)
         for i, dframe in enumerate(pd.read_html(io, **kwargs)):
-            if i and table['table']:
+            if i and table.get('table'):
                 table['table'] += str(i)
             table.update(dmh.PandasDataFrame(dframe).args.addtable)
             out.append(self.retrieve('table.addtable', **table).casTable)

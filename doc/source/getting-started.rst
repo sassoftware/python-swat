@@ -33,12 +33,12 @@ Now that we have a connection to CAS, we can run some actions on it.
 Running CAS Actions
 -------------------
 
-To test your connection, you can run the `serverstatus` action.
+To test your connection, you can run the ``serverstatus`` action.
 
 .. ipython:: python
 
    out = conn.serverstatus()
-   print(out)
+   out
 
 
 Handling the Output
@@ -52,7 +52,7 @@ use the standard way of accessing keys.
 
 .. ipython:: python
 
-   print(out['nodestatus']) 
+   out['nodestatus'] 
 
 In addition, you can access the keys as attributes.  This convenience was added
 to keep your code looking a bit cleaner.  However, be aware that if the name of a
@@ -62,7 +62,7 @@ want to use the syntax above for actual programs.
 
 .. ipython:: python
 
-    print(out.nodestatus)
+    out.nodestatus
 
 The types of the result keys can vary as well.  In this case, the `About` key holds
 a dictionary.  The `server` and `nodestatus` keys hold :class:`SASDataFrame` objects
@@ -78,8 +78,8 @@ work with them as you normally do.
 
 .. ipython:: python
 
-   print(out.nodestatus.role)
-   print(out.About['Version'])
+   out.nodestatus.role
+   out.About['Version']
 
 Simple Statistics
 -----------------
@@ -117,7 +117,7 @@ of the :class:`pandas.DataFrame` methods and attributes.  The :class:`pandas.Dat
 API is mirrored as much as possible, the only difference is that behind-the-scenes 
 the real work is being done by CAS.
 
-Since we started down this path with the intent to use the `summary` action, let's 
+Since we started down this path with the intent to use the ``summary`` action, let's 
 do that first.
 
 .. ipython:: python
@@ -125,8 +125,8 @@ do that first.
    out = conn.summary(table=tbl)
    out
 
-In addition, you can also call the `summary` action directly on the :class:`CASTable`
-object.  It will automatically populate the `table=` parameter.
+In addition, you can also call the ``summary`` action directly on the :class:`CASTable`
+object.  It will automatically populate the ``table=`` parameter.
 
 .. ipython:: python
 

@@ -139,6 +139,18 @@ class REST_CASConnection(object):
         session = _soptions.get('session')
         locale = _soptions.get('locale')
 
+        if hostname.startswith('http:') or hostname.startswith('https:'):
+            protocol = hostname.split(':', 1)[0]
+            self._baseurl = hostname
+            urlparts = urllib.parse.urlparse(hostname)
+            self._hostname = urlparts.hostname
+            self._port = urlparts.port or port
+
+        else:
+            self._baseurl = '%s://%s:%d' % (protocol, ipaddr, port)
+            self._hostname = hostname
+            self._port = port
+
         authinfo = None
         if password and password.startswith('authinfo={'):
             authinfo = password[11:-2]
@@ -159,9 +171,6 @@ class REST_CASConnection(object):
         except Exception as exc:
             raise SWATError(str(exc))
 
-        self._baseurl = '%s://%s:%d' % (protocol, ipaddr, port)
-        self._hostname = hostname
-        self._port = port
         self._username = username
         self._soptions = soptions
         self._error = error
