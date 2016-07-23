@@ -85,6 +85,71 @@ if a URL is specified, it must be downloaded to the client then uploaded CAS.
 Creating Custom Data Loaders
 ----------------------------
 
+In addition to the pre-configured data loaders described above, it's possible to write
+custom data loaders that can upload data to a CAS table from any type of file or stream
+of data that Python can handle.  These are called "data message handlers" and are implemented
+in the :class:`CASDataMsgHandler` class.  The :class:`CASDataMsgHandler` class can not be
+used directly, but is the base class for all data message handlers classes.
+
+To implement your own data message handler, you only need to implement two things in
+the subclass.
+
+1. The variable definitions required in the ``vars=`` parameter of the ``table.addtable`` CAS action.
+
+2. The :meth:`getrow` method to return each row of data.
+
+The variable definitions should be stored in the :attr:`vars` attribute of the subclass.
+The :meth:`getrow` method returns a row of values (as defined by :attr:`vars`) for each requested
+row index.  When there is not more data to return, ``None`` should be returned.
+
+How you generate the :attr:`vars` attribute is really dependent on your situation.  It can be
+inferred from a sample of the data or simply hard-coded.  We'll do a simple example using hard-coded
+variable definitions below.
+
+.. ipython:: python
+
+    import swat.cas.datamsghandlers as dmh
+
+    class MyDMH(dmh.CASDataMsgHandler):
+        def __init__(self, data):
+            self.data = data
+            vars = [
+                dict(name='Name', type='varchar'),
+                dict(name='Age', type='int32'),
+                dict(name='Height', type='double'),
+                dict(name='Weight', type='double'),
+            ]
+            dmh.CASDataMsgHandler.__init__(self, vars)
+        def getrow(self, index):
+            try:
+                return self.data[index]
+            except IndexError:
+                pass
+
+    mydmh = MyDMH([
+        ['Alfred', 13, 69, 112.5],
+        ['Judy', 14, 64.3, 90],
+        ['Robert', 12, 64.8, 128]
+    ])
+
+The ``table.addtable`` CAS action call below uses a Python shortcut to pass a dictionary as keyword
+parameters.  If you print ``**mydmh.arg.addtable``, you'll see the parameters that are
+getting passed to ``table.addtable``.  You don't have to use this shortcut mode; you could
+construct the variable definitions and pass them in manually.  However, you still need
+to pass the data message handler instance to the ``datamsghandler=`` argument.
+    
+.. ipython:: python
+
+    out = conn.addtable(table='Students', **mydmh.args.addtable)
+    students = out.casTable
+    students.columninfo()
+    students.head()
+
+While this example uses an explicit list of data and passes that to the data message handler
+class to index into, it doesn't have to be done this way.  In fact, there is a :class:`DBAPI`
+data message handler in the :mod:`swat.cas.datamsghandlers` module that takes a Python database
+connection that queries for the data that is returned by :meth:`getrow`.
+
 
 Server-Side Data Files and Sources
 ==================================
@@ -104,6 +169,14 @@ recommended method for large data files.
 
 Loading Data from Other Sources
 -------------------------------
+
+In addition to files, CAS has many other data loaders available to connect to sources 
+such as databases.  These other data sources require you to configure a CASLib that can
+connect and retrieve the data as a CAS table.  For these other data sources, you would
+still use the :class:`CAS.read_cas_path` method, but rather than specifying a file
+path, you would specify the name of a resource in that data loader (such as a database
+table).  This topic is beyond the scope of this document, but we are pointing it out
+in case you require this type of data access.
 
 
 .. ipython:: python

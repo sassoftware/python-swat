@@ -45,7 +45,9 @@ to the best of both worlds.
    workflows
    loading-data
    table-vs-dataframe
+   bygroups
    api
+   gotchas
    troubleshooting
    about
 

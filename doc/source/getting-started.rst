@@ -1,7 +1,8 @@
 .. currentmodule:: swat
 
+***************
 Getting Started
-===============
+***************
 
 Before you can use the SWAT package, you will need a running CAS server.  The SWAT package
 can connect to either the binary port or the HTTP port.  If you have the option of either,
@@ -31,7 +32,7 @@ to create a connection.
 Now that we have a connection to CAS, we can run some actions on it.
 
 Running CAS Actions
--------------------
+===================
 
 To test your connection, you can run the ``serverstatus`` action.
 
@@ -42,7 +43,7 @@ To test your connection, you can run the ``serverstatus`` action.
 
 
 Handling the Output
--------------------
+===================
 
 All CAS actions return a :class:`CASResults` object.  This is simply an ordered
 Python dictionary with a few extra methods and attributes added.  In the output 
@@ -82,7 +83,7 @@ work with them as you normally do.
    out.About['Version']
 
 Simple Statistics
------------------
+=================
 
 We can't have a getting started section without doing some sort of statistical
 analysis.  First, we need to see what CAS action sets are loaded.  We can get a 
@@ -145,7 +146,7 @@ you can do all of the standard DataFrame operations on it.
    summ.loc['Cylinders', 'Max']
 
 CAS Tables as DataFrames
-------------------------
+========================
 
 As we mentioned previously, :class:`CASTable` objects implement many of the 
 :class:`pandas.DataFrame` methods and properties.  This means that you can use the 
@@ -167,7 +168,7 @@ for pandas to handle.  Here are a few simple examples.
 For more information about :class:`CASTable`, see the :ref:`API Reference <api>`.
 
 Closing the Connection
-----------------------
+======================
 
 When you are finished with the connection, it's always a good idea to
 close it.
@@ -175,3 +176,7 @@ close it.
 .. ipython:: python
 
    conn.close()
+
+
+Authentication
+--------------

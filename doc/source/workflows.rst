@@ -16,7 +16,7 @@ The Easy Way
 
 In the most basic form of calling CAS actions, the actions are called directly
 on the connection object or a :class:`CASTable` object.  When you load a CAS
-action set (using `builtins.loadactionset`), the CAS actions in that action set
+action set (using ``builtins.loadactionset``), the CAS actions in that action set
 are added to the connection object as Python methods.  For example, when the 
 ``simple`` action set is loaded, the CAS connection object is extended with 
 methods for ``summary``, ``freq``, ``crosstab``, etc.  These can then be called on 
@@ -81,7 +81,7 @@ still use the CAS action methods on the :class:`CAS` connection object, but this
 time you add either a ``responsefunc=`` or ``resultfunc=`` function argument.
 
 The result callback function takes five arguments: `key`, `value`, `response`,
-`connection`, and `userdata`.  Those are the result key and value, the response the result
+`connection`, and ``userdata``.  Those are the result key and value, the response the result
 belongs to, the connection that the result belongs to, and an arbitrary user data
 structure.
 
@@ -91,8 +91,8 @@ and user data structure.
 The result callback and response callback are called for each result and response,
 respectively.  Keep in mind that you can only specify one or the other (a 
 response callback would override a result callback).  If you want to keep any sort
-of state information between calls, you can store it in the `userdata` argument
-and return it.  The returned value will get passed in as the `userdata` argument
+of state information between calls, you can store it in the ``userdata`` argument
+and return it.  The returned value will get passed in as the ``userdata`` argument
 on the next call.
 
 Here is an example demonstrating both styles of callbacks.
