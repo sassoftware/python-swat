@@ -36,7 +36,7 @@ Reading Data
 ~~~~~~~~~~~~
 
 Server-Side Files
-................
+.................
 
 .. autosummary::
    :toctree: generated/

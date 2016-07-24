@@ -8,6 +8,25 @@ import os
 import struct
 import sys
 
+try:
+    input = raw_input
+except:
+    pass
+
+
+def accept_license():
+    ''' Display TK license and check for acceptance '''
+    import glob
+    import pydoc
+    if len(glob.glob('swat/lib/*/*')) > 10:
+        os.environ['LESS'] = os.environ.get('LESS', '') + ' -e'
+        pydoc.pager(open('LICENSE.txt', 'r').read())
+        out = input('Do you accept the terms of the license? [y/N] ')
+        if out.lower().strip().startswith('y'):
+            return True
+        return False
+    return True
+
 
 class SWATInstaller(install):
     ''' Make sure that the Python executable is 64-bit '''
@@ -19,7 +38,8 @@ class SWATInstaller(install):
             print('This version of Python is %dbit:' % (size*8))
             print(sys.version)
             raise Exception('This packages requires 64bit Python')
-        install.run(self)
+        if accept_license():
+            install.run(self)
 
 
 setup(

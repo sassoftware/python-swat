@@ -16,6 +16,8 @@ SWAT (SAS Wrapper for Analytics Transfer)
 
 **Q&A Support:** https://communities.sas.com/t5/SAS-Viya-Coders-Library/tkb-p/cas%40tkb
 
+**SAS Viya:** http://www.sas.com/en_us/software/viya.html
+
 **CAS Action Reference:** http://support.sas.com/???
 
 
@@ -49,7 +51,6 @@ to the best of both worlds.
    api
    gotchas
    troubleshooting
-   about
 
 
 Index
