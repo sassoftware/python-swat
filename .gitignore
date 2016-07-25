@@ -1,0 +1,11 @@
+*.DS_Store
+build/
+swat.egg-info/
+__pycache__/
+generated/
+*.pyc
+*.swp
+*.so
+*.dll
+*.dylib
+*.old

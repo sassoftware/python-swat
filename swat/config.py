@@ -191,9 +191,13 @@ register_option('cas.dataset.bygroup_columns', 'string',
                 '                used to do the grouping\n' +
                 '    both : Add columns for both raw and formatted')
 
-register_option('cas.dataset.bygroup_suffix', 'string', check_string, '_f',
+register_option('cas.dataset.bygroup_formatted_suffix', 'string', check_string, '_f',
                 'Suffix to use on the formatted column name when both raw and\n' +
                 'formatted by group colunms are added.')
+
+register_option('cas.dataset.bygroup_collision_suffix', 'string', check_string, '_by',
+                'Suffix to use on the By group column name when a By group column\n' +
+                'is also included as a data column.')
 
 register_option('cas.dataset.bygroup_as_index', 'boolean', check_boolean, True,
                 'If True, any by group columns are set as the DataFrame index.')

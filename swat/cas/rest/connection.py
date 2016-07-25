@@ -147,6 +147,10 @@ class REST_CASConnection(object):
             self._port = urlparts.port or port
 
         else:
+            try:
+                ipaddr = socket.gethostbyname(hostname)
+            except Exception as exc:
+                raise SWATError(str(exc))
             self._baseurl = '%s://%s:%d' % (protocol, ipaddr, port)
             self._hostname = hostname
             self._port = port
@@ -165,11 +169,6 @@ class REST_CASConnection(object):
             port = authinfo.get('protocol', port)
             username = authinfo.get('user', username)
             password = authinfo.get('password')
-
-        try:
-            ipaddr = socket.gethostbyname(hostname)
-        except Exception as exc:
-            raise SWATError(str(exc))
 
         self._username = username
         self._soptions = soptions

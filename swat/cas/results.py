@@ -329,13 +329,13 @@ class CASResults(OrderedDict, RendererMixin):
 
         raise IndexError('No By group set matched the given index.')
 
-    def get_group(_self_, *name, **kwargs):
+    def get_group(_self_, name, **kwargs):
         ''' 
         Return a :class:`CASResults` object of the specified By group tables
 
         Parameters
         ----------
-        *name : one or more strings, optional
+        name : string or tuple-of-strings, optional
             The values of the By variable to choose.
         **kwargs : any, optional
             Key / value pairs containing the variable name and value
@@ -349,7 +349,7 @@ class CASResults(OrderedDict, RendererMixin):
 
         Specify the By group values (in order).
 
-        >>> print(out.get_group('Asia', 4))
+        >>> print(out.get_group(('Asia', 4)))
 
         Or, specify the By group values as keyword parameters.
 
@@ -367,7 +367,9 @@ class CASResults(OrderedDict, RendererMixin):
                              'to select a By group set first.')
 
         if not isinstance(name, (tuple, list)):
-            name = [name]
+            name = tuple([name])
+        else:
+            name = tuple(name)
 
         out = CASResults()
 

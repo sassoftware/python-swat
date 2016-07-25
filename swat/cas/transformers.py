@@ -299,7 +299,8 @@ def ctb2tabular(_sw_table, soptions='', connection=None):
     # Check for By group information
     cdf = cdf.reshape_bygroups(bygroup_columns=get_option('cas.dataset.bygroup_columns'),
                                bygroup_as_index=get_option('cas.dataset.bygroup_as_index'),
-                               bygroup_suffix=get_option('cas.dataset.bygroup_suffix'))
+                               bygroup_formatted_suffix=get_option('cas.dataset.bygroup_formatted_suffix'),
+                               bygroup_collision_suffix=get_option('cas.dataset.bygroup_collision_suffix'))
 
     # Add an index as needed
     index = get_option('cas.dataset.index_name')

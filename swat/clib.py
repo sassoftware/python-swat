@@ -19,28 +19,30 @@ _pyswat = None
 def _import_pyswat():
     ''' Import version-specific _pyswat package '''
     global _pyswat
+
+    import importlib
     import sys
+
     platform = 'linux'
     if sys.platform.lower().startswith('win'):
         platform = 'win'
     elif sys.platform.lower().startswith('darwin'):
         platform = 'mac'
-    _globals, _locals = globals(), locals()
+
+    if PY3:
+        libname = '_py%s%sswat' % (sys.version_info[0], sys.version_info[1])
+    elif WIDE_CHARS:
+        libname = '_pyswatw'
+    else:
+        libname = '_pyswat'
+
     try:
-        if PY3:
-            exec('from .lib.%s import _py%d%dswat as _pyswat' %
-                 (platform, sys.version_info[0], sys.version_info[1]),
-                 _globals, _locals)
-        elif WIDE_CHARS:
-            exec('from .lib.%s import _pyswatw as _pyswat' % platform, _globals, _locals)
-        else:
-            exec('from .lib.%s import _pyswat as _pyswat' % platform, _globals, _locals)
+        _pyswat = importlib.import_module('.lib.%s.%s' % (platform, libname), package='swat')
+
     except ImportError:
-        raise ValueError(('Could not import import _py%d%dswat.  This is likely due to an '
+        raise ValueError(('Could not import import %s.  This is likely due to an '
                           'incorrect TK path or an error while loading the TK subsystem. ' 
-                          'Try using the HTTP port for the REST interface.') %
-                         sys.version_info[:2])
-    _pyswat = _locals['_pyswat']
+                          'Try using the HTTP port for the REST interface.') % libname)
 
 
 def SW_CASConnection(*args, **kwargs):

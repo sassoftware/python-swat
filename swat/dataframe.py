@@ -111,7 +111,8 @@ def concat(objs, **kwargs):
 
 
 def reshape_bygroups(items, bygroup_columns='formatted',
-                     bygroup_as_index=True, bygroup_suffix='_f'):
+                     bygroup_as_index=True, bygroup_formatted_suffix='_f',
+                     bygroup_collision_suffix='_by'):
     '''
     Convert current By group representation to the specified representation
 
@@ -124,9 +125,12 @@ def reshape_bygroups(items, bygroup_columns='formatted',
         options are 'none' (only use metadata), 'formatted', 'raw', or 'both'.
     bygroup_as_index : boolean, optional
         Specifies whether the By group columns should be converted to indices.
-    bygroup_suffix : string, optional
+    bygroup_formatted_suffix : string, optional
         The suffix to use on formatted columns if the names collide with existing
         columns.
+    bygroup_collision_suffix : string, optional
+        The suffix to use on By group columns if there is also a data column
+        with the same name.
 
     See Also
     --------
@@ -140,14 +144,16 @@ def reshape_bygroups(items, bygroup_columns='formatted',
     if hasattr(items, 'reshape_bygroups'):
         return items.reshape_bygroups(bygroup_columns=bygroup_columns,
                                       bygroup_as_index=bygroup_as_index,
-                                      bygroup_suffix=bygroup_suffix)
+                                      bygroup_formatted_suffix=bygroup_formatted_suffix,
+                                      bygroup_collision_suffix=bygroup_collision_suffix)
 
     out = []
     for item in items:
         if hasattr(item, 'reshape_bygroups'):
             out.append(item.reshape_bygroups(bygroup_columns=bygroup_columns,
                                              bygroup_as_index=bygroup_as_index,
-                                             bygroup_suffix=bygroup_suffix))
+                                             bygroup_formatted_suffix=bygroup_formatted_suffix,
+                                             bygroup_collision_suffix=bygroup_collision_suffix))
         else:
             out.append(item)
     return out
@@ -773,7 +779,8 @@ class SASDataFrame(pd.DataFrame):
 #                                  self._my_repr_json_().replace("'", "\\'")))
 
     def reshape_bygroups(self, bygroup_columns='formatted',
-                         bygroup_as_index=True, bygroup_suffix='_f'):
+                         bygroup_as_index=True, bygroup_formatted_suffix='_f',
+                         bygroup_collision_suffix='_by'):
         '''
         Convert current By group representation to the specified representation
 
@@ -786,30 +793,46 @@ class SASDataFrame(pd.DataFrame):
             options are 'none' (only use metadata), 'formatted', 'raw', or 'both'.
         bygroup_as_index : boolean, optional
             Specifies whether the By group columns should be converted to indices.
-        bygroup_suffix : string, optional
+        bygroup_formatted_suffix : string, optional
             The suffix to use on formatted columns if the names collide with existing
             columns.
+        bygroup_collision_suffix : string, optional
+            The suffix to use when a By group column name has the same name as
+            a data column.
 
         Returns
         -------
         :class:`SASDataFrame`
 
         '''
-        if not self.attrs.get('ByVar1'):
-            return self
-
         # Make a copy of the DataFrame
         dframe = self[self.columns]
         dframe.colinfo = dframe.colinfo.copy()
         dframe.attrs = dframe.attrs.copy()
 
+        if not self.attrs.get('ByVar1'):
+            return dframe
+
         attrs = dframe.attrs
+
+        attrs.setdefault('ByGroupMode', 'attributes') # 'attributes', 'index', or 'columns'
+        attrs.setdefault('ByGroupColumns', 'none') # 'none', 'raw', 'formatted', or 'both'
+
+        # Short circuit if possible
+        if bygroup_columns == attrs['ByGroupColumns']:
+            if attrs['ByGroupMode'] == 'attributes':
+                return dframe
+            if bygroup_as_index and attrs['ByGroupMode'] == 'index':
+                return dframe
+            if not bygroup_as_index and attrs['ByGroupMode'] == 'columns':
+                return dframe
 
         # Get the names of all of the By variables
         byvars = []
         byvarsfmt = []
         byvals = []
         byvalsfmt = []
+        numbycols = 0
         i = 1
         while True:
             byvar = 'ByVar%d' % i
@@ -818,59 +841,106 @@ class SASDataFrame(pd.DataFrame):
                 break
 
             byvars.append(attrs[byvar])
-            byvarsfmt.append(attrs.get(byvar + 'Formatted', attrs[byvar] + bygroup_suffix))
             byvals.append(attrs[byvar + 'Value'])
             byvalsfmt.append(attrs[byvar + 'ValueFormatted'])
 
             attrs.pop(byvar + 'Formatted', None)
 
+            numbycols = numbycols + 1
+            if attrs['ByGroupColumns'] == 'both':
+                numbycols = numbycols + 1
+
             i = i + 1
 
-        # Drop all By columns and indexes
-        for name in byvars:
-            if name in dframe.columns:
-                dframe = dframe.drop(name, axis=1)
-            if name in dframe.index.names:
-                dframe = dframe.reset_index(level=dframe.index.names.index(name), drop=True)
+        # Drop existing indexes
+        if attrs['ByGroupMode'] == 'index':
+            dframe = dframe.reset_index(level=list(range(numbycols)), drop=True)
 
-        for name in byvarsfmt:
-            if name in dframe.columns:
-                dframe = dframe.drop(name, axis=1)
-            if name in dframe.index.names:
-                dframe = dframe.reset_index(level=dframe.index.names.index(name), drop=True)
+        # Drop existing columns
+        elif attrs['ByGroupMode'] == 'columns':
+            dframe = dframe.iloc[:, :numbycols]
+
+        # Bail out of we are doing attributes
+        if bygroup_columns == 'none':
+            attrs['ByGroupMode'] = 'attributes'
+            attrs['ByGroupColumns'] = 'none'
+            return dframe
 
         # Construct By group columns
-        i = 1
-        bycols = []
-        allcols = list(dframe.columns)
-        for byname, byval, bynamefmt, byvalfmt in zip(byvars, byvals, byvarsfmt, byvalsfmt):
-            bykey = 'ByVar%d' % i
-            bylabel = attrs.get(bykey + 'Label')
-            sasfmt = attrs.get(bykey + 'Format')
-            sasfmtwidth = split_format(sasfmt).width
-            if bygroup_columns == 'both' or bygroup_columns == 'raw':
-                dframe[byname] = byval
-                bycols.append(byname)
-                dframe.colinfo[byname] = SASColumnSpec(byname, label=bylabel,
-                                                       dtype=dtype_from_var(byval),
-                                                       format=sasfmt, width=sasfmtwidth)
-            if bygroup_columns == 'both' or bygroup_columns == 'formatted':
-                if bygroup_columns == 'both':
-                    byname = byname + bygroup_suffix
-                dframe[byname] = byvalfmt
-                bycols.append(byname)
-                attrs[bykey + 'Formatted'] = byname
-                dframe.colinfo[byname] = SASColumnSpec(byname, label=bylabel, dtype='varchar',
-                                                       format=sasfmt, width=sasfmtwidth)
-            i = i + 1
+        attrs['ByGroupColumns'] = bygroup_columns
 
-        # Put the By group columns at the beginning
-        dframe = dframe[bycols + allcols]
+        if bygroup_as_index:
+            attrs['ByGroupMode'] = 'index'
+            nlevels = len([x for x in dframe.index.names if x])
+            appendlevels = nlevels > 0
+            bylevels = 0
 
-        # Convert the By group columns to index columns as needed
-        if bycols and bygroup_as_index:
-            dframe = dframe.set_index(bycols)
-            dframe.index.names = bycols
+            i = 1
+            for byname, byval, byvalfmt in zip(byvars, byvals, byvalsfmt):
+                bykey = 'ByVar%d' % i
+                bylabel = attrs.get(bykey + 'Label')
+                sasfmt = attrs.get(bykey + 'Format')
+                sasfmtwidth = split_format(sasfmt).width
+                if bygroup_columns == 'both' or bygroup_columns == 'raw':
+                    dframe = dframe.set_index(pd.Series(data=[byval] * len(dframe), name=byname),
+                                              append=appendlevels)
+                    dframe.colinfo[byname] = SASColumnSpec(byname, label=bylabel,
+                                                           dtype=dtype_from_var(byval),
+                                                           format=sasfmt,
+                                                           width=sasfmtwidth)
+                    bylevels += 1
+                    appendlevels = True
+                if bygroup_columns == 'both' or bygroup_columns == 'formatted':
+                    if bygroup_columns == 'both':
+                        byname = byname + bygroup_formatted_suffix
+                    dframe = dframe.set_index(pd.Series(data=[byvalfmt] * len(dframe), name=byname),
+                                              append=appendlevels)
+                    dframe.colinfo[byname] = SASColumnSpec(byname, label=bylabel,
+                                                           dtype='varchar',
+                                                           format=sasfmt,
+                                                           width=sasfmtwidth)
+                    bylevels += 1
+                    appendlevels = True
+                i = i + 1
+
+            # Set the index level order
+            if nlevels:
+                dframe = dframe.reorder_levels(list(range(nlevels, nlevels + bylevels)) +
+                                               list(range(nlevels)))
+
+        else:
+            attrs['ByGroupMode'] = 'columns'
+            allcolnames = list(dframe.columns)
+            bycols = []
+
+            i = 1
+            for byname, byval, byvalfmt in zip(byvars, byvals, byvalsfmt):
+                bykey = 'ByVar%d' % i
+                bylabel = attrs.get(bykey + 'Label')
+                sasfmt = attrs.get(bykey + 'Format')
+                sasfmtwidth = split_format(sasfmt).width
+                if bygroup_columns == 'both' or bygroup_columns == 'raw':
+                    if byname in allcolnames:
+                        byname = byname + bygroup_collision_suffix
+                    dframe[byname] = byval
+                    bycols.append(byname)
+                    dframe.colinfo[byname] = SASColumnSpec(byname, label=bylabel,
+                                                           dtype=dtype_from_var(byval),
+                                                           format=sasfmt,
+                                                           width=sasfmtwidth)
+                if bygroup_columns == 'both' or bygroup_columns == 'formatted':
+                    if bygroup_columns == 'both':
+                        byname = byname + bygroup_formatted_suffix
+                    dframe[byname] = byvalfmt
+                    bycols.append(byname)
+                    dframe.colinfo[byname] = SASColumnSpec(byname, label=bylabel,
+                                                           dtype='varchar',
+                                                           format=sasfmt,
+                                                           width=sasfmtwidth)
+                i = i + 1
+
+            # Put the By group columns at the beginning
+            dframe = dframe[bycols + allcolnames]
 
         return dframe
 
