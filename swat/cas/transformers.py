@@ -170,45 +170,48 @@ def ctb2tabular(_sw_table, soptions='', connection=None):
 
     # get table attributes
     attrs = {}
-    while needattrs:
-        key = check(a2n(_sw_table.getNextAttributeKey(), 'utf-8'), _sw_table)
-        if key is None:
-            break
-        typ = check(_sw_table.getAttributeType(key), _sw_table)
-        ukey = a2u(key, 'utf-8')
-        if typ == 'int32':
-            attrs[ukey] = check(_sw_table.getInt32Attribute(key), _sw_table)
-        elif typ == 'int64':
-            attrs[ukey] = check(_sw_table.getInt64Attribute(key), _sw_table)
-        elif typ == 'double':
-            attrs[ukey] = check(_sw_table.getDoubleAttribute(key), _sw_table)
-        elif typ == 'string':
-            attrs[ukey] = check(a2u(_sw_table.getStringAttribute(key), 'utf-8'),
-                                _sw_table)
-        elif typ == 'date':
-            attrs[ukey] = check(_sw_table.getInt32Attribute(key), _sw_table)
-        elif typ == 'time':
-            attrs[ukey] = check(_sw_table.getInt64Attribute(key), _sw_table)
-        elif typ == 'datetime':
-            attrs[ukey] = check(_sw_table.getInt64Attribute(key), _sw_table)
-        elif typ == 'int32-array':
-            nitems = check(_sw_table.getAttributeNItems(), _sw_table)
-            attrs[ukey] = []
-            for i in range(nitems):
-                attrs[key].append(check(_sw_table.getInt32ArrayAttributeItem(key, i),
-                                        _sw_table))
-        elif typ == 'int64-array':
-            nitems = check(_sw_table.getAttributeNItems(), _sw_table)
-            attrs[ukey] = []
-            for i in range(nitems):
-                attrs[ukey].append(check(_sw_table.getInt64ArrayAttributeItem(key, i),
-                                         _sw_table))
-        elif typ == 'double-array':
-            nitems = check(_sw_table.getAttributeNItems(), _sw_table)
-            attrs[ukey] = []
-            for i in range(nitems):
-                attrs[ukey].append(check(_sw_table.getIntDoubleArrayAttributeItem(key, i),
-                                         _sw_table))
+    if hasattr(_sw_table, 'getAttributes'):
+        attrs = _sw_table.getAttributes()
+    else:
+        while needattrs:
+            key = check(a2n(_sw_table.getNextAttributeKey(), 'utf-8'), _sw_table)
+            if key is None:
+                break
+            typ = check(_sw_table.getAttributeType(key), _sw_table)
+            ukey = a2u(key, 'utf-8')
+            if typ == 'int32':
+                attrs[ukey] = check(_sw_table.getInt32Attribute(key), _sw_table)
+            elif typ == 'int64':
+                attrs[ukey] = check(_sw_table.getInt64Attribute(key), _sw_table)
+            elif typ == 'double':
+                attrs[ukey] = check(_sw_table.getDoubleAttribute(key), _sw_table)
+            elif typ == 'string':
+                attrs[ukey] = check(a2u(_sw_table.getStringAttribute(key), 'utf-8'),
+                                    _sw_table)
+            elif typ == 'date':
+                attrs[ukey] = check(_sw_table.getInt32Attribute(key), _sw_table)
+            elif typ == 'time':
+                attrs[ukey] = check(_sw_table.getInt64Attribute(key), _sw_table)
+            elif typ == 'datetime':
+                attrs[ukey] = check(_sw_table.getInt64Attribute(key), _sw_table)
+            elif typ == 'int32-array':
+                nitems = check(_sw_table.getAttributeNItems(), _sw_table)
+                attrs[ukey] = []
+                for i in range(nitems):
+                    attrs[key].append(check(_sw_table.getInt32ArrayAttributeItem(key, i),
+                                            _sw_table))
+            elif typ == 'int64-array':
+                nitems = check(_sw_table.getAttributeNItems(), _sw_table)
+                attrs[ukey] = []
+                for i in range(nitems):
+                    attrs[ukey].append(check(_sw_table.getInt64ArrayAttributeItem(key, i),
+                                             _sw_table))
+            elif typ == 'double-array':
+                nitems = check(_sw_table.getAttributeNItems(), _sw_table)
+                attrs[ukey] = []
+                for i in range(nitems):
+                    attrs[ukey].append(check(_sw_table.getIntDoubleArrayAttributeItem(key, i),
+                                             _sw_table))
     kwargs['attrs'] = attrs
 
     ncolumns = check(_sw_table.getNColumns(), _sw_table)

@@ -231,56 +231,59 @@ class SASColumnSpec(object):
 
         # Get table attributes
         attrs = {}
-        while True:
-            key = errorcheck(_sw_table.getNextColumnAttributeKey(col), _sw_table)
-            if key is None:
-                break
-            typ = errorcheck(_sw_table.getColumnAttributeType(col, a2n(key, 'utf-8')),
-                             _sw_table)
-            key = a2u(key, 'utf-8')
-            if typ == 'double':
-                attrs[key] = errorcheck(
-                    _sw_table.getColumnDoubleAttribute(col, a2n(key, 'utf-8')),
-                    _sw_table)
-            elif typ == 'int32':
-                attrs[key] = errorcheck(
-                    _sw_table.getColumnInt32Attribute(col, a2n(key, 'utf-8')),
-                    _sw_table)
-            elif typ == 'int64':
-                attrs[key] = errorcheck(
-                    _sw_table.getColumnInt64Attribute(col, a2n(key, 'utf-8')),
-                    _sw_table)
-            elif typ == 'string':
-                attrs[key] = errorcheck(
-                    a2u(_sw_table.getColumnStringAttribute(col, a2n(key, 'utf-8')),
-                        'utf-8'), _sw_table)
-            elif typ == 'int32-array':
-                nitems = errorcheck(_sw_table.getColumnAttributeNItems(), _sw_table)
-                attrs[key] = []
-                for i in range(nitems):
-                    attrs[key].append(errorcheck(
-                        _sw_table.getColumnInt32ArrayAttributeItem(col,
-                                                                   a2n(key, 'utf-8'),
-                                                                   i),
-                        _sw_table))
-            elif typ == 'int64-array':
-                nitems = errorcheck(_sw_table.getColumnAttributeNItems(), _sw_table)
-                attrs[key] = []
-                for i in range(nitems):
-                    attrs[key].append(errorcheck(
-                        _sw_table.getColumnInt64ArrayAttributeItem(col,
-                                                                   a2n(key, 'utf-8'),
-                                                                   i),
-                        _sw_table))
-            elif typ == 'double-array':
-                nitems = errorcheck(_sw_table.getColumnAttributeNItems(), _sw_table)
-                attrs[key] = []
-                for i in range(nitems):
-                    attrs[key].append(errorcheck(
-                        _sw_table.getColumnDoubleArrayAttributeItem(col,
-                                                                    a2n(key, 'utf-8'),
-                                                                    i),
-                        _sw_table))
+        if hasattr(_sw_table, 'getColumnAttributes'):
+            attrs = _sw_table.getColumnAttributes(col)
+        else:
+            while True:
+                key = errorcheck(_sw_table.getNextColumnAttributeKey(col), _sw_table)
+                if key is None:
+                    break
+                typ = errorcheck(_sw_table.getColumnAttributeType(col, a2n(key, 'utf-8')),
+                                 _sw_table)
+                key = a2u(key, 'utf-8')
+                if typ == 'double':
+                    attrs[key] = errorcheck(
+                        _sw_table.getColumnDoubleAttribute(col, a2n(key, 'utf-8')),
+                        _sw_table)
+                elif typ == 'int32':
+                    attrs[key] = errorcheck(
+                        _sw_table.getColumnInt32Attribute(col, a2n(key, 'utf-8')),
+                        _sw_table)
+                elif typ == 'int64':
+                    attrs[key] = errorcheck(
+                        _sw_table.getColumnInt64Attribute(col, a2n(key, 'utf-8')),
+                        _sw_table)
+                elif typ == 'string':
+                    attrs[key] = errorcheck(
+                        a2u(_sw_table.getColumnStringAttribute(col, a2n(key, 'utf-8')),
+                            'utf-8'), _sw_table)
+                elif typ == 'int32-array':
+                    nitems = errorcheck(_sw_table.getColumnAttributeNItems(), _sw_table)
+                    attrs[key] = []
+                    for i in range(nitems):
+                        attrs[key].append(errorcheck(
+                            _sw_table.getColumnInt32ArrayAttributeItem(col,
+                                                                       a2n(key, 'utf-8'),
+                                                                       i),
+                            _sw_table))
+                elif typ == 'int64-array':
+                    nitems = errorcheck(_sw_table.getColumnAttributeNItems(), _sw_table)
+                    attrs[key] = []
+                    for i in range(nitems):
+                        attrs[key].append(errorcheck(
+                            _sw_table.getColumnInt64ArrayAttributeItem(col,
+                                                                       a2n(key, 'utf-8'),
+                                                                       i),
+                            _sw_table))
+                elif typ == 'double-array':
+                    nitems = errorcheck(_sw_table.getColumnAttributeNItems(), _sw_table)
+                    attrs[key] = []
+                    for i in range(nitems):
+                        attrs[key].append(errorcheck(
+                            _sw_table.getColumnDoubleArrayAttributeItem(col,
+                                                                        a2n(key, 'utf-8'),
+                                                                        i),
+                            _sw_table))
 
         return cls(name=name, label=label, dtype=dtype, width=width, format=format,
                    size=size, attrs=attrs)
@@ -931,6 +934,8 @@ class SASDataFrame(pd.DataFrame):
                 if bygroup_columns == 'both' or bygroup_columns == 'formatted':
                     if bygroup_columns == 'both':
                         byname = byname + bygroup_formatted_suffix
+                    elif bygroup_columns == 'formatted' and byname in allcolnames:
+                        byname = byname + bygroup_collision_suffix
                     dframe[byname] = byvalfmt
                     bycols.append(byname)
                     dframe.colinfo[byname] = SASColumnSpec(byname, label=bylabel,

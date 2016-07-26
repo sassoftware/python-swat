@@ -329,7 +329,7 @@ class CASResults(OrderedDict, RendererMixin):
 
         raise IndexError('No By group set matched the given index.')
 
-    def get_group(_self_, name, **kwargs):
+    def get_group(_self_, *name, **kwargs):
         ''' 
         Return a :class:`CASResults` object of the specified By group tables
 
@@ -365,6 +365,10 @@ class CASResults(OrderedDict, RendererMixin):
         if 'ByGroupSet1.ByGroupInfo' in self:
             raise IndexError('Multiple By group sets are defined, use get_set to '
                              'to select a By group set first.')
+
+        # Convert list of positionals to a scalar
+        if name:
+            name = name[0]
 
         if not isinstance(name, (tuple, list)):
             name = tuple([name])

@@ -115,7 +115,7 @@ class CASTableAccessor(object):
 
 
 class CASTableRowScalarAccessor(CASTableAccessor):
-    ''' Implemention of the iat property '''
+    ''' Implemention of the `iat` property '''
 
     def __getitem__(self, pos):
         tbl = self._table()
@@ -125,7 +125,7 @@ class CASTableRowScalarAccessor(CASTableAccessor):
 
 
 class CASTableLabelScalarAccessor(CASTableAccessor):
-    ''' Implemention of the at property '''
+    ''' Implemention of the `at` property '''
 
     def __getitem__(self, pos):
         tbl = self._table()
@@ -140,7 +140,7 @@ class CASTableLabelScalarAccessor(CASTableAccessor):
 
 def _get_table_selection(table, args):
     '''
-    Determine the varlist, to, and from fetch parameters
+    Determine the varlist and computed varibles selected
 
     Parameters
     ----------
@@ -152,11 +152,11 @@ def _get_table_selection(table, args):
     Returns
     -------
     (dict, string)
-       (Dictionary containing fetch parameters,
+       (Dictionary containing table parameters,
         String containing expected output type: table, row, column, scalar)
 
     '''
-    cols = rowstart = rowend = None
+    cols = None
     compvars = []
     comppgm = []
     outtype = 'table'
@@ -167,19 +167,18 @@ def _get_table_selection(table, args):
 
         # tbl.x[[0, 3, 2]] or tbl.x[[2]]
         if isinstance(rows, items_types):
-            raise TypeError('Selecting and array of indexes is not supported')
+            raise IndexError('Row selection is not supported.')
 
         # tbl.x[1:12]
         elif isinstance(rows, slice):
-            if rows.step and rows.step != 1:
-                raise TypeError('Step values in slices are not supported')
-            rowstart = rows.start
-            rowend = rows.stop
+            if rows.start is not None or rows.stop is not None or \
+                    rows.step is not None:
+                raise IndexError('Row selection is not supported.')
 
         # tbl.x[10]
         elif isinstance(rows, int_types):
-            rowstart = rowend = rows
             outtype = 'row'
+            raise IndexError('Row selection is not supported.')
 
         else:
             raise TypeError('Unknown type for row indexing: %s' % rows)
@@ -253,29 +252,14 @@ def _get_table_selection(table, args):
 
     # Range of rows specified
     elif isinstance(args, slice):
-        if args.step and args.step != 1:
-            raise TypeError('Step values in row slices are not supported')
-        rowstart = args.start or 0
-        rowend = args.stop or (table._numrows - 1)
-        cols = None
+        raise IndexError('Row selection is not supported.')
 
     # One row specified
     elif isinstance(args, int_types):
-        rowstart = args
-        rowend = args
-        cols = None
-        outtype = 'row'
+        raise IndexError('Row selection is not supported.')
 
     else:
         raise TypeError('Unknown type for table indexing: %s' % args)
-
-    # Set missing endpoints
-    if rowstart is None:
-        rowstart = 0
-    if rowend is None:
-        rowend = table._numrows - 1
-
-    out = {'start': rowstart, 'stop': rowend}
 
     if cols:
         out['table.varlist'] = cols
@@ -308,23 +292,7 @@ class CASTableAnyLocationAccessor(CASTableAccessor):
         if dtype == 'column' or dtype == 'table':
             raise TypeError('Index must result in either a scalar or a row')
 
-        # With numeric column index, only row labels are allowed
-        if type(self).accessor == 'ix':
-            if params['start'] < 0:
-                raise KeyError(params['start'])
-            if params['stop'] < 0:
-                raise KeyError(params['stop'])
-
         tbl = self._table()
-
-        # Set negative index values
-        if params['start'] < 0:
-            numrows = tbl._numrows
-            params['start'] = params['start'] + numrows
-        if params['stop'] < 0:
-            if numrows is None:
-                numrows = tbl._numrows
-            params['stop'] = params['stop'] + numrows
 
         if 'table.varlist' in params or 'table.compvars' in params:
             tbl = tbl.copy()
@@ -348,39 +316,6 @@ class CASTableAnyLocationAccessor(CASTableAccessor):
         if 'table.compvars' in params and 'table.comppgm' in params:
             tbl.append_computed_columns(params.pop('table.compvars'),
                                         params.pop('table.comppgm'))
-
-        # Reformat params for table.fetch
-        fetch_params = {'from': params['start'] + 1, 'to': params['stop']}
-
-        from_ = params['start']
-
-        # Return a single value
-        if dtype == 'scalar':
-            out = pd.concat(list(tbl._retrieve('table.fetch', sastypes=False,
-                                               noindex=True, **fetch_params).values()))
-            if len(out):
-                out.index = [from_]
-            if type(self).accessor == 'iloc':
-                if table_varlist and not isinstance(table_varlist[0], int_types):
-                    return out.iloc[0, table_varlist[0]]
-                return out.iloc[0, 0]
-            elif type(self).accessor == 'ix':
-                return getattr(out, type(self).accessor)[from_, 0]
-            return getattr(out, type(self).accessor)[from_, table_varlist[0]]
-
-        # Return a series
-        if dtype == 'row':
-            out = pd.concat(list(tbl._retrieve('table.fetch', sastypes=False,
-                                               noindex=True, **fetch_params).values()))
-            if len(out):
-                out.index = [from_]
-            if type(self).accessor == 'iloc':
-                if is_column:
-                    return out.iloc[0].tolist()[0]
-                return out.iloc[0]
-            if is_column:
-                return getattr(out, type(self).accessor)[from_].tolist()[0]
-            return getattr(out, type(self).accessor)[from_]
 
         return tbl
 
@@ -703,8 +638,8 @@ class CASTable(ParamManager, ActionParamManager):
         self._connection = None
         self._contexts = []
 
-        self._iat = CASTableRowScalarAccessor(self)
-        self._at = CASTableLabelScalarAccessor(self)
+#       self._iat = CASTableRowScalarAccessor(self)
+#       self._at = CASTableLabelScalarAccessor(self)
         self._iloc = CASTableRowLocationAccessor(self)
         self._loc = CASTableLabelLocationAccessor(self)
         self._ix = CASTableAnyLocationAccessor(self)
@@ -2112,12 +2047,18 @@ class CASTable(ParamManager, ActionParamManager):
 
     @getattr_safe_property
     def at(self):
+        # Block autodoc
         ''' Label-based scalar accessor '''
+        raise NotImplementedError('The `at` attribute is not implemented, '
+                                  'but the attribute is reserved.')
         return self._at
 
     @getattr_safe_property
     def iat(self):
+        # Block autodoc
         ''' Integer location scalar accessor '''
+        raise NotImplementedError('The `iat` attribute is not implemented, '
+                                  'but the attribute is reserved.')
         return self._iat
 
     @getattr_safe_property

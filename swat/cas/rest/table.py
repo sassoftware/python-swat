@@ -9,7 +9,8 @@ Class for retrieving table values
 from __future__ import print_function, division, absolute_import, unicode_literals
 
 import base64
-from ...utils.compat import items_types
+from ..utils.datetime import cas2python_date, cas2python_time, cas2python_datetime
+from ...utils.compat import items_types, float64, int32, int64
 
 COL_TYPE_MAP = {
     'string': 'varchar',
@@ -21,6 +22,25 @@ def _strip(value):
     ''' If `value` is a string, strip the whitespace '''
     if hasattr(value, 'strip'):
         return value.strip()
+    return value
+
+
+def _attr2python(attr):
+    ''' Convert an attribute to a Python object '''
+    atype = attr['type']
+    value = attr['value']
+    if atype in ['double', 'float']:
+        return float64(value)
+    elif atype in ['int32', 'int']:
+        return int32(value)
+    elif atype == 'int64':
+        return int64(value)
+    elif atype == 'date':
+        return cas2python_date(value)
+    elif atype == 'time':
+        return cas2python_time(value)
+    elif atype == 'datetime':
+        return cas2python_datetime(value)
     return value
 
 
@@ -41,6 +61,23 @@ class REST_CASTable(object):
 
     def __init__(self, obj):
         self._obj = obj
+
+        # Map REST attributes to Python objects
+        attrs = self._obj.get('attributes', {})
+        for key, value in attrs.items():
+            attrs[key] = _attr2python(value)
+        for col in self._obj.get('schema', []):
+            colattrs = col.get('attributes', {})
+            for key, value in colattrs.items():
+                colattrs[key] = _attr2python(value)
+
+    def getAttributes(self):
+        ''' Return full set of attributes '''
+        return self._obj.get('attributes', {})
+
+    def getColumnAttributes(self, i):
+        ''' Return full set of column attributes '''
+        return self._obj.get('schema')[i].get('attributes', {})
 
     def getTypeName(self):
         ''' Get the object type '''

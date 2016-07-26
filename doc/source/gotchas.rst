@@ -56,8 +56,8 @@ or :class:`pandas.Series` object.
 
 
 
-Namespace Overloading
-=====================
+Name Collisions
+===============
 
 .. currentmodule:: swat.cas.table
 
