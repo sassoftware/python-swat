@@ -47,6 +47,7 @@ to the best of both worlds.
    workflows
    loading-data
    table-vs-dataframe
+   indexing
    bygroups
    api
    gotchas
