@@ -261,12 +261,14 @@ def _get_table_selection(table, args):
     else:
         raise TypeError('Unknown type for table indexing: %s' % args)
 
+    out = {}
+
     if cols:
         out['table.varlist'] = cols
 
     if compvars and comppgm:
-        out['table.compvars'] = compvars
-        out['table.comppgm'] = comppgm
+        out['table.computedvars'] = compvars
+        out['table.computedvarsprogram'] = comppgm
 
     # TODO: Set table.where for row label indexing when
     #       a table index is supported.
@@ -289,12 +291,9 @@ class CASTableAnyLocationAccessor(CASTableAccessor):
 
         params, dtype = _get_table_selection(self._table(), pos)
 
-        if dtype == 'column' or dtype == 'table':
-            raise TypeError('Index must result in either a scalar or a row')
-
         tbl = self._table()
 
-        if 'table.varlist' in params or 'table.compvars' in params:
+        if 'table.varlist' in params or 'table.computedvars' in params:
             tbl = tbl.copy()
 
         # Build varlist
@@ -313,9 +312,12 @@ class CASTableAnyLocationAccessor(CASTableAccessor):
             tbl.set_param('varlist', varlist)
 
         # Append compvars and comppgm
-        if 'table.compvars' in params and 'table.comppgm' in params:
-            tbl.append_computed_columns(params.pop('table.compvars'),
-                                        params.pop('table.comppgm'))
+        if 'table.computedvars' in params and 'table.computedvarsprogram' in params:
+            tbl.append_computed_columns(params.pop('table.computedvars'),
+                                        params.pop('table.computedvarsprogram'))
+
+        if dtype == 'column':
+            return tbl[tbl.columns[0]]
 
         return tbl
 
@@ -523,20 +525,20 @@ class CASTable(ParamManager, ActionParamManager):
         Default: []
     varlist : list of dicts, optional
         specifies the variables to use in the action.
-    compvars : list of strings, optional
+    computedvars : list of strings, optional
         specifies the names of the computed variables to create. Specify
-        an expression for each parameter in the compPgm parameter.
+        an expression for each parameter in the computedvarsprogram parameter.
         Default: []
-    comppgm : string, optional
+    computedvarsprogram : string, optional
         specifies an expression for each variable that you included in
-        the compVars parameter.
+        the computedvars parameter.
     groupbymode : string, optional
         specifies how the server creates groups.
         Default: NOSORT
         Values: NOSORT, REDISTRIBUTE
     compondemand : boolean, optional
         when set to True, the computed variables specified in the
-        compVars parameter are created when the table is loaded instead
+        computedvars parameter are created when the table is loaded instead
         of when the action begins.
         Default: False
     singlepass : boolean, optional
@@ -692,17 +694,17 @@ class CASTable(ParamManager, ActionParamManager):
             return
         return varlist
 
-    def append_compvars(self, *items, **kwargs):
+    def append_computedvars(self, *items, **kwargs):
         '''
-        Append variable names to tbl.compvars parameter
+        Append variable names to tbl.computedvars parameter
 
         Parameters
         ----------
         *items : strings or lists-of-strings
             Names to append.
         inplace : boolean, optional
-            If `True` (the default), tbl.compvars is appended.
-            If `False`, a new compvars is returned.
+            If `True` (the default), tbl.computedvars is appended.
+            If `False`, a new computedvars is returned.
 
         Returns
         -------
@@ -712,7 +714,14 @@ class CASTable(ParamManager, ActionParamManager):
             if inplace == False
 
         '''
-        varlist = self.get_param('compvars', [])
+        varlist = []
+        pname = 'compvars'
+        if self.has_param('computedvars'):
+            varlist = self.get_param('computedvars')
+            pname = 'computedvars'
+        elif self.has_param('compvars'):
+            varlist = self.get_param('compvars')
+            pname = 'compvars'
         if not isinstance(varlist, items_types):
             varlist = [varlist]
         for item in _flatten(items):
@@ -720,7 +729,7 @@ class CASTable(ParamManager, ActionParamManager):
                 varlist.append(item)
         varlist = _get_unique(varlist, lowercase=True)
         if kwargs.get('inplace', True):
-            self.set_param('compvars', varlist)
+            self.set_param(pname, varlist)
             return
         return varlist
 
@@ -756,17 +765,17 @@ class CASTable(ParamManager, ActionParamManager):
             return
         return varlist
 
-    def append_comppgm(self, *items, **kwargs):
+    def append_computedvarsprogram(self, *items, **kwargs):
         '''
-        Append code to tbl.comppgm parameter
+        Append code to tbl.computedvarsprogram parameter
 
         Parameters
         ----------
         *items : strings or lists-of-strings
             Code to append.
         inplace : boolean, optional
-            If `True`, tbl.comppgm is appended.
-            If `False`, a new comppgm is returned.
+            If `True`, tbl.computedvarsprogram is appended.
+            If `False`, a new computedvarsprogram is returned.
 
         Returns
         -------
@@ -776,7 +785,14 @@ class CASTable(ParamManager, ActionParamManager):
             if inplace == False
 
         '''
-        code = self.get_param('comppgm', [])
+        code = []
+        pname = 'comppgm'
+        if self.has_param('computedvarsprogram'):
+            code = self.get_param('computedvarsprogram')
+            pname = 'computedvarsprogram'
+        elif self.has_param('comppgm'):
+            code = self.get_param('comppgm')
+            pname = 'comppgm'
         if not isinstance(code, items_types):
             code = [code]
         for item in _flatten(items):
@@ -787,7 +803,7 @@ class CASTable(ParamManager, ActionParamManager):
                 code[i] = '%s; ' % block.rstrip()
         code = ''.join(_get_unique(code))
         if kwargs.get('inplace', True):
-            self.set_param('comppgm', code)
+            self.set_param(pname, code)
             return
         return code
 
@@ -808,13 +824,13 @@ class CASTable(ParamManager, ActionParamManager):
         Returns
         -------
         None
-            if inplace == True
-        (compvars, comppgm)
-            if inplace == False
+            if inplace=True
+        (computedvars, computedvarsprogram)
+            if inplace=False
 
         '''
-        out = (self.append_compvars(names, inplace=inplace),
-               self.append_comppgm(code, inplace=inplace))
+        out = (self.append_computedvars(names, inplace=inplace),
+               self.append_computedvarsprogram(code, inplace=inplace))
         if inplace:
             return
         return out
@@ -930,7 +946,7 @@ class CASTable(ParamManager, ActionParamManager):
         CASColumn object
 
         '''
-        table = copy.deepcopy(self)
+        table = self.copy()
 
         params = table.to_params()
         if varname is not None:
@@ -978,15 +994,27 @@ class CASTable(ParamManager, ActionParamManager):
             param_names = []
 
             actinfo = connection._get_action_info('builtins.cascommon')
+
             for item in actinfo[-1].get('params'):
                 if 'parmList' in item:
                     # Populate valid fields for tables and outtables
                     if item['name'] == 'castable':
                         cls.table_params = set([x['name'] for x in item['parmList']])
+
+                        # Bit of a hack. Add "aliases" for old spellings
+                        # of computedvars and computedvarsprogram
+                        cls.table_params.add('comppgm')
+                        cls.table_params.add('compvars')
+
                         tblparams = format_params(item['parmList'], connection,
                                                   param_names=param_names).rstrip()
 
                     elif item['name'] == 'casouttable':
+                        cls.outtable_params = set([x['name'] for x in item['parmList']])
+                        outtblparams = format_params(item['parmList'], connection,
+                                                     param_names=param_names).rstrip()
+
+                    elif item['name'] == 'casouttablebasic':
                         cls.outtable_params = set([x['name'] for x in item['parmList']])
                         outtblparams = format_params(item['parmList'], connection,
                                                      param_names=param_names).rstrip()
@@ -1315,12 +1343,12 @@ class CASTable(ParamManager, ActionParamManager):
         if '.' not in name:
             if not(re.match(r'^[A-Z]', origname)) and conn.has_actionset(name):
                 asinst = conn.get_actionset(name)
-                asinst.default_params = {'table': self.to_params()}
+                asinst.default_params = {'__table__': self.copy()}
                 return asinst
 
         if conn.has_action(name):
             actcls = conn.get_action_class(name)
-            members = {'default_params': {'table': copy.deepcopy(self)}}
+            members = {'default_params': {'__table__': self.copy()}}
             actcls = type(actcls.__name__, (actcls,), members)
 
             if re.match(r'^[A-Z]', origname):
@@ -1331,7 +1359,11 @@ class CASTable(ParamManager, ActionParamManager):
         # See if it's a column name
         if name in [x.lower() for x in self.get_param('varlist', [])]:
             return self._to_column(origname)
+        elif name in [x.lower() for x in self.get_param('computedvars', [])]:
+            return self._to_column(origname)
         elif name in [x.lower() for x in self.get_param('compvars', [])]:
+            return self._to_column(origname)
+        elif name in [x.lower() for x in self.get_param('groupby', [])]:
             return self._to_column(origname)
         elif not self.get_param('varlist', []):
             try:
@@ -1623,7 +1655,7 @@ class CASTable(ParamManager, ActionParamManager):
     @getattr_safe_property
     def _numrows(self):
         ''' Return number of rows in the table '''
-        return self._retrieve('simple.numrows')['numrows']
+        return self.copy(exclude='groupby')._retrieve('simple.numrows')['numrows']
 
     def __len__(self):
         return self._numrows
@@ -1649,7 +1681,7 @@ class CASTable(ParamManager, ActionParamManager):
 
         # Call tableinfo
         tblinfo = self._retrieve('table.tableinfo')['TableInfo']
-        compvars = self.get_param('compvars', [])
+        compvars = self.get_param('computedvars', self.get_param('compvars', []))
         if compvars and not isinstance(compvars, items_types):
             compvars = [compvars]
         return tblinfo.ix[0, 'Columns'] + len(compvars)
@@ -1734,7 +1766,7 @@ class CASTable(ParamManager, ActionParamManager):
         '''
         if n is None:
             n = get_option('cas.dataset.max_rows_fetched')
-        tbl = self.copy(deep=True)
+        tbl = self.copy()
         tbl._intersect_varlist(columns, inplace=True)
         return pd.concat(list(tbl._retrieve('table.fetch', to=n, noindex=True,
                                             sastypes=False).values())).as_matrix()
@@ -1769,9 +1801,9 @@ class CASTable(ParamManager, ActionParamManager):
         ''' Retrieve the frequency of CAS table column data types '''
         return self.ftypes.value_counts().sort_index()
 
-    def select_dtypes(self, include=None, exclude=None):
+    def _get_dtypes(self, include=None, exclude=None):
         '''
-        Return a subset `CASTable` including/excluding columns based on data type
+        Return a list of columns selected by `include` and `exclude`
 
         Parameters
         ----------
@@ -1792,9 +1824,10 @@ class CASTable(ParamManager, ActionParamManager):
 
         Returns
         -------
-        :class:`CASTable` object
+        list-of-strings
 
         '''
+        
         if include is None:
             include = set()
         elif not isinstance(include, items_types):
@@ -1848,9 +1881,48 @@ class CASTable(ParamManager, ActionParamManager):
                 if dtype in exclude:
                     varlist.discard(name)
 
-        tblcopy = copy.deepcopy(self)
-        tblcopy.set_param('varlist', [x for x in names if x in varlist])
+        return [x for x in names if x in varlist]
 
+
+    def select_dtypes(self, include=None, exclude=None, inplace=False):
+        '''
+        Return a subset `CASTable` including/excluding columns based on data type
+
+        Parameters
+        ----------
+        include : list-of-strings, optional
+            List of data type names to include in result
+        exclude : list-of-strings, optional
+            List of data type names to exclude from result
+        inplace : boolean, optional
+            Should the table be modified in place?
+
+        Notes
+        -----
+        In addition to data type names, the names 'number' and 'numeric'
+        can be used to refer to all numeric types.  The name 'character'
+        can be used to refer to all character types.
+
+        Numerics can also be referred to by the names 'integer' and
+        'floating' to refer to integers and floating point types,
+        respectively.
+
+        Returns
+        -------
+        :class:`CASTable` object
+            If inplace == False
+        ``self``
+            If inplace == True
+
+        '''
+        varlist = self._get_dtypes(include=include, exclude=exclude)
+
+        if inplace:
+            self.set_param('varlist', varlist)
+            return
+
+        tblcopy = self.copy()
+        tblcopy.set_param('varlist', varlist)
         return tblcopy
 
     @getattr_safe_property
@@ -1890,7 +1962,7 @@ class CASTable(ParamManager, ActionParamManager):
 #       ''' Deprecated '''
 #       raise NotImplementedError
 
-    def copy(self, deep=False):
+    def copy(self, deep=True, exclude=None):
         '''
         Make a copy of the `CASTable` object
 
@@ -1898,6 +1970,8 @@ class CASTable(ParamManager, ActionParamManager):
         ----------
         deep : boolean, optional
             Should all list / dict-type objects be deep copied?
+        exclude : list-of-strings, optional
+            Parameters that should be excluded (top-level only).
 
         Examples
         --------
@@ -1914,8 +1988,15 @@ class CASTable(ParamManager, ActionParamManager):
 
         '''
         if deep:
-            return copy.deepcopy(self)
-        return copy.copy(self)
+            out = copy.deepcopy(self)
+        else:
+            out = copy.copy(self)
+        if exclude:
+            if not isinstance(exclude, items_types):
+                exclude = [exclude] 
+            for item in exclude:
+                out.params.pop(item, None) 
+        return out
 
 #   def isnull(self):
 #       # TODO: Should build where clause that creates a table of booleans
@@ -2064,16 +2145,25 @@ class CASTable(ParamManager, ActionParamManager):
     @getattr_safe_property
     def ix(self):
         ''' Label-based indexer with integer position fallback '''
+        if isinstance(self, CASColumn):
+            raise NotImplementedError('The `ix` attribute is not implemented, '
+                                      'but the attribute is reserved.')
         return self._ix
 
     @getattr_safe_property
     def loc(self):
         ''' Label-based indexer '''
+        if isinstance(self, CASColumn):
+            raise NotImplementedError('The `loc` attribute is not implemented, '
+                                      'but the attribute is reserved.')
         return self._loc
 
     @getattr_safe_property
     def iloc(self):
         ''' Integer location based indexing for selection by position '''
+        if isinstance(self, CASColumn):
+            raise NotImplementedError('The `iloc` attribute is not implemented, '
+                                      'but the attribute is reserved.')
         return self._iloc
 
     def xs(self, key, axis=0, level=None, copy=None, drop_level=True):
@@ -2297,7 +2387,7 @@ class CASTable(ParamManager, ActionParamManager):
         :class:`CASColumn` object
 
         '''
-        out = self.copy(deep=True)._to_column(colname)
+        out = self.copy()._to_column(colname)
         del self[colname]
         return out
 
@@ -2570,17 +2660,17 @@ class CASTable(ParamManager, ActionParamManager):
         :class:`pandas.Series` object
 
         '''
-        tbl = self
-
         if numeric_only:
-            tbl = tbl.select_dtypes(include='numeric')
+            inputs = self._get_dtypes(include='numeric')
+        else:
+            inputs = self.get_param('varlist', None)
 
         groups = self.get_groupby_vars()
         if groups:
             # TODO: Only supports numeric variables
-            return self._summary().xs('count', level=len(groups))
+            return self._summary(inputs=inputs).xs('count', level=len(groups))
 
-        out = tbl._retrieve('simple.distinct')['Distinct']
+        out = self._retrieve('simple.distinct', inputs=inputs)['Distinct']
         out.set_index('Column', inplace=True)
         return out['NMiss'].astype(np.int64).rsub(self._numrows)
 
@@ -2615,6 +2705,8 @@ class CASTable(ParamManager, ActionParamManager):
         '''
         self._loadactionset('percentile')
 
+        inputs = list(self.columns)
+
         if not isinstance(percentiles, items_types):
             percentiles = [percentiles]
         else:
@@ -2622,7 +2714,8 @@ class CASTable(ParamManager, ActionParamManager):
 
         bygroup_columns = 'raw'
 
-        out = self._retrieve('percentile.percentile', multitable=True, values=percentiles)
+        out = self._retrieve('percentile.percentile', inputs=inputs,
+                             multitable=True, values=percentiles)
         out = [x.reshape_bygroups(bygroup_columns=bygroup_columns, bygroup_as_index=True)
                for x in out.get_tables('Percentile')]
         out = pd.concat(out)
@@ -2646,7 +2739,7 @@ class CASTable(ParamManager, ActionParamManager):
 
         return out
 
-    def _topk_frequency(self, maxtie=0):
+    def _topk_frequency(self, maxtie=0, skipna=True):
         ''' 
         Return the top value by frequency 
 
@@ -2661,7 +2754,11 @@ class CASTable(ParamManager, ActionParamManager):
 
         '''
         bygroup_columns = 'raw'
+
+        inputs = list(self.columns)
+
         out = self._retrieve('simple.topk', topk=1, bottomk=0,
+                             inputs=inputs, includemissing=not skipna, raw=True,
                              maxtie=maxtie, order='freq').get_tables('Topk')
         out = [x.reshape_bygroups(bygroup_columns=bygroup_columns,
                                   bygroup_as_index=True) for x in out]
@@ -2725,7 +2822,7 @@ class CASTable(ParamManager, ActionParamManager):
         # Auto-specify all numeric or all character
         if include is None and exclude is None:
             include = ['number']
-            tbl = self.select_dtypes(include=['number'])
+            tbl = self.select_dtypes(include=include)
             if not tbl.get_param('varlist', []):
                 tbl = self.select_dtypes(include=['character'])
 
@@ -2761,7 +2858,7 @@ class CASTable(ParamManager, ActionParamManager):
         # Get top value and frequency
         topk_freq = None
         if stats is None or stats == 'all' or 'freq' in stats or 'top' in stats:
-            topk_freq = tbl._topk_frequency()
+            topk_freq = tbl._topk_frequency(skipna=True)
 
         # Get unique value counts
         topk_val = None
@@ -2930,24 +3027,24 @@ class CASTable(ParamManager, ActionParamManager):
         '''
         from ..dataframe import reshape_bygroups
 
-        tbl = self
-
         if numeric_only:
-            tbl = tbl.select_dtypes(include='numeric')
+            inputs = self._get_dtypes(include='numeric')
+        else:
+            inputs = list(self.columns)
 
         if not isinstance(stats, items_types):
             stats = [stats]
         else:
             stats = list(stats)
 
-        out = tbl.simple.topk(order='value', includemissing=not skipna,
-                              topk=1, bottomk=1, **kwargs)
+        out = self._retrieve('simple.topk', order='value', includemissing=not skipna,
+                             inputs=inputs, raw=True, topk=1, bottomk=1, **kwargs)
 
         bygroup_columns = 'raw'
 
-        groups = tbl.get_groupby_vars()
+        groups = self.get_groupby_vars()
         groupset = set(groups)
-        columns = [x for x in tbl.columns if x not in groupset]
+        columns = [x for x in inputs if x not in groupset]
 
         # Minimum / Maximum
         minmax = None
@@ -3156,7 +3253,7 @@ class CASTable(ParamManager, ActionParamManager):
         if not isinstance(columns, items_types):
             columns = [columns]
         columns = [dict(name=x, order='DESCENDING', formatted='RAW') for x in columns]
-        col = self.copy(deep=True)
+        col = self.copy()
         col._action_params = {}
         return col._fetch(from_=1, to=n, sortby=columns)
 
@@ -3185,11 +3282,11 @@ class CASTable(ParamManager, ActionParamManager):
         if not isinstance(columns, items_types):
             columns = [columns]
         columns = [dict(name=x, order='ASCENDING', formatted='RAW') for x in columns]
-        col = self.copy(deep=True)
+        col = self.copy()
         col._action_params = {}
         return col._fetch(from_=1, to=n, sortby=columns)
 
-    def mode(self, axis=0, numeric_only=False, max_tie=100):
+    def mode(self, axis=0, numeric_only=False, max_tie=100, skipna=True):
         '''
         Return the mode of each column
 
@@ -3216,19 +3313,18 @@ class CASTable(ParamManager, ActionParamManager):
         '''
         # TODO: If a column has all unique values, it should just be set to NaN.
 
-        tbl = self
-
         if numeric_only:
-            tbl = tbl.select_dtypes(include='numeric')
-
-        columns = list(tbl.columns)
+            inputs = self._get_dtypes(include='numeric')
+        else:
+            inputs = list(self.columns)
 
         bygroup_columns = 'raw'
 
-        out = tbl._retrieve('simple.topk', order='freq', topk=1,
-                            bottomk=0, maxtie=max_tie)
+        out = self._retrieve('simple.topk', order='freq', topk=1, raw=True,
+                             includemissing=not skipna, inputs=inputs,
+                             bottomk=0, maxtie=max_tie)
 
-        groups = tbl.get_groupby_vars()
+        groups = self.get_groupby_vars()
         if groups:
             out = [x.reshape_bygroups(bygroup_columns=bygroup_columns, bygroup_as_index=False)
                    for x in out.get_tables('Topk')]
@@ -3255,7 +3351,7 @@ class CASTable(ParamManager, ActionParamManager):
 
                 item = pd.concat([item[col].sort_values(ascending=True,
                                   inplace=False).reset_index(drop=True)
-                                  for col in columns], axis=1)
+                                  for col in inputs], axis=1)
 
                 item = item.set_index(groups, append=True)
                 item = item.reorder_levels(groups + [None])
@@ -3282,7 +3378,7 @@ class CASTable(ParamManager, ActionParamManager):
                 out = charout
 
             out = pd.concat([out[col].sort_values(ascending=True).reset_index(drop=True)
-                             for col in columns], axis=1)
+                             for col in inputs], axis=1)
 
         out.columns.name = None
         out.index.name = None
@@ -3671,7 +3767,7 @@ class CASTable(ParamManager, ActionParamManager):
         if inplace:
             out = self
         else:
-            out = copy.deepcopy(self)
+            out = self.copy()
         if not isinstance(by, items_types):
             by = [by]
         if not isinstance(ascending, items_types):
@@ -4625,7 +4721,7 @@ class CASTable(ParamManager, ActionParamManager):
 
         # tbl[[colnames|colindexes]]
         if not(is_column) and (isinstance(key, list) or isinstance(key, pd.Index)):
-            out = copy.deepcopy(self)
+            out = self.copy()
             columns = list(out.columns)
             colset = set([x.lower() for x in columns])
             compvars = []
@@ -4645,16 +4741,16 @@ class CASTable(ParamManager, ActionParamManager):
 
         # tbl[CASColumn]
         if isinstance(key, CASColumn):
-            out = copy.deepcopy(self)
+            out = self.copy()
             expr, ecompvars, ecomppgm = key._to_expression()
 
             out.append_where(expr)
 
             if ecompvars:
-                out.append_compvars(ecompvars)
+                out.append_computedvars(ecompvars)
 
             if ecomppgm:
-                out.append_comppgm(ecomppgm)
+                out.append_computedvarsprogram(ecomppgm)
 
             if out.get_param('varlist', None) is None:
                 out.set_param('varlist', list(self.columns))
@@ -4734,7 +4830,7 @@ class CASTable(ParamManager, ActionParamManager):
             raise SWATError('Only CAS queries are supported at this time.')
         tbl = self
         if not inplace:
-            tbl = tbl.copy(deep=True)
+            tbl = tbl.copy()
         tbl.append_where(expr)
         return tbl
 
@@ -4752,10 +4848,10 @@ class CASTable(ParamManager, ActionParamManager):
 #       out.append_where(expr)
 
 #       if ecompvars:
-#           out.append_compvars(ecompvars)
+#           out.append_computedvars(ecompvars)
 
 #       if ecomppgm:
-#           out.append_comppgm(ecomppgm)
+#           out.append_computedvarsprogram(ecomppgm)
 
 #       if out.get_param('varlist', None) is None:
 #           out.set_param('varlist', list(self.columns))
@@ -6016,12 +6112,12 @@ class CASColumn(CASTable):
         CASColumn object
 
         '''
-        out = copy.deepcopy(self)
+        out = self.copy()
 
         outname = '_%s_%s_' % (funcname, self.get_connection()._gen_id())
 
         out.set_param('varlist', [outname])
-        if outname in self.get_param('compvars', []):
+        if outname in self.get_param('computedvars', self.get_param('compvars', [])):
             return out
 
         kwargs = kwargs.copy()
@@ -6084,8 +6180,8 @@ class CASColumn(CASTable):
     def _to_expression(self):
         ''' Convert CASColumn to an expression '''
         return (_nlit(self.name),
-                self.get_param('compvars', []),
-                self.get_param('comppgm', ''))
+                self.get_param('computedvars', self.get_param('compvars', [])),
+                self.get_param('computedvarsprogram', self.get_param('comppgm', '')))
 
     def __and__(self, arg):
         return self._compare('and', arg)
@@ -6126,7 +6222,7 @@ class CASColumn(CASTable):
     def all(self, axis=None, bool_only=None, skipna=None, level=None, **kwargs):
         ''' Return whether all elements are True '''
         numrows = self._numrows
-        col = self.copy(deep=True)
+        col = self.copy()
         if self._is_character():
             col.append_where('lengthn(%s) ^= 0' % _nlit(col.name))
         else:
@@ -6135,7 +6231,7 @@ class CASColumn(CASTable):
 
     def any(self, axis=None, bool_only=None, skipna=None, level=None, **kwargs):
         ''' Return whether any elements are True '''
-        col = self.copy(deep=True)
+        col = self.copy()
         if self._is_character():
             col.append_where('lengthn(%s) ^= 0' % _nlit(col.name))
         else:
@@ -6160,7 +6256,7 @@ class CASColumn(CASTable):
             return self._compute('clip_lower', 'max({lower}, {value})', lower=lower)
         elif upper is not None:
             return self._compute('clip_upper', 'min({upper}, {value})', upper=upper)
-        return self.copy(deep=True)
+        return self.copy()
 
     def clip_lower(self, threshold, axis=0):
         ''' Trim values below given threshold '''
@@ -6172,7 +6268,7 @@ class CASColumn(CASTable):
 
     def _to_table(self):
         ''' Convert CASColumn object to a CASTable object '''
-        column = copy.deepcopy(self)
+        column = self.copy()
 
         table = CASTable(**column.to_params())
 
@@ -6191,11 +6287,17 @@ class CASColumn(CASTable):
         tbl = self._to_table()
         for item in others:
             tbl.append_varlist(item.get_param('varlist', []))
-            tbl.append_compvars(item.get_param('compvars', []))
-            tbl.append_comppgm(item.get_param('comppgm', ''))
+            tbl.append_computedvars(item.get_param('computedvars',
+                                    item.get_param('compvars', [])))
+            tbl.append_computedvarsprogram(item.get_param('computedvarsprogram',
+                                           item.get_param('comppgm', '')))
             tbl.append_where(item.get_param('where', ''))
+        if not tbl.get_param('computedvars', None):
+            tbl.del_param('computedvars')
         if not tbl.get_param('compvars', None):
             tbl.del_param('compvars')
+        if not tbl.get_param('computedvarsprogram', None):
+            tbl.del_param('computedvarsprogram')
         if not tbl.get_param('comppgm', None):
             tbl.del_param('comppgm')
         if not tbl.get_param('where', None):
@@ -6276,14 +6378,14 @@ class CASColumn(CASTable):
 
     def nlargest(self, n=5, keep='first'):
         ''' Return the n largest values '''
-        col = self.copy(deep=True)
+        col = self.copy()
         col._action_params = {}
         return col._fetch(from_=1, to=n, sortby=[dict(name=col.name,
                           order='DESCENDING', formatted='RAW')])[col.name]
 
     def nsmallest(self, n=5, keep='first'):
         ''' Return the n smallest values '''
-        col = self.copy(deep=True)
+        col = self.copy()
         col._action_params = {}
         return col._fetch(from_=1, to=n, sortby=[dict(name=col.name,
                           order='ASCENDING', formatted='RAW')])[col.name]
@@ -6338,7 +6440,7 @@ class CASColumn(CASTable):
 
         '''
         bygroup_columns = 'raw'
-        out = self._retrieve('simple.freq',
+        out = self._retrieve('simple.freq', inputs=self.get_param('varlist', None),
                              includemissing=includemissing).get_tables('Frequency')
         out = [x.reshape_bygroups(bygroup_columns=bygroup_columns,
                                   bygroup_as_index=True) for x in out]
@@ -6501,7 +6603,7 @@ class CASTableGroupBy(object):
 
     def __init__(self, table, by, axis=0, level=None, as_index=True, sort=True,
                  group_keys=True, squeeze=False, **kwargs):
-        self._table = table.copy(deep=True)
+        self._table = table.copy()
         self._table.append_groupby(by)
         if isinstance(by, items_types):
             self._by = list(by)
@@ -6512,7 +6614,8 @@ class CASTableGroupBy(object):
         self._as_index = as_index
 
     def __iter__(self):
-        groupby = self._table[self._by].simple.groupby()['Groupby']
+        tbl = self._table.copy(exclude='groupby')
+        groupby = tbl._retrieve('simple.groupby', inputs=self._by)['Groupby']
         groupby = groupby[self._by].to_records(index=False)
         for group in groupby:
             yield tuple(group), self.get_group(group)

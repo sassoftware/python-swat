@@ -868,6 +868,10 @@ class CAS(object):
         if isinstance(kwargs, ParamManager):
             kwargs = copy.deepcopy(kwargs.params)
 
+        # Short circuit if we can
+        if not isinstance(kwargs, dict):
+            return
+
         # See if we have a caslib= parameter
         caslib = False
         for param in parmlist:
@@ -876,10 +880,7 @@ class CAS(object):
                 break
 
         # kwargs preserving case
-        if isinstance(kwargs, dict):
-            casekeys = {k.lower(): k for k in kwargs.keys()}
-        else:
-            casekeys = {}
+        casekeys = {k.lower(): k for k in kwargs.keys()}
 
         # Add support for CASTable objects
         for param in parmlist:
@@ -900,16 +901,39 @@ class CAS(object):
                     kwargs[key] = kwargs[key].to_outtable_params()
                 elif param.get('isCasLib') and kwargs[key].has_param('caslib'):
                     kwargs[key] = kwargs[key].get_param('caslib')
-                # Workaround for columninfo which doesn't define table= as
-                # a table definition.
-                elif key.lower() == 'table' and \
-                        action.lower() in ['columninfo', 'table.columninfo']:
-                    kwargs[key] = kwargs[key].to_table_params()
 
             # If a string is given for a table object, convert it to a table object
             elif key in kwargs and isinstance(kwargs[key], text_types) and \
                     param.get('isTableDef'):
                 kwargs[key] = {'name': kwargs[key]}
+
+            elif param.get('isTableDef') and key.lower() == 'table' and '__table__' in kwargs:
+                kwargs[key] = kwargs['__table__'].to_table_params()
+
+            elif param.get('isTableName') and key.lower() == 'name' and '__table__' in kwargs:
+                if caslib and 'caslib' not in kwargs and \
+                       kwargs['__table__'].has_param('caslib'):
+                    kwargs['caslib'] = kwargs['__table__'].get_param('caslib')
+                kwargs[key] = kwargs['__table__'].to_table_name()
+
+            # Workaround for columninfo which doesn't define table= as
+            # a table definition.
+            elif key.lower() == 'table' and '__table__' in kwargs and \
+                    action.lower() in ['columninfo', 'table.columninfo']:
+                kwargs[key] = kwargs['__table__'].to_table_params()
+
+        kwargs.pop('__table__', None)
+
+        # Workaround for tableinfo which aliases table= to name=, but
+        # the alias is hidden.
+        if action.lower() in ['tableinfo', 'table.tableinfo'] and 'table' in kwargs:
+            if isinstance(kwargs['table'], CASTable):
+                kwargs['table'] = kwargs['table'].to_table_params()
+            if isinstance(kwargs['table'], dict):
+                if caslib and 'caslib' not in kwargs and \
+                       kwargs['table'].get('caslib'):
+                    kwargs['caslib'] = kwargs['table']['caslib']
+                kwargs['table'] = kwargs['table']['name']
 
         # Add current value fields in the signature
         for param in parmlist:

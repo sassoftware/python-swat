@@ -753,6 +753,8 @@ class CASAction(ParamManager):
             for key, value in six.iteritems(params):
                 if key.lower() in type(self).param_names:
                     out[key] = value
+                elif key.lower() == '__table__':
+                    out[key] = value
             return out
         return out
 
