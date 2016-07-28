@@ -3876,7 +3876,7 @@ class CASTable(ParamManager, ActionParamManager):
 
         '''
         kwargs = kwargs.copy()
-        kwargs['tables'] = [self]
+        kwargs['tables'] = [self.to_table_params()]
         if not args and 'name' not in kwargs:
             kwargs['name'] = _gen_table_name()
         out = self._retrieve('table.view', *args, **kwargs)
