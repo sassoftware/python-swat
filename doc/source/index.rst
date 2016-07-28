@@ -52,6 +52,7 @@ to the best of both worlds.
    api
    gotchas
    troubleshooting
+   licenses
 
 
 Index

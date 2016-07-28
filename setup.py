@@ -20,7 +20,7 @@ def accept_license():
     import pydoc
     if len(glob.glob('swat/lib/*/*')) > 10:
         os.environ['LESS'] = os.environ.get('LESS', '') + ' -e'
-        pydoc.pager(open('LICENSE.txt', 'r').read())
+        pydoc.pager(open(os.path.join('LICENSES', 'SAS-TK.txt'), 'r').read())
         out = input('Do you accept the terms of the license? [y/N] ')
         if out.lower().strip().startswith('y'):
             return True
@@ -38,7 +38,9 @@ class SWATInstaller(install):
             print('This version of Python is %dbit:' % (size*8))
             print(sys.version)
             raise Exception('This packages requires 64bit Python')
-        if accept_license():
+        if os.environ.get('ACCEPT_SAS_TK_LICENSE', '').lower().startswith('y'):
+            install.run(self)
+        elif accept_license():
             install.run(self)
 
 
@@ -62,13 +64,16 @@ setup(
         "six >= 0.9.0",
     ],
     classifiers = [
-        'Development Status :: 5 - Production/Stable',
+        'Development Status :: 4 - Beta',
         'Intended Audience :: Developers',
         'Intended Audience :: Science/Research',
         'License :: OSI Approved :: Apache Software License',
-        'Topic :: Software Development :: Libraries :: Python Modules',
+        'License :: Other/Proprietary License',
+        'Natural Language :: English',
         'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
+        'Topic :: Scientific/Engineering :: Information Analysis',
+        'Topic :: Software Development :: Libraries :: Python Modules',
     ],
 )

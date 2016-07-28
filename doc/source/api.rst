@@ -223,9 +223,8 @@ Indexing, Iteration
 .. autosummary::
    :toctree: generated/
 
+   CASTable.drop
    CASTable.head
-   CASTable.at
-   CASTable.iat
    CASTable.ix
    CASTable.loc
    CASTable.iloc
@@ -237,8 +236,8 @@ Indexing, Iteration
    CASTable.tail
    CASTable.query
 
-For more information on ``.at``, ``.iat``, ``.ix``, ``.loc``, and
-``.iloc``,  see the :ref:`indexing documentation <indexing>`.
+For more information on ``.ix``, ``.loc``, and ``.iloc``,
+see the :ref:`indexing documentation <indexing>`.
 
 
 GroupBy

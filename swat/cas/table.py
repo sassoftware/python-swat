@@ -2128,16 +2128,14 @@ class CASTable(ParamManager, ActionParamManager):
 
     @getattr_safe_property
     def at(self):
-        # Block autodoc
-        ''' Label-based scalar accessor '''
+        #''' Label-based scalar accessor '''
         raise NotImplementedError('The `at` attribute is not implemented, '
                                   'but the attribute is reserved.')
         return self._at
 
     @getattr_safe_property
     def iat(self):
-        # Block autodoc
-        ''' Integer location scalar accessor '''
+        #''' Integer location scalar accessor '''
         raise NotImplementedError('The `iat` attribute is not implemented, '
                                   'but the attribute is reserved.')
         return self._iat
@@ -3654,8 +3652,69 @@ class CASTable(ParamManager, ActionParamManager):
 #   def align(self, *args, **kwargs):
 #       raise NotImplementedError
 
-#   def drop(self, *args, **kwargs):
-#       raise NotImplementedError
+    def drop(self, labels, axis=0, level=None, inplace=False, errors='raise'):
+        '''
+        Return a new :class:`CASTable` object with the specified columns removed
+
+        Parameters
+        ----------
+        labels : string or list-of-strings
+            The items to remove.
+        axis : int, optional
+            Only axis=1 is supported.
+        level : int or string, optional
+            Not implemented.
+        inplace : boolean, optional
+            If True, apply the operation in place and return None.
+        errors : string, optional
+            If 'raise', then an exception is raised if the requested labels
+            do not exist.  If 'ignore', any errors are ignored.
+
+        Examples
+        --------
+        >>> tbl = CASTable('my-table')
+        >>> print(tbl.columns)
+        Index(['A', 'B', 'C'], dtype='object')
+
+        >>> tbl = tbl.drop(['B', 'C'], axis=1)
+        >>> print(tbl.columns)
+        Index(['A'], dtype='object')
+
+        See Also
+        --------
+        :meth:`pandas.DataFrame.drop`
+
+        Returns
+        -------
+        None
+            If inplace == True
+        :class:`CASTable`
+            If inplace == False
+
+        '''
+        if axis != 1:
+            raise NotImplementedError('Only axis=1 is supported.')
+
+        if not isinstance(labels, items_types):
+            labels = [labels]
+
+        labels = set(labels)
+        columns = list(self.columns)
+        if errors == 'raise':
+            diff = labels.difference(set(columns))
+            if diff:
+                raise IndexError('Requested name(s) do not exist in the column list: %s.' %
+                                 ', '.join(list(diff)))
+
+        columns = [x for x in columns if x not in labels]
+
+        if inplace:
+            self.set_param('varlist', columns)
+            return
+
+        out = self.copy(exclude='varlist')
+        out.set_param('varlist', columns)
+        return out
 
 #   def drop_duplicates(self, *args, **kwargs):
 #       raise NotImplementedError
