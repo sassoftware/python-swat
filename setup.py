@@ -60,8 +60,9 @@ setup(
         'swat': ['lib/*/*'],
     },
     install_requires = [
-        "pandas >= 0.16.0",
-        "six >= 0.9.0",
+        'pandas >= 0.16.0',
+        'six >= 0.9.0',
+        'requests',
     ],
     classifiers = [
         'Development Status :: 4 - Beta',

@@ -10,6 +10,7 @@ from __future__ import print_function, division, absolute_import, unicode_litera
 
 import base64
 import json
+import requests
 import six
 import socket
 from six.moves import urllib
@@ -178,42 +179,32 @@ class REST_CASConnection(object):
         self._auth = b'Basic ' + base64.b64encode(
             ('%s:%s' % (username, password)).encode('utf-8')).strip()
 
-        headers = {
+        self._req_sess = requests.Session()
+        self._req_sess.headers.update({
             'Content-Type': 'application/json',
             'Content-Length': 0,
             'Authorization': self._auth,
-        }
+        })
 
-        if session:
-            try:
-                req = urllib.request.Request(
-                          urllib.parse.urljoin(self._baseurl,
-                                               'cas/sessions/%s' % session),
-                          b'', headers)
-                res = urllib.request.urlopen(req)
-                self._session = json.loads(a2u(res.read(), 'utf-8'))['uuid']
-            except Exception as exc:
-                raise SWATError(str(exc))
-        else:
-            try:
-                req = urllib.request.Request(
-                          urllib.parse.urljoin(self._baseurl, 'cas/sessions'),
-                          b'', headers)
-                req.get_method = lambda: 'PUT'
-                res = urllib.request.urlopen(req)
-                code = res.getcode()
-                self._session = json.loads(a2u(res.read(), 'utf-8'))['session']
-            except Exception as exc:
-                raise SWATError(str(exc))
+        try:
+            if session:
+                res = self._req_sess.get(urllib.parse.urljoin(self._baseurl,
+                                        'cas/sessions/%s' % session), data=b'')
+                self._session = json.loads(a2u(res.text, 'utf-8'))['uuid']
+            else:
+                res = self._req_sess.put(urllib.parse.urljoin(self._baseurl,
+                                         'cas/sessions'), data=b'')
+                self._session = json.loads(a2u(res.text, 'utf-8'))['session']
 
-            if locale:
-                self.invoke('session.setlocale', dict(locale=locale))
-                if self._results.get('disposition').get('severity', '') == 'Error':
-                    raise SWATError(self._results.get('disposition'
-                                                      ).get('formattedStatus',
-                                                            'Invalid locale: %s' %
-                                                            locale))
-                self._results.clear()
+                if locale:
+                    self.invoke('session.setlocale', dict(locale=locale))
+                    if self._results.get('disposition').get('severity', '') == 'Error':
+                        raise SWATError(self._results.get('disposition') \
+                                        .get('formattedStatus',
+                                             'Invalid locale: %s' % locale))
+                    self._results.clear()
+        except Exception as exc:
+            raise SWATError(str(exc))
 
     def invoke(self, action_name, kwargs):
         '''
@@ -233,35 +224,33 @@ class REST_CASConnection(object):
         '''
         is_ui = kwargs.get('_apptag', '') == 'UI'
         kwargs = json.dumps(_normalize_params(kwargs))
+
         if options.cas.trace_actions and \
                 (not(is_ui) or (is_ui and options.cas.trace_ui_actions)):
             print('[%s]' % action_name)
             _print_params(json.loads(kwargs), prefix='    ')
             print('')
+
         post_data = a2u(kwargs).encode('utf-8')
-        headers = {
+        self._req_sess.headers.update({
             'Content-Type': 'application/json',
             'Content-Length': len(post_data),
-            'Authorization': self._auth,
-        }
+        })
 
         try:
-            req = urllib.request.Request(
-                      urllib.parse.urljoin(self._baseurl,
-                                           'cas/sessions/%s/actions/%s' %
-                                           (self._session, action_name)),
-                      post_data, headers)
-            res = urllib.request.urlopen(req)
-            code = res.getcode()
-            res = res.read()
+            res = self._req_sess.post(urllib.parse.urljoin(self._baseurl,
+                                      'cas/sessions/%s/actions/%s' %
+                                      (self._session, action_name)),
+                                      data=post_data)
+            res = res.text
         except Exception as exc:
             raise SWATError(str(exc))
 
         try:
             self._results = json.loads(a2u(res, 'utf-8'), strict=False)
-        except ValueError:
-            print(res)
-            raise
+        except ValueError as exc:
+            #print(res)
+            raise SWATError(str(exc))
         return self
 
     def receive(self):
@@ -325,19 +314,15 @@ class REST_CASConnection(object):
 
     def close(self):
         ''' Close the connection '''
-        if self._session:
-            headers = {
+        if self._session and self._req_sess is not None:
+            self._req_sess.headers.update({
                 'Content-Type': 'application/json',
                 'Content-Length': 0,
-                'Authorization': self._auth,
-            }
-            req = urllib.request.Request(urllib.parse.urljoin(self._baseurl,
-                                         'cas/sessions/%s' % self._session),
-                                         b'', headers)
-            req.get_method = lambda: 'DELETE'
-            res = urllib.request.urlopen(req)
+            })
+            res = self._req_sess.delete(urllib.parse.urljoin(self._baseurl,
+                                        'cas/sessions/%s' % self._session), data=b'')
             self._session = None
-            return res.getcode()
+            return res.status_code
 
     def upload(self, file_name, params):
         ''' Upload a data file '''
