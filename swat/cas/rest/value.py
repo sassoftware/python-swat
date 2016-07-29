@@ -22,13 +22,17 @@ def _value2python(_value, soptions, errors, connection,
         if _value.get('_ctb'):
             return ctb2tabular(REST_CASTable(_value), soptions, connection)
 
+        # Short circuit reflection data
+        if 'actions' in _value and _value.get('actions', [{}])[0].get('params', False):
+            return _value
+
         out = {}
         for key, value in _value.items():
             out[key] = _value2python(value, soptions, errors, connection,
                                      ctb2tabular, b64decode, cas2python_datetime,
                                      cas2python_date, cas2python_time)
         return out
-
+          
     if isinstance(_value, items_types):
         out = []
         for i, value in enumerate(_value):
