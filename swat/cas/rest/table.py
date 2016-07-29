@@ -9,6 +9,7 @@ Class for retrieving table values
 from __future__ import print_function, division, absolute_import, unicode_literals
 
 import base64
+import numpy as np
 from ..utils.datetime import cas2python_date, cas2python_time, cas2python_datetime
 from ...utils.compat import items_types, float64, int32, int64
 
@@ -30,6 +31,8 @@ def _attr2python(attr):
     atype = attr['type']
     value = attr['value']
     if atype in ['double', 'float']:
+        if value is None:
+            return np.nan
         return float64(value)
     elif atype in ['int32', 'int']:
         return int32(value)
