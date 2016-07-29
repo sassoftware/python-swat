@@ -581,11 +581,10 @@ class CASResults(OrderedDict, RendererMixin):
 
         i = 0
         for key, item in six.iteritems(self):
-            if not isinstance(key, int):
-                if i:
-                    sfmt = '<div class="cas-results-key"><hr/><b>&#167; %s</b></div>'
-                else:
-                    sfmt = '<div class="cas-results-key"><b>&#167; %s</b></div>'
+            if i:
+                sfmt = '<div class="cas-results-key"><hr/><b>&#167; %s</b></div>'
+            else:
+                sfmt = '<div class="cas-results-key"><b>&#167; %s</b></div>'
             output.append(sfmt % key)
             output.append('<div class="cas-results-body">')
             if hasattr(item, '_repr_html_'):
