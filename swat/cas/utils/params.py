@@ -65,8 +65,8 @@ def table(name, **kwargs):
     --------
     >>> tbl('my.table')
     {'name': 'my.table'}
-    >>> tbl('my.table', varlist=['var1','var2','var3'])
-    {'name': 'my.table', 'varlist': ['var1', 'var2', 'var3']}
+    >>> tbl('my.table', vars=['var1','var2','var3'])
+    {'name': 'my.table', 'vars': ['var1', 'var2', 'var3']}
 
     '''
     out = xadict(**kwargs)

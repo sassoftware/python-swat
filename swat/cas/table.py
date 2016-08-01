@@ -140,7 +140,7 @@ class CASTableLabelScalarAccessor(CASTableAccessor):
 
 def _get_table_selection(table, args):
     '''
-    Determine the varlist and computed varibles selected
+    Determine the vars and computed varibles selected
 
     Parameters
     ----------
@@ -264,7 +264,7 @@ def _get_table_selection(table, args):
     out = {}
 
     if cols:
-        out['table.varlist'] = cols
+        out['table.vars'] = cols
 
     if compvars and comppgm:
         out['table.computedvars'] = compvars
@@ -293,23 +293,23 @@ class CASTableAnyLocationAccessor(CASTableAccessor):
 
         tbl = self._table()
 
-        if 'table.varlist' in params or 'table.computedvars' in params:
+        if 'table.vars' in params or 'table.computedvars' in params:
             tbl = tbl.copy()
 
-        # Build varlist
-        table_varlist = None
-        if 'table.varlist' in params:
+        # Build vars
+        table_vars = None
+        if 'table.vars' in params:
             varlist = []
-            table_varlist = params.pop('table.varlist')
+            table_vars = params.pop('table.vars')
             columns = None
-            for item in table_varlist:
+            for item in table_vars:
                 if isinstance(item, int_types):
                     if not columns:
                         columns = list(tbl.columns)
                     varlist.append(columns[item])
                 else:
                     varlist.append(item)
-            tbl.set_param('varlist', varlist)
+            tbl.set_param('vars', varlist)
 
         # Append compvars and comppgm
         if 'table.computedvars' in params and 'table.computedvarsprogram' in params:
@@ -523,7 +523,7 @@ class CASTable(ParamManager, ActionParamManager):
         can be combined with groupBy variables when groupByMode is set to
         REDISTRIBUTE.
         Default: []
-    varlist : list of dicts, optional
+    vars : list of dicts, optional
         specifies the variables to use in the action.
     computedvars : list of strings, optional
         specifies the names of the computed variables to create. Specify
@@ -660,17 +660,17 @@ class CASTable(ParamManager, ActionParamManager):
             doc = doc.split('Returns')[0].rstrip()
             self.params.set_doc(doc)
 
-    def append_varlist(self, *items, **kwargs):
+    def append_vars(self, *items, **kwargs):
         '''
-        Append variable names to tbl.varlist parameter
+        Append variable names to tbl.vars parameter
 
         Parameters
         ----------
         *items : strings or lists-of-strings
             Names to append.
         inplace : boolean, optional
-            If `True`, the current tbl.varlist is appended.
-            If `False`, the new varlist is returned.
+            If `True`, the current tbl.vars is appended.
+            If `False`, the new vars is returned.
 
         Returns
         -------
@@ -680,7 +680,7 @@ class CASTable(ParamManager, ActionParamManager):
             if inplace == False
 
         '''
-        varlist = self.get_param('varlist', [])
+        varlist = self.get_param('vars', [])
         if not varlist:
             varlist = list(self.columns)
         if not isinstance(varlist, items_types):
@@ -690,7 +690,7 @@ class CASTable(ParamManager, ActionParamManager):
                 varlist.append(item)
         varlist = _get_unique(varlist, lowercase=True)
         if kwargs.get('inplace', True):
-            self.set_param('varlist', varlist)
+            self.set_param('vars', varlist)
             return
         return varlist
 
@@ -950,16 +950,13 @@ class CASTable(ParamManager, ActionParamManager):
 
         params = table.to_params()
         if varname is not None:
-            params['varlist'] = [varname]
+            params['vars'] = [varname]
         else:
-            varlist = params.get('varlist', [])
+            varlist = params.get('vars', [])
             if isinstance(varlist, items_types) and len(varlist):
-                params['varlist'] = [varlist[0]]
+                params['vars'] = [varlist[0]]
 
         column = CASColumn(**params)
-
-        for key, value in six.iteritems(table._action_params):
-            column._action_params[key] = value
 
         try:
             column.set_connection(table.get_connection())
@@ -1150,9 +1147,6 @@ class CASTable(ParamManager, ActionParamManager):
 
         '''
         tbl = type(self)(**self.params)
-        tbl._action_params = {}
-        for key, value in six.iteritems(self._action_params):
-            tbl._action_params[key] = copy.copy(value)
         try:
             tbl.set_connection(self.get_connection())
         except SWATError:
@@ -1183,7 +1177,6 @@ class CASTable(ParamManager, ActionParamManager):
 
         '''
         tbl = type(self)(**copy.deepcopy(self.params))
-        tbl._action_params = copy.deepcopy(self._action_params)
         try:
             tbl.set_connection(self.get_connection())
         except SWATError:
@@ -1318,7 +1311,7 @@ class CASTable(ParamManager, ActionParamManager):
         True
 
         >>> print(tbl.datacol)
-        CASColumn('my-table', varlist=['datacol'])
+        CASColumn('my-table', vars=['datacol'])
 
         >>> print(tbl.summary)
         ?.simple.Summary()
@@ -1357,7 +1350,7 @@ class CASTable(ParamManager, ActionParamManager):
             return actcls()
 
         # See if it's a column name
-        if name in [x.lower() for x in self.get_param('varlist', [])]:
+        if name in [x.lower() for x in self.get_param('vars', [])]:
             return self._to_column(origname)
         elif name in [x.lower() for x in self.get_param('computedvars', [])]:
             return self._to_column(origname)
@@ -1365,10 +1358,10 @@ class CASTable(ParamManager, ActionParamManager):
             return self._to_column(origname)
         elif name in [x.lower() for x in self.get_param('groupby', [])]:
             return self._to_column(origname)
-        elif not self.get_param('varlist', []):
+        elif not self.get_param('vars', []):
             try:
                 tbl = self.copy()
-                tbl.set_param('varlist', [origname])
+                tbl.set_param('vars', [origname])
                 colinfo = tbl._columninfo
             except (ValueError, SWATError):
                 colinfo = None
@@ -1439,7 +1432,8 @@ class CASTable(ParamManager, ActionParamManager):
         CASResults object
         
         '''
-        out = self.retrieve(_name_, _apptag='UI', _messagelevel='none', **kwargs)
+        #out = self.retrieve(_name_, _apptag='UI', _messagelevel='none', **kwargs)
+        out = self.retrieve(_name_, _apptag='UI', **kwargs)
         if out.severity > 1:
             raise SWATError(out.status)
         return out
@@ -1450,34 +1444,8 @@ class CASTable(ParamManager, ActionParamManager):
             repr(self.params['name']),
             dict2kwargs(self.to_params(), ignore=['name'], fmt='%s')
         ]
-
-        # Check for sort parameters
-        sort = ''
-        fetch = self.get_action_params('table.fetch')
-        if fetch and ('sortby' in fetch or 'orderby' in fetch):
-            sortby = fetch.get('sortby', fetch.get('orderby'))
-            if isinstance(sortby, dict):
-                sortby = [sortby]
-            elif not isinstance(sortby, items_types):
-                sortby = [dict(name=sortby, ascending=True)]
-
-            names = [x['name'] for x in sortby]
-            if len(names) == 1:
-                names = names.pop()
-
-            order = [x.get('order', 'ASCENDING').upper() == 'ASCENDING' for x in sortby]
-            if set(order) == set([True]):
-                order = ''
-            elif set(order) == set([False]):
-                order = ', ascending=False'
-            else:
-                order = ', ascending=%s' % repr(order)
-
-            sort = '.sort_values(%s%s)' % (repr(names), order)
-
-        return '%s(%s)%s' % (type(self).__name__,
-                             ', '.join([x.strip() for x in parts if x.strip()]),
-                             sort)
+        return '%s(%s)' % (type(self).__name__,
+                           ', '.join([x.strip() for x in parts if x.strip()]))
 
     def __repr__(self):
         return str(self)
@@ -1675,7 +1643,7 @@ class CASTable(ParamManager, ActionParamManager):
     def _numcolumns(self):
         ''' Return number of visible columns '''
         # Short circuit if we can
-        varlist = self.get_param('varlist', [])
+        varlist = self.get_param('vars', [])
         if varlist:
             return len(varlist)
 
@@ -1689,7 +1657,7 @@ class CASTable(ParamManager, ActionParamManager):
     @getattr_safe_property
     def columns(self):
         ''' The visible columns in the table '''
-        varlist = self.get_param('varlist', [])
+        varlist = self.get_param('vars', [])
         if varlist:
             return pd.Index(varlist)
         return pd.Index(self._columninfo['Column'].tolist())
@@ -1699,18 +1667,18 @@ class CASTable(ParamManager, ActionParamManager):
         ''' The table index '''
         return
 
-    def _intersect_varlist(self, columns, inplace=False):
+    def _intersect_vars(self, columns, inplace=False):
         ''' 
-        Return the intersection of `columns` and `self.varlist` 
+        Return the intersection of `columns` and `self.vars` 
         
         This is used to generate a new column list that contains the
         intersection of the names in `columns` with the names of the
-        current table's varlist.
+        current table's vars.
 
         Examples
         --------
-        >>> tbl = CASTable('my-table', varlist=['a', 'b', 'c'])
-        >>> print(tbl._intersect_varlist(['a', 'c', 'd']))
+        >>> tbl = CASTable('my-table', vars=['a', 'b', 'c'])
+        >>> print(tbl._intersect_vars(['a', 'c', 'd']))
         ['a', 'c']
 
         Returns
@@ -1729,16 +1697,16 @@ class CASTable(ParamManager, ActionParamManager):
         if not columns:
             if inplace:
                 return
-            return self.get_param('varlist', [])
+            return self.get_param('vars', [])
 
-        varlist = self.get_param('varlist', [])
+        varlist = self.get_param('vars', [])
         if not varlist:
             varlist = columns
         else:
             varlist = list(sorted(set(varlist) & set(columns), key=varlist.index))
 
         if inplace:
-            self.set_param('varlist', varlist)
+            self.set_param('vars', varlist)
             return
 
         return varlist
@@ -1767,8 +1735,8 @@ class CASTable(ParamManager, ActionParamManager):
         if n is None:
             n = get_option('cas.dataset.max_rows_fetched')
         tbl = self.copy()
-        tbl._intersect_varlist(columns, inplace=True)
-        return pd.concat(list(tbl._retrieve('table.fetch', to=n, noindex=True,
+        tbl._intersect_vars(columns, inplace=True)
+        return pd.concat(list(tbl._retrieve('table.fetch', to=n, index=False,
                                             sastypes=False).values())).as_matrix()
 
     @getattr_safe_property
@@ -1849,22 +1817,26 @@ class CASTable(ParamManager, ActionParamManager):
         integer_types = set(['int32', 'int64', 'date', 'time', 'datetime'])
         float_types = num_types.difference(integer_types)
 
-        if 'character' in include or 'O' in include or object in include:
+        if 'character' in include or 'O' in include or \
+                object in include or 'all' in include:
             include.update(char_types)
-        if 'number' in include or 'numeric' in include or np.number in include:
+        if 'number' in include or 'numeric' in include or \
+                np.number in include or 'all' in include:
             include.update(num_types)
-        if 'floating' in include:
+        if 'floating' in include or 'all' in include:
             include.update(float_types)
-        if 'integer' in include:
+        if 'integer' in include or 'all' in include:
             include.update(integer_types)
 
-        if 'character' in exclude or 'O' in exclude or object in exclude:
+        if 'character' in exclude or 'O' in exclude or \
+                object in exclude or 'all' in exclude:
             exclude.update(char_types)
-        if 'number' in exclude or 'numeric' in exclude or np.number in exclude:
+        if 'number' in exclude or 'numeric' in exclude or \
+                np.number in exclude or 'all' in exclude:
             exclude.update(num_types)
-        if 'floating' in exclude:
+        if 'floating' in exclude or 'all' in exclude:
             exclude.update(float_types)
-        if 'integer' in exclude:
+        if 'integer' in exclude or 'all' in exclude:
             exclude.update(integer_types)
 
         varlist = set()
@@ -1918,11 +1890,11 @@ class CASTable(ParamManager, ActionParamManager):
         varlist = self._get_dtypes(include=include, exclude=exclude)
 
         if inplace:
-            self.set_param('varlist', varlist)
+            self.set_param('vars', varlist)
             return
 
         tblcopy = self.copy()
-        tblcopy.set_param('varlist', varlist)
+        tblcopy.set_param('vars', varlist)
         return tblcopy
 
     @getattr_safe_property
@@ -2009,7 +1981,7 @@ class CASTable(ParamManager, ActionParamManager):
 
     # Indexing, iteration
 
-    def head(self, n=5, columns=None):
+    def head(self, n=5, columns=None, sortby=None):
         ''' 
         Retrieve first `n` rows 
 
@@ -2031,9 +2003,9 @@ class CASTable(ParamManager, ActionParamManager):
         :class:`swat.SASDataFrame`
         
         '''
-        return self.slice(start=0, stop=n - 1, columns=columns)
+        return self.slice(start=0, stop=n - 1, columns=columns, sortby=sortby)
 
-    def tail(self, n=5, columns=None):
+    def tail(self, n=5, columns=None, sortby=None):
         ''' 
         Retrieve last `n` rows
 
@@ -2055,9 +2027,9 @@ class CASTable(ParamManager, ActionParamManager):
         :class:`swat.SASDataFrame`
         
         '''
-        return self.slice(start=-n, stop=-1, columns=columns)
+        return self.slice(start=-n, stop=-1, columns=columns, sortby=sortby)
 
-    def slice(self, start=0, stop=None, columns=None):
+    def slice(self, start=0, stop=None, columns=None, sortby=None):
         ''' 
         Retrieve the specified rows 
         
@@ -2086,7 +2058,7 @@ class CASTable(ParamManager, ActionParamManager):
 
         if columns is not None:
             tbl = self.copy()
-            tbl.set_param('varlist', list(columns))
+            tbl.set_param('vars', list(columns))
 
         groups = self.get_groupby_vars()
         if groups:
@@ -2107,7 +2079,9 @@ class CASTable(ParamManager, ActionParamManager):
                     stop = numrows + stop
 
             out.append(pd.concat(list(group._retrieve('table.fetch', sastypes=False,
-                                                      from_=start + 1, to=stop + 1).values())))
+                                                      sortby=sortby,
+                                                      from_=start + 1,
+                                                      to=stop + 1).values())))
 
         out = pd.concat(out)
 
@@ -2266,7 +2240,7 @@ class CASTable(ParamManager, ActionParamManager):
         i = 0
         while True:
             out = pd.concat(list(self._retrieve('table.fetch', from_=start, to=stop,
-                                                sastypes=False, noindex=True).values()))
+                                                sastypes=False, index=False).values()))
 
             if not len(out):
                 break
@@ -2340,7 +2314,7 @@ class CASTable(ParamManager, ActionParamManager):
         if isinstance(col, int_types):
             col = self.columns[col]
         tbl = self.copy()
-        tbl.set_param('varlist', [col])
+        tbl.set_param('vars', [col])
         numrows = self._numrows
         if abs(index) >= numrows:
             raise IndexError('index %s is out of bounds for axis 0 with size %s' %
@@ -2414,7 +2388,7 @@ class CASTable(ParamManager, ActionParamManager):
         newvarlist = [x for x in varlist if x.lower() != lcolname]
         if len(newvarlist) == len(varlist):
             raise KeyError(colname)
-        self.set_param('varlist', newvarlist)
+        self.set_param('vars', newvarlist)
 
     def datastep(self, code, casout=None, *args, **kwargs):
         '''
@@ -2452,7 +2426,7 @@ class CASTable(ParamManager, ActionParamManager):
         self._loadactionset('datastep')
         out = self.get_connection().retrieve('datastep.runcode', *args, **kwargs)
         try:
-            return out['outputTables']['casTable'][0]
+            return out['OutputCasTables']['casTable'][0]
         except (KeyError, IndexError):
             pass
         raise SWATError(out.status)
@@ -2661,7 +2635,7 @@ class CASTable(ParamManager, ActionParamManager):
         if numeric_only:
             inputs = self._get_dtypes(include='numeric')
         else:
-            inputs = self.get_param('varlist', None)
+            inputs = self.get_param('vars', None)
 
         groups = self.get_groupby_vars()
         if groups:
@@ -2821,7 +2795,7 @@ class CASTable(ParamManager, ActionParamManager):
         if include is None and exclude is None:
             include = ['number']
             tbl = self.select_dtypes(include=include)
-            if not tbl.get_param('varlist', []):
+            if not tbl.get_param('vars', []):
                 tbl = self.select_dtypes(include=['character'])
 
         # include/exclude was specified by the user
@@ -3252,7 +3226,6 @@ class CASTable(ParamManager, ActionParamManager):
             columns = [columns]
         columns = [dict(name=x, order='DESCENDING', formatted='RAW') for x in columns]
         col = self.copy()
-        col._action_params = {}
         return col._fetch(from_=1, to=n, sortby=columns)
 
     def nsmallest(self, n, columns, keep='first'):
@@ -3281,7 +3254,6 @@ class CASTable(ParamManager, ActionParamManager):
             columns = [columns]
         columns = [dict(name=x, order='ASCENDING', formatted='RAW') for x in columns]
         col = self.copy()
-        col._action_params = {}
         return col._fetch(from_=1, to=n, sortby=columns)
 
     def mode(self, axis=0, numeric_only=False, max_tie=100, skipna=True):
@@ -3709,11 +3681,11 @@ class CASTable(ParamManager, ActionParamManager):
         columns = [x for x in columns if x not in labels]
 
         if inplace:
-            self.set_param('varlist', columns)
+            self.set_param('vars', columns)
             return
 
-        out = self.copy(exclude='varlist')
-        out.set_param('varlist', columns)
+        out = self.copy(exclude='vars')
+        out.set_param('vars', columns)
         return out
 
 #   def drop_duplicates(self, *args, **kwargs):
@@ -3823,23 +3795,7 @@ class CASTable(ParamManager, ActionParamManager):
             If inplace == False.
 
         '''
-        if inplace:
-            out = self
-        else:
-            out = self.copy()
-        if not isinstance(by, items_types):
-            by = [by]
-        if not isinstance(ascending, items_types):
-            ascending = [ascending] * len(by)
-        for col, asc in zip(by, ascending):
-            fetch = out.get_action_params('table.fetch', {})
-            fetch.setdefault('sortby', []).append(
-                dict(name=col, order=asc and 'ASCENDING' or 'DESCENDING',
-                     formatted='RAW'))
-            out.set_action_params('table.fetch', **fetch)
-        if inplace:
-            return
-        return out
+        raise NotImplemented('You must use sortby= on the method that fetches the data.')
 
     sort = sort_values
 
@@ -3876,6 +3832,7 @@ class CASTable(ParamManager, ActionParamManager):
 
         '''
         kwargs = kwargs.copy()
+        kwargs.pop('sortby', None)
         kwargs['tables'] = [self.to_table_params()]
         if not args and 'name' not in kwargs:
             kwargs['name'] = _gen_table_name()
@@ -3956,7 +3913,7 @@ class CASTable(ParamManager, ActionParamManager):
         kwargs = kwargs.copy()
         if 'to' not in kwargs:
             kwargs['to'] = get_option('cas.dataset.max_rows_fetched')
-        out = pd.concat(list(self._retrieve('table.fetch', noindex=True,
+        out = pd.concat(list(self._retrieve('table.fetch', index=False,
                                             sastypes=False, **kwargs).values()))
         groups = self.get_groupby_vars()
         if grouped and groups:
@@ -4258,9 +4215,10 @@ class CASTable(ParamManager, ActionParamManager):
         
         '''
         from ..dataframe import concat
+        kwargs = kwargs.copy()
         return concat(list(self._retrieve('table.fetch', sastypes=False,
-                                          to=MAX_INT64_INDEX,
-                                          noindex=True, **kwargs).values()))
+                                          to=MAX_INT64_INDEX, sortby=sortby,
+                                          index=False, **kwargs).values()))
 
     def _to_any(self, method, *args, **kwargs):
         '''
@@ -4280,7 +4238,8 @@ class CASTable(ParamManager, ActionParamManager):
         standard_dataframe = kwargs.pop('standard_dataframe', False)
         dframe = concat(list(self._retrieve('table.fetch', sastypes=False,
                                             to=get_option('cas.dataset.max_rows_fetched'),
-                                            noindex=True).values()))
+                                            sortby=kwargs.pop('sortby', None),
+                                            index=False).values()))
         if standard_dataframe:
             dframe = pd.DataFrame(dframe)
         return getattr(dframe, 'to_' + method)(*args, **kwargs)
@@ -4748,7 +4707,7 @@ class CASTable(ParamManager, ActionParamManager):
             comppgm.append('%s = %s; ' % (key, value))
 
         self.append_computed_columns(compvars, comppgm)
-        self.append_varlist(key)
+        self.append_vars(key)
 
     def __getitem__(self, key):
         '''
@@ -4793,7 +4752,7 @@ class CASTable(ParamManager, ActionParamManager):
                     compvars.append(k)
                     comppgm.append('%s = .; ' % _nlit(k))
                 varlist.append(k)
-            out.set_param('varlist', varlist)
+            out.set_param('vars', varlist)
             if compvars:
                 out.append_computed_columns(compvars, comppgm)
             return out
@@ -4811,8 +4770,8 @@ class CASTable(ParamManager, ActionParamManager):
             if ecomppgm:
                 out.append_computedvarsprogram(ecomppgm)
 
-            if out.get_param('varlist', None) is None:
-                out.set_param('varlist', list(self.columns))
+            if out.get_param('vars', None) is None:
+                out.set_param('vars', list(self.columns))
 
             return out
 
@@ -4912,8 +4871,8 @@ class CASTable(ParamManager, ActionParamManager):
 #       if ecomppgm:
 #           out.append_computedvarsprogram(ecomppgm)
 
-#       if out.get_param('varlist', None) is None:
-#           out.set_param('varlist', list(self.columns))
+#       if out.get_param('vars', None) is None:
+#           out.set_param('vars', list(self.columns))
 
 #       if not inplace:
 #           return out
@@ -5768,7 +5727,7 @@ class CASColumn(CASTable):
     @getattr_safe_property
     def name(self):
         ''' Return the column name '''
-        name = self.get_param('varlist')
+        name = self.get_param('vars')
         if isinstance(name, items_types):
             name = name[0]
         return name
@@ -5848,7 +5807,7 @@ class CASColumn(CASTable):
         '''
         out = self._fetch(from_=key + 1, to=key + 1)
         try:
-            return out.get_value(0, self.varlist[0])
+            return out.get_value(0, self.get_param('vars')[0])
         except KeyError:
             pass
         return default
@@ -5911,21 +5870,31 @@ class CASColumn(CASTable):
         ''' Return boolean indicating if the data type is character '''
         return self.dtype in set(['char', 'varchar', 'binary', 'varbinary'])
 
-    def tolist(self):
+    def _get_sortby(self, sort):
+        if sort:
+            if sort is True:
+                return [dict(name=self.name)]
+            elif isinstance(sort, text_types) or isinstance(sort, binary_types):
+                return [dict(name=self.name, order=sort)]
+            else:
+                return sort
+
+    def tolist(self, sort=False):
         ''' Return a list of the column values '''
-        return self._fetch().ix[:, 0].tolist()
+        return self._fetch(sortby=self._get_sortby(sort)).ix[:, 0].tolist()
 
-    def head(self, n=5):
+    def head(self, n=5, sort=False):
         ''' Return first `n` rows of the column in a Series '''
-        return self.slice(start=0, stop=n - 1)
+        return self.slice(start=0, stop=n - 1, sort=sort)
 
-    def tail(self, n=5):
+    def tail(self, n=5, sort=False):
         ''' Return last `n` rows of the column in a Series '''
-        return self.slice(start=-n, stop=-1)
+        return self.slice(start=-n, stop=-1, sort=sort)
 
-    def slice(self, start=0, stop=None):
+    def slice(self, start=0, stop=None, sort=False):
         ''' Return from rows from `start` to `stop` in a Series '''
-        return CASTable.slice(self, start=start, stop=stop)[self.name]
+        return CASTable.slice(self, start=start, stop=stop,
+                              sortby=self._get_sortby(sort))[self.name]
 
     def add(self, other, level=None, fill_value=None, axis=0):
         ''' Addition of CASColumn with other, element-wise '''
@@ -6175,7 +6144,7 @@ class CASColumn(CASTable):
 
         outname = '_%s_%s_' % (funcname, self.get_connection()._gen_id())
 
-        out.set_param('varlist', [outname])
+        out.set_param('vars', [outname])
         if outname in self.get_param('computedvars', self.get_param('compvars', [])):
             return out
 
@@ -6331,9 +6300,6 @@ class CASColumn(CASTable):
 
         table = CASTable(**column.to_params())
 
-        for key, value in six.iteritems(column._action_params):
-            table._action_params[key] = value
-
         try:
             table.set_connection(column.get_connection())
         except SWATError:
@@ -6345,7 +6311,7 @@ class CASColumn(CASTable):
         ''' Combine CASColumn objects into a CASTable object '''
         tbl = self._to_table()
         for item in others:
-            tbl.append_varlist(item.get_param('varlist', []))
+            tbl.append_vars(item.get_param('vars', []))
             tbl.append_computedvars(item.get_param('computedvars',
                                     item.get_param('compvars', [])))
             tbl.append_computedvarsprogram(item.get_param('computedvarsprogram',
@@ -6438,14 +6404,12 @@ class CASColumn(CASTable):
     def nlargest(self, n=5, keep='first'):
         ''' Return the n largest values '''
         col = self.copy()
-        col._action_params = {}
         return col._fetch(from_=1, to=n, sortby=[dict(name=col.name,
                           order='DESCENDING', formatted='RAW')])[col.name]
 
     def nsmallest(self, n=5, keep='first'):
         ''' Return the n smallest values '''
         col = self.copy()
-        col._action_params = {}
         return col._fetch(from_=1, to=n, sortby=[dict(name=col.name,
                           order='ASCENDING', formatted='RAW')])[col.name]
 
@@ -6499,7 +6463,7 @@ class CASColumn(CASTable):
 
         '''
         bygroup_columns = 'raw'
-        out = self._retrieve('simple.freq', inputs=self.get_param('varlist', None),
+        out = self._retrieve('simple.freq', inputs=self.get_param('vars', None),
                              includemissing=includemissing).get_tables('Frequency')
         out = [x.reshape_bygroups(bygroup_columns=bygroup_columns,
                                   bygroup_as_index=True) for x in out]
@@ -6613,13 +6577,24 @@ class CASColumn(CASTable):
         ''' Retrieve all elements into a Series '''
         return pd.concat(list(self._retrieve('table.fetch', sastypes=False,
                                             to=MAX_INT64_INDEX,
-                                            noindex=True).values()))[self.name]
+                                            index=False).values()))[self.name]
 
     def _to_any(self, method, *args, **kwargs):
         ''' Generic converter to various forms '''
+        kwargs = kwargs.copy()
+        sort = kwargs.pop('sort', False)
+        sortby = None
+        if sort:
+            if sort is True:
+                sortby = [dict(name=self.name)]
+            elif isinstance(sort, text_types) or isinstance(sort, binary_types):
+                sortby = [dict(name=self.name, order=sort)]
+            else:
+                sortby = sort
         out = pd.concat(list(self._retrieve('table.fetch', sastypes=False,
+                                            sortby=sortby,
                                             to=get_option('cas.dataset.max_rows_fetched'),
-                                            noindex=True).values()))[self.name]
+                                            index=False).values()))[self.name]
         return getattr(out, 'to_' + method)(*args, **kwargs)
 
     def to_frame(self, *args, **kwargs):
@@ -6762,7 +6737,7 @@ class CASTableGroupBy(object):
         '''
         return self._table.to_frame(*args, **kwargs)
 
-    def nth(self, n, dropna=None):
+    def nth(self, n, dropna=None, sortby=None):
         '''
         Return the nth row from each group
 
@@ -6778,7 +6753,7 @@ class CASTableGroupBy(object):
         '''
         if not isinstance(n, items_types):
             n = [n] 
-        out = pd.concat(self.slice(x, x) for x in n)
+        out = pd.concat(self.slice(x, x, sortby=None) for x in n)
         if self._as_index:
             return out.set_index(self.get_groupby_vars()).sort_index()
         return out
