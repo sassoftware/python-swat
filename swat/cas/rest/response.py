@@ -43,15 +43,16 @@ class REST_CASResponse(object):
     def __init__(self, obj):
         obj = obj or {}
 
+        disp = obj.get('disposition', None) or {}
+
         self._disposition = {}
-        self._disposition['debug'] = obj.get('disposition', {}).get('debugInfo')
-        self._disposition['status'] = obj.get('disposition', {}).get('formattedStatus')
-        self._disposition['reason'] = obj.get('disposition', {}).get('reason', '').lower()
+        self._disposition['debug'] = disp.get('debugInfo')
+        self._disposition['status'] = disp.get('formattedStatus')
+        self._disposition['reason'] = disp.get('reason', '').lower()
         if self._disposition['reason'] == 'ok':
             self._disposition['reason'] = None
-        self._disposition['severity'] = _SEVERITY_MAP.get(obj.get('disposition',
-                                                                  {}).get('severity'))
-        self._disposition['status_code'] = obj.get('disposition', {}).get('statusCode')
+        self._disposition['severity'] = _SEVERITY_MAP.get(disp.get('severity'))
+        self._disposition['status_code'] = disp.get('statusCode')
 
         # TODO: Map names for consistency
         self._update_flags = [camel2underscore(x)
