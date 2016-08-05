@@ -38,11 +38,12 @@ class SWATInstaller(install):
             print('This version of Python is %dbit:' % (size*8))
             print(sys.version)
             raise Exception('This packages requires 64bit Python')
-        if os.environ.get('ACCEPT_SAS_TK_LICENSE', '').lower().startswith('y'):
+        if os.environ.get('CONDA_BUILD', None):
+            install.run(self)
+        elif os.environ.get('ACCEPT_SAS_TK_LICENSE', '').lower().startswith('y'):
             install.run(self)
         elif accept_license():
             install.run(self)
-
 
 setup(
     cmdclass = {'install': SWATInstaller},
@@ -50,11 +51,11 @@ setup(
     name = 'swat',
     version = '0.9.0',
     description = 'SAS Wrapper for Analytics Transfer (SWAT)',
-    long_description = open('README.rst').read(),
+    long_description = open('README.rst', 'r').read(),
     author = 'Kevin D Smith',
     author_email = 'Kevin.Smith@sas.com',
     url = 'http://github.com/sassoftware/python-swat/',
-    license = 'LICENSE.txt',
+    license = 'LICENSE/SWAT.txt',
     packages = find_packages(),
     package_data = {
         'swat': ['lib/*/*'],
