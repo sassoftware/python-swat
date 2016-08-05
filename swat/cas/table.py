@@ -157,8 +157,8 @@ def _get_table_selection(table, args):
 
     '''
     cols = None
-    compvars = []
-    comppgm = []
+    computedvars = []
+    computedvarsprogram = []
     outtype = 'table'
 
     # Rows and columns specified
@@ -196,8 +196,8 @@ def _get_table_selection(table, args):
                     out.append(col)
                 else:
                     out.append(col)
-                    compvars.append(col)
-                    comppgm.append('%s = .; ' % _nlit(col))
+                    computedvars.append(col)
+                    computedvarsprogram.append('%s = .; ' % _nlit(col))
             cols = out
 
         # tbl.x[0, 'a':10]
@@ -266,9 +266,9 @@ def _get_table_selection(table, args):
     if cols:
         out['table.vars'] = cols
 
-    if compvars and comppgm:
-        out['table.computedvars'] = compvars
-        out['table.computedvarsprogram'] = comppgm
+    if computedvars and computedvarsprogram:
+        out['table.computedvars'] = computedvars
+        out['table.computedvarsprogram'] = computedvarsprogram
 
     # TODO: Set table.where for row label indexing when
     #       a table index is supported.
@@ -311,7 +311,7 @@ class CASTableAnyLocationAccessor(CASTableAccessor):
                     varlist.append(item)
             tbl.set_param('vars', varlist)
 
-        # Append compvars and comppgm
+        # Append computedvars and computedvarsprogram
         if 'table.computedvars' in params and 'table.computedvarsprogram' in params:
             tbl.append_computed_columns(params.pop('table.computedvars'),
                                         params.pop('table.computedvarsprogram'))
@@ -715,13 +715,8 @@ class CASTable(ParamManager, ActionParamManager):
 
         '''
         varlist = []
-        pname = 'compvars'
         if self.has_param('computedvars'):
             varlist = self.get_param('computedvars')
-            pname = 'computedvars'
-        elif self.has_param('compvars'):
-            varlist = self.get_param('compvars')
-            pname = 'compvars'
         if not isinstance(varlist, items_types):
             varlist = [varlist]
         for item in _flatten(items):
@@ -729,7 +724,7 @@ class CASTable(ParamManager, ActionParamManager):
                 varlist.append(item)
         varlist = _get_unique(varlist, lowercase=True)
         if kwargs.get('inplace', True):
-            self.set_param(pname, varlist)
+            self.set_param('computedvars', varlist)
             return
         return varlist
 
@@ -786,13 +781,8 @@ class CASTable(ParamManager, ActionParamManager):
 
         '''
         code = []
-        pname = 'comppgm'
         if self.has_param('computedvarsprogram'):
             code = self.get_param('computedvarsprogram')
-            pname = 'computedvarsprogram'
-        elif self.has_param('comppgm'):
-            code = self.get_param('comppgm')
-            pname = 'comppgm'
         if not isinstance(code, items_types):
             code = [code]
         for item in _flatten(items):
@@ -803,7 +793,7 @@ class CASTable(ParamManager, ActionParamManager):
                 code[i] = '%s; ' % block.rstrip()
         code = ''.join(_get_unique(code))
         if kwargs.get('inplace', True):
-            self.set_param(pname, code)
+            self.set_param('computedvarsprogram', code)
             return
         return code
 
@@ -997,12 +987,6 @@ class CASTable(ParamManager, ActionParamManager):
                     # Populate valid fields for tables and outtables
                     if item['name'] == 'castable':
                         cls.table_params = set([x['name'] for x in item['parmList']])
-
-                        # Bit of a hack. Add "aliases" for old spellings
-                        # of computedvars and computedvarsprogram
-                        cls.table_params.add('comppgm')
-                        cls.table_params.add('compvars')
-
                         tblparams = format_params(item['parmList'], connection,
                                                   param_names=param_names).rstrip()
 
@@ -1327,6 +1311,11 @@ class CASTable(ParamManager, ActionParamManager):
         # Short circuit any table attributes
         if '.' not in name:
             try:
+                # Alias these two shorter names to the proper name
+                if name == 'compvars':
+                    name = 'computedvars'
+                elif name == 'comppgm':
+                    name = 'computedvarsprogram'
                 return super(CASTable, self).__getattr__(name)
             except AttributeError:
                 pass
@@ -1353,8 +1342,6 @@ class CASTable(ParamManager, ActionParamManager):
         if name in [x.lower() for x in self.get_param('vars', [])]:
             return self._to_column(origname)
         elif name in [x.lower() for x in self.get_param('computedvars', [])]:
-            return self._to_column(origname)
-        elif name in [x.lower() for x in self.get_param('compvars', [])]:
             return self._to_column(origname)
         elif name in [x.lower() for x in self.get_param('groupby', [])]:
             return self._to_column(origname)
@@ -1649,10 +1636,10 @@ class CASTable(ParamManager, ActionParamManager):
 
         # Call tableinfo
         tblinfo = self._retrieve('table.tableinfo')['TableInfo']
-        compvars = self.get_param('computedvars', self.get_param('compvars', []))
-        if compvars and not isinstance(compvars, items_types):
-            compvars = [compvars]
-        return tblinfo.ix[0, 'Columns'] + len(compvars)
+        computedvars = self.get_param('computedvars', [])
+        if computedvars and not isinstance(computedvars, items_types):
+            computedvars = [computedvars]
+        return tblinfo.ix[0, 'Columns'] + len(computedvars)
 
     @getattr_safe_property
     def columns(self):
@@ -4215,9 +4202,8 @@ class CASTable(ParamManager, ActionParamManager):
         
         '''
         from ..dataframe import concat
-        kwargs = kwargs.copy()
         return concat(list(self._retrieve('table.fetch', sastypes=False,
-                                          to=MAX_INT64_INDEX, sortby=sortby,
+                                          to=MAX_INT64_INDEX,
                                           index=False, **kwargs).values()))
 
     def _to_any(self, method, *args, **kwargs):
@@ -4692,21 +4678,21 @@ class CASTable(ParamManager, ActionParamManager):
             The value of the column.
 
         '''
-        compvars = [key]
-        comppgm = []
+        computedvars = [key]
+        computedvarsprogram = []
 
         if isinstance(value, CASColumn):
             cexpr, cvars, cpgm = value._to_expression()
-            comppgm.append(cpgm)
-            comppgm.append('%s = %s; ' % (key, cexpr))
+            computedvarsprogram.append(cpgm)
+            computedvarsprogram.append('%s = %s; ' % (key, cexpr))
 
         elif isinstance(value, text_types) or isinstance(value, binary_types):
-            comppgm.append('%s = "%s"; ' % (key, _escape_string(value)))
+            computedvarsprogram.append('%s = "%s"; ' % (key, _escape_string(value)))
 
         else:
-            comppgm.append('%s = %s; ' % (key, value))
+            computedvarsprogram.append('%s = %s; ' % (key, value))
 
-        self.append_computed_columns(compvars, comppgm)
+        self.append_computed_columns(computedvars, computedvarsprogram)
         self.append_vars(key)
 
     def __getitem__(self, key):
@@ -4742,33 +4728,33 @@ class CASTable(ParamManager, ActionParamManager):
             out = self.copy()
             columns = list(out.columns)
             colset = set([x.lower() for x in columns])
-            compvars = []
-            comppgm = []
+            computedvars = []
+            computedvarsprogram = []
             varlist = []
             for k in key:
                 if isinstance(k, int_types):
                     k = columns[k]
                 if k.lower() not in colset:
-                    compvars.append(k)
-                    comppgm.append('%s = .; ' % _nlit(k))
+                    computedvars.append(k)
+                    computedvarsprogram.append('%s = .; ' % _nlit(k))
                 varlist.append(k)
             out.set_param('vars', varlist)
-            if compvars:
-                out.append_computed_columns(compvars, comppgm)
+            if computedvars:
+                out.append_computed_columns(computedvars, computedvarsprogram)
             return out
 
         # tbl[CASColumn]
         if isinstance(key, CASColumn):
             out = self.copy()
-            expr, ecompvars, ecomppgm = key._to_expression()
+            expr, ecomputedvars, ecomputedvarsprogram = key._to_expression()
 
             out.append_where(expr)
 
-            if ecompvars:
-                out.append_computedvars(ecompvars)
+            if ecomputedvars:
+                out.append_computedvars(ecomputedvars)
 
-            if ecomppgm:
-                out.append_computedvarsprogram(ecomppgm)
+            if ecomputedvarsprogram:
+                out.append_computedvarsprogram(ecomputedvarsprogram)
 
             if out.get_param('vars', None) is None:
                 out.set_param('vars', list(self.columns))
@@ -4861,15 +4847,15 @@ class CASTable(ParamManager, ActionParamManager):
 #       if not inplace:
 #           out = copy.deepcopy(out)
 
-#       expr, ecompvars, ecomppgm = cond._to_expression()
+#       expr, ecomputedvars, ecomputedvarsprogram = cond._to_expression()
 
 #       out.append_where(expr)
 
-#       if ecompvars:
-#           out.append_computedvars(ecompvars)
+#       if ecomputedvars:
+#           out.append_computedvars(ecomputedvars)
 
-#       if ecomppgm:
-#           out.append_computedvarsprogram(ecomppgm)
+#       if ecomputedvarsprogram:
+#           out.append_computedvarsprogram(ecomputedvarsprogram)
 
 #       if out.get_param('vars', None) is None:
 #           out.set_param('vars', list(self.columns))
@@ -5551,6 +5537,163 @@ class CharacterColumnMethods(object):
 #       return self._compute('soundslike', '({value} =* {arg})', arg=arg)
 
 
+class SASColumnMethods(object):
+    ''' CASColumn SAS methods '''
+
+    def __init__(self, column):
+        self._column = column
+        self._dtype = column.dtype
+
+    def _compute(self, *args, **kwargs):
+        ''' Call the _compute method on the table column '''
+        return self._column._compute(*args, **kwargs)
+
+    def abs(self):
+        ''' Returns the absolute value '''
+        return self._compute('abs', 'abs({value})')
+
+    def airy(self):
+        ''' Returns the value of the Airy function '''
+        return self._compute('airy', 'airy({value})')
+
+    def beta(self, other):
+        ''' Returns the value of the beta function '''
+        return self._compute('beta', 'beta({value}, {other})', other=other)
+
+    def cnonct(self, df, prob):
+        ''' Returns the noncentrality parameter from a chi-square distribution '''
+        return self._compute('cnonct', 'cnonct({value}, {df}, {prob})',
+                             df=df, prob=prob)
+
+#   def coalesce(self, *args):
+#       ''' Returns the first non-missing value from a list of numeric arguments '''
+#       return self._compute('coalesce', 'coalesce({value}, {other})', other=other)
+
+    def constant(self, name, parameter=None):
+        ''' Computes machine and mathematical constants '''
+        if parameter is None:
+            return self._compute('constant', 'constant({name})', name=name)
+        return self._compute('constant', 'constant({name}, {parameter})',
+                             name=name, parameter=parameter)
+
+    def dairy(self):
+        ''' Returns the derivative of the AIRY function '''
+        return self._compute('dairy', 'dairy({value})')
+
+    def deviance(self, distribution, parameters, epsilon):
+        ''' Returns the deviance based on a probability distribution '''
+        return self._compute('deviance',
+                             'deviance({distribution}, {value}, {parameters}, {epsilon})', 
+                             distribution=distribution, parameters=parameters, epsilon=epsilon)
+        
+    def digamma(self):
+        ''' Returns the value of the digamma function '''
+        return self._compute('digamma', 'digamma({value})')
+
+    def erf(self):
+        ''' Returns the value of the (normal) error function '''
+        return self._compute('erf', 'erf({value})')
+
+    def erfc(self):
+        ''' Returns the value of the complementary (normal) error function '''
+        return self._compute('erfc', 'erfc({value})')
+
+    def exp(self):
+        ''' Returns the value of the exponential function '''
+        return self._compute('exp', 'exp({value})')
+
+    def fact(self):
+        ''' Computes a factorial '''
+        return self._compute('fact', 'fact({value})')
+
+    def fnonct(self, ndf, ddf, prob):
+        ''' Returns the value of the noncentrality parameter of an F distribution '''
+        return self._compute('fnonct', 'fnonct({value}, {ndf}, {ddf}, {prob})',
+                             ndf=ndf, ddf=ddf, prob=prob)
+
+    def gamma(self):
+        ''' Returns the value of the gamma function '''
+        return self._compute('gamma', 'gamma({value})')
+
+#   def gcd(self, *args):
+#       ''' Returns the greatest common divisor for one or more integers '''
+#       return self._compute('gcd', 'gcd({value})')
+
+#   def ibessel(self, nu, kode):
+#       ''' Returns the value of the modified Bessel function '''
+#       return self._compute('ibessel', 'ibessel({nu}, {value}, {kode})',
+#                            nu=nu, kode=kode)
+
+#   def jbessel(self, nu):
+#       ''' Returns the value of the Bessel function '''
+#       return self._compute('jbessel', 'jbessel({nu}, {value}', nu=nu)
+
+    def gamma(self):
+        ''' Returns the value of the gamma function '''
+        return self._compute('gamma', 'gamma({value})')
+
+#   def lcm(self, *args):
+#       ''' Returns the least common multiple '''
+#       return self._compute('lcm', 'lcm({value})')
+
+    def lgamma(self):
+        ''' Returns the natural logarithm of the Gamma function '''
+        return self._compute('lgamma', 'lgamma({value})')
+
+    def log(self):
+        ''' Returns the natural (base e) logarithm '''
+        return self._compute('log', 'log({value})')
+
+    def log1px(self):
+        ''' Returns the log of 1 plus the argument '''
+        return self._compute('log1px', 'log1px({value})')
+
+    def log10(self):
+        ''' Returns the logarithm to the base 10 '''
+        return self._compute('log10', 'log10({value})')
+
+    def log2(self):
+        ''' Returns the logarithm to the base 2 '''
+        return self._compute('log2', 'log2({value})')
+
+    def logbeta(self, param):
+        ''' Returns the logarithm of the beta function '''
+        return self._compute('logbeta', 'logbeta({value}, {param})', param=param)
+
+    def log2(self):
+        ''' Returns the logarithm to the base 2 '''
+        return self._compute('log2', 'log2({value})')
+
+    def mod(self, divisor):
+        ''' Returns the remainder from the division with fuzzing '''
+        return self._compute('mod', 'mod({value}, {divisor})', divisor=divisor)
+
+    def modz(self, divisor):
+        ''' Returns the remainder from the division without fuzzing '''
+        return self._compute('modz', 'modz({value}, {divisor})', divisor=divisor)
+
+#   def msplint(self, n, *args):
+#       ''' Returns the ordinate of a monotonicity-preserving interpolating spline '''
+#       return self._compute('mpsplint', 'mpsplint({value}, {n})', n=n)
+
+    def sign(self):
+        ''' Returns the sign of a value '''
+        return self._compute('sign', 'sign({value})')
+
+    def sqrt(self):
+        ''' Returns the square root of a value '''
+        return self._compute('sqrt', 'sqrt({value})')
+
+    def tnonct(self, df, prob):
+        ''' Returns the value of the noncentrality parameter from the Student's t distribution '''
+        return self._compute('tnonct', 'tnonct({value}, {df}, {prob})',
+                             df=df, prob=prob)
+
+    def trigamma(self):
+        ''' Returns the value of the trigamma function '''
+        return self._compute('trigamma', 'trigamma({value})')
+
+
 class DatetimeColumnMethods(object):
     ''' CASColumn datetime methods '''
 
@@ -5725,22 +5868,31 @@ class CASColumn(CASTable):
         return DatetimeColumnMethods(self)
 
     @getattr_safe_property
+    def sas(self):
+        ''' Accessor for the sas methods '''
+        return SASColumnMethods(self)
+
+    @getattr_safe_property
     def name(self):
         ''' Return the column name '''
-        name = self.get_param('vars')
-        if isinstance(name, items_types):
-            name = name[0]
-        return name
+        name = self.get_param('vars', None)
+        if name:
+            if isinstance(name, items_types):
+                name = name[0]
+            return name
+        raise SWATError('There is no name associted with this column.')
 
     @getattr_safe_property
     def dtype(self):
         ''' The data type of the underlying data '''
-        return self._columninfo['Type'][0]
+        return self._columninfo.set_index('Column')['Type'].loc[self.name]
+#       return self._columninfo['Type'][0]
 
     @getattr_safe_property
     def ftype(self):
         ''' The data type and whether it is sparse or dense '''
-        return self._columninfo['Type'][0] + ':dense'
+        return self._columninfo.set_index('Column')['Type'].loc[self.name] + ':dense'
+#       return self._columninfo['Type'][0] + ':dense'
 
     def xs(self, *args, **kwargs):
         ''' Only exists for CASTable '''
@@ -5775,7 +5927,8 @@ class CASColumn(CASTable):
     @getattr_safe_property
     def itemsize(self):
         ''' Return the size of the data type of the underlying data '''
-        return self._columninfo['RawLength'][0]
+        return self._columninfo.set_index('Column')['RawLength'].loc[self.name]
+#       return self._columninfo['RawLength'][0]
 
     def isnull(self):
         ''' Return a boolean :class:`CASColumn` indicating if the values are null '''
@@ -6110,8 +6263,8 @@ class CASColumn(CASTable):
     def __invert__(self):
         return self._compute('invert', '(^({value}))')
 
-    def _compute(self, funcname, code, use_quotes=True, extra_compvars=None,
-                 extra_comppgm=None, add_length=False, dtype=None, **kwargs):
+    def _compute(self, funcname, code, use_quotes=True, extra_computedvars=None,
+                 extra_computedvarsprogram=None, add_length=False, dtype=None, **kwargs):
         '''
         Create a computed column from given expression
 
@@ -6126,9 +6279,9 @@ class CASColumn(CASTable):
             will be populated by `kwargs`.
         use_quotes : boolean, optional
             Use quotes around string literals
-        extra_compvars : list, optional
+        extra_computedvars : list, optional
             Additional computed variables
-        extra_comppgm : string, optional
+        extra_computedvarsprogram : string, optional
             Additional computed program
         add_length : boolean, optional
             Add a 'length varname varchar(*)' for the output variable
@@ -6145,29 +6298,29 @@ class CASColumn(CASTable):
         outname = '_%s_%s_' % (funcname, self.get_connection()._gen_id())
 
         out.set_param('vars', [outname])
-        if outname in self.get_param('computedvars', self.get_param('compvars', [])):
+        if outname in self.get_param('computedvars', []):
             return out
 
         kwargs = kwargs.copy()
 
-        compvars = [outname]
-        comppgm = []
+        computedvars = [outname]
+        computedvarsprogram = []
 
         if dtype:
-            comppgm.append('length %s %s' % (_nlit(outname), dtype))
+            computedvarsprogram.append('length %s %s' % (_nlit(outname), dtype))
         elif add_length:
-            comppgm.append('length %s varchar(*)' % _nlit(outname))
+            computedvarsprogram.append('length %s varchar(*)' % _nlit(outname))
 
-        if extra_compvars:
-            compvars.append(extra_compvars)
-        if extra_comppgm:
-            comppgm.append(extra_comppgm)
+        if extra_computedvars:
+            computedvars.append(extra_computedvars)
+        if extra_computedvarsprogram:
+            computedvarsprogram.append(extra_computedvarsprogram)
 
         for key, value in six.iteritems(kwargs):
             if isinstance(value, CASColumn):
-                aexpr, acompvars, acomppgm = value._to_expression()
-                compvars.append(acompvars)
-                comppgm.append(acomppgm)
+                aexpr, acomputedvars, acomputedvarsprogram = value._to_expression()
+                computedvars.append(acomputedvars)
+                computedvarsprogram.append(acomputedvarsprogram)
                 kwargs[key] = aexpr
             elif use_quotes and (isinstance(value, text_types) or
                                  isinstance(value, binary_types)):
@@ -6176,9 +6329,9 @@ class CASColumn(CASTable):
                 items = []
                 for item in value:
                     if isinstance(item, CASColumn):
-                        aexpr, acompvars, acomppgm = item._to_expression()
-                        compvars.append(acompvars)
-                        comppgm.append(acomppgm)
+                        aexpr, acomputedvars, acomputedvarsprogram = item._to_expression()
+                        computedvars.append(acomputedvars)
+                        computedvarsprogram.append(acomputedvarsprogram)
                         items.append(aexpr)
                     elif isinstance(item, text_types) or \
                             isinstance(item, binary_types):
@@ -6199,17 +6352,17 @@ class CASColumn(CASTable):
         if not re.search(r';\s*$', code):
             code = '%s; ' % code
 
-        comppgm.append(code.format(**kwargs))
+        computedvarsprogram.append(code.format(**kwargs))
 
-        out.append_computed_columns(compvars, comppgm)
+        out.append_computed_columns(computedvars, computedvarsprogram)
 
         return out
 
     def _to_expression(self):
         ''' Convert CASColumn to an expression '''
         return (_nlit(self.name),
-                self.get_param('computedvars', self.get_param('compvars', [])),
-                self.get_param('computedvarsprogram', self.get_param('comppgm', '')))
+                self.get_param('computedvars', []),
+                self.get_param('computedvarsprogram', ''))
 
     def __and__(self, arg):
         return self._compare('and', arg)
@@ -6223,22 +6376,22 @@ class CASColumn(CASTable):
         right = other
 
         # Left side
-        left, lcompvars, lcomppgm = left._to_expression()
+        left, lcomputedvars, lcomputedvarsprogram = left._to_expression()
 
-        compvars = []
-        comppgm = []
+        computedvars = []
+        computedvarsprogram = []
 
         # Right side
         if isinstance(right, CASColumn):
-            right, rcompvars, rcomppgm = right._to_expression()
-            compvars.append(rcompvars)
-            comppgm.append(rcomppgm)
+            right, rcomputedvars, rcomputedvarsprogram = right._to_expression()
+            computedvars.append(rcomputedvars)
+            computedvarsprogram.append(rcomputedvarsprogram)
         elif isinstance(right, text_types) or isinstance(right, binary_types):
             right = repr(right)
 
         opname = OPERATOR_NAMES.get(operator, operator)
         col = self._compute(opname, '(%s %s %s)' % (str(left), operator, str(right)),
-                            extra_compvars=compvars, extra_comppgm=comppgm)
+                            extra_computedvars=computedvars, extra_computedvarsprogram=computedvarsprogram)
         return col
 
     def abs(self):
@@ -6312,19 +6465,13 @@ class CASColumn(CASTable):
         tbl = self._to_table()
         for item in others:
             tbl.append_vars(item.get_param('vars', []))
-            tbl.append_computedvars(item.get_param('computedvars',
-                                    item.get_param('compvars', [])))
-            tbl.append_computedvarsprogram(item.get_param('computedvarsprogram',
-                                           item.get_param('comppgm', '')))
+            tbl.append_computedvars(item.get_param('computedvars', []))
+            tbl.append_computedvarsprogram(item.get_param('computedvarsprogram', ''))
             tbl.append_where(item.get_param('where', ''))
         if not tbl.get_param('computedvars', None):
             tbl.del_param('computedvars')
-        if not tbl.get_param('compvars', None):
-            tbl.del_param('compvars')
         if not tbl.get_param('computedvarsprogram', None):
             tbl.del_param('computedvarsprogram')
-        if not tbl.get_param('comppgm', None):
-            tbl.del_param('comppgm')
         if not tbl.get_param('where', None):
             tbl.del_param('where')
         return tbl
