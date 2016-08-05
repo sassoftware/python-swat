@@ -883,15 +883,24 @@ class CAS(object):
         casekeys = {k.lower(): k for k in kwargs.keys()}
 
         # Add support for CASTable objects
+        inputs = None
+        uses_inputs = False
+        uses_fetchvars = False
         for param in parmlist:
             key = param['name']
             key = casekeys.get(key, key)
+            if key.lower() == 'inputs':
+                uses_inputs = True
+            elif key.lower() == 'fetchvars':
+                uses_fetchvars = True
 
             # Convert table objects to the proper form based on the argument type
             if key in kwargs and isinstance(kwargs[key], CASTable):
                 if param.get('isTableDef'):
+                    inputs = kwargs[key].get_param('__inputs__', None)
                     kwargs[key] = kwargs[key].to_table_params()
                 elif param.get('isTableName'):
+                    inputs = kwargs[key].get_param('__inputs__', None)
                     # Fill in caslib= first
                     if caslib and 'caslib' not in kwargs and \
                             kwargs[key].has_param('caslib'):
@@ -908,9 +917,11 @@ class CAS(object):
                 kwargs[key] = {'name': kwargs[key]}
 
             elif param.get('isTableDef') and key.lower() == 'table' and '__table__' in kwargs:
+                inputs = kwargs['__table__'].get_param('__inputs__', None)
                 kwargs[key] = kwargs['__table__'].to_table_params()
 
             elif param.get('isTableName') and key.lower() == 'name' and '__table__' in kwargs:
+                inputs = kwargs['__table__'].get_param('__inputs__', None)
                 if caslib and 'caslib' not in kwargs and \
                        kwargs['__table__'].has_param('caslib'):
                     kwargs['caslib'] = kwargs['__table__'].get_param('caslib')
@@ -920,7 +931,17 @@ class CAS(object):
             # a table definition.
             elif key.lower() == 'table' and '__table__' in kwargs and \
                     action.lower() in ['columninfo', 'table.columninfo']:
+                inputs = kwargs['__table__'].get_param('__inputs__', None)
                 kwargs[key] = kwargs['__table__'].to_table_params()
+                if inputs:
+                    if 'vars' not in kwargs:
+                         kwargs[key]['vars'] = inputs
+                inputs = None 
+
+        if uses_inputs and inputs is not None and 'inputs' not in kwargs:
+            kwargs['inputs'] = inputs
+        elif uses_fetchvars and inputs is not None and 'fetchvars' not in kwargs:
+            kwargs['fetchvars'] = inputs
 
         kwargs.pop('__table__', None)
 
