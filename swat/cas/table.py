@@ -264,7 +264,7 @@ def _get_table_selection(table, args):
     out = {}
 
     if cols:
-        out['table.__inputs__'] = cols
+        out['table._columns'] = cols
 
     if computedvars and computedvarsprogram:
         out['table.computedvars'] = computedvars
@@ -293,14 +293,14 @@ class CASTableAnyLocationAccessor(CASTableAccessor):
 
         tbl = self._table()
 
-        if 'table.__inputs__' in params or 'table.computedvars' in params:
+        if 'table._columns' in params or 'table.computedvars' in params:
             tbl = tbl.copy()
 
         # Build inputs
         inputs = None
-        if 'table.__inputs__' in params:
+        if 'table._columns' in params:
             varlist = []
-            inputs = params.pop('table.__inputs__')
+            inputs = params.pop('table._columns')
             columns = None
             for item in inputs:
                 if isinstance(item, int_types):
@@ -309,7 +309,7 @@ class CASTableAnyLocationAccessor(CASTableAccessor):
                     varlist.append(columns[item])
                 else:
                     varlist.append(item)
-            tbl.set_param('__inputs__', varlist)
+            tbl._columns = varlist
 
         # Append computedvars and computedvarsprogram
         if 'table.computedvars' in params and 'table.computedvarsprogram' in params:
@@ -640,6 +640,9 @@ class CASTable(ParamManager, ActionParamManager):
         self._connection = None
         self._contexts = []
 
+        self._columns = []
+        self._sortby = []
+
 #       self._iat = CASTableRowScalarAccessor(self)
 #       self._at = CASTableLabelScalarAccessor(self)
         self._iloc = CASTableRowLocationAccessor(self)
@@ -660,7 +663,7 @@ class CASTable(ParamManager, ActionParamManager):
             doc = doc.split('Returns')[0].rstrip()
             self.params.set_doc(doc)
 
-    def append_inputs(self, *items, **kwargs):
+    def append_columns(self, *items, **kwargs):
         '''
         Append variable names to action inputs parameter
 
@@ -680,7 +683,7 @@ class CASTable(ParamManager, ActionParamManager):
             if inplace == False
 
         '''
-        varlist = self.get_param('__inputs__', [])
+        varlist = self._columns
         if not varlist:
             varlist = list(self.columns)
         if not isinstance(varlist, items_types):
@@ -690,7 +693,7 @@ class CASTable(ParamManager, ActionParamManager):
                 varlist.append(item)
         varlist = _get_unique(varlist, lowercase=True)
         if kwargs.get('inplace', True):
-            self.set_param('__inputs__', varlist)
+            self._columns = varlist
             return
         return varlist
 
@@ -878,15 +881,11 @@ class CASTable(ParamManager, ActionParamManager):
             if inplace == False
 
         '''
-        name = 'orderby'
         orderby = []
 
-        # See if there is a orderby or sortby
+        # See if there is a orderby
         if self.has_param('orderby'):
             orderby = self.get_param('orderby')
-        elif self.has_param('sortby'):
-            name = 'sortby'
-            orderby = self.get_param('sortby')
 
         # Force orderby to be a list
         if isinstance(orderby, dict):
@@ -916,7 +915,7 @@ class CASTable(ParamManager, ActionParamManager):
 
         # Set it as needed
         if kwargs.get('inplace', True):
-            self.set_param(name, orderby)
+            self.set_param('orderby', orderby)
             return
 
         return orderby
@@ -936,20 +935,18 @@ class CASTable(ParamManager, ActionParamManager):
         CASColumn object
 
         '''
-        table = self.copy()
+        column = CASColumn(**self.copy().to_params())
+        column._sortby = list(self._sortby)
 
-        params = table.to_params()
         if varname is not None:
-            params['__inputs__'] = [varname]
+            column._columns = [varname]
         else:
-            varlist = params.get('__inputs__', [])
+            varlist = column._columns
             if isinstance(varlist, items_types) and len(varlist):
-                params['__inputs__'] = [varlist[0]]
-
-        column = CASColumn(**params)
+                column._columns = [varlist[0]]
 
         try:
-            column.set_connection(table.get_connection())
+            column.set_connection(self.get_connection())
         except SWATError:
             pass
 
@@ -1131,6 +1128,8 @@ class CASTable(ParamManager, ActionParamManager):
 
         '''
         tbl = type(self)(**self.params)
+        tbl._columns = self._columns
+        tbl._sortby = self._sortby
         try:
             tbl.set_connection(self.get_connection())
         except SWATError:
@@ -1161,6 +1160,8 @@ class CASTable(ParamManager, ActionParamManager):
 
         '''
         tbl = type(self)(**copy.deepcopy(self.params))
+        tbl._columns = list(self._columns)
+        tbl._sortby = list(self._sortby)
         try:
             tbl.set_connection(self.get_connection())
         except SWATError:
@@ -1344,16 +1345,16 @@ class CASTable(ParamManager, ActionParamManager):
             return actcls()
 
         # See if it's a column name
-        if name in [x.lower() for x in self.get_param('__inputs__', [])]:
+        if name in [x.lower() for x in self._columns]:
             return self._to_column(origname)
         elif name in [x.lower() for x in self.get_param('computedvars', [])]:
             return self._to_column(origname)
         elif name in [x.lower() for x in self.get_param('groupby', [])]:
             return self._to_column(origname)
-        elif not self.get_param('__inputs__', []):
+        elif not self._columns:
             try:
                 tbl = self.copy()
-                tbl.set_param('__inputs__', [origname])
+                tbl._columns = [origname]
                 colinfo = tbl._columninfo
             except (ValueError, SWATError):
                 colinfo = None
@@ -1436,8 +1437,33 @@ class CASTable(ParamManager, ActionParamManager):
             repr(self.params['name']),
             dict2kwargs(self.to_params(), ignore=['name'], fmt='%s')
         ]
-        return '%s(%s)' % (type(self).__name__,
-                           ', '.join([x.strip() for x in parts if x.strip()]))
+
+        columns = ''
+        if self._columns:
+            columns = '[%s]' % ', '.join(repr(x) for x in self._columns)
+            if not isinstance(self, CASColumn):
+                columns = '[%s]' % columns
+
+        sort = ''
+        if self._sortby:
+            names = [x['name'] for x in self._sortby]
+            if len(names) == 1:
+                names = names.pop()
+
+            order = [x.get('order', 'ASCENDING').upper() == 'ASCENDING'
+                     for x in self._sortby]
+            if set(order) == set([True]):
+                order = ''
+            elif set(order) == set([False]):
+                order = ', ascending=False'
+            else:
+                order = ', ascending=%s' % repr(order)
+
+            sort = '.sort_values(%s%s)' % (repr(names), order)
+
+        return '%s(%s)%s%s' % (type(self).__name__,
+                               ', '.join([x.strip() for x in parts if x.strip()]),
+                               columns, sort)
 
     def __repr__(self):
         return str(self)
@@ -1471,6 +1497,14 @@ class CASTable(ParamManager, ActionParamManager):
         
         '''
         return self.get_connection().get_actionset_names()
+
+    def get_inputs_param(self):
+        ''' Return the column names for the inputs= action parameter '''
+        return self._columns
+
+    def get_fetch_params(self):
+        ''' Return options to be used during the table.fetch action ''' 
+        return dict(sortby=self._sortby)
 
     def to_table_params(self):
         '''
@@ -1635,7 +1669,7 @@ class CASTable(ParamManager, ActionParamManager):
     def _numcolumns(self):
         ''' Return number of visible columns '''
         # Short circuit if we can
-        varlist = self.get_param('__inputs__', [])
+        varlist = self._columns
         if varlist:
             return len(varlist)
 
@@ -1649,7 +1683,7 @@ class CASTable(ParamManager, ActionParamManager):
     @getattr_safe_property
     def columns(self):
         ''' The visible columns in the table '''
-        varlist = self.get_param('__inputs__', [])
+        varlist = self._columns
         if varlist:
             return pd.Index(varlist)
         return pd.Index(self._columninfo['Column'].tolist())
@@ -1659,7 +1693,7 @@ class CASTable(ParamManager, ActionParamManager):
         ''' The table index '''
         return
 
-    def _intersect_inputs(self, columns, inplace=False):
+    def _intersect_columns(self, columns, inplace=False):
         ''' 
         Return the intersection of `columns` and `inputs` 
         
@@ -1670,7 +1704,7 @@ class CASTable(ParamManager, ActionParamManager):
         Examples
         --------
         >>> tbl = CASTable('my-table', vars=['a', 'b', 'c'])
-        >>> print(tbl._intersect_inputs(['a', 'c', 'd']))
+        >>> print(tbl._intersect_columns(['a', 'c', 'd']))
         ['a', 'c']
 
         Returns
@@ -1689,16 +1723,16 @@ class CASTable(ParamManager, ActionParamManager):
         if not columns:
             if inplace:
                 return
-            return self.get_param('__inputs__', [])
+            return self._columns
 
-        varlist = self.get_param('__inputs__', [])
+        varlist = self._columns
         if not varlist:
             varlist = columns
         else:
             varlist = list(sorted(set(varlist) & set(columns), key=varlist.index))
 
         if inplace:
-            self.set_param('__inputs__', varlist)
+            self._columns = varlist
             return
 
         return varlist
@@ -1727,7 +1761,7 @@ class CASTable(ParamManager, ActionParamManager):
         if n is None:
             n = get_option('cas.dataset.max_rows_fetched')
         tbl = self.copy()
-        tbl._intersect_inputs(columns, inplace=True)
+        tbl._intersect_columns(columns, inplace=True)
         return pd.concat(list(tbl._retrieve('table.fetch', to=n, index=False,
                                             sastypes=False).values())).as_matrix()
 
@@ -1882,11 +1916,11 @@ class CASTable(ParamManager, ActionParamManager):
         varlist = self._get_dtypes(include=include, exclude=exclude)
 
         if inplace:
-            self.set_param('__inputs__', varlist)
+            self._columns = varlist
             return
 
         tblcopy = self.copy()
-        tblcopy.set_param('__inputs__', varlist)
+        tblcopy._columns = varlist
         return tblcopy
 
     @getattr_safe_property
@@ -2050,7 +2084,7 @@ class CASTable(ParamManager, ActionParamManager):
 
         if columns is not None:
             tbl = self.copy()
-            tbl.set_param('__inputs__', list(columns))
+            tbl._columns = list(columns)
 
         groups = self.get_groupby_vars()
         if groups:
@@ -2306,7 +2340,7 @@ class CASTable(ParamManager, ActionParamManager):
         if isinstance(col, int_types):
             col = self.columns[col]
         tbl = self.copy()
-        tbl.set_param('__inputs__', [col])
+        tbl._columns = [col]
         numrows = self._numrows
         if abs(index) >= numrows:
             raise IndexError('index %s is out of bounds for axis 0 with size %s' %
@@ -2380,7 +2414,7 @@ class CASTable(ParamManager, ActionParamManager):
         newvarlist = [x for x in varlist if x.lower() != lcolname]
         if len(newvarlist) == len(varlist):
             raise KeyError(colname)
-        self.set_param('__inputs__', newvarlist)
+        self._columns = newvarlist
 
     def datastep(self, code, casout=None, *args, **kwargs):
         '''
@@ -2627,7 +2661,7 @@ class CASTable(ParamManager, ActionParamManager):
         if numeric_only:
             inputs = self._get_dtypes(include='numeric')
         else:
-            inputs = self.get_param('__inputs__', None)
+            inputs = self._columns or None
 
         groups = self.get_groupby_vars()
         if groups:
@@ -2787,7 +2821,7 @@ class CASTable(ParamManager, ActionParamManager):
         if include is None and exclude is None:
             include = ['number']
             tbl = self.select_dtypes(include=include)
-            if not tbl.get_param('__inputs__', []):
+            if not tbl._columns:
                 tbl = self.select_dtypes(include=['character'])
 
         # include/exclude was specified by the user
@@ -3673,11 +3707,11 @@ class CASTable(ParamManager, ActionParamManager):
         columns = [x for x in columns if x not in labels]
 
         if inplace:
-            self.set_param('__inputs__', columns)
+            self._columns = columns
             return
 
-        out = self.copy(exclude='__inputs__')
-        out.set_param('__inputs__', columns)
+        out = self.copy()
+        out._columns = columns
         return out
 
 #   def drop_duplicates(self, *args, **kwargs):
@@ -3787,7 +3821,21 @@ class CASTable(ParamManager, ActionParamManager):
             If inplace == False.
 
         '''
-        raise NotImplemented('You must use sortby= on the method that fetches the data.')
+        if inplace:
+            out = self
+        else:
+            out = copy.deepcopy(self)
+        if not isinstance(by, items_types):
+            by = [by]
+        if not isinstance(ascending, items_types):
+            ascending = [ascending] * len(by)
+        for col, asc in zip(by, ascending):
+            out._sortby.append(
+                dict(name=col, order=asc and 'ASCENDING' or 'DESCENDING',
+                     formatted='RAW'))
+        if inplace:
+            return
+        return out
 
     sort = sort_values
 
@@ -4698,7 +4746,7 @@ class CASTable(ParamManager, ActionParamManager):
             computedvarsprogram.append('%s = %s; ' % (key, value))
 
         self.append_computed_columns(computedvars, computedvarsprogram)
-        self.append_inputs(key)
+        self.append_columns(key)
 
     def __getitem__(self, key):
         '''
@@ -4743,7 +4791,7 @@ class CASTable(ParamManager, ActionParamManager):
                     computedvars.append(k)
                     computedvarsprogram.append('%s = .; ' % _nlit(k))
                 varlist.append(k)
-            out.set_param('__inputs__', varlist)
+            out._columns = varlist
             if computedvars:
                 out.append_computed_columns(computedvars, computedvarsprogram)
             return out
@@ -4761,8 +4809,8 @@ class CASTable(ParamManager, ActionParamManager):
             if ecomputedvarsprogram:
                 out.append_computedvarsprogram(ecomputedvarsprogram)
 
-            if out.get_param('__inputs__', None) is None:
-                out.set_param('__inputs__', list(self.columns))
+            if not out._columns:
+                out._columns = list(self.columns)
 
             return out
 
@@ -4862,8 +4910,8 @@ class CASTable(ParamManager, ActionParamManager):
 #       if ecomputedvarsprogram:
 #           out.append_computedvarsprogram(ecomputedvarsprogram)
 
-#       if out.get_param('__inputs__', None) is None:
-#           out.set_param('__inputs__', list(self.columns))
+#       if not out._columns:
+#           out._columns = list(self.columns)
 
 #       if not inplace:
 #           return out
@@ -5880,7 +5928,7 @@ class CASColumn(CASTable):
     @getattr_safe_property
     def name(self):
         ''' Return the column name '''
-        name = self.get_param('__inputs__', None)
+        name = self._columns
         if name:
             if isinstance(name, items_types):
                 name = name[0]
@@ -5962,7 +6010,7 @@ class CASColumn(CASTable):
         '''
         out = self._fetch(from_=key + 1, to=key + 1)
         try:
-            return out.get_value(0, self.get_param('__inputs__')[0])
+            return out.get_value(0, self._columns[0])
         except KeyError:
             pass
         return default
@@ -6299,7 +6347,7 @@ class CASColumn(CASTable):
 
         outname = '_%s_%s_' % (funcname, self.get_connection()._gen_id())
 
-        out.set_param('__inputs__', [outname])
+        out._columns = [outname]
         if outname in self.get_param('computedvars', []):
             return out
 
@@ -6466,7 +6514,7 @@ class CASColumn(CASTable):
         ''' Combine CASColumn objects into a CASTable object '''
         tbl = self._to_table()
         for item in others:
-            tbl.append_inputs(item.get_param('__inputs__', []))
+            tbl.append_columns(item._columns)
             tbl.append_computedvars(item.get_param('computedvars', []))
             tbl.append_computedvarsprogram(item.get_param('computedvarsprogram', ''))
             tbl.append_where(item.get_param('where', ''))
@@ -6612,7 +6660,7 @@ class CASColumn(CASTable):
 
         '''
         bygroup_columns = 'raw'
-        out = self._retrieve('simple.freq', inputs=self.get_param('__inputs__', None),
+        out = self._retrieve('simple.freq', inputs=self._columns,
                              includemissing=includemissing).get_tables('Frequency')
         out = [x.reshape_bygroups(bygroup_columns=bygroup_columns,
                                   bygroup_as_index=True) for x in out]

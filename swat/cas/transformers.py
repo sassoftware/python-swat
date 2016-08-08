@@ -505,7 +505,6 @@ def py2cas(soptions, _sw_error, **kwargs):
                        _sw_values)
             i = i + 1
         elif isinstance(item, datetime.date):
-            print(key, casdt.python2cas_date(item))
             errorcheck(_sw_values.setDate(i, key, casdt.python2cas_date(item)),
                        _sw_values)
             i = i + 1

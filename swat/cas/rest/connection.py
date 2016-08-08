@@ -248,9 +248,14 @@ class REST_CASConnection(object):
 
         try:
             self._results = json.loads(a2u(res, 'utf-8'), strict=False)
+            if self._results.get('disposition', None) is None:
+                if self._results.get('error'):
+                    raise SWATError(self._results['error']) 
+                else:
+                    raise SWATError('Unknown error')
         except ValueError as exc:
-            #print(res)
             raise SWATError(str(exc))
+
         return self
 
     def receive(self):
