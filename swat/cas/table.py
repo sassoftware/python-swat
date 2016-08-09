@@ -936,19 +936,19 @@ class CASTable(ParamManager, ActionParamManager):
 
         '''
         column = CASColumn(**self.copy().to_params())
+        column._columns = list(self._columns)
         column._sortby = list(self._sortby)
 
         if varname is not None:
             column._columns = [varname]
-        else:
-            varlist = column._columns
-            if isinstance(varlist, items_types) and len(varlist):
-                column._columns = [varlist[0]]
 
         try:
             column.set_connection(self.get_connection())
         except SWATError:
             pass
+
+        if not column._columns:
+            column._columns = [column._columninfo.ix[0, 'Column']]
 
         return column
 
@@ -2007,7 +2007,7 @@ class CASTable(ParamManager, ActionParamManager):
 
     # Indexing, iteration
 
-    def head(self, n=5, columns=None, sortby=None):
+    def head(self, n=5, columns=None):
         ''' 
         Retrieve first `n` rows 
 
@@ -2029,9 +2029,9 @@ class CASTable(ParamManager, ActionParamManager):
         :class:`swat.SASDataFrame`
         
         '''
-        return self.slice(start=0, stop=n - 1, columns=columns, sortby=sortby)
+        return self.slice(start=0, stop=n - 1, columns=columns)
 
-    def tail(self, n=5, columns=None, sortby=None):
+    def tail(self, n=5, columns=None):
         ''' 
         Retrieve last `n` rows
 
@@ -2053,9 +2053,9 @@ class CASTable(ParamManager, ActionParamManager):
         :class:`swat.SASDataFrame`
         
         '''
-        return self.slice(start=-n, stop=-1, columns=columns, sortby=sortby)
+        return self.slice(start=-n, stop=-1, columns=columns)
 
-    def slice(self, start=0, stop=None, columns=None, sortby=None):
+    def slice(self, start=0, stop=None, columns=None):
         ''' 
         Retrieve the specified rows 
         
@@ -2105,7 +2105,6 @@ class CASTable(ParamManager, ActionParamManager):
                     stop = numrows + stop
 
             out.append(pd.concat(list(group._retrieve('table.fetch', sastypes=False,
-                                                      sortby=sortby,
                                                       from_=start + 1,
                                                       to=stop + 1).values())))
 
@@ -3251,8 +3250,7 @@ class CASTable(ParamManager, ActionParamManager):
         if not isinstance(columns, items_types):
             columns = [columns]
         columns = [dict(name=x, order='DESCENDING', formatted='RAW') for x in columns]
-        col = self.copy()
-        return col._fetch(from_=1, to=n, sortby=columns)
+        return self._fetch(from_=1, to=n, sortby=columns)
 
     def nsmallest(self, n, columns, keep='first'):
         '''
@@ -3279,8 +3277,7 @@ class CASTable(ParamManager, ActionParamManager):
         if not isinstance(columns, items_types):
             columns = [columns]
         columns = [dict(name=x, order='ASCENDING', formatted='RAW') for x in columns]
-        col = self.copy()
-        return col._fetch(from_=1, to=n, sortby=columns)
+        return self._fetch(from_=1, to=n, sortby=columns)
 
     def mode(self, axis=0, numeric_only=False, max_tie=100, skipna=True):
         '''
@@ -3872,14 +3869,15 @@ class CASTable(ParamManager, ActionParamManager):
 
         '''
         kwargs = kwargs.copy()
-        kwargs.pop('sortby', None)
         kwargs['tables'] = [self.to_table_params()]
         if not args and 'name' not in kwargs:
             kwargs['name'] = _gen_table_name()
         out = self._retrieve('table.view', *args, **kwargs)
         if 'caslib' in out and 'viewName' in out:
             conn = self.get_connection()
-            return conn.CASTable(out['viewName'], caslib=out['caslib'])
+            out = conn.CASTable(out['viewName'], caslib=out['caslib'])
+            out._sortby = list(self._sortby)
+            return out
         raise SWATError('No output table was returned')
 
 #   def to_panel(self, *args, **kwargs):
@@ -4277,7 +4275,6 @@ class CASTable(ParamManager, ActionParamManager):
         standard_dataframe = kwargs.pop('standard_dataframe', False)
         dframe = concat(list(self._retrieve('table.fetch', sastypes=False,
                                             to=get_option('cas.dataset.max_rows_fetched'),
-                                            sortby=kwargs.pop('sortby', None),
                                             index=False).values()))
         if standard_dataframe:
             dframe = pd.DataFrame(dframe)
@@ -6073,31 +6070,21 @@ class CASColumn(CASTable):
         ''' Return boolean indicating if the data type is character '''
         return self.dtype in set(['char', 'varchar', 'binary', 'varbinary'])
 
-    def _get_sortby(self, sort):
-        if sort:
-            if sort is True:
-                return [dict(name=self.name)]
-            elif isinstance(sort, text_types) or isinstance(sort, binary_types):
-                return [dict(name=self.name, order=sort)]
-            else:
-                return sort
-
-    def tolist(self, sort=False):
+    def tolist(self):
         ''' Return a list of the column values '''
-        return self._fetch(sortby=self._get_sortby(sort)).ix[:, 0].tolist()
+        return self._fetch().ix[:, 0].tolist()
 
-    def head(self, n=5, sort=False):
+    def head(self, n=5):
         ''' Return first `n` rows of the column in a Series '''
-        return self.slice(start=0, stop=n - 1, sort=sort)
+        return self.slice(start=0, stop=n - 1)
 
-    def tail(self, n=5, sort=False):
+    def tail(self, n=5):
         ''' Return last `n` rows of the column in a Series '''
-        return self.slice(start=-n, stop=-1, sort=sort)
+        return self.slice(start=-n, stop=-1)
 
-    def slice(self, start=0, stop=None, sort=False):
+    def slice(self, start=0, stop=None):
         ''' Return from rows from `start` to `stop` in a Series '''
-        return CASTable.slice(self, start=start, stop=stop,
-                              sortby=self._get_sortby(sort))[self.name]
+        return CASTable.slice(self, start=start, stop=stop)[self.name]
 
     def add(self, other, level=None, fill_value=None, axis=0):
         ''' Addition of CASColumn with other, element-wise '''
@@ -6600,15 +6587,13 @@ class CASColumn(CASTable):
 
     def nlargest(self, n=5, keep='first'):
         ''' Return the n largest values '''
-        col = self.copy()
-        return col._fetch(from_=1, to=n, sortby=[dict(name=col.name,
-                          order='DESCENDING', formatted='RAW')])[col.name]
+        return self._fetch(from_=1, to=n, sortby=[dict(name=self.name,
+                           order='DESCENDING', formatted='RAW')])[self.name]
 
     def nsmallest(self, n=5, keep='first'):
         ''' Return the n smallest values '''
-        col = self.copy()
-        return col._fetch(from_=1, to=n, sortby=[dict(name=col.name,
-                          order='ASCENDING', formatted='RAW')])[col.name]
+        return self._fetch(from_=1, to=n, sortby=[dict(name=self.name,
+                           order='ASCENDING', formatted='RAW')])[self.name]
 
     def std(self, axis=None, skipna=None, level=None, ddof=1):
         ''' Return the standard deviation of the values '''
@@ -6934,7 +6919,7 @@ class CASTableGroupBy(object):
         '''
         return self._table.to_frame(*args, **kwargs)
 
-    def nth(self, n, dropna=None, sortby=None):
+    def nth(self, n, dropna=None):
         '''
         Return the nth row from each group
 
@@ -6950,7 +6935,7 @@ class CASTableGroupBy(object):
         '''
         if not isinstance(n, items_types):
             n = [n] 
-        out = pd.concat(self.slice(x, x, sortby=None) for x in n)
+        out = pd.concat(self.slice(x, x) for x in n)
         if self._as_index:
             return out.set_index(self.get_groupby_vars()).sort_index()
         return out
