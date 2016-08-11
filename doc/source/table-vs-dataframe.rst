@@ -1,15 +1,15 @@
 .. currentmodule:: swat
 .. _tblvsdf:
 
-**********************
-CASTable vs. DataFrame
-**********************
+***************************************
+CASTable vs. DataFrame vs. SASDataFrame
+***************************************
 
 :class:`CASTable` objects and DataFrame object (either :class:`pandas.DataFrame` or 
 :class:`SASDataFrame`) act very similar in many ways, but they are extremely different
 constructs.  :class:`CASTable` objects do not contain actual data.  They are simply
-a client-side view of the data in a CAS table on a CAS server.  DataFrames contain
-data in-memory on the client machine.
+a client-side view of the data in a CAS table on a CAS server.  DataFrames and 
+SASDataFrames contain data in-memory on the client machine.
 
 Even though they are very different architectures, :class:`CASTable` objects support
 much of the :class:`pandas.DataFrame` API.  However, since CAS tables can contain
@@ -28,6 +28,9 @@ of the data, you will get a local copy of that result in a :class:`SASDataFrame`
 Most actions allow you to specify a ``casout=`` parameter that allows you to send the
 summarized data to a table in the server as well.
 
+The methods and properties of :class:`CASTable` objects that return a new :class:`CASTable`
+object are ``loc``, ``iloc``, ``ix``, ``query``, ``sort_values``, and ``__getitem__`` 
+(i.e., ``tbl[...]``).  The remaining methods will return results.
 A sampling of a number of methods common to both :class:`CASTable` and
 DataFrame are shown below with the result type of that method.
 
@@ -62,3 +65,18 @@ Method        CASColumn  Series
 c.head()      Series     Series
 c[c.col > 1]  CASColumn  Series
 ============  =========  =========
+
+Pandas DataFrame vs. SASDataFrame
+=================================
+
+:class:`SASDataFrame` is a subclass of :class:`pandas.DataFrame`.  Therefore, anything
+you can do with a :class:`pandas.DataFrame` will also work with :class:`SASDataFrame`.
+The only difference is that :class:`SASDataFrame` objects contain extra metadata
+familiar to SAS users.  This includes a title, label, name, a dictionary of extended
+attributes for information such as By groups and system titles (``attrs``), and 
+a dictionary of column metadata (``colinfo``).
+
+Also, since SAS has both formatted and raw values for By groups, :class:`SASDataFrame` 
+objects also have a method called :meth:`SASDataFrame.reshape_bygroups` to change
+the way that By group information in represented in the DataFrame.  See the 
+:ref:`By group documentation <bygroups>` for more information.
