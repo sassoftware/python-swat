@@ -2130,14 +2130,14 @@ class CASTable(ParamManager, ActionParamManager):
         #''' Label-based scalar accessor '''
         raise NotImplementedError('The `at` attribute is not implemented, '
                                   'but the attribute is reserved.')
-        return self._at
+#       return self._at
 
     @getattr_safe_property
     def iat(self):
         #''' Integer location scalar accessor '''
         raise NotImplementedError('The `iat` attribute is not implemented, '
                                   'but the attribute is reserved.')
-        return self._iat
+#       return self._iat
 
     @getattr_safe_property
     def ix(self):
@@ -3709,6 +3709,7 @@ class CASTable(ParamManager, ActionParamManager):
 
         out = self.copy()
         out._columns = columns
+        out._sortby = list(self._sortby)
         return out
 
 #   def drop_duplicates(self, *args, **kwargs):
@@ -5677,10 +5678,6 @@ class SASColumnMethods(object):
 #   def jbessel(self, nu):
 #       ''' Returns the value of the Bessel function '''
 #       return self._compute('jbessel', 'jbessel({nu}, {value}', nu=nu)
-
-    def gamma(self):
-        ''' Returns the value of the gamma function '''
-        return self._compute('gamma', 'gamma({value})')
 
 #   def lcm(self, *args):
 #       ''' Returns the least common multiple '''

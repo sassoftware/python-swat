@@ -23,6 +23,7 @@ from ..utils import escapejson
 from ..utils.xdict import xadict
 
 
+@six.python_2_unicode_compatible
 class RendererMixin(object):
     ''' Mixin for rendering dictionaries of results '''
 
@@ -33,7 +34,7 @@ class RendererMixin(object):
         Returns
         -------
         string
-            HTML representation of CASResults object
+           HTML representation of CASResults object
 
         '''
         if pdcom.in_qtconsole():
@@ -46,11 +47,10 @@ class RendererMixin(object):
 
         i = 0
         for key, item in six.iteritems(self):
-            if not isinstance(key, int):
-                if i:
-                    sfmt = '<div class="cas-results-key"><hr/><b>&#167; %s</b></div>'
-                else:
-                    sfmt = '<div class="cas-results-key"><b>&#167; %s</b></div>'
+            if i:
+                sfmt = '<div class="cas-results-key"><hr/><b>&#167; %s</b></div>'
+            else:
+                sfmt = '<div class="cas-results-key"><b>&#167; %s</b></div>'
             output.append(sfmt % key)
             output.append('<div class="cas-results-body">')
             if hasattr(item, '_repr_html_'):
@@ -87,8 +87,23 @@ class RendererMixin(object):
         return '\n'.join(output)
 
     def __str__(self):
-        from IPython.lib.pretty import pretty
-        return pretty(self)
+        try:
+            from IPython.lib.pretty import pretty
+            return pretty(self)
+        except ImportError:
+            out = []
+
+            for key, item in six.iteritems(self):
+                out.append('[%s]' % key)
+                out.append('')
+                out.append('%s' % item)
+                out.append('')
+                out.append('')
+
+            if getattr(self, 'performance'):
+                out.append(self._performance_str_())
+
+            return '\n'.join(out)
 
     def _repr_pretty_(self, p, cycle):
         from IPython.lib.pretty import pretty
@@ -108,6 +123,10 @@ class RendererMixin(object):
             p.break_()
 
         if getattr(self, 'performance'):
+            p.text(self._performance_str_())
+
+    def _performance_str_(self):
+        if getattr(self, 'performance'):
             stats = []
             if getattr(self.performance, 'elapsed_time'):
                 stats.append('elapsed: %.3gs' % self.performance.elapsed_time)
@@ -118,7 +137,8 @@ class RendererMixin(object):
             if getattr(self.performance, 'memory'):
                 stats.append('mem: %.3gMB' % (self.performance.memory / 1048576.0))
             if stats:
-                p.text('+ ' + (', '.join(stats)).capitalize())
+                return '+ ' + (', '.join(stats)).capitalize()
+        return ''
 
     def _make_byline(self, attrs):
         ''' Create a SAS Byline from DataFrame metadata '''
@@ -166,13 +186,12 @@ class RendererMixin(object):
         return ''.join(output)
 
 
-class RenderableXADict(xadict, RendererMixin):
+class RenderableXADict(RendererMixin, xadict):
     ''' Renderable xadict object '''
     pass
 
 
-@six.python_2_unicode_compatible
-class CASResults(OrderedDict, RendererMixin):
+class CASResults(RendererMixin, OrderedDict):
     '''
     Ordered collection of results from a CAS action
 
@@ -403,10 +422,13 @@ class CASResults(OrderedDict, RendererMixin):
                         match = False 
                         break 
                 elif name:
-                    if attrs['ByVar%sValue' % i] != name[i-1] and \
-                            attrs['ByVar%sValueFormatted' % i] != name[i-1]:
-                        match = False 
-                        break 
+                    try:
+                        if attrs['ByVar%sValue' % i] != name[i-1] and \
+                                attrs['ByVar%sValueFormatted' % i] != name[i-1]:
+                            match = False 
+                            break 
+                    except IndexError:
+                        raise KeyError('No matching By group keys were found.')
                 i = i + 1
             if match:
                 out[re.sub(r'^ByGroup\d+\.', '', key)] = value
@@ -560,119 +582,6 @@ class CASResults(OrderedDict, RendererMixin):
 
         if not inplace:
             return out
-
-    def _repr_html_(self):
-        '''
-        Create an HTML representation for IPython
-
-        Returns
-        -------
-        string
-           HTML representation of CASResults object
-
-        '''
-        if pdcom.in_qtconsole():
-            return None
-
-        if not pd.get_option('display.notebook.repr_html'):
-            return None
-
-        output = []
-
-        i = 0
-        for key, item in six.iteritems(self):
-            if i:
-                sfmt = '<div class="cas-results-key"><hr/><b>&#167; %s</b></div>'
-            else:
-                sfmt = '<div class="cas-results-key"><b>&#167; %s</b></div>'
-            output.append(sfmt % key)
-            output.append('<div class="cas-results-body">')
-            if hasattr(item, '_repr_html_'):
-                res = item._repr_html_()
-                if res is None:
-                    output.append('<div>%s</div>' % res)
-                else:
-                    output.append(res)
-            else:
-                output.append('<div>%s</div>' % item)
-            output.append('</div>')
-            i += 1
-
-        output.append('<div class="cas-output-area"></div>')
-
-        if getattr(self, 'performance'):
-            stats = []
-            if getattr(self.performance, 'elapsed_time'):
-                stats.append('<span class="cas-elapsed">elapsed %.3gs</span>' %
-                             self.performance.elapsed_time)
-            if getattr(self.performance, 'cpu_user_time'):
-                stats.append('<span class="cas-user">user %.3gs</span>' %
-                             self.performance.cpu_user_time)
-            if getattr(self.performance, 'cpu_system_time'):
-                stats.append('<span class="cas-sys">sys %.3gs</span>' %
-                             self.performance.cpu_system_time)
-            if getattr(self.performance, 'memory'):
-                stats.append('<span class="cas-memory">mem %.3gMB</span>' %
-                             (self.performance.memory / 1048576.0))
-            if stats:
-                output.append('<p class="cas-results-performance"><small>%s</small></p>' %
-                              ' &#183; '.join(stats))
-
-        return '\n'.join(output)
-
-    def __str__(self):
-        try:
-            from IPython.lib.pretty import pretty
-            return pretty(self)
-        except ImportError:
-            out = []
-
-            for key, item in six.iteritems(self):
-                out.append('[%s]' % key)
-                out.append('')
-                out.append('%s' % item)
-                out.append('')
-                out.append('')
-
-            if getattr(self, 'performance'):
-                out.append(self._performance_str_())
-
-            return '\n'.join(out)
-
-    def _repr_pretty_(self, p, cycle):
-        from IPython.lib.pretty import pretty
-
-        if cycle:
-            p.text('...')
-            return
-
-        for key, item in six.iteritems(self):
-            p.text('[%s]' % key)
-            p.break_()
-            with p.indent(1):
-                for line in pretty(item).splitlines():
-                    p.break_()
-                    p.text(line)
-            p.break_()
-            p.break_()
-
-        if getattr(self, 'performance'):
-            p.text(self._performance_str_())
-
-    def _performance_str_(self):
-        if getattr(self, 'performance'):
-            stats = []
-            if getattr(self.performance, 'elapsed_time'):
-                stats.append('elapsed: %.3gs' % self.performance.elapsed_time)
-            if getattr(self.performance, 'cpu_user_time'):
-                stats.append('user: %.3gs' % self.performance.cpu_user_time)
-            if getattr(self.performance, 'cpu_system_time'):
-                stats.append('sys: %.3gs' % self.performance.cpu_system_time)
-            if getattr(self.performance, 'memory'):
-                stats.append('mem: %.3gMB' % (self.performance.memory / 1048576.0))
-            if stats:
-                return '+ ' + (', '.join(stats)).capitalize()
-        return ''
 
 #   def _my_repr_json_(self):
 #       '''

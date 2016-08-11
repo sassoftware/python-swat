@@ -205,7 +205,8 @@ class CAS(object):
             port = cf.get_option('cas.port')
 
         # Detect protocol
-        if hostname.startswith('http:') or hostname.startswith('https:'):
+        if hasattr(hostname, 'startswith') and (hostname.startswith('http:') or
+                                                hostname.startswith('https:')):
             protocol = hostname.split(':', 1)[0]
         else:
             protocol = self._detect_protocol(hostname, port, protocol=protocol)

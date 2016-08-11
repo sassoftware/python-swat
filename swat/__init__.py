@@ -67,10 +67,3 @@ from .exceptions import SWATError, SWATOptionError, SWATCASActionError
 
 # SAS Formatter
 from .formatter import SASFormatter
-
-__all__ = ['config', 'set_option', 'get_option', 'reset_option', 'describe_option',
-           'options', 'option_context', 'InitializeTK', 'CAS', 'vl', 'nil', 'getone',
-           'getnext', 'datamsghandlers',
-           'blob', 'initialize_tk', 'table', 'SASDataFrame', 'SWATError', 
-           'SWATOptionError', 'SWATCASActionError', 'SASFormatter', 'CASTable',
-           'concat', 'reshape_bygroups']

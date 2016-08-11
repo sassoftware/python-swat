@@ -26,11 +26,11 @@ from .formatter import SASFormatter
 
 def dtype_from_var(value):
     ''' Guess the CAS data type from the value '''
-    if isinstance(value, int64):
+    if isinstance(value, int64_types):
         return 'int64'
-    if isinstance(value, int32):
+    if isinstance(value, int32_types):
         return 'int32'
-    if isinstance(value, float64):
+    if isinstance(value, float64_types):
         return 'double'
     if isinstance(value, text_types):
         return 'varchar'
