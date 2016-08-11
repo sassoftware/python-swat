@@ -1175,10 +1175,13 @@ class CAS(object):
         if promote is not None:
             kwargs['promote'] = promote
 
-        resp = errorcheck(self._sw_connection.upload(a2n(filename),
-                                                     py2cas(self._soptions,
-                                                            self._sw_error, **kwargs)),
-                          self._sw_connection)
+        if isinstance(self._sw_connection, rest.REST_CASConnection):
+            resp = self._sw_connection.upload(a2n(filename), kwargs)
+        else:
+            resp = errorcheck(self._sw_connection.upload(a2n(filename),
+                                                         py2cas(self._soptions,
+                                                                self._sw_error, **kwargs)),
+                              self._sw_connection)
 
         # Remove temporary file as needed
         if delete:

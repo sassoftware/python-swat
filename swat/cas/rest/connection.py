@@ -15,6 +15,7 @@ import six
 import socket
 from six.moves import urllib
 from .message import REST_CASMessage
+from .response import REST_CASResponse
 from ..table import CASTable
 from ...config import options
 from ...exceptions import SWATError
@@ -331,9 +332,33 @@ class REST_CASConnection(object):
 
     def upload(self, file_name, params):
         ''' Upload a data file '''
-        raise NotImplementedError('The upload method is not supported ' +
-                                  'in the REST interface')
-        return
+        with open(file_name, 'rb') as datafile:
+            data = datafile.read()
+        self._req_sess.headers.update({
+            'Content-Type': 'application/octet-stream',
+            'Content-Length': len(data),
+            'JSON-Parameters': json.dumps(_normalize_params(params))
+        })
+        try:
+            res = self._req_sess.put(urllib.parse.urljoin(self._baseurl,
+                                                          'cas/sessions/%s/actions/upload' %
+                                                          self._session), data=data)
+            res = res.text
+        except Exception as exc:
+            raise SWATError(str(exc))
+        finally:
+            del self._req_sess.headers['JSON-Parameters']
+
+        try:
+            out = json.loads(a2u(res, 'utf-8'), strict=False)
+            if out.get('disposition', None) is None:
+                if out.get('error'):
+                    raise SWATError(self._results['error'])
+                else:
+                    raise SWATError('Unknown error')
+            return REST_CASResponse(out)
+        except ValueError as exc:
+            raise SWATError(str(exc))
 
     def stopAption(self):
         ''' Stop the current action '''
