@@ -3827,6 +3827,7 @@ class CASTable(ParamManager, ActionParamManager):
             by = [by]
         if not isinstance(ascending, items_types):
             ascending = [ascending] * len(by)
+        out._sortby = []
         for col, asc in zip(by, ascending):
             out._sortby.append(
                 dict(name=col, order=asc and 'ASCENDING' or 'DESCENDING',

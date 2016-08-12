@@ -394,16 +394,13 @@ Indexing, Iteration
 .. autosummary::
    :toctree: generated/
 
-   CASColumn.get
-   CASColumn.at
-   CASColumn.iat
    CASColumn.ix
    CASColumn.loc
    CASColumn.iloc
    CASColumn.__iter__
    CASColumn.iteritems
 
-For more information on ``.at``, ``.iat``, ``.ix``, ``.loc``, and
+For more information on ``.ix``, ``.loc``, and
 ``.iloc``,  see the :ref:`indexing documentation <indexing>`.
 
 Binary Operator Functions

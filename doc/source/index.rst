@@ -49,6 +49,7 @@ to the best of both worlds.
    table-vs-dataframe
    indexing
    bygroups
+   sorting
    api
    gotchas
    troubleshooting
