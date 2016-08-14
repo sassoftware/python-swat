@@ -14,3 +14,4 @@ SWAT and are released under SAS' additional functionality license
 (shown below).
 
 .. include:: ../../LICENSES/SAS-TK.txt
+   :start-line: 6

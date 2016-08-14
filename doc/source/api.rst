@@ -28,9 +28,9 @@ Session Management
    :toctree: generated/
 
    CAS.close
-   CAS.session_context
    CAS.copy
    CAS.fork
+   CAS.session_context
 
 Reading Data
 ~~~~~~~~~~~~
@@ -535,7 +535,7 @@ String Handling
 ~~~~~~~~~~~~~~~
 
 :attr:`CASColumn.str` can be used to access the values of a CAS table 
-column as stings and apply operations. They are accessed as
+column as strings and apply operations. They are accessed as
 ``CASColumn.str.<method/property>``.
 
 .. autosummary::
@@ -567,6 +567,45 @@ column as stings and apply operations. They are accessed as
    CharacterColumnMethods.istitle
    CharacterColumnMethods.isnumeric
    CharacterColumnMethods.isdecimal
+
+SAS Functions
+~~~~~~~~~~~~~
+
+:attr:`CASColumn.sas` can be used to apply SAS functions to
+values in a table column. They are accessed as
+``CASColumn.sas.<method>``.  Documentation for SAS functions
+can be seen at
+`support.sas.com <https://support.sas.com/documentation/cdl/en/lefunctionsref/67960/HTML/default/viewer.htm#p0w6napahk6x0an0z2dzozh2ouzm.htm>`_.
+
+.. autosummary::
+   :toctree: generated/
+
+   SASColumnMethods.abs
+   SASColumnMethods.airy
+   SASColumnMethods.beta
+   SASColumnMethods.cnonct
+   SASColumnMethods.constant
+   SASColumnMethods.dairy
+   SASColumnMethods.deviance
+   SASColumnMethods.digamma
+   SASColumnMethods.erf
+   SASColumnMethods.erfc
+   SASColumnMethods.exp
+   SASColumnMethods.fact
+   SASColumnMethods.fnonct
+   SASColumnMethods.gamma
+   SASColumnMethods.lgamma
+   SASColumnMethods.log
+   SASColumnMethods.log1px
+   SASColumnMethods.log10
+   SASColumnMethods.log2
+   SASColumnMethods.logbeta
+   SASColumnMethods.mod
+   SASColumnMethods.modz
+   SASColumnMethods.sign
+   SASColumnMethods.sqrt
+   SASColumnMethods.tnonct
+   SASColumnMethods.trigamma
 
 
 CASResponse

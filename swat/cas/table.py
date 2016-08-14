@@ -5708,10 +5708,6 @@ class SASColumnMethods(object):
         ''' Returns the logarithm of the beta function '''
         return self._compute('logbeta', 'logbeta({value}, {param})', param=param)
 
-    def log2(self):
-        ''' Returns the logarithm to the base 2 '''
-        return self._compute('log2', 'log2({value})')
-
     def mod(self, divisor):
         ''' Returns the remainder from the division with fuzzing '''
         return self._compute('mod', 'mod({value}, {divisor})', divisor=divisor)
