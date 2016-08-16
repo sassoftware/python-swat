@@ -150,51 +150,51 @@ class REST_CASResponse(object):
 
     def getElapsedTime(self):
         ''' Get the elapsed time '''
-        return self._disposition.get('elapsed_time')
+        return self._metrics.get('elapsed_time')
 
     def getDataMovementTime(self):
         ''' Get the amount of time for data movement '''
-        return self._disposition.get('data_movement_time')
+        return self._metrics.get('data_movement_time')
 
     def getDataMovementBytes(self):
         ''' Get the number of bytes of data movement '''
-        return self._disposition.get('data_movement_bytes')
+        return self._metrics.get('data_movement_bytes')
 
     def getCPUUserTime(self):
         ''' Get the amount of CPU user time '''
-        return self._disposition.get('cpu_user_time')
+        return self._metrics.get('cpu_user_time')
 
     def getCPUSystemTime(self):
         ''' Get the amount of CPU system time '''
-        return self._disposition.get('cpu_system_time')
+        return self._metrics.get('cpu_system_time')
 
     def getSystemTotalMemory(self):
         ''' Get the amount of system memory '''
-        return self._disposition.get('system_total_memory')
+        return self._metrics.get('system_total_memory')
 
     def getSystemNodes(self):
         ''' Get the number of system nodes '''
-        return self._disposition.get('system_nodes')
+        return self._metrics.get('system_nodes')
 
     def getSystemCores(self):
         ''' Get the number of system cores '''
-        return self._disposition.get('system_cores')
+        return self._metrics.get('system_cores')
 
     def getMemory(self):
         ''' Get the amount of memory used '''
-        return self._disposition.get('memory')
+        return self._metrics.get('memory')
 
     def getMemoryOS(self):
         ''' Get the amount of OS memory used '''
-        return self._disposition.get('memory_os')
+        return self._metrics.get('memory_os')
 
     def getMemorySystem(self):
         ''' Get the amount of system memory used '''
-        return self._disposition.get('memory_system')
+        return self._metrics.get('memory_system')
 
     def getMemoryQuota(self):
         ''' Get the memory quota '''
-        return self._disposition.get('memory_quota')
+        return self._metrics.get('memory_quota')
 
     def getLastErrorMessage(self):
         ''' Get the last generated error message '''
