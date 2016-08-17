@@ -4935,7 +4935,7 @@ class CASTable(ParamManager, ActionParamManager):
 
     def get_groupby_vars(self):
         ''' Return a list of By group variable names '''
-        groups = []
+        out = []
         if self.has_groupby_vars():
             groups = self.get_param('groupby')
             if not isinstance(groups, items_types):
@@ -4944,10 +4944,10 @@ class CASTable(ParamManager, ActionParamManager):
                 if not grp:
                     continue
                 if isinstance(grp, dict):
-                    groups.append(grp['name'])
+                    out.append(grp['name'])
                 else:
-                    groups.append(grp)
-        return groups
+                    out.append(grp)
+        return out
 
     def has_groupby_vars(self):
         ''' Does the table have By group variables configured? '''
