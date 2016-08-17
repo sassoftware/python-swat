@@ -889,15 +889,17 @@ class CAS(object):
         uses_inputs = False
         uses_fetchvars = False
         for param in parmlist:
+            ptype = param['parmType']         
             key = param['name']
             key = casekeys.get(key, key)
             key_lower = key.lower()
 
             # Check for inputs= / fetchvars= parameters
-            if key_lower == 'inputs':
-                uses_inputs = True
-            elif key_lower == 'fetchvars':
-                uses_fetchvars = True
+            if ptype == 'value_list':
+                if key_lower == 'inputs':
+                    uses_inputs = True
+                elif key_lower == 'fetchvars':
+                    uses_fetchvars = True
 
             # Get table object if it exists
             tbl = kwargs.get('__table__', None)

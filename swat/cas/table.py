@@ -500,7 +500,7 @@ class CASTable(ParamManager, ActionParamManager):
 
     Parameters
     ----------
-    name : string
+    name : string or CASTable
         specifies the name of the table to use.
     caslib : string, optional
         specifies the caslib containing the table that you want to use
@@ -508,27 +508,22 @@ class CASTable(ParamManager, ActionParamManager):
         value only if you need to access a table from a different caslib.
     where : string, optional
         specifies an expression for subsetting the input data.
-    groupby : list of strings, optional
+    groupby : list of dicts, optional
         specifies the names of the variables to use for grouping
         results.
-        Default: []
     groupbyfmts : list, optional
         specifies the format to apply to each group-by variable. To
         avoid specifying a format for a group-by variable, use "" (no
         format).
         Default: []
-    orderby : list of strings, optional
+    orderby : list of dicts, optional
         specifies the variables to use for ordering observations within
         partitions. This parameter applies to partitioned tables or it
         can be combined with groupBy variables when groupByMode is set to
         REDISTRIBUTE.
-        Default: []
-    vars : list of dicts, optional
-        specifies the variables to use in the action.
-    computedvars : list of strings, optional
+    computedvars : list of dicts, optional
         specifies the names of the computed variables to create. Specify
         an expression for each parameter in the computedvarsprogram parameter.
-        Default: []
     computedvarsprogram : string, optional
         specifies an expression for each variable that you included in
         the computedvars parameter.
@@ -536,9 +531,9 @@ class CASTable(ParamManager, ActionParamManager):
         specifies how the server creates groups.
         Default: NOSORT
         Values: NOSORT, REDISTRIBUTE
-    compondemand : boolean, optional
+    computedondemand : boolean, optional
         when set to True, the computed variables specified in the
-        computedvars parameter are created when the table is loaded instead
+        compVars parameter are created when the table is loaded instead
         of when the action begins.
         Default: False
     singlepass : boolean, optional
@@ -552,6 +547,8 @@ class CASTable(ParamManager, ActionParamManager):
         when set to True, table access is less aggressive with virtual
         memory use.
         Default: True
+    vars : list of dicts, optional
+        specifies the variables to use in the action.
     timestamp : string, optional
         specifies the timestamp to apply to the table. Specify the value
         in the form that is appropriate for your session locale.
@@ -569,7 +566,8 @@ class CASTable(ParamManager, ActionParamManager):
         specifies the number of copies of the table to make for fault
         tolerance. Larger values result in slower performance and use
         more memory, but provide high availability for data in the event
-        of a node failure.  **Used only on output table definitions.**
+        of a node failure.
+        **Used only on output table definitions.**
         Default: 1
         Note: Value range is 0 <= n < 2147483647
     threadblocksize : int64, optional
@@ -580,12 +578,12 @@ class CASTable(ParamManager, ActionParamManager):
         Note: Value range is 0 <= n < 9223372036854775807
     label : string, optional
         specifies the descriptive label to associate with the table.
-        **Used only on output table definitions.**
     maxmemsize : int64, optional
         specifies the maximum amount of physical memory, in bytes, to
         allocate for the table. After this threshold is reached, the
         server uses temporary files and operating system facilities for
-        memory management.  **Used only on output table definitions.**
+        memory management.
+        **Used only on output table definitions.**
         Default: 0
     promote : boolean, optional
         when set to True, the output table is added with a global scope.
@@ -593,6 +591,11 @@ class CASTable(ParamManager, ActionParamManager):
         access controls. The target caslib must also have a global scope.
         **Used only on output table definitions.**
         Default: False
+    ondemand : boolean, optional
+        when set to True, table access is less aggressive with virtual
+        memory use.
+        **Used only on output table definitions.**
+        Default: True
 
     Examples
     --------
