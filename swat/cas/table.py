@@ -5831,7 +5831,7 @@ class DatetimeColumnMethods(object):
     @property
     def dayofweek(self):
         ''' The day of the week (Monday=0, Sunday=6) '''
-        return self._compute('weekday', 'weekday(%s) - 2' % self._get_date())
+        return self._compute('weekday', 'mod(weekday(%s) + 5, 7)' % self._get_date())
 
     @property
     def weekday(self):
