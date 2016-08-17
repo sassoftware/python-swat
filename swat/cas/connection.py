@@ -943,12 +943,12 @@ class CAS(object):
             elif tbl is not None and key_lower == 'table' and \
                     action.lower() in ['columninfo', 'table.columninfo']:
                 inputs = tbl.get_inputs_param()
-                fetch = tbl.get_fetch_params()
                 kwargs[key] = tbl.to_table_params()
-                if inputs:
-                    if 'vars' not in kwargs:
-                         kwargs[key]['vars'] = inputs
-                inputs = None 
+                if not uses_inputs:
+                    if inputs:
+                        if 'vars' not in kwargs:
+                             kwargs[key]['vars'] = inputs
+                    inputs = None 
 
         # Apply input variables
         if uses_inputs and inputs and 'inputs' not in kwargs:

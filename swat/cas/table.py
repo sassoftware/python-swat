@@ -1504,7 +1504,7 @@ class CASTable(ParamManager, ActionParamManager):
 
     def get_fetch_params(self):
         ''' Return options to be used during the table.fetch action ''' 
-        return dict(sortby=self._sortby)
+        return dict(sortby=self._sortby, sastypes=False)
 
     def to_table_params(self):
         '''
@@ -1762,8 +1762,7 @@ class CASTable(ParamManager, ActionParamManager):
             n = get_option('cas.dataset.max_rows_fetched')
         tbl = self.copy()
         tbl._intersect_columns(columns, inplace=True)
-        return pd.concat(list(tbl._retrieve('table.fetch', to=n, index=False,
-                                            sastypes=False).values())).as_matrix()
+        return tbl._fetch(to=n).as_matrix()
 
     @getattr_safe_property
     def dtypes(self):
@@ -2104,9 +2103,7 @@ class CASTable(ParamManager, ActionParamManager):
                 if stop < 0:
                     stop = numrows + stop
 
-            out.append(pd.concat(list(group._retrieve('table.fetch', sastypes=False,
-                                                      from_=start + 1,
-                                                      to=stop + 1).values())))
+            out.append(group._fetch(from_=start + 1, to=stop + 1))
 
         out = pd.concat(out)
 
@@ -2264,8 +2261,7 @@ class CASTable(ParamManager, ActionParamManager):
 
         i = 0
         while True:
-            out = pd.concat(list(self._retrieve('table.fetch', from_=start, to=stop,
-                                                sastypes=False, index=False).values()))
+            out = self._fetch(from_=start, to=stop)
 
             if not len(out):
                 break
@@ -3950,15 +3946,42 @@ class CASTable(ParamManager, ActionParamManager):
         :class:`SASDataFrame`
 
         '''
+        from .. import dataframe as df
+
         kwargs = kwargs.copy()
+
+        for key, value in six.iteritems(self.get_fetch_params()):
+            if key in kwargs:
+                continue
+            if key == 'sortby' and ('orderby' in kwargs or 'orderBy' in kwargs):
+                continue
+            kwargs[key] = value
+
+        from_ = 0
+        if 'from' in kwargs:
+            from_ = kwargs['from']
+        elif 'from_' in kwargs:
+            from_ = kwargs['from_']
+
         if 'to' not in kwargs:
-            kwargs['to'] = get_option('cas.dataset.max_rows_fetched')
-        out = pd.concat(list(self._retrieve('table.fetch', index=False,
-                                            sastypes=False, **kwargs).values()))
+            kwargs['to'] = from_ + get_option('cas.dataset.max_rows_fetched')
+
+        if 'index' not in kwargs:
+            kwargs['index'] = False
+
+        out = df.concat(list(self._retrieve('table.fetch', **kwargs).values()))
+
         groups = self.get_groupby_vars()
         if grouped and groups:
             return out.groupby(groups)
+
         return out
+
+    def _fetchall(self, grouped=False, **kwargs):
+        ''' Fetch all rows '''
+        kwargs = kwargs.copy()
+        kwargs['to'] = MAX_INT64_INDEX
+        return self._fetch(grouped=grouped, **kwargs)
 
     def boxplot(self, *args, **kwargs):
         '''
@@ -4254,10 +4277,7 @@ class CASTable(ParamManager, ActionParamManager):
         :class:`SASDataFrame`
         
         '''
-        from ..dataframe import concat
-        return concat(list(self._retrieve('table.fetch', sastypes=False,
-                                          to=MAX_INT64_INDEX,
-                                          index=False, **kwargs).values()))
+        return self._fetchall(**kwargs)
 
     def _to_any(self, method, *args, **kwargs):
         '''
@@ -4275,9 +4295,7 @@ class CASTable(ParamManager, ActionParamManager):
         '''
         from ..dataframe import concat
         standard_dataframe = kwargs.pop('standard_dataframe', False)
-        dframe = concat(list(self._retrieve('table.fetch', sastypes=False,
-                                            to=get_option('cas.dataset.max_rows_fetched'),
-                                            index=False).values()))
+        dframe = self._fetch()
         if standard_dataframe:
             dframe = pd.DataFrame(dframe)
         return getattr(dframe, 'to_' + method)(*args, **kwargs)
@@ -4922,7 +4940,13 @@ class CASTable(ParamManager, ActionParamManager):
             groups = self.get_param('groupby')
             if not isinstance(groups, items_types):
                 groups = [groups]
-            groups = [x for x in groups if x]
+            for grp in groups:
+                if not grp:
+                    continue
+                if isinstance(grp, dict):
+                    groups.append(grp['name'])
+                else:
+                    groups.append(grp)
         return groups
 
     def has_groupby_vars(self):
@@ -7044,9 +7068,7 @@ class CASColumn(CASTable):
 
     def to_series(self, *args, **kwargs):
         ''' Retrieve all elements into a Series '''
-        return pd.concat(list(self._retrieve('table.fetch', sastypes=False,
-                                            to=MAX_INT64_INDEX,
-                                            index=False).values()))[self.name]
+        return self._fetchall()[self.name]
 
     def _to_any(self, method, *args, **kwargs):
         ''' Generic converter to various forms '''
@@ -7060,10 +7082,7 @@ class CASColumn(CASTable):
                 sortby = [dict(name=self.name, order=sort)]
             else:
                 sortby = sort
-        out = pd.concat(list(self._retrieve('table.fetch', sastypes=False,
-                                            sortby=sortby,
-                                            to=get_option('cas.dataset.max_rows_fetched'),
-                                            index=False).values()))[self.name]
+        out = self._fetch(sortby=sortby)[self.name]
         return getattr(out, 'to_' + method)(*args, **kwargs)
 
     def to_frame(self, *args, **kwargs):
