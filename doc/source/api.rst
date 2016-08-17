@@ -586,7 +586,6 @@ can be seen at
    SASColumnMethods.cnonct
    SASColumnMethods.constant
    SASColumnMethods.dairy
-   SASColumnMethods.deviance
    SASColumnMethods.digamma
    SASColumnMethods.erf
    SASColumnMethods.erfc

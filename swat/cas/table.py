@@ -5601,140 +5601,433 @@ class SASColumnMethods(object):
         return self._column._compute(*args, **kwargs)
 
     def abs(self):
-        ''' Returns the absolute value '''
+        '''
+        Computes the absolute value
+
+        Returns
+        -------
+        :class:`CASColumn`
+
+        '''
         return self._compute('abs', 'abs({value})')
 
     def airy(self):
-        ''' Returns the value of the Airy function '''
+        '''
+        Computes the value of the Airy function
+
+        Returns
+        -------
+        :class:`CASColumn`
+
+        '''
         return self._compute('airy', 'airy({value})')
 
-    def beta(self, other):
-        ''' Returns the value of the beta function '''
-        return self._compute('beta', 'beta({value}, {other})', other=other)
+    def beta(self, param):
+        '''
+        Computes the value of the beta function
+
+        Parameters
+        ----------
+        param : int
+            Second shape parameter.
+
+        Returns
+        ------- 
+        :class:`CASColumn`
+
+        '''
+        return self._compute('beta', 'beta({value}, {param})', param=param)
 
     def cnonct(self, df, prob):
-        ''' Returns the noncentrality parameter from a chi-square distribution '''
+        '''
+        Computes the noncentrality parameter from a chi-square distribution
+
+        Parameters
+        ----------
+        df : int
+            Degrees of freedom.
+        prob : float
+            Probability.
+
+        Returns
+        ------- 
+        :class:`CASColumn`
+
+        '''
         return self._compute('cnonct', 'cnonct({value}, {df}, {prob})',
                              df=df, prob=prob)
 
 #   def coalesce(self, *args):
-#       ''' Returns the first non-missing value from a list of numeric arguments '''
+#       '''
+#       Returns the first non-missing value from a list of numeric arguments
+
+#       Returns
+#       ------- 
+#       :class:`CASColumn`
+
+#       '''
 #       return self._compute('coalesce', 'coalesce({value}, {other})', other=other)
 
     def constant(self, name, parameter=None):
-        ''' Computes machine and mathematical constants '''
+        '''
+        Computes machine and mathematical constants
+
+        Parameters
+        ----------
+        name : string
+            Name of the constant value to return.  The possible names are:
+                * e : the natural base
+                * euler : Euler constant
+                * pi : Pi
+                * exactint : exact integer
+                * big : largest double-precision number
+                * logbig : log with respect to to base of `big`
+                * sqrtbig : square root of `big`
+                * small : smallest double-precision number
+                * logsmall : log with respect to base of `small`
+                * sqrtsmall : square root of `small`
+                * maceps : machine precision constant
+                * logmaceps : log with respect to base of `maceps`
+                * sqrtmaceps : square root of `maceps`
+        parameter : any
+            Optional parameter for certain constant values.
+
+        Returns
+        ------- 
+        :class:`CASColumn`
+
+        '''
         if parameter is None:
             return self._compute('constant', 'constant({name})', name=name)
         return self._compute('constant', 'constant({name}, {parameter})',
                              name=name, parameter=parameter)
 
     def dairy(self):
-        ''' Returns the derivative of the AIRY function '''
+        '''
+        Computes the derivative of the AIRY function
+
+        Returns
+        ------- 
+        :class:`CASColumn`
+
+        '''
         return self._compute('dairy', 'dairy({value})')
 
-    def deviance(self, distribution, parameters, epsilon):
-        ''' Returns the deviance based on a probability distribution '''
-        return self._compute('deviance',
-                             'deviance({distribution}, {value}, {parameters}, {epsilon})', 
-                             distribution=distribution, parameters=parameters, epsilon=epsilon)
+#   def deviance(self, distribution, *parameters):
+#       '''
+#       Computes the deviance based on a probability distribution
+
+#       Parameters
+#       ----------
+#       distribution : string
+#           Name of the distribution: bernoulli, binomial, gamma, igauss, wald,
+#           normal, gaussian, or poisson.
+
+#       Returns
+#       ------- 
+#       :class:`CASColumn`
+
+#       '''
+#       return self._compute('deviance',
+#                            'deviance({distribution}, {value}, {parameters})', 
+#                            distribution=distribution, parameters=parameters)
         
     def digamma(self):
-        ''' Returns the value of the digamma function '''
+        '''
+        Computes the value of the digamma function
+
+        Returns
+        ------- 
+        :class:`CASColumn`
+
+        '''
         return self._compute('digamma', 'digamma({value})')
 
     def erf(self):
-        ''' Returns the value of the (normal) error function '''
+        '''
+        Computes the value of the (normal) error function
+
+        Returns
+        ------- 
+        :class:`CASColumn`
+
+        '''
         return self._compute('erf', 'erf({value})')
 
     def erfc(self):
-        ''' Returns the value of the complementary (normal) error function '''
+        '''
+        Computes the value of the complementary (normal) error function
+
+        Returns
+        ------- 
+        :class:`CASColumn`
+
+        '''
         return self._compute('erfc', 'erfc({value})')
 
     def exp(self):
-        ''' Returns the value of the exponential function '''
+        '''
+        Computes the value of the exponential function
+
+        Returns
+        ------- 
+        :class:`CASColumn`
+
+        '''
         return self._compute('exp', 'exp({value})')
 
     def fact(self):
-        ''' Computes a factorial '''
+        '''
+        Computes a factorial
+
+        Returns
+        ------- 
+        :class:`CASColumn`
+
+        '''
         return self._compute('fact', 'fact({value})')
 
     def fnonct(self, ndf, ddf, prob):
-        ''' Returns the value of the noncentrality parameter of an F distribution '''
+        '''
+        Computes the value of the noncentrality parameter of an F distribution
+
+        Parameters
+        ----------
+        ndf : int
+            Numerator degree of freedom parameter.
+        ddf : int
+            Denominator degree of freedom parameter.
+        prob : float
+            Probability. 
+
+        Returns
+        ------- 
+        :class:`CASColumn`
+
+        '''
         return self._compute('fnonct', 'fnonct({value}, {ndf}, {ddf}, {prob})',
                              ndf=ndf, ddf=ddf, prob=prob)
 
     def gamma(self):
-        ''' Returns the value of the gamma function '''
+        '''
+        Computes the value of the gamma function
+
+        Returns
+        ------- 
+        :class:`CASColumn`
+
+        '''
         return self._compute('gamma', 'gamma({value})')
 
 #   def gcd(self, *args):
-#       ''' Returns the greatest common divisor for one or more integers '''
+#       '''
+#       Computes the greatest common divisor for one or more integers
+
+#       Returns
+#       ------- 
+#       :class:`CASColumn`
+
+#       '''
 #       return self._compute('gcd', 'gcd({value})')
 
 #   def ibessel(self, nu, kode):
-#       ''' Returns the value of the modified Bessel function '''
+#       '''
+#       Computes the value of the modified Bessel function
+
+#       Returns
+#       ------- 
+#       :class:`CASColumn`
+
+#       '''
 #       return self._compute('ibessel', 'ibessel({nu}, {value}, {kode})',
 #                            nu=nu, kode=kode)
 
 #   def jbessel(self, nu):
-#       ''' Returns the value of the Bessel function '''
+#       '''
+#       Computes the value of the Bessel function
+
+#       Returns
+#       ------- 
+#       :class:`CASColumn`
+
+#       '''
 #       return self._compute('jbessel', 'jbessel({nu}, {value}', nu=nu)
 
 #   def lcm(self, *args):
-#       ''' Returns the least common multiple '''
+#       '''
+#       Computes the least common multiple
+
+#       Returns
+#       ------- 
+#       :class:`CASColumn`
+
+#       '''
 #       return self._compute('lcm', 'lcm({value})')
 
     def lgamma(self):
-        ''' Returns the natural logarithm of the Gamma function '''
+        '''
+        Computes the natural logarithm of the Gamma function
+
+        Returns
+        ------- 
+        :class:`CASColumn`
+
+        '''
         return self._compute('lgamma', 'lgamma({value})')
 
     def log(self):
-        ''' Returns the natural (base e) logarithm '''
+        '''
+        Computes the natural (base e) logarithm
+
+        Returns
+        ------- 
+        :class:`CASColumn`
+
+        '''
         return self._compute('log', 'log({value})')
 
     def log1px(self):
-        ''' Returns the log of 1 plus the argument '''
+        '''
+        Computes the log of 1 plus the argument
+
+        Returns
+        ------- 
+        :class:`CASColumn`
+
+        '''
         return self._compute('log1px', 'log1px({value})')
 
     def log10(self):
-        ''' Returns the logarithm to the base 10 '''
+        '''
+        Computes the logarithm to the base 10
+
+        Returns
+        ------- 
+        :class:`CASColumn`
+
+        '''
         return self._compute('log10', 'log10({value})')
 
     def log2(self):
-        ''' Returns the logarithm to the base 2 '''
+        '''
+        Computes the logarithm to the base 2
+
+        Returns
+        ------- 
+        :class:`CASColumn`
+
+        '''
         return self._compute('log2', 'log2({value})')
 
     def logbeta(self, param):
-        ''' Returns the logarithm of the beta function '''
+        '''
+        Computes the logarithm of the beta function
+
+        Parameters
+        ----------
+        param : int
+            Second shape parameter.
+
+        Returns
+        ------- 
+        :class:`CASColumn`
+
+        '''
         return self._compute('logbeta', 'logbeta({value}, {param})', param=param)
 
     def mod(self, divisor):
-        ''' Returns the remainder from the division with fuzzing '''
+        '''
+        Computes the remainder from the division with fuzzing
+
+        Parameters
+        ----------
+        divisor : int
+           Divisor.
+
+        Returns
+        ------- 
+        :class:`CASColumn`
+
+        '''
         return self._compute('mod', 'mod({value}, {divisor})', divisor=divisor)
 
     def modz(self, divisor):
-        ''' Returns the remainder from the division without fuzzing '''
+        '''
+        Computes the remainder from the division without fuzzing
+
+        Parameters
+        ----------
+        divisor : int
+           Divisor.
+
+        Returns
+        ------- 
+        :class:`CASColumn`
+
+        '''
         return self._compute('modz', 'modz({value}, {divisor})', divisor=divisor)
 
 #   def msplint(self, n, *args):
-#       ''' Returns the ordinate of a monotonicity-preserving interpolating spline '''
+#       '''
+#       Returns the ordinate of a monotonicity-preserving interpolating spline
+
+#       Returns
+#       ------- 
+#       :class:`CASColumn`
+
+#       '''
 #       return self._compute('mpsplint', 'mpsplint({value}, {n})', n=n)
 
     def sign(self):
-        ''' Returns the sign of a value '''
+        '''
+        Returns the sign of a value
+
+        Returns
+        ------- 
+        :class:`CASColumn`
+
+        '''
         return self._compute('sign', 'sign({value})')
 
     def sqrt(self):
-        ''' Returns the square root of a value '''
+        '''
+        Computes the square root of a value
+
+        Returns
+        ------- 
+        :class:`CASColumn`
+
+        '''
         return self._compute('sqrt', 'sqrt({value})')
 
     def tnonct(self, df, prob):
-        ''' Returns the value of the noncentrality parameter from the Student's t distribution '''
+        '''
+        Computes the value of the noncentrality parameter from the Student's t distribution
+
+        Parameters
+        ----------
+        df : int
+            Degrees of freedom.
+        prob : float
+            Probability.
+
+        Returns
+        ------- 
+        :class:`CASColumn`
+
+        '''
         return self._compute('tnonct', 'tnonct({value}, {df}, {prob})',
                              df=df, prob=prob)
 
     def trigamma(self):
-        ''' Returns the value of the trigamma function '''
+        '''
+        Returns the value of the trigamma function
+
+        Returns
+        ------- 
+        :class:`CASColumn`
+
+        '''
         return self._compute('trigamma', 'trigamma({value})')
 
 
