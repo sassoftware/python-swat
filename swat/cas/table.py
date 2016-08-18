@@ -2346,7 +2346,7 @@ class CASTable(ParamManager, ActionParamManager):
         if index < 0:
             index = index + numrows
         out = self._fetch(from_=index + 1, to=index + 1)
-        return out.get_value(0, col, **kwargs)
+        return out.get_value(out.index.values[0], col, **kwargs)
 
     def lookup(self, row_labels, col_labels):
         ''' Retrieve values indicated by row_labels, col_labels positions '''
@@ -3970,9 +3970,14 @@ class CASTable(ParamManager, ActionParamManager):
             kwargs['to'] = from_ + get_option('cas.dataset.max_rows_fetched')
 
         if 'index' not in kwargs:
-            kwargs['index'] = False
+            kwargs['index'] = True
 
         out = df.concat(list(self._retrieve('table.fetch', **kwargs).values()))
+
+        if len(out.columns) and out.columns[0] == '_Index_':
+            out['_Index_'] = out['_Index_'] - 1
+            out = out.set_index('_Index_')
+            out.index.name = None
 
         groups = self.get_groupby_vars()
         if grouped and groups:
@@ -6321,8 +6326,8 @@ class CASColumn(CASTable):
         '''
         out = self._fetch(from_=key + 1, to=key + 1)
         try:
-            return out.get_value(0, self._columns[0])
-        except KeyError:
+            return out.get_value(out.index.values[0], self._columns[0])
+        except (KeyError, IndexError):
             pass
         return default
 
