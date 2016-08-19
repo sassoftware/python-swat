@@ -48,7 +48,7 @@ Handling the Output
 All CAS actions return a :class:`CASResults` object.  This is simply an ordered
 Python dictionary with a few extra methods and attributes added.  In the output 
 above, you'll see the keys of the dictionary surrounded in square brackets.  They
-are `About`, `server`, and `nodestatus`.  Since this is a dictionary, you can just
+are 'About', 'server', and 'nodestatus'.  Since this is a dictionary, you can just
 use the standard way of accessing keys.
 
 .. ipython:: python
@@ -65,8 +65,8 @@ want to use the syntax above for actual programs.
 
     out.nodestatus
 
-The types of the result keys can vary as well.  In this case, the `About` key holds
-a dictionary.  The `server` and `nodestatus` keys hold :class:`SASDataFrame` objects
+The types of the result keys can vary as well.  In this case, the 'About' key holds
+a dictionary.  The 'server' and 'nodestatus' keys hold :class:`SASDataFrame` objects
 (a subclass of :class:`pandas.DataFrame`).
 
 .. ipython:: python
@@ -87,8 +87,8 @@ Simple Statistics
 
 We can't have a getting started section without doing some sort of statistical
 analysis.  First, we need to see what CAS action sets are loaded.  We can get a 
-listing of all of the action sets and actions using the `help` CAS action.  If you
-run `help` without any arguments, it will display all of the loaded actions and
+listing of all of the action sets and actions using the ``help`` CAS action.  If you
+run ``help`` without any arguments, it will display all of the loaded actions and
 their descriptions.  Rather than printing that large listing, we'll specifically
 ask for the `simple` action set since we already know that's the one we want.
 
@@ -96,7 +96,7 @@ ask for the `simple` action set since we already know that's the one we want.
 
    conn.help(actionset='simple');
 
-Let's start with the `summary` action.  Of course, we first need to load some data.
+Let's start with the ``summary`` action.  Of course, we first need to load some data.
 The simplest way to load data is to do it from the client side.  Note that while this
 is the simplest way, it's probably not the best way for large data sets.  Those should
 be loaded from the server side if possible.

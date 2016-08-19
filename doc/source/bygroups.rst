@@ -8,10 +8,10 @@ Handling By Groups
 If By groups are specified when running a CAS action, the result are returned
 with the following behaviors.
 
-1. A result key named `ByGroupInfo` is returned with all of the By group 
+1. A result key named 'ByGroupInfo' is returned with all of the By group 
    variable values.
 2. Each By group table is returned in a separate result key with a prefix of
-   "`ByGroup#.`".
+   'ByGroup#.'.
 
 These behaviors can help when you have a large number of By groups and you
 want to process them as they arrive at the client rather than trying to hold

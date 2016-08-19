@@ -41,7 +41,7 @@ before it is uploaded to CAS.
 
 .. ipython:: python
 
-   conn = swat.CAS()
+   conn = swat.CAS(host, port, username, password)
    cars = conn.read_csv('https://raw.githubusercontent.com/'
                         'sassoftware/sas-viya-programming/master/data/cars.csv')
    cars.head()

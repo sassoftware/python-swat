@@ -80,8 +80,8 @@ from the CAS server, or the individual result keys in the responses.  You
 still use the CAS action methods on the :class:`CAS` connection object, but this
 time you add either a ``responsefunc=`` or ``resultfunc=`` function argument.
 
-The result callback function takes five arguments: `key`, `value`, `response`,
-`connection`, and ``userdata``.  Those are the result key and value, the response the result
+The result callback function takes five arguments: ``key``, ``value``, ``response``,
+``connection``, and ``userdata``.  Those are the result key and value, the response the result
 belongs to, the connection that the result belongs to, and an arbitrary user data
 structure.
 
