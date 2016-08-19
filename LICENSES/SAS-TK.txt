@@ -18,9 +18,9 @@ THE CODE.
 You are downloading software code ("Code") which will become part of
 a software product ("Software") that is currently licensed from SAS
 Institute Inc. or one of its subsidiaries ("SAS") under a separate
-software license agreement (“Software License Agreement”). The legal
+software license agreement ("Software License Agreement"). The legal
 entity that entered into the Software License Agreement with SAS is
-defined as “Customer.” The Code is designed either to correct an error
+defined as "Customer." The Code is designed either to correct an error
 in the Software or to add functionality to the Software. The Code is
 governed by the Software License Agreement and this Agreement. If you
 are not an authorized user under the Software License Agreement, you may
@@ -30,10 +30,10 @@ In addition to the terms of the Software License Agreement, the
 following terms apply to the Code:
 
 EXPORT/IMPORT RESTRICTIONS. SAS hereby notifies Customer that the Code
-is of United States of America (“United States”) origin and United
+is of United States of America ("United States") origin and United
 States export laws and regulations apply to the Code. Both SAS and
 Customer agree to comply with these and other applicable export and
-import laws and regulations. Customer’s compliance obligations include
+import laws and regulations. Customer's compliance obligations include
 ensuring (a) that there is no access, download, export, re-export,
 import, or distribution of the Code or any underlying information,
 technology or data except in full compliance with all laws and
@@ -41,7 +41,7 @@ regulations of the United States and in full compliance with any other
 applicable laws and regulations; and (b) compliance with restrictions of
 countries other than the United States related to exports and imports.
 United States export classification information for Software can be
-found at SAS’ Export Compliance website located at
+found at SAS' Export Compliance website located at
 http://support.sas.com/adminservices/export.html. By accepting the
 Agreement and using and/or, if authorized, downloading the Code,
 Customer agrees to the foregoing and represents and warrants that
@@ -69,13 +69,13 @@ Upon termination of the license to use the Software, Customer agrees
 to delete and destroy the Code and certify to SAS that the Code has
 been deleted and destroyed.
 
-SAS’ LICENSORS DISCLAIM ALL WARRANTIES, EXPRESS OR IMPLIED, INCLUDING
+SAS' LICENSORS DISCLAIM ALL WARRANTIES, EXPRESS OR IMPLIED, INCLUDING
 WITHOUT LIMITATION ANY IMPLIED WARRANTIES OF MERCHANTABILITY OR FITNESS
 FOR A PARTICULAR PURPOSE, OR ARISING AS A RESULT OF CUSTOM OR USAGE IN
-THE TRADE OR BY COURSE OF DEALING. SAS’ LICENSORS PROVIDE THEIR
-SOFTWARE “AS IS.”
+THE TRADE OR BY COURSE OF DEALING. SAS' LICENSORS PROVIDE THEIR
+SOFTWARE "AS IS."
 
-SAS’ LICENSORS SHALL NOT BE LIABLE TO YOU OR CUSTOMER FOR ANY GENERAL,
+SAS' LICENSORS SHALL NOT BE LIABLE TO YOU OR CUSTOMER FOR ANY GENERAL,
 SPECIAL, DIRECT, INDIRECT, CONSEQUENTIAL, INCIDENTAL OR OTHER DAMAGES
 ARISING OUT OF OR RELATED TO THE SOFTWARE OR CODE.
 
