@@ -447,7 +447,7 @@ class CASResults(RendererMixin, OrderedDict):
         name : string
             The name of the tables to retrieve.  This name does not include
             the "ByGroup#." prefix if By groups are involved.  It also does
-            not include "ByGroupSet#.' if By group sets are involved.
+            not include "ByGroupSet#." if By group sets are involved.
         set : int, optional
             The index of the By group set (if the action supports multiple
             sets of By groups).
@@ -537,7 +537,7 @@ class CASResults(RendererMixin, OrderedDict):
         -------
         :class:`CASResults`
             If inplace == False
-        None
+        ``None``
             If inplace == True
 
         '''

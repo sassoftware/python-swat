@@ -41,7 +41,7 @@ Server-Side Files
 .. autosummary::
    :toctree: generated/
 
-   CAS.read_cas_path
+   CAS.load_path
 
 Client-Side Files
 .................

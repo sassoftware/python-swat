@@ -84,6 +84,6 @@ perform on the Code or the Software.
 
 LGL2100/04AUG16 SAS and all other SAS Institute Inc. product or
 service names are registered trademarks or trademarks of SAS Institute
-Inc. in the USA and other countries. ® indicates USA registration.
+Inc. in the USA and other countries. (R) indicates USA registration.
 Other brand and product names are trademarks of their respective
 companies.

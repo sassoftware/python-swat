@@ -117,10 +117,10 @@ class CAS(object):
     ----------
     hostname : string or list-of-strings, optional
         Host to connect to.  If not specified, the value will come
-        from the `cas.hostname` option or ``CASHOST`` environment variable.
+        from the ``cas.hostname`` option or ``CASHOST`` environment variable.
     port : int or long, optional
         Port number.  If not specified, the value will come from the
-        `cas.port` option or ``CASPORT`` environment variable.
+        ``cas.port`` option or ``CASPORT`` environment variable.
     username : string, optional
         Name of user on CAS host.
     password : string, optional
@@ -140,7 +140,7 @@ class CAS(object):
         The protocol to use for communicating with the server.
         This protocol must match the protocol spoken by the specified
         server port.  If not specified, the value will come from the
-        `cas.protocol` option or ``CASPROTOCOL`` environment variable.
+        ``cas.protocol`` option or ``CASPROTOCOL`` environment variable.
     **kwargs : any, optional
         Arbitrary keyword arguments used for internal purposes only.
 
@@ -755,8 +755,8 @@ class CAS(object):
         '''
         Create a copy of the connection
 
-        The copy of the connection will use the same parameters as this
-        object, but it will create a new session.
+        The copy of the connection will use the same parameters as ``self``,
+        but it will create a new session.
 
         Examples
         --------
@@ -783,11 +783,13 @@ class CAS(object):
         '''
         Create multiple copies of a connection
 
-        The copies of the connection will use the same parameters as this
-        object, but each will create a new session.
+        The copies of the connection will use the same parameters as ``self``,
+        but each will create a new session.
 
-        .. note:: The first element in the returned list is the same object that
-                  the method was called on.  You only get `num`-1 copies.
+        Notes
+        -----
+        The first element in the returned list is the same object that
+        the method was called on.  You only get `num`-1 copies.
 
         Parameters
         ----------
@@ -1352,7 +1354,7 @@ class CAS(object):
         <swat.CASPerformance object at 0x33b1c50>
 
         Performance values are loaded lazily, but you can get a dictionary of
-        all of them using the `to_dict` method.
+        all of them using the ``to_dict`` method.
 
         >>> print(out.performance.to_dict())
         {'system_cores': 1152L, 'memory_quota': 303759360L, 'cpu_user_time': 0.014995,
@@ -1360,13 +1362,13 @@ class CAS(object):
          'memory_system': 432093312L, 'cpu_system_time': 0.018999, 'memory': 150688L,
          'memory_os': 294322176L, 'system_total_memory': 4868538236928L}
 
-        Rather than having the `retrieve` method compile all of the results into one
+        Rather than having the ``retrieve`` method compile all of the results into one
         object, you can control how the responses and results from the server are
-        handled in your own functions using the `responsefunc` or `resultfunc` keyword
+        handled in your own functions using the ``responsefunc`` or ``resultfunc`` keyword
         arguments.
 
-        The `responsefunc` argument allows you to specify a function that is called for
-        each response from the server after the action is called.  The `resultfunc`
+        The ``responsefunc`` argument allows you to specify a function that is called for
+        each response from the server after the action is called.  The ``resultfunc``
         is called for each result in a response.  These functions can not be used at the
         same time though.  In the case where both are specified, only the resultfunc
         will be used.  Below is an example of using a responsefunc function.
@@ -1388,7 +1390,7 @@ class CAS(object):
         .
         .
 
-        The same result can be gotten using the `resultfunc` option as well.
+        The same result can be gotten using the ``resultfunc`` option as well.
 
         >>> def myfunc(key, value, response, connection, userdata):
         ...    if userdata is None:
@@ -1453,7 +1455,7 @@ class CAS(object):
 
     def _get_results(self, riter, responsefunc=None, resultfunc=None):
         '''
-        Walk through responses in `riter` and compile results
+        Walk through responses in ``riter`` and compile results
 
         Parameters
         ----------
@@ -1858,34 +1860,34 @@ class CAS(object):
             out.pop('promote')
         return out, kwargs
 
-    def read_cas_path(self, path=None, readahead=None, importoptions=None,
-                      resident=None, promote=None, ondemand=None, attrtable=None,
-                      caslib=None, options=None, casout=None, singlepass=None,
-                      where=None, varlist=None, groupby=None, groupbyfmts=None,
-                      groupbymode=None, orderby=None, nosource=None, returnwhereinfo=None,
-                      **kwargs):
+    def load_path(self, path=None, readahead=None, importoptions=None,
+                  resident=None, promote=None, ondemand=None, attrtable=None,
+                  caslib=None, options=None, casout=None, singlepass=None,
+                  where=None, varlist=None, groupby=None, groupbyfmts=None,
+                  groupbymode=None, orderby=None, nosource=None, returnwhereinfo=None,
+                  **kwargs):
         '''
-        Read a path from a CASLib
+        Load a path from a CASLib
 
-        The parameters for this are the same as for the `builtins.loadtable`
+        The parameters for this are the same as for the ``builtins.loadtable``
         CAS action.  This method is simply a convenience method that loads a
         table and returns a :class:`CASTable` in one step.
 
         Notes
         -----
         The path specified must exist on the **server side**.  For loading 
-        data from the client side, see the `read_*` and :meth:`upload` methods.
+        data from the client side, see the ``read_*`` and :meth:`upload` methods.
 
         Examples
         --------
         >>> conn = swat.CAS()
-        >>> tbl = conn.read_cas_path('data/iris.csv')
+        >>> tbl = conn.load_path('data/iris.csv')
         >>> print(tbl.head())
 
         See Also
         --------
         :meth:`read_csv`
-        :meth:`upload`
+        :meth:`upload_file`
 
         Returns
         -------
@@ -1906,6 +1908,28 @@ class CAS(object):
             return out['casTable']
         except KeyError:
             raise SWATError(out.status)
+
+    def _importoptions_from_dframe(self, dframe):
+        '''
+        Derive importoptions= values from DataFrame
+
+        '''
+        use_options = False
+        ivars = []
+        importoptions = dict(filetype='csv', vars=ivars)
+        print(dframe.dtypes)
+        for i, dtype in enumerate(dframe.dtypes.values):
+            dtype = str(dtype)
+            if 'int64' in dtype:
+                ivars.append(dict(type='int64'))
+                use_options = True
+            elif 'int32' in dtype:
+                ivars.append(dict(type='int32'))
+                use_options = True
+            else:
+                ivars.append({})
+        if use_options:
+            return importoptions
 
     def _read_any(self, _method_, *args, **kwargs):
         '''
@@ -1928,13 +1952,15 @@ class CAS(object):
         :class:`CASTable`
 
         '''
-        if self._protocol.startswith('http'):
-            raise SWATError('The table.addtable action is not supported ' +
-                            'in the REST interface')
         import pandas as pd
-        from swat import datamsghandlers as dmh
         table, kwargs = self._get_table_args(*args, **kwargs)
         dframe = getattr(pd, _method_)(*args, **kwargs)
+        # REST doesn't support table.addtable
+        if self._protocol.startswith('http'):
+            return self.upload_frame(dframe, casout=table and table or None,
+#                                    importoptions=self._importoptions_from_dframe(dframe),
+                                     promote=table.get('promote', None))
+        from swat import datamsghandlers as dmh
         table.update(dmh.PandasDataFrame(dframe).args.addtable)
         return self.retrieve('table.addtable', **table).casTable
 
@@ -2028,18 +2054,22 @@ class CAS(object):
         See Also
         --------
         :func:`pandas.read_table` 
-        :meth:`upload`
+        :meth:`upload_file`
 
         Returns
         -------
         :class:`CASTable`
 
         '''
-        if self._protocol.startswith('http'):
-            raise SWATError('The table.addtable action is not supported ' +
-                            'in the REST interface')
-        from swat import datamsghandlers as dmh
         table, kwargs = self._get_table_args(filepath_or_buffer, **kwargs)
+        # REST doesn't support table.addtable
+        if self._protocol.startswith('http'):
+            import pandas as pd
+            dframe = pd.read_table(filepath_or_buffer, **kwargs)
+            return self.upload_frame(dframe, casout=table and table or None,
+#                                    importoptions=self._importoptions_from_dframe(dframe),
+                                     promote=table.get('promote', None))
+        from swat import datamsghandlers as dmh
         table.update(dmh.Text(filepath_or_buffer, **kwargs).args.addtable)
         return self.retrieve('table.addtable', **table).casTable
 
@@ -2084,18 +2114,22 @@ class CAS(object):
         See Also
         --------
         :func:`pandas.read_table`
-        :meth:`upload`
+        :meth:`upload_file`
 
         Returns
         -------
         :class:`CASTable`
 
         '''
-        if self._protocol.startswith('http'):
-            raise SWATError('The table.addtable action is not supported ' +
-                            'in the REST interface')
-        from swat import datamsghandlers as dmh
         table, kwargs = self._get_table_args(filepath_or_buffer, **kwargs)
+        # REST doesn't support table.addtable
+        if self._protocol.startswith('http'):
+            import pandas as pd
+            dframe = pd.read_csv(filepath_or_buffer, **kwargs)
+            return self.upload_frame(dframe, casout=table and table or None,
+#                                    importoptions=self._importoptions_from_dframe(dframe),
+                                     promote=table.get('promote', None))
+        from swat import datamsghandlers as dmh
         table.update(dmh.CSV(filepath_or_buffer, **kwargs).args.addtable)
         return self.retrieve('table.addtable', **table).casTable
 
@@ -2140,18 +2174,22 @@ class CAS(object):
         See Also
         --------
         :func:`pandas.read_table`
-        :meth:`upload`
+        :meth:`upload_file`
 
         Returns
         -------
         :class:`CASTable`
 
         '''
-        if self._protocol.startswith('http'):
-            raise SWATError('The table.addtable action is not supported ' +
-                            'in the REST interface')
-        from swat import datamsghandlers as dmh
         table, kwargs = self._get_table_args(filepath_or_buffer, **kwargs)
+        # REST doesn't support table.addtable
+        if self._protocol.startswith('http'):
+            import pandas as pd
+            dframe = pd.read_fwf(filepath_or_buffer, **kwargs)
+            return self.upload_frame(dframe, casout=table and table or None,
+#                                    importoptions=self._importoptions_from_dframe(dframe),
+                                     promote=table.get('promote', None))
+        from swat import datamsghandlers as dmh
         table.update(dmh.FWF(filepath_or_buffer, **kwargs).args.addtable)
         return self.retrieve('table.addtable', **table).casTable
 
@@ -2227,7 +2265,7 @@ class CAS(object):
         See Also
         --------
         :func:`pandas.read_excel`
-        :meth:`upload`
+        :meth:`upload_file`
 
         Returns
         -------
@@ -2369,9 +2407,6 @@ class CAS(object):
         :class:`CASTable`
 
         '''
-        if self._protocol.startswith('http'):
-            raise SWATError('The table.addtable action is not supported ' +
-                            'in the REST interface')
         import pandas as pd
         from swat import datamsghandlers as dmh
         kwargs = kwargs.copy()
@@ -2380,8 +2415,13 @@ class CAS(object):
         for i, dframe in enumerate(pd.read_html(io, **kwargs)):
             if i and table.get('table'):
                 table['table'] += str(i)
-            table.update(dmh.PandasDataFrame(dframe).args.addtable)
-            out.append(self.retrieve('table.addtable', **table).casTable)
+            if self._protocol.startswith('http'):
+                out.append(self.upload_frame(dframe, casout=table and table or None,
+#                                            importoptions=self._importoptions_from_dframe(dframe),
+                                             promote=table.get('promote', None)))
+            else:
+                table.update(dmh.PandasDataFrame(dframe).args.addtable)
+                out.append(self.retrieve('table.addtable', **table).casTable)
         return out
 
     def read_hdf(self, path_or_buf, **kwargs):
@@ -2466,6 +2506,7 @@ class CAS(object):
         See Also
         --------
         :func:`pandas.read_sas`
+        :meth:`upload_file`
 
         Returns
         -------

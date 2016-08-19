@@ -59,17 +59,17 @@ class CASDataMsgHandler(object):
     class.
 
     When subclassing :class:`CASDataMsgHandler`, you only need to 
-    implement two pieces: `__init__` (the constructor) and `getrow`.
-    The constructor must create the `vars=` parameter for the 
-    `table.addtable` CAS action and store it in the `vars` instance
-    attribute.  The `getrow` method, must return a single row of data
+    implement two pieces: ``__init__`` (the constructor) and ``getrow``.
+    The constructor must create the ``vars=`` parameter for the 
+    ``table.addtable`` CAS action and store it in the ``vars`` instance
+    attribute.  The ``getrow`` method, must return a single row of data
     values to be added to the data buffer.
 
     Parameters
     ----------
     vars : list-of-dicts
         The list of variables to upload.  This has the same format as
-        the `vars=` argument to the `table.addtable` action.  Each dict should
+        the ``vars=`` argument to the ``table.addtable`` action.  Each dict should
         at least have the keys: name, rtype, and length.
     nrecs : int, optional
         The number of records in the buffer.
@@ -84,7 +84,7 @@ class CASDataMsgHandler(object):
     Examples
     --------
     The example below creates a custom data message handler with hard-coded
-    data and variable definitions.  The `getrow` method is defined to simply
+    data and variable definitions.  The ``getrow`` method is defined to simply
     return the requested row in the data array.
     
     >>> conn = swat.CAS()

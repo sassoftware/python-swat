@@ -4,6 +4,7 @@
 
 from setuptools import setup, find_packages
 from setuptools.command.install import install
+import glob
 import os
 import struct
 import sys
@@ -14,18 +15,20 @@ except:
     pass
 
 
+def has_tk():
+    ''' See if TK components exist '''
+    return len(glob.glob('swat/lib/*/*')) > 10
+
+
 def accept_license():
     ''' Display TK license and check for acceptance '''
-    import glob
     import pydoc
-    if len(glob.glob('swat/lib/*/*')) > 10:
-        os.environ['LESS'] = os.environ.get('LESS', '') + ' -e'
-        pydoc.pager(open(os.path.join('LICENSES', 'SAS-TK.txt'), 'r').read())
-        out = input('Do you accept the terms of the license? [y/N] ')
-        if out.lower().strip().startswith('y'):
-            return True
-        return False
-    return True
+    os.environ['LESS'] = os.environ.get('LESS', '') + ' -e'
+    pydoc.pager(open(os.path.join('LICENSES', 'SAS-TK.txt'), 'r').read())
+    out = input('Do you accept the terms of the license? [y/N] ')
+    if out.lower().strip().startswith('y'):
+        return True
+    return False
 
 
 class SWATInstaller(install):
@@ -42,7 +45,11 @@ class SWATInstaller(install):
             install.run(self)
         elif os.environ.get('ACCEPT_SAS_TK_LICENSE', '').lower().startswith('y'):
             install.run(self)
-        elif accept_license():
+        elif not has_tk():
+            print('NOTE: Only the REST interface is supported with the pure Python installation.')
+            print('      Use the pip or conda installers for binary protocol support.')
+            install.run(self)
+        elif has_tk() and accept_license():
             install.run(self)
 
 setup(
