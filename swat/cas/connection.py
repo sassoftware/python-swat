@@ -1052,8 +1052,7 @@ class CAS(object):
 
         return signature
 
-    def upload(self, data, importoptions=None, resident=None,
-               promote=None, casout=None):
+    def upload(self, data, importoptions=None, casout=None):
         '''
         Upload data from a local file into a CAS table
 
@@ -1088,10 +1087,6 @@ class CAS(object):
             uploading.
         importoptions : dict, optional
             Import options for the table.upload action.
-        resident : boolean, optional
-            Internal use only.
-        promote : boolean, optional
-            Should the resulting table be in the global namespace?
         casout : dict, optional
             Output table definition for the `table.upload` action.
 
@@ -1173,12 +1168,6 @@ class CAS(object):
             casout['name'] = name
         kwargs['casout'] = casout
 
-        if resident is not None:
-            kwargs['resident'] = resident
-
-        if promote is not None:
-            kwargs['promote'] = promote
-
         if isinstance(self._sw_connection, rest.REST_CASConnection):
             resp = self._sw_connection.upload(a2n(filename), kwargs)
         else:
@@ -1196,7 +1185,7 @@ class CAS(object):
 
         return self._get_results([(CASResponse(resp, connection=self), self)])
 
-    def upload_file(self, data, importoptions=None, promote=None, casout=None):
+    def upload_file(self, data, importoptions=None, casout=None):
         '''
         Upload a client-side data file to CAS and parse it into a CAS table
         
@@ -1208,8 +1197,6 @@ class CAS(object):
             uploading.
         importoptions : dict, optional
             Import options for the table.upload action.
-        promote : boolean, optional
-            Should the resulting table be in the global namespace?
         casout : dict, optional
             Output table definition for the `table.upload` action.
 
@@ -1218,13 +1205,12 @@ class CAS(object):
         :class:`CASTable`
 
         '''
-        out = self.upload(data, importoptions=importoptions,
-                          promote=promote, casout=casout)
+        out = self.upload(data, importoptions=importoptions, casout=casout)
         if out.severity > 1:
             raise SWATError(out.status)
         return out['casTable']
 
-    def upload_frame(self, data, importoptions=None, promote=None, casout=None):
+    def upload_frame(self, data, importoptions=None, casout=None):
         '''
         Upload a client-side data file to CAS and parse it into a CAS table
         
@@ -1234,8 +1220,6 @@ class CAS(object):
             DataFrames will be converted to CSV before uploading.
         importoptions : dict, optional
             Import options for the table.upload action.
-        promote : boolean, optional
-            Should the resulting table be in the global namespace?
         casout : dict, optional
             Output table definition for the `table.upload` action.
 
@@ -1244,8 +1228,7 @@ class CAS(object):
         :class:`CASTable`
 
         '''
-        out = self.upload(data, importoptions=importoptions,
-                          promote=promote, casout=casout)
+        out = self.upload(data, importoptions=importoptions, casout=casout)
         if out.severity > 1:
             raise SWATError(out.status)
         return out['casTable']
@@ -1421,6 +1404,9 @@ class CAS(object):
         if 'datamsghandler' in kwargs:
             datamsghandler = kwargs['datamsghandler']
             kwargs.pop('datamsghandler')
+            if self._protocol.startswith('http'):
+                raise SWATError('Data message handlers are not supported '
+                                'in the REST interface.')
 
         # Response callback function
         responsefunc = None
@@ -1861,9 +1847,9 @@ class CAS(object):
         return out, kwargs
 
     def load_path(self, path=None, readahead=None, importoptions=None,
-                  resident=None, promote=None, ondemand=None, attrtable=None,
-                  caslib=None, options=None, casout=None, singlepass=None,
-                  where=None, varlist=None, groupby=None, groupbyfmts=None,
+                  promote=None, ondemand=None, attrtable=None,
+                  caslib=None, datasourceoptions=None, casout=None, singlepass=None,
+                  where=None, vars=None, groupby=None, groupbyfmts=None,
                   groupbymode=None, orderby=None, nosource=None, returnwhereinfo=None,
                   **kwargs):
         '''
@@ -1895,10 +1881,10 @@ class CAS(object):
 
         '''
         args = {k: v for k, v in dict(path=path, readahead=readahead,
-                importoptions=importoptions, resident=resident, promote=promote,
+                importoptions=importoptions, promote=promote,
                 ondemand=ondemand, attrtable=attrtable, caslib=caslib,
-                options=options, casout=casout, singlepass=singlepass,
-                where=where, varlist=varlist, groupby=groupby,
+                datasourceoptions=datasourceoptions, casout=casout,
+                singlepass=singlepass, where=where, vars=vars, groupby=groupby,
                 groupbyfmts=groupbyfmts, groupbymode=groupbymode,
                 orderby=orderby, nosource=nosource,
                 returnwhereinfo=returnwhereinfo).items() if v is not None}
@@ -1917,7 +1903,6 @@ class CAS(object):
         use_options = False
         ivars = []
         importoptions = dict(filetype='csv', vars=ivars)
-        print(dframe.dtypes)
         for i, dtype in enumerate(dframe.dtypes.values):
             dtype = str(dtype)
             if 'int64' in dtype:
@@ -1957,6 +1942,8 @@ class CAS(object):
         dframe = getattr(pd, _method_)(*args, **kwargs)
         # REST doesn't support table.addtable
         if self._protocol.startswith('http'):
+            if 'table' in table:
+                table['name'] = table.pop('table')
             return self.upload_frame(dframe, casout=table and table or None,
 #                                    importoptions=self._importoptions_from_dframe(dframe),
                                      promote=table.get('promote', None))
@@ -2066,6 +2053,8 @@ class CAS(object):
         if self._protocol.startswith('http'):
             import pandas as pd
             dframe = pd.read_table(filepath_or_buffer, **kwargs)
+            if 'table' in table:
+                table['name'] = table.pop('table')
             return self.upload_frame(dframe, casout=table and table or None,
 #                                    importoptions=self._importoptions_from_dframe(dframe),
                                      promote=table.get('promote', None))
@@ -2126,6 +2115,8 @@ class CAS(object):
         if self._protocol.startswith('http'):
             import pandas as pd
             dframe = pd.read_csv(filepath_or_buffer, **kwargs)
+            if 'table' in table:
+                table['name'] = table.pop('table')
             return self.upload_frame(dframe, casout=table and table or None,
 #                                    importoptions=self._importoptions_from_dframe(dframe),
                                      promote=table.get('promote', None))
@@ -2186,6 +2177,8 @@ class CAS(object):
         if self._protocol.startswith('http'):
             import pandas as pd
             dframe = pd.read_fwf(filepath_or_buffer, **kwargs)
+            if 'table' in table:
+                table['name'] = table.pop('table')
             return self.upload_frame(dframe, casout=table and table or None,
 #                                    importoptions=self._importoptions_from_dframe(dframe),
                                      promote=table.get('promote', None))

@@ -2107,7 +2107,7 @@ class CASTable(ParamManager, ActionParamManager):
 
     # Indexing, iteration
 
-    def head(self, n=5, columns=None):
+    def head(self, n=5, columns=None, bygroup_as_index=True):
         ''' 
         Retrieve first `n` rows 
 
@@ -2117,6 +2117,8 @@ class CASTable(ParamManager, ActionParamManager):
             The number of rows to return.
         columns : list-of-strings, optional
             A subset of columns to return.
+        bygroup_as_index : boolean
+            If By groups are specified, should they be converted to an index?
         
         Notes
         -----
@@ -2129,9 +2131,9 @@ class CASTable(ParamManager, ActionParamManager):
         :class:`swat.SASDataFrame`
         
         '''
-        return self.slice(start=0, stop=n - 1, columns=columns)
+        return self.slice(start=0, stop=n, columns=columns, bygroup_as_index=bygroup_as_index)
 
-    def tail(self, n=5, columns=None):
+    def tail(self, n=5, columns=None, bygroup_as_index=True):
         ''' 
         Retrieve last `n` rows
 
@@ -2141,6 +2143,8 @@ class CASTable(ParamManager, ActionParamManager):
             The number of rows to return.
         columns : list-of-strings, optional
             A subset of columns to return.
+        bygroup_as_index : boolean
+            If By groups are specified, should they be converted to an index?
         
         Notes
         -----
@@ -2153,9 +2157,9 @@ class CASTable(ParamManager, ActionParamManager):
         :class:`swat.SASDataFrame`
         
         '''
-        return self.slice(start=-n, stop=-1, columns=columns)
+        return self.slice(start=-n, stop=-1, columns=columns, bygroup_as_index=bygroup_as_index)
 
-    def slice(self, start=0, stop=None, columns=None):
+    def slice(self, start=0, stop=None, columns=None, bygroup_as_index=True):
         ''' 
         Retrieve the specified rows 
         
@@ -2168,6 +2172,8 @@ class CASTable(ParamManager, ActionParamManager):
             rows until the end are retrieved.
         columns : list-of-strings, optional
             A subset of columns to return.
+        bygroup_as_index : boolean
+            If By groups are specified, should they be converted to an index?
         
         Notes
         -----
@@ -2180,41 +2186,69 @@ class CASTable(ParamManager, ActionParamManager):
         :class:`swat.SASDataFrame`
         
         '''
+        from ..dataframe import concat
+
         tbl = self
 
         if columns is not None:
             tbl = self.copy()
             tbl._columns = list(columns)
 
-        groups = self.get_groupby_vars()
-        if groups:
-            groups = [x[1] for x in tbl.groupby(groups)]
+        groupvars = self.get_groupby_vars()
+        if groupvars:
+            groups = tbl.groupby(groupvars)
         else:
-            groups = [tbl]
+            groups = [(None, tbl)]
 
         out = []
-        for group in groups:
+        for value, group in groups:
+            fstart = start
+            fstop = stop
+
             if stop is None:
-                stop = start + 5
+                fstop = start + 5
 
             if start < 0 or stop < 0:
                 numrows = group._numrows
                 if start < 0:
-                    start = numrows + start
+                    fstart = numrows + start
                 if stop < 0:
-                    stop = numrows + stop
+                    fstop = numrows + stop + 1
 
-            out.append(group._fetch(from_=start + 1, to=stop + 1))
+            grpdata = group._fetch(from_=fstart + 1, to=fstop)
+            grpcols = set(grpdata.columns)
+            if groupvars:
+                for name, val in zip(groupvars, value): 
+                    if name in grpcols:
+                        continue
+                    grpdata[name] = val
+                if bygroup_as_index:
+                    grpdata = grpdata.set_index(groupvars)
+            out.append(grpdata)
 
-        out = pd.concat(out)
+        return concat(out)
 
-        try:
-            out.set_index('_Index_')
-            out.index.name = None
-        except KeyError:
-            pass
+    def nth(self, n, dropna=False, bygroup_as_index=True):
+        '''
+        Return the nth row
 
-        return out
+        Parameters
+        ----------
+        n : int or list-of-ints
+            The rows to select.
+
+        Returns
+        -------
+        :class:`pandas.DataFrame`
+
+        '''
+        from ..dataframe import concat
+        if not isinstance(n, items_types):
+            n = [n]
+        out = []
+        for item in n:
+            out.append(self.slice(item, item, bygroup_as_index=True)) 
+        return concat(out).sort_index()
 
 #
 # TODO: Until CAS tables get index support (or we fake it locally) we
@@ -2676,13 +2710,16 @@ class CASTable(ParamManager, ActionParamManager):
         out = self._retrieve('simple.summary', **kwargs).get_tables('Summary')
         out = [x.reshape_bygroups(bygroup_columns=bygroup_columns,
                                   bygroup_as_index=True) for x in out]
+        columns = []
+        if out:
+            columns = list(out[0]['Column'].values)
         out = pd.concat(out)
         out = out.set_index('Column', append=self.has_groupby_vars())
         out = out.rename(columns=dict((k, k.lower()) for k in out.columns))
         out = out.rename(columns=dict(n='count'))
         out = out.stack().unstack('Column')
         out.columns.name = None
-        return out
+        return out[columns]
 
 #   def abs(self):
 #       raise NotImplementedError
@@ -3338,16 +3375,14 @@ class CASTable(ParamManager, ActionParamManager):
         See Also
         --------
         :meth:`pandas.DataFrame.nlargest`
+        :meth:`nsmallest`
 
         Returns
         -------
         :class:`pandas.Series`
 
         '''
-        if not isinstance(columns, items_types):
-            columns = [columns]
-        columns = [dict(name=x, order='DESCENDING', formatted='RAW') for x in columns]
-        return self._fetch(from_=1, to=n, sortby=columns)
+        return self.sort_values(columns, ascending=False).slice(0, n)
 
     def nsmallest(self, n, columns, keep='first'):
         '''
@@ -3364,17 +3399,15 @@ class CASTable(ParamManager, ActionParamManager):
 
         See Also
         --------
-        :meth:`pandas.DataFrame.nlargest`
+        :meth:`pandas.DataFrame.nsmallest`
+        :meth:`nlargest`
 
         Returns
         -------
         :class:`pandas.Series`
 
         '''
-        if not isinstance(columns, items_types):
-            columns = [columns]
-        columns = [dict(name=x, order='ASCENDING', formatted='RAW') for x in columns]
-        return self._fetch(from_=1, to=n, sortby=columns)
+        return self.sort_values(columns, ascending=True).slice(0, n)
 
     def mode(self, axis=0, numeric_only=False, max_tie=100, skipna=True):
         '''
@@ -3442,6 +3475,11 @@ class CASTable(ParamManager, ActionParamManager):
                 item = pd.concat([item[col].sort_values(ascending=True,
                                   inplace=False).reset_index(drop=True)
                                   for col in inputs], axis=1)
+
+                # Add By group values in for the index as needed
+                for byname, byval in zip(groups, key):
+                    if byname not in item.columns:
+                        item[byname] = byval
 
                 item = item.set_index(groups, append=True)
                 item = item.reorder_levels(groups + [None])
@@ -4218,6 +4256,8 @@ class CASTable(ParamManager, ActionParamManager):
         table, kwargs = connection._get_table_args(*args, **kwargs)
         dframe = getattr(pd.DataFrame, 'from_' + name)(data, *args, **kwargs)
         if connection._protocol.startswith('http'):
+            if 'table' in table:
+                table['name'] = table.pop('table')
             return connection.upload_frame(dframe, casout=table and table or None,
 #                                          importoptions=connection._importoptions_from_dframe(dframe),
                                            promote=table.get('promote', None))
@@ -6495,17 +6535,21 @@ class CASColumn(CASTable):
         ''' Return a list of the column values '''
         return self._fetch().ix[:, 0].tolist()
 
-    def head(self, n=5):
+    def head(self, n=5, bygroup_as_index=True):
         ''' Return first `n` rows of the column in a Series '''
-        return self.slice(start=0, stop=n - 1)
+        return self.slice(start=0, stop=n, bygroup_as_index=bygroup_as_index)
 
-    def tail(self, n=5):
+    def tail(self, n=5, bygroup_as_index=True):
         ''' Return last `n` rows of the column in a Series '''
-        return self.slice(start=-n, stop=-1)
+        return self.slice(start=-n, stop=-1, bygroup_as_index=True)
 
-    def slice(self, start=0, stop=None):
+    def slice(self, start=0, stop=None, bygroup_as_index=True):
         ''' Return from rows from `start` to `stop` in a Series '''
-        return CASTable.slice(self, start=start, stop=stop)[self.name]
+        return CASTable.slice(self, start=start, stop=stop, bygroup_as_index=bygroup_as_index)[self.name]
+
+    def nth(self, n, dropna=False, bygroup_as_index=True):
+        ''' Return the nth row '''
+        return CASTable.nth(self, n=n, bygroup_as_index=True)
 
     def add(self, other, level=None, fill_value=None, axis=0):
         ''' Addition of CASColumn with other, element-wise '''
@@ -7160,9 +7204,7 @@ class CASColumn(CASTable):
         :class:`pandas.Series`
 
         '''
-        # TODO: Needs By group support
-        return self._fetch(from_=1, to=n, sortby=[dict(name=self.name,
-                           order='DESCENDING', formatted='RAW')])[self.name]
+        return self.sort_values([self.name], ascending=False).slice(0, n)
 
     def nsmallest(self, n=5, keep='first'):
         '''
@@ -7178,9 +7220,7 @@ class CASColumn(CASTable):
         :class:`pandas.Series`
 
         '''
-        # TODO: Needs By group support
-        return self._fetch(from_=1, to=n, sortby=[dict(name=self.name,
-                           order='ASCENDING', formatted='RAW')])[self.name]
+        return self.sort_values([self.name], ascending=True).slice(0, n)
 
     def std(self, axis=None, skipna=None, level=None, ddof=1):
         '''
@@ -7617,7 +7657,7 @@ class CASTableGroupBy(object):
 
     Returns
     -------
-    CASTableGroupBy object
+    :class:`CASTableGroupBy`
 
     '''
 
@@ -7640,8 +7680,19 @@ class CASTableGroupBy(object):
         for group in groupby:
             yield tuple(group), self.get_group(group)
 
+    def __getitem__(self, name):
+        out = self._table[name]
+        if isinstance(out, (CASTable, CASColumn)):
+            out = type(self)(out.copy(), list(self._by),
+                             as_index=self._as_index, sort=self._sort)
+        return out
+
     def __getattr__(self, name):
-        return getattr(self._table, name)
+        out = getattr(self._table, name)
+        if isinstance(out, (CASTable, CASColumn)):
+            out = type(self)(out.copy(), list(self._by),
+                             as_index=self._as_index, sort=self._sort)
+        return out
 
     def get_group(self, name, obj=None):
         '''
@@ -7656,7 +7707,7 @@ class CASTableGroupBy(object):
 
         Returns
         -------
-        CASTable or CASColumn
+        :class:`CASTable` or :class:`CASColumn`
 
         '''
         if obj is None:
@@ -7679,7 +7730,14 @@ class CASTableGroupBy(object):
         return grptbl
 
     def get_groupby_vars(self):
-        ''' Get groupby variables from table '''
+        '''
+        Get groupby variables from table
+
+        Returns
+        -------
+        list of strings 
+
+        '''
         return self._table.get_groupby_vars()
 
     @getattr_safe_property
@@ -7691,39 +7749,84 @@ class CASTableGroupBy(object):
         '''
         Retrieve first values of each group
  
-        See CASTable.head / CASColumn.head for arguments.
+        See Also
+        --------
+        :class:`CASTable.head`
+        :class:`CASColumn.head`
 
         '''
+        kwargs = kwargs.copy()
+        kwargs.setdefault('bygroup_as_index', isinstance(self._table, CASColumn))
         return self._table.head(*args, **kwargs)
 
     def tail(self, *args, **kwargs):
         '''
         Retrieve last values of each group
  
-        See CASTable.tail / CASColumn.tail for arguments.
+        See Also
+        --------
+        :class:`CASTable.tail`
+        :class:`CASColumn.tail`
 
         '''
+        kwargs = kwargs.copy()
+        kwargs.setdefault('bygroup_as_index', isinstance(self._table, CASColumn))
         return self._table.tail(*args, **kwargs)
 
     def slice(self, *args, **kwargs):
         '''
         Retrieve requested values of each group
  
-        See CASTable.head / CASColumn.head for arguments.
+        See Also
+        --------
+        :class:`CASTable.slice`
+        :class:`CASColumn.slice`
 
         '''
+        kwargs = kwargs.copy()
+        kwargs.setdefault('bygroup_as_index', isinstance(self._table, CASColumn))
         return self._table.slice(*args, **kwargs)
 
     def to_frame(self, *args, **kwargs):
         ''' 
         Retrieve all values into a DataFrame
 
-        See CASTable.to_frame / CASColumn.to_frame for arguments.
+        See Also
+        --------
+        :class:`CASTable.to_frame`
+        :class:`CASColumn.to_frame`
+
+        Returns
+        -------
+        :class:`pandas.DataFrame`
 
         '''
-        return self._table.to_frame(*args, **kwargs)
+        out = self._table.slice(0, -1, bygroup_as_index=self._as_index)
+        if isinstance(out, pd.Series):
+            out = out.to_frame()
+        return out
 
-    def nth(self, n, dropna=None):
+    def to_series(self, *args, **kwargs):
+        '''
+        Retrieve all values into a Series
+
+        See Also
+        --------
+        :class:`CASColumn.to_series`
+
+        Returns
+        -------
+        :class:`pandas.Series`
+
+        '''
+        columns = list(self._table.columns)
+        if len(columns) > 1:
+            raise ValueError('Too many columns to convert to a Series')
+        if isinstance(self._table, CASColumn):
+            return self._table.slice(0, -1, bygroup_as_index=True)
+        return self._table.slice(0, -1, bygroup_as_index=True)[columns[0]]
+
+    def nth(self, n, dropna=None, **kwargs):
         '''
         Return the nth row from each group
 
@@ -7734,21 +7837,21 @@ class CASTableGroupBy(object):
 
         Returns
         -------
-        DataFrame
+        :class:`pandas.DataFrame`
 
         '''
-        if not isinstance(n, items_types):
-            n = [n] 
-        out = pd.concat(self.slice(x, x) for x in n)
-        if self._as_index:
-            return out.set_index(self.get_groupby_vars()).sort_index()
-        return out
+        kwargs = kwargs.copy()
+        kwargs.setdefault('bygroup_as_index', False)
+        return self._table.nth(n=n, dropna=dropna, **kwargs)
 
     def unique(self, *args, **kwargs):
         '''
         Get unique values using groups
 
-        See CASTable.unique / CASColumn.unique for arguments.
+        See Also
+        --------
+        :class:`CASTable.unique`
+        :class:`CASColumn.unique`
 
         '''
         if self._as_index:
@@ -7759,7 +7862,10 @@ class CASTableGroupBy(object):
         '''
         Get number of unique values using groups
 
-        See CASTable.unique / CASColumn.unique for arguments.
+        See Also
+        --------
+        :class:`CASTable.nunique`
+        :class:`CASColumn.nunique`
 
         '''
         if self._as_index:
@@ -7770,7 +7876,10 @@ class CASTableGroupBy(object):
         '''
         Get value counts using groups
 
-        See CASTable.unique / CASColumn.unique for arguments.
+        See Also
+        --------
+        :class:`CASTable.value_counts`
+        :class:`CASColumn.value_counts`
 
         '''
         if self._as_index:
@@ -7778,14 +7887,14 @@ class CASTableGroupBy(object):
         return self._table.value_counts(*args, **kwargs).reset_index(
                    self.get_groupby_vars())
 
-    def __getitem__(self, name):
-        return self._table[name]
-
     def max(self, *args, **kwargs):
         '''
         Get maximum values using groups
 
-        See CASTable.unique / CASColumn.unique for arguments.
+        See Also
+        --------
+        :class:`CASTable.max`
+        :class:`CASColumn.max`
 
         '''
         if self._as_index:
@@ -7796,7 +7905,10 @@ class CASTableGroupBy(object):
         '''
         Get mean values using groups
 
-        See CASTable.unique / CASColumn.unique for arguments.
+        See Also
+        --------
+        :class:`CASTable.mean`
+        :class:`CASColumn.mean`
 
         '''
         if self._as_index:
@@ -7807,7 +7919,10 @@ class CASTableGroupBy(object):
         '''
         Get minimum values using groups
 
-        See CASTable.unique / CASColumn.unique for arguments.
+        See Also
+        --------
+        :class:`CASTable.min`
+        :class:`CASColumn.min`
 
         '''
         if self._as_index:
@@ -7818,7 +7933,10 @@ class CASTableGroupBy(object):
         '''
         Get median values using groups
 
-        See CASTable.unique / CASColumn.unique for arguments.
+        See Also
+        --------
+        :class:`CASTable.median`
+        :class:`CASColumn.median`
 
         '''
         if self._as_index:
@@ -7829,7 +7947,10 @@ class CASTableGroupBy(object):
         '''
         Get mode values using groups
 
-        See CASTable.unique / CASColumn.unique for arguments.
+        See Also
+        --------
+        :class:`CASTable.mode`
+        :class:`CASColumn.mode`
 
         '''
         if self._as_index:
@@ -7840,7 +7961,10 @@ class CASTableGroupBy(object):
         '''
         Get quantiles using groups
 
-        See CASTable.unique / CASColumn.unique for arguments.
+        See Also
+        --------
+        :class:`CASTable.quantile`
+        :class:`CASColumn.quantile`
 
         '''
         if self._as_index:
@@ -7851,7 +7975,10 @@ class CASTableGroupBy(object):
         '''
         Get sum using groups
 
-        See CASTable.unique / CASColumn.unique for arguments.
+        See Also
+        --------
+        :class:`CASTable.sum`
+        :class:`CASColumn.sum`
 
         '''
         if self._as_index:
@@ -7862,7 +7989,10 @@ class CASTableGroupBy(object):
         '''
         Get std using groups
 
-        See CASTable.unique / CASColumn.unique for arguments.
+        See Also
+        --------
+        :class:`CASTable.std`
+        :class:`CASColumn.std`
 
         '''
         if self._as_index:
@@ -7873,7 +8003,10 @@ class CASTableGroupBy(object):
         '''
         Get var using groups
 
-        See CASTable.unique / CASColumn.unique for arguments.
+        See Also
+        --------
+        :class:`CASTable.var`
+        :class:`CASColumn.var`
 
         '''
         if self._as_index:
@@ -7884,7 +8017,10 @@ class CASTableGroupBy(object):
         '''
         Get nmiss using groups
 
-        See CASTable.unique / CASColumn.unique for arguments.
+        See Also
+        --------
+        :class:`CASTable.nmiss`
+        :class:`CASColumn.nmiss`
 
         '''
         if self._as_index:
@@ -7895,7 +8031,10 @@ class CASTableGroupBy(object):
         '''
         Get stderr using groups
 
-        See CASTable.unique / CASColumn.unique for arguments.
+        See Also
+        --------
+        :class:`CASTable.stderr`
+        :class:`CASColumn.stderr`
 
         '''
         if self._as_index:
@@ -7906,7 +8045,10 @@ class CASTableGroupBy(object):
         '''
         Get uss using groups
 
-        See CASTable.unique / CASColumn.unique for arguments.
+        See Also
+        --------
+        :class:`CASTable.uss`
+        :class:`CASColumn.uss`
 
         '''
         if self._as_index:
@@ -7917,7 +8059,10 @@ class CASTableGroupBy(object):
         '''
         Get css using groups
 
-        See CASTable.unique / CASColumn.unique for arguments.
+        See Also
+        --------
+        :class:`CASTable.css`
+        :class:`CASColumn.css`
 
         '''
         if self._as_index:
@@ -7928,7 +8073,10 @@ class CASTableGroupBy(object):
         '''
         Get cv using groups
 
-        See CASTable.unique / CASColumn.unique for arguments.
+        See Also
+        --------
+        :class:`CASTable.cv`
+        :class:`CASColumn.cv`
 
         '''
         if self._as_index:
@@ -7939,7 +8087,10 @@ class CASTableGroupBy(object):
         '''
         Get tvalue using groups
 
-        See CASTable.unique / CASColumn.unique for arguments.
+        See Also
+        --------
+        :class:`CASTable.tvalue`
+        :class:`CASColumn.tvalue`
 
         '''
         if self._as_index:
@@ -7950,7 +8101,10 @@ class CASTableGroupBy(object):
         '''
         Get probt using groups
 
-        See CASTable.unique / CASColumn.unique for arguments.
+        See Also
+        --------
+        :class:`CASTable.probt`
+        :class:`CASColumn.probt`
 
         '''
         if self._as_index:
@@ -7961,10 +8115,60 @@ class CASTableGroupBy(object):
         '''
         Get basic statistics using groups
 
-        See CASTable.unique / CASColumn.unique for arguments.
+        See Also
+        --------
+        :class:`CASTable.describe`
+        :class:`CASColumn.describe`
 
         '''
         if self._as_index:
             return self._table.describe(*args, **kwargs)
-        return self._table.describe(*args, **kwargs).reset_index(
+        out = self._table.describe(*args, **kwargs)
+        if isinstance(out, pd.Series):
+            out = out.unstack(level=-1)
+        return out.reset_index(self.get_groupby_vars())
+
+    def nlargest(self, *args, **kwargs):
+        '''
+        Return the `n` largest values ordered by `columns`
+
+        See Also
+        --------
+        :meth:`CASTable.nlargest` 
+        :meth:`CASColumn.nlargest` 
+
+        '''
+        if self._as_index:
+            return self._table.nlargest(*args, **kwargs)
+        return self._table.nlargest(*args, **kwargs).reset_index(
                    self.get_groupby_vars())
+
+    def nsmallest(self, *args, **kwargs):
+        '''
+        Return the `n` smallest values ordered by `columns`
+
+        See Also
+        --------
+        :meth:`CASTable.nsmallest` 
+        :meth:`CASColumn.nsmallest` 
+
+        '''
+        if self._as_index:
+            return self._table.nsmallest(*args, **kwargs)
+        return self._table.nsmallest(*args, **kwargs).reset_index(
+                   self.get_groupby_vars())
+
+    def query(self, *args, **kwargs):
+        '''
+        Query the table with a boolean expression
+
+        See Also
+        --------
+        :meth:`CASTable.query`
+        :meth:`CASColumn.query`
+
+        '''
+        out = self._table.query(*args, **kwargs)
+        if out is not None:
+            self._table = out
+            return self

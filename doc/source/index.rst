@@ -29,13 +29,13 @@ desktop or in a hosted cloud environment, you can analyze extremely large data s
 as much processing power as you need, while still retaining the ease-of-use of Python
 on the client side.
 
-Using SWAT, you can execute workflows of CAS statistical actions, then pull down
+Using SWAT, you can execute workflows of CAS analytic actions, then pull down
 the summarized data to further process on the client side in Python, or to merge with data
 from other sources using familiar `Pandas <http://pandas.pydata.org>`__ data structures.  In fact,
 the SWAT package mimics much of the API of the Pandas package so that using CAS should
 feel familiar to current Pandas users.
 
-With the best-of-breed SAS statistics in the cloud and the use of Python and 
+With the best-of-breed SAS analytics in the cloud and the use of Python and 
 its large collection of open source packages, the SWAT package gives you access
 to the best of both worlds.
 

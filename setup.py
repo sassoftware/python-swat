@@ -36,18 +36,21 @@ class SWATInstaller(install):
     def run(self):
         size = struct.calcsize('P')  # integer size
         if size != 8:
-            print('Sorry, you must have 64bit Python installed.')
-            print('Exiting.')
-            print('This version of Python is %dbit:' % (size*8))
-            print(sys.version)
+            print('')
+            print('ERROR: Sorry, you must have 64bit Python installed.')
+            print('       This version of Python is %dbit:' % (size*8))
+            print('')
+            #print(sys.version)
             raise Exception('This packages requires 64bit Python')
-        if os.environ.get('CONDA_BUILD', None):
+        if os.environ.get('CONDA_BUILD', None) or os.environ.get('WHEEL_BUILD', None):
             install.run(self)
         elif os.environ.get('ACCEPT_SAS_TK_LICENSE', '').lower().startswith('y'):
             install.run(self)
         elif not has_tk():
+            print('')
             print('NOTE: Only the REST interface is supported with the pure Python installation.')
             print('      Use the pip or conda installers for binary protocol support.')
+            print('')
             install.run(self)
         elif has_tk() and accept_license():
             install.run(self)
