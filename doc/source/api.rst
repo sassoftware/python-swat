@@ -607,6 +607,72 @@ can be seen at
    SASColumnMethods.trigamma
 
 
+CASTableGroupBy
+---------------
+
+:class:`CASTableGroupBy` objects are returned by :meth:`CASTable.grouppby`
+and :meth:`CASColumn.groupby`.
+
+Constructor
+~~~~~~~~~~~
+
+.. currentmodule:: swat.cas.table
+
+.. autosummary::
+   :toctree: generated/
+
+   CASTableGroupBy 
+
+Indexing and Iteration
+~~~~~~~~~~~~~~~~~~~~~~
+
+.. autosummary::
+   :toctree: generated/
+
+   CASTableGroupBy.__iter__
+   CASTableGroupBy.get_group
+   CASTableGroupBy.query
+
+Conversion
+~~~~~~~~~~
+
+.. autosummary::
+   :toctree: generated/
+
+   CASTableGroupBy.to_frame
+   CASTableGroupBy.to_series
+
+Computations / Descriptive Statistics
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. autosummary::
+   :toctree: generated/
+
+   CASTableGroupBy.css
+   CASTableGroupBy.cv
+   CASTableGroupBy.describe
+   CASTableGroupBy.head
+   CASTableGroupBy.max
+   CASTableGroupBy.mean
+   CASTableGroupBy.median
+   CASTableGroupBy.min
+   CASTableGroupBy.mode
+   CASTableGroupBy.nth
+   CASTableGroupBy.nmiss
+   CASTableGroupBy.nlargest
+   CASTableGroupBy.nsmallest
+   CASTableGroupBy.nunique
+   CASTableGroupBy.probt
+   CASTableGroupBy.quantile
+   CASTableGroupBy.std
+   CASTableGroupBy.stderr
+   CASTableGroupBy.sum
+   CASTableGroupBy.tvalue
+   CASTableGroupBy.unique
+   CASTableGroupBy.uss
+   CASTableGroupBy.value_counts
+   CASTableGroupBy.var
+
 CASResponse
 -----------
 

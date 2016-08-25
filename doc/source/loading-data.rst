@@ -163,7 +163,7 @@ recommended method for large data files.
 
 .. ipython:: python
 
-   cars = conn.read_cas_path('data/cars.csv', caslib='casuser')
+   cars = conn.load_path('data/cars.csv', caslib='casuser')
    cars.head()
 
 
@@ -173,7 +173,7 @@ Loading Data from Other Sources
 In addition to files, CAS has many other data loaders available to connect to sources 
 such as databases.  These other data sources require you to configure a CASLib that can
 connect and retrieve the data as a CAS table.  For these other data sources, you would
-still use the :class:`CAS.read_cas_path` method, but rather than specifying a file
+still use the :class:`CAS.load_path` method, but rather than specifying a file
 path, you would specify the name of a resource in that data loader (such as a database
 table).  This topic is beyond the scope of this document, but we are pointing it out
 in case you require this type of data access.
