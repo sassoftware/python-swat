@@ -34,13 +34,11 @@ automatically choose the appropriate download for your platform.
 Pip
 ---
 
-If you are installing with ``pip``, you need to choose the appropriate download for your platform.
-This is because the SWAT downloads include precompiled binaries specific to that platform.
-The commands for each supported platform are shown below.  This package has the appropriate 
+If you are installing with ``pip``, it will download and install the appropriate Wheel
+file for your platform.  This package has the appropriate 
 prerequesites specified, so ``pip`` should install those if they aren't installed already.
 
 .. code-block:: bash
 
-   # Linux 64
-   pip install http://github.com/sassoftware/python-swat/releases/0.9.0/swat-0.9.0-linux64.tar.gz
+   pip install swat
 

@@ -1,3 +1,6 @@
+
+.. Copyright SAS Institute
+
 *****************************************
 SWAT (SAS Wrapper for Analytics Transfer)
 *****************************************
