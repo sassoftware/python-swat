@@ -1944,9 +1944,8 @@ class CAS(object):
         if self._protocol.startswith('http'):
             if 'table' in table:
                 table['name'] = table.pop('table')
-            return self.upload_frame(dframe, casout=table and table or None,
-#                                    importoptions=self._importoptions_from_dframe(dframe),
-                                     promote=table.get('promote', None))
+            return self.upload_frame(dframe, casout=table and table or None)
+#                                    importoptions=self._importoptions_from_dframe(dframe)
         from swat import datamsghandlers as dmh
         table.update(dmh.PandasDataFrame(dframe).args.addtable)
         return self.retrieve('table.addtable', **table).casTable
@@ -2055,9 +2054,8 @@ class CAS(object):
             dframe = pd.read_table(filepath_or_buffer, **kwargs)
             if 'table' in table:
                 table['name'] = table.pop('table')
-            return self.upload_frame(dframe, casout=table and table or None,
-#                                    importoptions=self._importoptions_from_dframe(dframe),
-                                     promote=table.get('promote', None))
+            return self.upload_frame(dframe, casout=table and table or None)
+#                                    importoptions=self._importoptions_from_dframe(dframe)
         from swat import datamsghandlers as dmh
         table.update(dmh.Text(filepath_or_buffer, **kwargs).args.addtable)
         return self.retrieve('table.addtable', **table).casTable
@@ -2117,9 +2115,8 @@ class CAS(object):
             dframe = pd.read_csv(filepath_or_buffer, **kwargs)
             if 'table' in table:
                 table['name'] = table.pop('table')
-            return self.upload_frame(dframe, casout=table and table or None,
-#                                    importoptions=self._importoptions_from_dframe(dframe),
-                                     promote=table.get('promote', None))
+            return self.upload_frame(dframe, casout=table and table or None)
+#                                    importoptions=self._importoptions_from_dframe(dframe)
         from swat import datamsghandlers as dmh
         table.update(dmh.CSV(filepath_or_buffer, **kwargs).args.addtable)
         return self.retrieve('table.addtable', **table).casTable
@@ -2179,9 +2176,8 @@ class CAS(object):
             dframe = pd.read_fwf(filepath_or_buffer, **kwargs)
             if 'table' in table:
                 table['name'] = table.pop('table')
-            return self.upload_frame(dframe, casout=table and table or None,
-#                                    importoptions=self._importoptions_from_dframe(dframe),
-                                     promote=table.get('promote', None))
+            return self.upload_frame(dframe, casout=table and table or None)
+#                                    importoptions=self._importoptions_from_dframe(dframe)
         from swat import datamsghandlers as dmh
         table.update(dmh.FWF(filepath_or_buffer, **kwargs).args.addtable)
         return self.retrieve('table.addtable', **table).casTable
@@ -2409,9 +2405,8 @@ class CAS(object):
             if i and table.get('table'):
                 table['table'] += str(i)
             if self._protocol.startswith('http'):
-                out.append(self.upload_frame(dframe, casout=table and table or None,
-#                                            importoptions=self._importoptions_from_dframe(dframe),
-                                             promote=table.get('promote', None)))
+                out.append(self.upload_frame(dframe, casout=table and table or None))
+#                                            importoptions=self._importoptions_from_dframe(dframe)
             else:
                 table.update(dmh.PandasDataFrame(dframe).args.addtable)
                 out.append(self.retrieve('table.addtable', **table).casTable)

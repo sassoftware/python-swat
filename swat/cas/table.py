@@ -4258,9 +4258,8 @@ class CASTable(ParamManager, ActionParamManager):
         if connection._protocol.startswith('http'):
             if 'table' in table:
                 table['name'] = table.pop('table')
-            return connection.upload_frame(dframe, casout=table and table or None,
-#                                          importoptions=connection._importoptions_from_dframe(dframe),
-                                           promote=table.get('promote', None))
+            return connection.upload_frame(dframe, casout=table and table or None)
+#                                          importoptions=connection._importoptions_from_dframe(dframe)
         dmh = PandasDataFrame(dframe)
         table.update(dmh.args.addtable)
         return connection.retrieve('table.addtable', **table)['casTable']
