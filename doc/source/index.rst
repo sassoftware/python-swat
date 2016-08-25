@@ -1,3 +1,6 @@
+
+.. Copyright SAS Institute
+
 :tocdepth: 4
 
 *****************************************

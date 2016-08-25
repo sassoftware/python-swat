@@ -1,3 +1,6 @@
+
+.. Copyright SAS Institute
+
 .. currentmodule:: swat.cas.results
 .. _bygroups:
 
