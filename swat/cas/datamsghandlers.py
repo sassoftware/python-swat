@@ -28,18 +28,17 @@ import re
 import datetime
 import numpy as np
 import pandas as pd
-from .utils.datetime import (str2cas_timestamp, str2cas_datetime, str2cas_date, str2cas_time,
-                             str2sas_timestamp, str2sas_datetime, str2sas_date, str2sas_time,
-                             cas2python_timestamp, cas2python_datetime, cas2python_date,
-                             cas2python_time,
-                             sas2python_timestamp, sas2python_datetime, sas2python_date,
-                             sas2python_time,
-                             cas2sas_timestamp, cas2sas_datetime, cas2sas_date, cas2sas_time,
-                             sas2cas_timestamp, sas2cas_datetime, sas2cas_date, sas2cas_time,
-                             python2sas_timestamp, python2sas_datetime, python2sas_date,
-                             python2sas_time,
-                             python2cas_timestamp, python2cas_datetime, python2cas_date,
-                             python2cas_time)
+from .utils.datetime import (str2cas_timestamp, str2cas_datetime, str2cas_date,
+                             str2cas_time, str2sas_timestamp, str2sas_datetime,
+                             str2sas_date, str2sas_time, cas2python_timestamp,
+                             cas2python_datetime, cas2python_date, cas2python_time,
+                             sas2python_timestamp, sas2python_datetime,
+                             sas2python_date, sas2python_time, cas2sas_timestamp,
+                             cas2sas_datetime, cas2sas_date, cas2sas_time,
+                             sas2cas_timestamp, sas2cas_datetime, sas2cas_date,
+                             sas2cas_time, python2sas_timestamp, python2sas_datetime,
+                             python2sas_date, python2sas_time, python2cas_timestamp,
+                             python2cas_datetime, python2cas_date, python2cas_time)
 from .. import clib
 from ..clib import errorcheck
 from ..exceptions import SWATError
@@ -70,12 +69,12 @@ class CASDataMsgHandler(object):
 
     All CAS data message handlers should inherit from this class.
     The communication between the client and CAS server requires
-    several steps and error handling that is implemented in this 
+    several steps and error handling that is implemented in this
     class.
 
-    When subclassing :class:`CASDataMsgHandler`, you only need to 
+    When subclassing :class:`CASDataMsgHandler`, you only need to
     implement two pieces: ``__init__`` (the constructor) and ``getrow``.
-    The constructor must create the ``vars=`` parameter for the 
+    The constructor must create the ``vars=`` parameter for the
     ``table.addtable`` CAS action and store it in the ``vars`` instance
     attribute.  The ``getrow`` method, must return a single row of data
     values to be added to the data buffer.
@@ -101,17 +100,17 @@ class CASDataMsgHandler(object):
     The example below creates a custom data message handler with hard-coded
     data and variable definitions.  The ``getrow`` method is defined to simply
     return the requested row in the data array.
-    
+
     >>> conn = swat.CAS()
     >>> import swat.cas.datamsghandlers as dmh
     >>> class MyDMH(dmh.CASDataMsgHandler):
-    ...   
+    ...
     ...     def __init__(self):
     ...         self.data = [
     ...             ('A', 1, 100.2),
     ...             ('B', 2, 234.5),
     ...             ('C', 3, 999.0)
-    ...         ] 
+    ...         ]
     ...
     ...         vars = [
     ...             dict(name='name', label='Name', length=16,
@@ -198,7 +197,7 @@ class CASDataMsgHandler(object):
 
     @property
     def args(self):
-        ''' 
+        '''
         Property that generates the CAS action parameters
         for CAS actions that use a data message handler.  To use it,
         you specify the CAS action name as an attribute name.  The
@@ -317,14 +316,14 @@ class CASDataMsgHandler(object):
             if transformer is identity:
                 if vtype == 'DATE' and isinstance(value, (datetime.datetime,
                                                           datetime.date)):
-                    value = python2cas_date(value) 
+                    value = python2cas_date(value)
                 elif vtype == 'TIME' and isinstance(value, (datetime.datetime,
                                                             datetime.time)):
-                    value = python2cas_time(value) 
+                    value = python2cas_time(value)
                 elif vtype == 'DATETIME' and isinstance(value, (datetime.date,
                                                                 datetime.time,
                                                                 datetime.datetime)):
-                    value = python2cas_datetime(value) 
+                    value = python2cas_datetime(value)
             if vrtype == 'CHAR' or vtype in ['VARCHAR', 'CHAR']:
                 if isinstance(value, binary_types) or isinstance(value, text_types):
                     errorcheck(self._sw_databuffer.setString(row, offset,
@@ -455,7 +454,8 @@ class PandasDataFrame(CASDataMsgHandler):
 
     '''
 
-    def __init__(self, data, nrecs=1000, dtype=None, labels=None, formats=None, transformers=None):
+    def __init__(self, data, nrecs=1000, dtype=None, labels=None,
+                 formats=None, transformers=None):
         if transformers is None:
             transformers = {}
 
@@ -802,7 +802,7 @@ class JSON(PandasDataFrame):
     '''
 
     def __init__(self, path, nrecs=1000, transformers=None, **kwargs):
-        super(JSON, self).__init__(pd.read_json(path, **kwargs), 
+        super(JSON, self).__init__(pd.read_json(path, **kwargs),
                                    nrecs=nrecs, transformers=transformers)
 
 

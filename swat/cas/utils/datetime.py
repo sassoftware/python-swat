@@ -37,7 +37,7 @@ CAS_EPOCH = datetime.datetime(month=1, day=1, year=1960)
 
 
 def str2cas_timestamp(dts):
-    ''' 
+    '''
     Convert a string to a CAS timestamp
 
     Parameters
@@ -93,7 +93,7 @@ def str2cas_date(dts):
 
 
 def str2cas_time(dts):
-    ''' 
+    '''
     Convert a string to a CAS time
 
     Parameters
@@ -122,7 +122,7 @@ def str2cas_time(dts):
 def str2sas_timestamp(dts):
     '''
     Convert a string to a SAS timestamp
-    
+
     Parameters
     ----------
     dts : string
@@ -141,7 +141,7 @@ def str2sas_timestamp(dts):
     -------
     float
         SAS timestamp
-    
+
     '''
     return python2sas_datetime(pd.to_datetime(dts))
 
@@ -151,7 +151,7 @@ str2sas_datetime = str2sas_timestamp
 def str2sas_date(dts):
     '''
     Convert a string to a SAS date
-    
+
     Parameters
     ----------
     dts : string
@@ -170,7 +170,7 @@ def str2sas_date(dts):
     -------
     float
         SAS date
-    
+
     '''
     return python2sas_date(pd.to_datetime(dts))
 
@@ -178,7 +178,7 @@ def str2sas_date(dts):
 def str2sas_time(dts):
     '''
     Convert a string to a SAS time
-    
+
     Parameters
     ----------
     dts : string
@@ -197,7 +197,7 @@ def str2sas_time(dts):
     -------
     float
         SAS time
-    
+
     '''
     return python2sas_time(pd.to_datetime(dts))
 
@@ -208,7 +208,7 @@ def str2sas_time(dts):
 def sas2python_timestamp(sts):
     '''
     Convert a SAS datetime to Python datetime
-    
+
     Parameters
     ----------
     sts : float
@@ -222,7 +222,7 @@ def sas2python_timestamp(sts):
     Returns
     -------
     :class:`datetime.datetime`
-    
+
     '''
     return cas2python_timestamp(sas2cas_timestamp(sts))
 
@@ -232,7 +232,7 @@ sas2python_datetime = sas2python_timestamp
 def sas2python_date(sdt):
     '''
     Convert a SAS date to a Python date
-    
+
     Parameters
     ----------
     sts : float
@@ -246,7 +246,7 @@ def sas2python_date(sdt):
     Returns
     -------
     :class:`datetime.date`
-    
+
     '''
     return cas2python_date(sas2cas_date(sdt))
 
@@ -254,7 +254,7 @@ def sas2python_date(sdt):
 def sas2python_time(sts):
     '''
     Convert a SAS time to a Python time
-    
+
     Parameters
     ----------
     sts : float
@@ -268,7 +268,7 @@ def sas2python_time(sts):
     Returns
     -------
     :class:`datetime.time`
-    
+
     '''
     return cas2python_time(sas2cas_time(sts))
 
@@ -276,7 +276,7 @@ def sas2python_time(sts):
 def sas2cas_timestamp(sts):
     '''
     Convert a SAS datetime to CAS datetime
-    
+
     Parameters
     ----------
     sts : float
@@ -291,7 +291,7 @@ def sas2cas_timestamp(sts):
     -------
     int
         CAS timestamp
-    
+
     '''
     return int64(sts * 10**6)
 
@@ -301,7 +301,7 @@ sas2cas_datetime = sas2cas_timestamp
 def sas2cas_date(sdt):
     '''
     Convert a SAS date to a CAS date
-    
+
     Parameters
     ----------
     sdt : float
@@ -316,7 +316,7 @@ def sas2cas_date(sdt):
     -------
     int
         CAS date
-    
+
     '''
     return int32(sdt)
 
@@ -324,7 +324,7 @@ def sas2cas_date(sdt):
 def sas2cas_time(sts):
     '''
     Convert a SAS time to a CAS time
-    
+
     Parameters
     ----------
     sts : float
@@ -339,7 +339,7 @@ def sas2cas_time(sts):
     -------
     int
         CAS time
-    
+
     '''
     return int64(sts * 10**6)
 
@@ -418,7 +418,7 @@ def cas2python_time(ctm):
 def cas2sas_timestamp(cdt):
     '''
     Convert a CAS timestamp to a SAS timestamp
-    
+
     Parameters
     ----------
     cdt : int
@@ -433,7 +433,7 @@ def cas2sas_timestamp(cdt):
     -------
     float
         SAS timestamp
-    
+
     '''
     return cdt / float(10**6)
 
@@ -443,7 +443,7 @@ cas2sas_datetime = cas2sas_timestamp
 def cas2sas_date(cdt):
     '''
     Convert a CAS date to a SAS date
-    
+
     Parameters
     ----------
     cdt : int
@@ -458,7 +458,7 @@ def cas2sas_date(cdt):
     -------
     float
         SAS date
-    
+
     '''
     return float(cdt)
 
@@ -466,7 +466,7 @@ def cas2sas_date(cdt):
 def cas2sas_time(cdt):
     '''
     Convert a CAS time to a SAS time
-    
+
     Parameters
     ----------
     cdt : int
@@ -481,7 +481,7 @@ def cas2sas_time(cdt):
     -------
     float
         SAS time
-    
+
     '''
     return cdt / float(10**6)
 
@@ -492,7 +492,7 @@ def cas2sas_time(cdt):
 def python2cas_timestamp(pyts):
     '''
     Convert a Python datetime to CAS datetime
- 
+
     Parameters
     ----------
     pyts : :class:`datetime.datetime`
@@ -578,7 +578,7 @@ def python2cas_date(pydt):
 def python2sas_timestamp(pyts):
     '''
     Convert a Python datetime to SAS datetime
-    
+
     Parameters
     ----------
     pyts : :class:`datetime.datetime`
@@ -593,7 +593,7 @@ def python2sas_timestamp(pyts):
     -------
     float
         SAS timestamp
-    
+
     '''
     return python2cas_timestamp(pyts) / float(10**6)
 
@@ -603,7 +603,7 @@ python2sas_datetime = python2sas_timestamp
 def python2sas_date(pydt):
     '''
     Convert a Python date to a SAS date
-    
+
     Parameters
     ----------
     pydt : :class:`datetime.date`
@@ -618,7 +618,7 @@ def python2sas_date(pydt):
     -------
     float
         SAS date
-    
+
     '''
     if isinstance(pydt, datetime.datetime):
         delta = pydt.date() - CAS_EPOCH.date()
@@ -634,7 +634,7 @@ def python2sas_date(pydt):
 def python2sas_time(pytm):
     '''
     Convert a Python time to a SAS time
-    
+
     Parameters
     ----------
     pytm : :class:`datetime.time`
@@ -649,7 +649,7 @@ def python2sas_time(pytm):
     -------
     float
         SAS time
-    
+
     '''
     return python2cas_time(pytm) / float(10**6)
 

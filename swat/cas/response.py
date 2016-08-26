@@ -34,7 +34,7 @@ from .transformers import cas2py
 @six.python_2_unicode_compatible
 class CASDisposition(object):
     '''
-    Disposition of a CAS response 
+    Disposition of a CAS response
 
     This class is never instantiated directly.  It is instantiated behind the
     scenes when the :class:`CASResponse` is created.
@@ -104,7 +104,7 @@ class CASDisposition(object):
     def debug(self):
         ''' Disposition debug information '''
         return errorcheck(a2u(self._sw_response.getDispositionDebug(), 'utf-8'),
-                              self._sw_response)
+                          self._sw_response)
 
     def __str__(self):
         out = []
@@ -256,15 +256,15 @@ class CASResponse(object):
 
     Attributes
     ----------
-    disposition : :class:`CASDisposition` 
+    disposition : :class:`CASDisposition`
         The disposition of a CAS response.  This includes the attributes
         severity, reason, status, debug, and status_code.
     performance : :class:`CASPerformance`
         Performance metrices of a CAS action.
     messages : list-of-strings
         The messages returned by the CAS action.
-    updateflags : set-of-strings 
-        The update flags sent by the CAS server.    
+    updateflags : set-of-strings
+        The update flags sent by the CAS server.
 
     Examples
     --------

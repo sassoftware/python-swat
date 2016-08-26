@@ -370,7 +370,7 @@ class CASTablePlotter(object):
         Make a line plot of all columns in a table
 
         This method fetches the data from the CAS table and uses the
-        :meth:`pandas.DataFrame.plot` method to plot it.  All 
+        :meth:`pandas.DataFrame.plot` method to plot it.  All
         arguments used in the call to this method are passed to
         the DataFrame's :meth:`plot` method.
 
@@ -611,12 +611,12 @@ class CASTable(ParamManager, ActionParamManager):
     as simply a container of table parameters and used as CAS action parameter
     values.  If a connection is associated with it (either by instantiating it
     from :meth:`CAS.CASTable` or using :meth:`set_connection`), it can be used
-    to call CAS actions on the table.  Finally, it supports much of the 
+    to call CAS actions on the table.  Finally, it supports much of the
     :class:`pandas.DataFrame` API, so it can interact with CAS tables in much
     the same way you interact with local data.
 
     The parameters below are a superset of all of the available parameters.
-    Some CAS actions may not support all parameters.  You will need to see the 
+    Some CAS actions may not support all parameters.  You will need to see the
     help for each CAS action on what it supports.
 
     Parameters
@@ -732,7 +732,7 @@ class CASTable(ParamManager, ActionParamManager):
 
     Call a CAS action directly on the :class:`CASTable`.
 
-    >>> summ = iris.summary() 
+    >>> summ = iris.summary()
     >>> print(summ)
 
     Use a :class:`CASTable` as an output table definition.
@@ -1133,7 +1133,7 @@ class CASTable(ParamManager, ActionParamManager):
         '''
         Set the connection to use for action calls
 
-        When a connection is registered with a :class:`CASTable` object, 
+        When a connection is registered with a :class:`CASTable` object,
         CAS actions can be called on it as if they were instance methods.
 
         Parameters
@@ -1165,7 +1165,7 @@ class CASTable(ParamManager, ActionParamManager):
         '''
         Get the registered connection object
 
-        When a connection is registered with a :class:`CASTable` object, 
+        When a connection is registered with a :class:`CASTable` object,
         CAS actions can be called on it as if they were instance methods.
 
         Raises
@@ -1199,9 +1199,9 @@ class CASTable(ParamManager, ActionParamManager):
         return conn
 
     def __eq__(self, other):
-        ''' 
-        Test for equality 
-        
+        '''
+        Test for equality
+
         CASTable objects are considered equal if they contain the exact
         same set of parameters.
 
@@ -1226,7 +1226,7 @@ class CASTable(ParamManager, ActionParamManager):
         Returns
         -------
         boolean
-        
+
         '''
         if isinstance(other, CASTable):
             if self.params == other.params:
@@ -1293,8 +1293,8 @@ class CASTable(ParamManager, ActionParamManager):
         return tbl
 
     def __setattr__(self, name, value):
-        ''' 
-        Set attribute or parameter value 
+        '''
+        Set attribute or parameter value
 
         When an attribute is set on a CASTable object it can end up
         in one of two locations.  If the name of the attribute given
@@ -1303,7 +1303,7 @@ class CASTable(ParamManager, ActionParamManager):
         to CAS actions.
 
         If the specified name does not match a CAS table parameter, the
-        attribute is set on the :class:`CASTable` object as a standard Python 
+        attribute is set on the :class:`CASTable` object as a standard Python
         attribute.
 
         Parameters
@@ -1337,19 +1337,19 @@ class CASTable(ParamManager, ActionParamManager):
         return super(CASTable, self).__setattr__(name.lower(), value)
 
     def __delattr__(self, name):
-        ''' 
-        Delete an attribute 
+        '''
+        Delete an attribute
 
         When an attribute is deleted from a CASTable object, it can be
-        deleted from one of two areas.  If the name specified matches the 
-        name of a CAS table parameter, the key is deleted from the 
+        deleted from one of two areas.  If the name specified matches the
+        name of a CAS table parameter, the key is deleted from the
         :attr:`CASTable.params` object dictionary which holds parameters used
         when the CASTable is used in a CAS action call.
 
-        If the attribute name is not a valid CAS table parameter, the 
+        If the attribute name is not a valid CAS table parameter, the
         attribute is deleted from the CASTable object as a standard Python
         attribute.
-        
+
         Parameters
         ----------
         name : string
@@ -1379,16 +1379,16 @@ class CASTable(ParamManager, ActionParamManager):
         return super(CASTable, self).__delattr__(name.lower())
 
     def __getattr__(self, name):
-        ''' 
+        '''
         Get named parameter, CAS action, or table column
 
         When attributes are accessed on a CASTable object, they lookup
         goes through several levels.  First, if the attribute is a real
-        Python attribute on the CASTable object, that value will get 
+        Python attribute on the CASTable object, that value will get
         returned.
 
         Second, if the requested attribute is the name of a CAS table
-        parameter and the parameter has been set, the value of that 
+        parameter and the parameter has been set, the value of that
         parameter will be returned.
 
         Third, if the CASTable object has a connection registered with
@@ -1397,7 +1397,7 @@ class CASTable(ParamManager, ActionParamManager):
 
         Finally, if the attribute value matches the name of a CAS table
         column, a CASColumn is returned.
-        
+
         Parameters
         ----------
         name : string
@@ -1425,7 +1425,7 @@ class CASTable(ParamManager, ActionParamManager):
         Returns
         -------
         any
-        
+
         '''
         origname = name
         name = name.lower()
@@ -1532,16 +1532,15 @@ class CASTable(ParamManager, ActionParamManager):
 
     def _retrieve(self, _name_, **kwargs):
         '''
-        Same as retrieve, but marked as a UI call 
+        Same as retrieve, but marked as a UI call
 
         This is used for behind-the-scenes calls to CASTable.retrieve.
-        
+
         Returns
         -------
         CASResults object
-        
+
         '''
-        #out = self.retrieve(_name_, _apptag='UI', _messagelevel='none', **kwargs)
         out = self.retrieve(_name_, _apptag='UI', **kwargs)
         if out.severity > 1:
             raise SWATError(out.status)
@@ -1585,32 +1584,32 @@ class CASTable(ParamManager, ActionParamManager):
         return str(self)
 
     def get_action_names(self):
-        ''' 
-        Return a list of available CAS actions 
+        '''
+        Return a list of available CAS actions
 
         If a CAS connection is registered with the CASTable object,
         this method returns the list of CAS actions names available
         to the connection.
-        
+
         Returns
         -------
         list of strings
-        
+
         '''
         return self.get_connection().get_action_names()
 
     def get_actionset_names(self):
-        ''' 
-        Return a list of available actionsets 
+        '''
+        Return a list of available actionsets
 
         If a CAS connection is registered with the CASTable object,
         this method returns the list of CAS action set names available
         to the connection.
-        
+
         Returns
         -------
         list of strings
-        
+
         '''
         return self.get_connection().get_actionset_names()
 
@@ -1619,7 +1618,7 @@ class CASTable(ParamManager, ActionParamManager):
         return self._columns
 
     def get_fetch_params(self):
-        ''' Return options to be used during the table.fetch action ''' 
+        ''' Return options to be used during the table.fetch action '''
         return dict(sortby=self._sortby, sastypes=False)
 
     def to_table_params(self):
@@ -1810,9 +1809,9 @@ class CASTable(ParamManager, ActionParamManager):
         return
 
     def _intersect_columns(self, columns, inplace=False):
-        ''' 
-        Return the intersection of `columns` and `inputs` 
-        
+        '''
+        Return the intersection of `columns` and `inputs`
+
         This is used to generate a new column list that contains the
         intersection of the names in `columns` with the names of the
         current table's inputs.
@@ -1829,7 +1828,7 @@ class CASTable(ParamManager, ActionParamManager):
             If inplace == False
         None
             If inplace == True
-        
+
         '''
         if columns is None:
             columns = []
@@ -1936,7 +1935,7 @@ class CASTable(ParamManager, ActionParamManager):
         list-of-strings
 
         '''
-        
+
         if include is None:
             include = set()
         elif not isinstance(include, items_types):
@@ -1995,7 +1994,6 @@ class CASTable(ParamManager, ActionParamManager):
                     varlist.discard(name)
 
         return [x for x in names if x in varlist]
-
 
     def select_dtypes(self, include=None, exclude=None, inplace=False):
         '''
@@ -2106,9 +2104,9 @@ class CASTable(ParamManager, ActionParamManager):
             out = copy.copy(self)
         if exclude:
             if not isinstance(exclude, items_types):
-                exclude = [exclude] 
+                exclude = [exclude]
             for item in exclude:
-                out.params.pop(item, None) 
+                out.params.pop(item, None)
         return out
 
 #   def isnull(self):
@@ -2123,8 +2121,8 @@ class CASTable(ParamManager, ActionParamManager):
     # Indexing, iteration
 
     def head(self, n=5, columns=None, bygroup_as_index=True):
-        ''' 
-        Retrieve first `n` rows 
+        '''
+        Retrieve first `n` rows
 
         Parameters
         ----------
@@ -2134,7 +2132,7 @@ class CASTable(ParamManager, ActionParamManager):
             A subset of columns to return.
         bygroup_as_index : boolean
             If By groups are specified, should they be converted to an index?
-        
+
         Notes
         -----
         Since CAS tables can be distributed across a grid of computers,
@@ -2144,12 +2142,13 @@ class CASTable(ParamManager, ActionParamManager):
         Returns
         -------
         :class:`swat.SASDataFrame`
-        
+
         '''
-        return self.slice(start=0, stop=n, columns=columns, bygroup_as_index=bygroup_as_index)
+        return self.slice(start=0, stop=n, columns=columns,
+                          bygroup_as_index=bygroup_as_index)
 
     def tail(self, n=5, columns=None, bygroup_as_index=True):
-        ''' 
+        '''
         Retrieve last `n` rows
 
         Parameters
@@ -2160,7 +2159,7 @@ class CASTable(ParamManager, ActionParamManager):
             A subset of columns to return.
         bygroup_as_index : boolean
             If By groups are specified, should they be converted to an index?
-        
+
         Notes
         -----
         Since CAS tables can be distributed across a grid of computers,
@@ -2170,14 +2169,15 @@ class CASTable(ParamManager, ActionParamManager):
         Returns
         -------
         :class:`swat.SASDataFrame`
-        
+
         '''
-        return self.slice(start=-n, stop=-1, columns=columns, bygroup_as_index=bygroup_as_index)
+        return self.slice(start=-n, stop=-1, columns=columns,
+                          bygroup_as_index=bygroup_as_index)
 
     def slice(self, start=0, stop=None, columns=None, bygroup_as_index=True):
-        ''' 
-        Retrieve the specified rows 
-        
+        '''
+        Retrieve the specified rows
+
         Parameters
         ----------
         start : int or long, optional
@@ -2189,7 +2189,7 @@ class CASTable(ParamManager, ActionParamManager):
             A subset of columns to return.
         bygroup_as_index : boolean
             If By groups are specified, should they be converted to an index?
-        
+
         Notes
         -----
         Since CAS tables can be distributed across a grid of computers,
@@ -2199,7 +2199,7 @@ class CASTable(ParamManager, ActionParamManager):
         Returns
         -------
         :class:`swat.SASDataFrame`
-        
+
         '''
         from ..dataframe import concat
 
@@ -2233,7 +2233,7 @@ class CASTable(ParamManager, ActionParamManager):
             grpdata = group._fetch(from_=fstart + 1, to=fstop)
             grpcols = set(grpdata.columns)
             if groupvars:
-                for name, val in zip(groupvars, value): 
+                for name, val in zip(groupvars, value):
                     if name in grpcols:
                         continue
                     grpdata[name] = val
@@ -2262,7 +2262,7 @@ class CASTable(ParamManager, ActionParamManager):
             n = [n]
         out = []
         for item in n:
-            out.append(self.slice(item, item, bygroup_as_index=True)) 
+            out.append(self.slice(item, item, bygroup_as_index=True))
         return concat(out).sort_index()
 
 #
@@ -2274,14 +2274,14 @@ class CASTable(ParamManager, ActionParamManager):
 
     @getattr_safe_property
     def at(self):
-        #''' Label-based scalar accessor '''
+        # ''' Label-based scalar accessor '''
         raise NotImplementedError('The `at` attribute is not implemented, '
                                   'but the attribute is reserved.')
 #       return self._at
 
     @getattr_safe_property
     def iat(self):
-        #''' Integer location scalar accessor '''
+        # ''' Integer location scalar accessor '''
         raise NotImplementedError('The `iat` attribute is not implemented, '
                                   'but the attribute is reserved.')
 #       return self._iat
@@ -2350,12 +2350,12 @@ class CASTable(ParamManager, ActionParamManager):
 
     def __iter__(self):
         '''
-        Iterate through all visible column names in ``self`` 
-        
+        Iterate through all visible column names in ``self``
+
         Yields
         ------
         string
-        
+
         '''
         for col in self.columns:
             yield col
@@ -2363,20 +2363,20 @@ class CASTable(ParamManager, ActionParamManager):
     def iteritems(self):
         '''
         Iterate over column names and :class:`CASColumn` objects
-        
+
         Yields
         ------
         (string, :class:`CASColumn`)
             Two-element tuple containing a column name and a :class:`CASColumn` object
-        
+
         '''
         for col in self.columns:
             yield (col, self._to_column(col))
 
     def _generic_iter(self, name, *args, **kwargs):
-        ''' 
-        Generic iterator for various iteration implementations 
-        
+        '''
+        Generic iterator for various iteration implementations
+
         Parameters
         ----------
         name : string
@@ -2389,7 +2389,7 @@ class CASTable(ParamManager, ActionParamManager):
         Yields
         ------
         iterator result
-        
+
         '''
         kwargs = kwargs.copy()
 
@@ -2449,7 +2449,7 @@ class CASTable(ParamManager, ActionParamManager):
         --------
         :meth:`iteritems`
         :meth:`itertuples`
-        
+
         Returns
         -------
         iterator of (index, :class:`pandas.Series`) tuples
@@ -2460,7 +2460,7 @@ class CASTable(ParamManager, ActionParamManager):
     def itertuples(self, index=True, chunksize=None):
         '''
         Iterate over rows as tuples
-        
+
         Parameters
         ----------
         index : boolean, optional
@@ -2476,7 +2476,7 @@ class CASTable(ParamManager, ActionParamManager):
         Returns
         -------
         iterator of row tuples
-        
+
         '''
         return self._generic_iter('itertuples', index=index, chunksize=chunksize)
 
@@ -2540,8 +2540,8 @@ class CASTable(ParamManager, ActionParamManager):
 
         Notes
         -----
-        This method does not actually remove a column from the table on 
-        the CAS server.  It merely removes it from the list of visible 
+        This method does not actually remove a column from the table on
+        the CAS server.  It merely removes it from the list of visible
         columns in `self`.
 
         Parameters
@@ -2755,8 +2755,8 @@ class CASTable(ParamManager, ActionParamManager):
 #       raise NotImplementedError
 
     def corr(self, method=None, min_periods=None):
-        ''' 
-        Compute pairwise correlation of columns 
+        '''
+        Compute pairwise correlation of columns
 
         Parameters
         ----------
@@ -2886,8 +2886,8 @@ class CASTable(ParamManager, ActionParamManager):
         return out
 
     def _topk_frequency(self, maxtie=0, skipna=True):
-        ''' 
-        Return the top value by frequency 
+        '''
+        Return the top value by frequency
 
         Parameters
         ----------
@@ -3195,9 +3195,10 @@ class CASTable(ParamManager, ActionParamManager):
         # Minimum / Maximum
         minmax = None
         if 'min' in stats or 'max' in stats:
-            minmax = [x.reshape_bygroups(bygroup_columns=bygroup_columns, bygroup_as_index=False)
+            minmax = [x.reshape_bygroups(bygroup_columns=bygroup_columns,
+                                         bygroup_as_index=False)
                       for x in out.get_tables('Topk')]
-            minmax = pd.concat(minmax) 
+            minmax = pd.concat(minmax)
             minmax.loc[:, 'stat'] = ['max', 'min'] * int(len(minmax) / 2)
             if 'NumVar' in minmax.columns and 'CharVar' in minmax.columns:
                 minmax['NumVar'].fillna(minmax['CharVar'], inplace=True)
@@ -3228,9 +3229,10 @@ class CASTable(ParamManager, ActionParamManager):
         # Unique
         unique = None
         if 'unique' in stats:
-            unique = [x.reshape_bygroups(bygroup_columns=bygroup_columns, bygroup_as_index=False)
+            unique = [x.reshape_bygroups(bygroup_columns=bygroup_columns,
+                                         bygroup_as_index=False)
                       for x in out.get_tables('TopkMisc')]
-            unique = pd.concat(unique) 
+            unique = pd.concat(unique)
             unique.loc[:, 'unique'] = 'unique'
             unique.rename(columns=dict(N='value', Column='column'), inplace=True)
             unique = unique.loc[:, groups + ['unique', 'column', 'value']]
@@ -3375,7 +3377,7 @@ class CASTable(ParamManager, ActionParamManager):
                                  numeric_only=numeric_only, **kwargs)
 
     def nlargest(self, n, columns, keep='first'):
-        ''' 
+        '''
         Return the `n` largest values ordered by `columns`
 
         Parameters
@@ -3464,9 +3466,10 @@ class CASTable(ParamManager, ActionParamManager):
 
         groups = self.get_groupby_vars()
         if groups:
-            out = [x.reshape_bygroups(bygroup_columns=bygroup_columns, bygroup_as_index=False)
+            out = [x.reshape_bygroups(bygroup_columns=bygroup_columns,
+                                      bygroup_as_index=False)
                    for x in out.get_tables('Topk')]
-            out = pd.concat(out) 
+            out = pd.concat(out)
             out['Rank'] = out['Rank'] - 1
             items = []
             for key, item in out.groupby(groups):
@@ -3595,7 +3598,7 @@ class CASTable(ParamManager, ActionParamManager):
 #       raise NotImplementedError
 
     def sum(self, axis=None, skipna=None, level=None, numeric_only=True):
-        ''' 
+        '''
         Return the sum of the values of each column
 
         Parameters
@@ -3625,8 +3628,8 @@ class CASTable(ParamManager, ActionParamManager):
         return self._get_summary_stat('sum')
 
     def std(self, axis=None, skipna=None, level=None, ddof=1, numeric_only=True):
-        ''' 
-        Return the standard deviation of the values of each column 
+        '''
+        Return the standard deviation of the values of each column
 
         Parameters
         ----------
@@ -3657,7 +3660,7 @@ class CASTable(ParamManager, ActionParamManager):
 
     def var(self, axis=None, skipna=None, level=None, ddof=1, numeric_only=True):
         '''
-        Return the variance of the values of each column 
+        Return the variance of the values of each column
 
         Parameters
         ----------
@@ -3689,8 +3692,8 @@ class CASTable(ParamManager, ActionParamManager):
     # Not DataFrame methods, but they are available statistics.
 
     def nmiss(self):
-        ''' 
-        Return the number of missing values in each column 
+        '''
+        Return the number of missing values in each column
 
         Returns
         -------
@@ -3703,8 +3706,8 @@ class CASTable(ParamManager, ActionParamManager):
         return self._get_summary_stat('nmiss').astype(np.int64)
 
     def stderr(self):
-        ''' 
-        Return the standard error of the values of each column 
+        '''
+        Return the standard error of the values of each column
 
         Returns
         -------
@@ -3717,7 +3720,7 @@ class CASTable(ParamManager, ActionParamManager):
         return self._get_summary_stat('stderr')
 
     def uss(self):
-        ''' 
+        '''
         Return the uncorrected sum of squares of the values of each column
 
         Returns
@@ -3731,7 +3734,7 @@ class CASTable(ParamManager, ActionParamManager):
         return self._get_summary_stat('uss')
 
     def css(self):
-        ''' 
+        '''
         Return the corrected sum of squares of the values of each column
 
         Returns
@@ -3745,7 +3748,7 @@ class CASTable(ParamManager, ActionParamManager):
         return self._get_summary_stat('css')
 
     def cv(self):
-        ''' 
+        '''
         Return the coefficient of variation of the values of each column
 
         Returns
@@ -3760,7 +3763,7 @@ class CASTable(ParamManager, ActionParamManager):
 
     def tvalue(self):
         '''
-        Return the value of T-statistics for hypothesis testing of the values of each column
+        Return the T-statistics for hypothesis testing of the values of each column
 
         Returns
         -------
@@ -3773,7 +3776,7 @@ class CASTable(ParamManager, ActionParamManager):
         return self._get_summary_stat('tvalue')
 
     def probt(self):
-        ''' 
+        '''
         Return the p-value of the T-statistics of the values of each column
 
         Returns
@@ -3848,8 +3851,8 @@ class CASTable(ParamManager, ActionParamManager):
         if errors == 'raise':
             diff = labels.difference(set(columns))
             if diff:
-                raise IndexError('Requested name(s) do not exist in the column list: %s.' %
-                                 ', '.join(list(diff)))
+                raise IndexError('Requested name(s) do not exist in the '
+                                 'column list: %s.' % ', '.join(list(diff)))
 
         columns = [x for x in columns if x not in labels]
 
@@ -4087,14 +4090,14 @@ class CASTable(ParamManager, ActionParamManager):
     # Plotting
 
     def _fetch(self, grouped=False, **kwargs):
-        ''' 
+        '''
         Return the fetched DataFrame given the fetch parameters
 
         Parameters
         ----------
         grouped : boolean, optional
             Should the output DataFrame be returned as By groups?
-        
+
         Returns
         -------
         :class:`SASDataFrame`
@@ -4191,11 +4194,11 @@ class CASTable(ParamManager, ActionParamManager):
         fetched to the **client side**.  The data is then plotted using
         :meth:`pandas.DataFrame.plot`.
 
-        The ``plot`` attribute can be used as both a method and an 
+        The ``plot`` attribute can be used as both a method and an
         object.  When called as a method, the parameters are the same
         as :meth:`pandas.DataFrame.plot`.  When used as an attribute
         each of the plot types are available as methods.  For example,
-        ``tbl.plot(kind='bar')`` is equivalent to ``tbl.plot.bar()``. 
+        ``tbl.plot(kind='bar')`` is equivalent to ``tbl.plot.bar()``.
 
         Parameters
         ----------
@@ -4217,7 +4220,7 @@ class CASTable(ParamManager, ActionParamManager):
     def from_csv(cls, connection, path, *args, **kwargs):
         '''
         Create a CASTable from a CSV file
-        
+
         Parameters
         ----------
         connection : :class:`CAS`
@@ -4237,7 +4240,7 @@ class CASTable(ParamManager, ActionParamManager):
         Returns
         -------
         :class:`CASTable`
-        
+
         '''
         kwargs = kwargs.copy()
         kwargs.setdefault('index_col', 0)
@@ -4248,7 +4251,7 @@ class CASTable(ParamManager, ActionParamManager):
     def _from_any(cls, name, connection, data, *args, **kwargs):
         '''
         Upload data from various sources
-        
+
         Parameters
         ----------
         name : string
@@ -4265,7 +4268,7 @@ class CASTable(ParamManager, ActionParamManager):
         Returns
         -------
         :class:`CASTable`
-        
+
         '''
         from swat.cas.datamsghandlers import PandasDataFrame
         table, kwargs = connection._get_table_args(*args, **kwargs)
@@ -4283,7 +4286,7 @@ class CASTable(ParamManager, ActionParamManager):
     def from_dict(cls, connection, data, *args, **kwargs):
         '''
         Create a CASTable from a dictionary
-        
+
         Parameters
         ----------
         connection : :class:`CAS`
@@ -4302,7 +4305,7 @@ class CASTable(ParamManager, ActionParamManager):
         Returns
         -------
         :class:`CASTable`
-        
+
         '''
         return cls._from_any('dict', connection, data, *args, **kwargs)
 
@@ -4310,7 +4313,7 @@ class CASTable(ParamManager, ActionParamManager):
     def from_items(cls, connection, items, *args, **kwargs):
         '''
         Create a CASTable from a (key, value) pairs
-        
+
         Parameters
         ----------
         connection : :class:`CAS`
@@ -4330,7 +4333,7 @@ class CASTable(ParamManager, ActionParamManager):
         Returns
         -------
         :class:`CASTable`
-        
+
         '''
         return cls._from_any('items', connection, items, *args, **kwargs)
 
@@ -4338,12 +4341,12 @@ class CASTable(ParamManager, ActionParamManager):
     def from_records(cls, connection, data, *args, **kwargs):
         '''
         Create a CASTable from records
-        
+
         Parameters
         ----------
         connection : :class:`CAS`
             The :class:`CAS` connection to read the data into.
-        data : :func:`numpy.ndarray` (structured dtype), list-of-tuples,dict, or :class:`pandas.DataFrame`
+        data : :func:`numpy.ndarray`, list-of-tuples, dict, or :class:`pandas.DataFrame`
             The data to upload.
         *args : positional arguments
             Positional arguments sent to :meth:`pandas.DataFrame.from_records`.
@@ -4357,7 +4360,7 @@ class CASTable(ParamManager, ActionParamManager):
         Returns
         -------
         :class:`CASTable`
-        
+
         '''
         return cls._from_any('records', connection, data, *args, **kwargs)
 
@@ -4382,7 +4385,7 @@ class CASTable(ParamManager, ActionParamManager):
         See Also
         --------
         :meth:`pandas.DataFrame.info`
-        
+
         '''
         buf.write(u'%s\n' % self)
 
@@ -4429,7 +4432,7 @@ class CASTable(ParamManager, ActionParamManager):
     def to_frame(self, **kwargs):
         '''
         Retrieve entire table as a :class:`SASDataFrame`
-        
+
         Parameters
         ----------
         **kwargs : keyword arguments, optional
@@ -4438,14 +4441,14 @@ class CASTable(ParamManager, ActionParamManager):
         Returns
         -------
         :class:`SASDataFrame`
-        
+
         '''
         return self._fetchall(**kwargs)
 
     def _to_any(self, method, *args, **kwargs):
         '''
         Generic converter to various output types
-        
+
         Parameters
         ----------
         method : string
@@ -4468,8 +4471,8 @@ class CASTable(ParamManager, ActionParamManager):
         Return an :func:`numpy.xarray` from the CAS table
 
         This method creates an object on the **client side**.  This means
-        that **all of the data in the table must all be fetched**.  
-        If you want to save a file on the server side, use the 
+        that **all of the data in the table must all be fetched**.
+        If you want to save a file on the server side, use the
         ``table.save`` CAS action.
 
         Parameters
@@ -4491,8 +4494,8 @@ class CASTable(ParamManager, ActionParamManager):
         Pickle (serialize) the CAS table data
 
         This method writes a file on the **client side**.  This means
-        that **all of the data in the table must all be fetched**.  
-        If you want to save a file on the server side, use the 
+        that **all of the data in the table must all be fetched**.
+        If you want to save a file on the server side, use the
         ``table.save`` CAS action.
 
         Parameters
@@ -4514,8 +4517,8 @@ class CASTable(ParamManager, ActionParamManager):
         Write CAS table data to comma separated values (CSV)
 
         This method writes a file on the **client side**.  This means
-        that **all of the data in the table must all be fetched**.  
-        If you want to save a file on the server side, use the 
+        that **all of the data in the table must all be fetched**.
+        If you want to save a file on the server side, use the
         ``table.save`` CAS action.
 
         Parameters
@@ -4537,8 +4540,8 @@ class CASTable(ParamManager, ActionParamManager):
         Write CAS table data to HDF
 
         This method writes a file on the **client side**.  This means
-        that **all of the data in the table must all be fetched**.  
-        If you want to save a file on the server side, use the 
+        that **all of the data in the table must all be fetched**.
+        If you want to save a file on the server side, use the
         ``table.save`` CAS action.
 
         Parameters
@@ -4560,8 +4563,8 @@ class CASTable(ParamManager, ActionParamManager):
         Write CAS table records to SQL database
 
         This method depends on data on the **client side**.  This means
-        that **all of the data in the table must all be fetched**.  
-        If you want to save a file on the server side, use the 
+        that **all of the data in the table must all be fetched**.
+        If you want to save a file on the server side, use the
         ``table.save`` CAS action.
 
         Parameters
@@ -4583,8 +4586,8 @@ class CASTable(ParamManager, ActionParamManager):
         Convert CAS table data to a Python dictionary
 
         This method writes an object on the **client side**.  This means
-        that **all of the data in the table must all be fetched**.  
-        If you want to save a file on the server side, use the 
+        that **all of the data in the table must all be fetched**.
+        If you want to save a file on the server side, use the
         ``table.save`` CAS action.
 
         Parameters
@@ -4610,8 +4613,8 @@ class CASTable(ParamManager, ActionParamManager):
         Write CAS table data to an Excel spreadsheet
 
         This method writes a file on the **client side**.  This means
-        that **all of the data in the table must all be fetched**.  
-        If you want to save a file on the server side, use the 
+        that **all of the data in the table must all be fetched**.
+        If you want to save a file on the server side, use the
         ``table.save`` CAS action.
 
         Parameters
@@ -4633,8 +4636,8 @@ class CASTable(ParamManager, ActionParamManager):
         Convert the CAS table data to a JSON string
 
         This method writes a file on the **client side**.  This means
-        that **all of the data in the table must all be fetched**.  
-        If you want to save a file on the server side, use the 
+        that **all of the data in the table must all be fetched**.
+        If you want to save a file on the server side, use the
         ``table.save`` CAS action.
 
         Parameters
@@ -4656,8 +4659,8 @@ class CASTable(ParamManager, ActionParamManager):
         Render the CAS table data to an HTML table
 
         This method writes a file on the **client side**.  This means
-        that **all of the data in the table must all be fetched**.  
-        If you want to save a file on the server side, use the 
+        that **all of the data in the table must all be fetched**.
+        If you want to save a file on the server side, use the
         ``table.save`` CAS action.
 
         Parameters
@@ -4679,8 +4682,8 @@ class CASTable(ParamManager, ActionParamManager):
         Render the CAS table data to a LaTeX tabular environment
 
         This method writes a file on the **client side**.  This means
-        that **all of the data in the table must all be fetched**.  
-        If you want to save a file on the server side, use the 
+        that **all of the data in the table must all be fetched**.
+        If you want to save a file on the server side, use the
         ``table.save`` CAS action.
 
         Parameters
@@ -4702,8 +4705,8 @@ class CASTable(ParamManager, ActionParamManager):
         Write CAS table data to Stata file
 
         This method writes a file on the **client side**.  This means
-        that **all of the data in the table must all be fetched**.  
-        If you want to save a file on the server side, use the 
+        that **all of the data in the table must all be fetched**.
+        If you want to save a file on the server side, use the
         ``table.save`` CAS action.
 
         Parameters
@@ -4725,8 +4728,8 @@ class CASTable(ParamManager, ActionParamManager):
         Write CAS table data to msgpack object
 
         This method writes a file on the **client side**.  This means
-        that **all of the data in the table must all be fetched**.  
-        If you want to save a file on the server side, use the 
+        that **all of the data in the table must all be fetched**.
+        If you want to save a file on the server side, use the
         ``table.save`` CAS action.
 
         Parameters
@@ -4748,8 +4751,8 @@ class CASTable(ParamManager, ActionParamManager):
         Write CAS table data to a Google BigQuery table
 
         This method depends on data on the **client side**.  This means
-        that **all of the data in the table must all be fetched**.  
-        If you want to save a file on the server side, use the 
+        that **all of the data in the table must all be fetched**.
+        If you want to save a file on the server side, use the
         ``table.save`` CAS action.
 
         Parameters
@@ -4771,8 +4774,8 @@ class CASTable(ParamManager, ActionParamManager):
         Convert CAS table data to record array
 
         This method writes objects on the **client side**.  This means
-        that **all of the data in the table must all be fetched**.  
-        If you want to save a file on the server side, use the 
+        that **all of the data in the table must all be fetched**.
+        If you want to save a file on the server side, use the
         ``table.save`` CAS action.
 
         Parameters
@@ -4798,8 +4801,8 @@ class CASTable(ParamManager, ActionParamManager):
         Convert CAS table data to SparseDataFrame
 
         This method writes an object on the **client side**.  This means
-        that **all of the data in the table must all be fetched**.  
-        If you want to save a file on the server side, use the 
+        that **all of the data in the table must all be fetched**.
+        If you want to save a file on the server side, use the
         ``table.save`` CAS action.
 
         Parameters
@@ -4825,8 +4828,8 @@ class CASTable(ParamManager, ActionParamManager):
         Return dense representation of CAS table data
 
         This method writes an object on the **client side**.  This means
-        that **all of the data in the table must all be fetched**.  
-        If you want to save a file on the server side, use the 
+        that **all of the data in the table must all be fetched**.
+        If you want to save a file on the server side, use the
         ``table.save`` CAS action.
 
         Parameters
@@ -4852,8 +4855,8 @@ class CASTable(ParamManager, ActionParamManager):
         Render the CAS table to a console-friendly tabular output
 
         This method writes a string on the **client side**.  This means
-        that **all of the data in the table must all be fetched**.  
-        If you want to save a file on the server side, use the 
+        that **all of the data in the table must all be fetched**.
+        If you want to save a file on the server side, use the
         ``table.save`` CAS action.
 
         Parameters
@@ -4879,8 +4882,8 @@ class CASTable(ParamManager, ActionParamManager):
         Write the CAS table data to the clipboard
 
         This method writes the clipboard on the **client side**.  This means
-        that **all of the data in the table must all be fetched**.  
-        If you want to save a file on the server side, use the 
+        that **all of the data in the table must all be fetched**.
+        If you want to save a file on the server side, use the
         ``table.save`` CAS action.
 
         Parameters
@@ -5009,7 +5012,7 @@ class CASTable(ParamManager, ActionParamManager):
                 group_keys=True, squeeze=False, **kwargs):
         '''
         Specify grouping variables for the table
-        
+
         Parameters
         ----------
         by : string or list-of-strings
@@ -5032,7 +5035,7 @@ class CASTable(ParamManager, ActionParamManager):
         Returns
         -------
         :class:`CASTableGroupBy`
-        
+
         '''
         return CASTableGroupBy(self, by, axis=axis, level=level, as_index=as_index,
                                sort=sort, group_keys=group_keys, squeeze=squeeze,
@@ -5149,11 +5152,11 @@ class CharacterColumnMethods(object):
     def capitalize(self):
         '''
         Capitalize first letter, lowercase the rest
-        
+
         Returns
         -------
         :class:`CASColumn`
-        
+
         '''
         return self._compute('capitalize',
                              'upcase(substr({value}, 1, 1)) || ' +
@@ -5170,7 +5173,7 @@ class CharacterColumnMethods(object):
     def contains(self, pat, case=True, flags=0, na=np.nan, regex=True):
         '''
         Does the value contain the specified pattern?
-        
+
         Parameters
         ----------
         pat : string or :class:`CASColumn`
@@ -5191,7 +5194,7 @@ class CharacterColumnMethods(object):
         Returns
         -------
         :class:`CASColumn`
-        
+
         '''
         if regex:
             if isinstance(pat, CASColumn):
@@ -5213,14 +5216,14 @@ class CharacterColumnMethods(object):
     def count(self, pat, flags=0, **kwargs):
         '''
         Count occurrences of pattern in each value
-        
+
         Parameters
         ----------
         pat : string or :class:`CASColumn`
             The pattern to match.
         flags : int, optional
             Not implemented.
-    
+
         See Also
         --------
         :meth:`pandas.Series.str.count`
@@ -5228,7 +5231,7 @@ class CharacterColumnMethods(object):
         Returns
         -------
         :class:`CASColumn`
-        
+
         '''
         if flags & re.IGNORECASE:
             return self._compute('count', 'count({value}, {pat})', pat=pat)
@@ -5268,7 +5271,7 @@ class CharacterColumnMethods(object):
     def find(self, sub, start=0, end=None):
         '''
         Return lowest index of pattern in each value, or -1 on failure
-        
+
         Parameters
         ----------
         sub : string or :class:`CASColumn`
@@ -5285,7 +5288,7 @@ class CharacterColumnMethods(object):
         Returns
         -------
         :class:`CASColumn`
-        
+
         '''
         if end is None:
             return self._compute('find',
@@ -5301,7 +5304,7 @@ class CharacterColumnMethods(object):
 
         This method works the same way as :meth:`find` except that
         an exception is raised when the pattern is not found.
-        
+
         Parameters
         ----------
         sub : string or :class:`CASColumn`
@@ -5324,7 +5327,7 @@ class CharacterColumnMethods(object):
         ------
         ``ValueError``
             If the substring is not found in a data element
-        
+
         '''
         col = self.find(sub, start=start, end=end)
         if col[col < 0]._numrows:
@@ -5338,11 +5341,11 @@ class CharacterColumnMethods(object):
         See Also
         --------
         :meth:`pandas.Series.str.len`
-        
+
         Returns
         -------
         :class:`CASColumn`
-        
+
         '''
         return self._compute('len', 'lengthn({value})')
 
@@ -5353,21 +5356,21 @@ class CharacterColumnMethods(object):
         See Also
         --------
         :meth:`pandas.Series.str.lower`
-        
+
         Returns
         -------
         :class:`CASColumn`
-        
+
         '''
         return self._compute('lower', 'lowcase({value})', add_length=True)
 
     def lstrip(self, to_strip=None):
         '''
         Strip leading spaces
-        
+
         Parameters
         ----------
-        to_strip 
+        to_strip
             Not implemented.
 
         See Also
@@ -5377,14 +5380,14 @@ class CharacterColumnMethods(object):
         Returns
         -------
         :class:`CASColumn`
-        
+
         '''
         return self._compute('lstrip', 'strip({value})', add_length=True)
 
     def repeat(self, repeats):
         '''
         Duplicate value the specified number of times
-        
+
         Parameters
         ----------
         repeats : int
@@ -5397,7 +5400,7 @@ class CharacterColumnMethods(object):
         Returns
         -------
         :class:`CASColumn`
-        
+
         '''
         trim = ''
         if not re.match(r'^_\w+_[A-Za-z0-9]+_$', self._column.name):
@@ -5408,7 +5411,7 @@ class CharacterColumnMethods(object):
     def replace(self, pat, repl, n=-1, case=True, flags=0):
         '''
         Replace a pattern in the data
-        
+
         Parameters
         ----------
         pat : string or :class:`CASColumn`
@@ -5429,7 +5432,7 @@ class CharacterColumnMethods(object):
         Returns
         -------
         :class:`CASColumn`
-        
+
         '''
         if isinstance(pat, CASColumn) and isinstance(repl, CASColumn):
             rgx = "prxchange('s/'|| trim({pat}) ||'/' trim({repl}) || '/%s',{n},{value})"
@@ -5445,7 +5448,7 @@ class CharacterColumnMethods(object):
     def rfind(self, sub, start=0, end=None):
         '''
         Return highest index of the pattern
-        
+
         Parameters
         ----------
         sub : string or :class:`CASColumn`
@@ -5454,7 +5457,7 @@ class CharacterColumnMethods(object):
             Not implemented.
         end : int, optional
             Not implemented.
-        
+
         See Also
         --------
         :meth:`find`
@@ -5463,7 +5466,7 @@ class CharacterColumnMethods(object):
         Returns
         -------
         :class:`CASColumn`
-        
+
         '''
         # TODO: start / end
         return self._compute('find',
@@ -5473,7 +5476,7 @@ class CharacterColumnMethods(object):
     def rindex(self, sub, start=0, end=None):
         '''
         Return highest index of the pattern
-        
+
         Parameters
         ----------
         sub : string or :class:`CASColumn`
@@ -5491,7 +5494,7 @@ class CharacterColumnMethods(object):
         Returns
         -------
         :class:`CASColumn`
-        
+
         '''
         # TODO: start / end
         col = self.rfind(sub, start=start, end=end)
@@ -5507,18 +5510,18 @@ class CharacterColumnMethods(object):
         --------
         :meth:`strip`
         :meth:`pandas.Series.str.rstrip`
-        
+
         Returns
         -------
         :class:`CASColumn`
-        
+
         '''
         return self._compute('rstrip', 'trimn({value})', add_length=True)
 
     def slice(self, start=0, stop=None, step=None):
         '''
         Slice a substring from the value
-        
+
         Parameters
         ----------
         start : int, optional
@@ -5535,7 +5538,7 @@ class CharacterColumnMethods(object):
         Returns
         -------
         :class:`CAScolumn`
-        
+
         '''
         # TODO: step
         if stop is None:
@@ -5580,7 +5583,7 @@ class CharacterColumnMethods(object):
     def strip(self, to_strip=None):
         '''
         Strip leading and trailing whitespace
-        
+
         See Also
         --------
         :meth:`pandas.Series.str.strip`
@@ -5588,14 +5591,14 @@ class CharacterColumnMethods(object):
         Returns
         -------
         :class:`CASColumn`
-        
+
         '''
         return self._compute('strip', 'strip({value})', add_length=True)
 
     def title(self):
         '''
         Capitalize each word in the value
-        
+
         See Also
         --------
         :meth:`pandas.Series.str.title`
@@ -5603,29 +5606,29 @@ class CharacterColumnMethods(object):
         Returns
         -------
         :class:`CASColumn`
-        
+
         '''
         return self._compute('title', 'propcase({value})', add_length=True)
 
     def upper(self):
         '''
         Uppercase the value
-        
+
         See Also
         --------
         :meth:`pandas.Series.str.upper`
-        
+
         Returns
         -------
         :class:`CASColumn`
-        
+
         '''
         return self._compute('upper', 'upcase({value})', add_length=True)
 
     def isalnum(self):
         '''
         Does the value contain only alphanumeric characters?
-        
+
         See Also
         --------
         :meth:`pandas.Series.str.isalnum`
@@ -5633,14 +5636,14 @@ class CharacterColumnMethods(object):
         Returns
         -------
         :class:`CASColumn`
-        
+
         '''
         return self._compute('isalnum', 'notalnum({value}) < 1')
 
     def isalpha(self):
         '''
         Does the value contain only alpha characters?
-        
+
         See Also
         --------
         :meth:`pandas.Series.str.isalpha`
@@ -5648,14 +5651,14 @@ class CharacterColumnMethods(object):
         Returns
         -------
         :class:`CASColumn`
-        
+
         '''
         return self._compute('isalpha', 'notalpha({value}) < 1')
 
     def isdigit(self):
         '''
         Does the value contain only digits?
-        
+
         See Also
         --------
         :meth:`pandas.Series.str.isdigit`
@@ -5663,14 +5666,14 @@ class CharacterColumnMethods(object):
         Returns
         -------
         :class:`CASColumn`
-        
+
         '''
         return self._compute('isdigit', 'notdigit({value}) < 1')
 
     def isspace(self):
         '''
         Does the value contain only whitespace?
-        
+
         See Also
         --------
         :meth:`pandas.Series.str.isspace`
@@ -5678,14 +5681,14 @@ class CharacterColumnMethods(object):
         Returns
         -------
         :class:`CASColumn`
-        
+
         '''
         return self._compute('isspace', 'notspace({value}) < 1')
 
     def islower(self):
         '''
         Does the value contain only lowercase characters?
-        
+
         See Also
         --------
         :meth:`pandas.Series.str.islower`
@@ -5693,14 +5696,14 @@ class CharacterColumnMethods(object):
         Returns
         -------
         :class:`CASColumn`
-        
+
         '''
         return self._compute('islower', '(lowcase({value}) = {value})')
 
     def isupper(self):
         '''
         Does the value contain only uppercase characters?
-        
+
         See Also
         --------
         :meth:`pandas.Series.str.isupper`
@@ -5708,14 +5711,14 @@ class CharacterColumnMethods(object):
         Returns
         -------
         :class:`CASColumn`
-        
+
         '''
         return self._compute('isupper', '(upcase({value}) = {value})')
 
     def istitle(self):
         '''
         Is the value equivalent to the title representation?
-        
+
         See Also
         --------
         :meth:`pandas.Series.str.istitle`
@@ -5723,14 +5726,14 @@ class CharacterColumnMethods(object):
         Returns
         -------
         :class:`CASColumn`
-        
+
         '''
         return self._compute('istitle', '(propcase({value}) = {value})')
 
     def isnumeric(self):
         '''
         Does the value contain a numeric representation?
-        
+
         See Also
         --------
         :meth:`pandas.Series.str.isnumeric`
@@ -5738,14 +5741,14 @@ class CharacterColumnMethods(object):
         Returns
         -------
         :class:`CASColumn`
-        
+
         '''
         return self._compute('isnumeric', r"prxmatch('/^\s*\d+\s*$/', {value}) > 0")
 
     def isdecimal(self):
         '''
         Does the value contain a decimal representation?
-        
+
         See Also
         --------
         :meth:`pandas.Series.str.isdecimal`
@@ -5753,7 +5756,7 @@ class CharacterColumnMethods(object):
         Returns
         -------
         :class:`CASColumn`
-        
+
         '''
         return self._compute('isnumeric',
                              r"prxmatch('/^\s*(0?\.\d+|\d+(\.\d*)?)\s*$/', " +
@@ -5819,7 +5822,7 @@ class SASColumnMethods(object):
             Second shape parameter.
 
         Returns
-        ------- 
+        -------
         :class:`CASColumn`
 
         '''
@@ -5837,7 +5840,7 @@ class SASColumnMethods(object):
             Probability.
 
         Returns
-        ------- 
+        -------
         :class:`CASColumn`
 
         '''
@@ -5849,7 +5852,7 @@ class SASColumnMethods(object):
 #       Returns the first non-missing value from a list of numeric arguments
 
 #       Returns
-#       ------- 
+#       -------
 #       :class:`CASColumn`
 
 #       '''
@@ -5880,7 +5883,7 @@ class SASColumnMethods(object):
             Optional parameter for certain constant values.
 
         Returns
-        ------- 
+        -------
         :class:`CASColumn`
 
         '''
@@ -5894,7 +5897,7 @@ class SASColumnMethods(object):
         Computes the derivative of the AIRY function
 
         Returns
-        ------- 
+        -------
         :class:`CASColumn`
 
         '''
@@ -5911,20 +5914,20 @@ class SASColumnMethods(object):
 #           normal, gaussian, or poisson.
 
 #       Returns
-#       ------- 
+#       -------
 #       :class:`CASColumn`
 
 #       '''
 #       return self._compute('deviance',
-#                            'deviance({distribution}, {value}, {parameters})', 
+#                            'deviance({distribution}, {value}, {parameters})',
 #                            distribution=distribution, parameters=parameters)
-        
+
     def digamma(self):
         '''
         Computes the value of the digamma function
 
         Returns
-        ------- 
+        -------
         :class:`CASColumn`
 
         '''
@@ -5935,7 +5938,7 @@ class SASColumnMethods(object):
         Computes the value of the (normal) error function
 
         Returns
-        ------- 
+        -------
         :class:`CASColumn`
 
         '''
@@ -5946,7 +5949,7 @@ class SASColumnMethods(object):
         Computes the value of the complementary (normal) error function
 
         Returns
-        ------- 
+        -------
         :class:`CASColumn`
 
         '''
@@ -5957,7 +5960,7 @@ class SASColumnMethods(object):
         Computes the value of the exponential function
 
         Returns
-        ------- 
+        -------
         :class:`CASColumn`
 
         '''
@@ -5968,7 +5971,7 @@ class SASColumnMethods(object):
         Computes a factorial
 
         Returns
-        ------- 
+        -------
         :class:`CASColumn`
 
         '''
@@ -5985,10 +5988,10 @@ class SASColumnMethods(object):
         ddf : int
             Denominator degree of freedom parameter.
         prob : float
-            Probability. 
+            Probability.
 
         Returns
-        ------- 
+        -------
         :class:`CASColumn`
 
         '''
@@ -6000,7 +6003,7 @@ class SASColumnMethods(object):
         Computes the value of the gamma function
 
         Returns
-        ------- 
+        -------
         :class:`CASColumn`
 
         '''
@@ -6011,7 +6014,7 @@ class SASColumnMethods(object):
 #       Computes the greatest common divisor for one or more integers
 
 #       Returns
-#       ------- 
+#       -------
 #       :class:`CASColumn`
 
 #       '''
@@ -6022,7 +6025,7 @@ class SASColumnMethods(object):
 #       Computes the value of the modified Bessel function
 
 #       Returns
-#       ------- 
+#       -------
 #       :class:`CASColumn`
 
 #       '''
@@ -6034,7 +6037,7 @@ class SASColumnMethods(object):
 #       Computes the value of the Bessel function
 
 #       Returns
-#       ------- 
+#       -------
 #       :class:`CASColumn`
 
 #       '''
@@ -6045,7 +6048,7 @@ class SASColumnMethods(object):
 #       Computes the least common multiple
 
 #       Returns
-#       ------- 
+#       -------
 #       :class:`CASColumn`
 
 #       '''
@@ -6056,7 +6059,7 @@ class SASColumnMethods(object):
         Computes the natural logarithm of the Gamma function
 
         Returns
-        ------- 
+        -------
         :class:`CASColumn`
 
         '''
@@ -6067,7 +6070,7 @@ class SASColumnMethods(object):
         Computes the natural (base e) logarithm
 
         Returns
-        ------- 
+        -------
         :class:`CASColumn`
 
         '''
@@ -6078,7 +6081,7 @@ class SASColumnMethods(object):
         Computes the log of 1 plus the argument
 
         Returns
-        ------- 
+        -------
         :class:`CASColumn`
 
         '''
@@ -6089,7 +6092,7 @@ class SASColumnMethods(object):
         Computes the logarithm to the base 10
 
         Returns
-        ------- 
+        -------
         :class:`CASColumn`
 
         '''
@@ -6100,7 +6103,7 @@ class SASColumnMethods(object):
         Computes the logarithm to the base 2
 
         Returns
-        ------- 
+        -------
         :class:`CASColumn`
 
         '''
@@ -6116,7 +6119,7 @@ class SASColumnMethods(object):
             Second shape parameter.
 
         Returns
-        ------- 
+        -------
         :class:`CASColumn`
 
         '''
@@ -6132,7 +6135,7 @@ class SASColumnMethods(object):
            Divisor.
 
         Returns
-        ------- 
+        -------
         :class:`CASColumn`
 
         '''
@@ -6148,7 +6151,7 @@ class SASColumnMethods(object):
            Divisor.
 
         Returns
-        ------- 
+        -------
         :class:`CASColumn`
 
         '''
@@ -6159,7 +6162,7 @@ class SASColumnMethods(object):
 #       Returns the ordinate of a monotonicity-preserving interpolating spline
 
 #       Returns
-#       ------- 
+#       -------
 #       :class:`CASColumn`
 
 #       '''
@@ -6170,7 +6173,7 @@ class SASColumnMethods(object):
         Returns the sign of a value
 
         Returns
-        ------- 
+        -------
         :class:`CASColumn`
 
         '''
@@ -6181,7 +6184,7 @@ class SASColumnMethods(object):
         Computes the square root of a value
 
         Returns
-        ------- 
+        -------
         :class:`CASColumn`
 
         '''
@@ -6189,7 +6192,7 @@ class SASColumnMethods(object):
 
     def tnonct(self, df, prob):
         '''
-        Computes the value of the noncentrality parameter from the Student's t distribution
+        Computes the noncentrality parameter from the Student's t distribution
 
         Parameters
         ----------
@@ -6199,7 +6202,7 @@ class SASColumnMethods(object):
             Probability.
 
         Returns
-        ------- 
+        -------
         :class:`CASColumn`
 
         '''
@@ -6211,7 +6214,7 @@ class SASColumnMethods(object):
         Returns the value of the trigamma function
 
         Returns
-        ------- 
+        -------
         :class:`CASColumn`
 
         '''
@@ -6462,7 +6465,7 @@ class CASColumn(CASTable):
     def get(self, key, default=None):
         '''
         Get item from CASColumn for the given key
-        
+
         Parameters
         ----------
         key : int
@@ -6477,7 +6480,7 @@ class CASColumn(CASTable):
         Returns
         -------
         any
-        
+
         '''
         out = self._fetch(from_=key + 1, to=key + 1)
         try:
@@ -6522,7 +6525,7 @@ class CASColumn(CASTable):
             If inplace == True
         :class:`CASColumn`
             If inplace == False
-        
+
         '''
         return CASTable.sort_values(self, self.name, axis=axis, ascending=ascending,
                                     inplace=inplace, kind=kind, na_position=na_position)
@@ -6559,7 +6562,8 @@ class CASColumn(CASTable):
 
     def slice(self, start=0, stop=None, bygroup_as_index=True):
         ''' Return from rows from `start` to `stop` in a Series '''
-        return CASTable.slice(self, start=start, stop=stop, bygroup_as_index=bygroup_as_index)[self.name]
+        return CASTable.slice(self, start=start, stop=stop,
+                              bygroup_as_index=bygroup_as_index)[self.name]
 
     def nth(self, n, dropna=False, bygroup_as_index=True):
         ''' Return the nth row '''
@@ -6907,7 +6911,8 @@ class CASColumn(CASTable):
 
         opname = OPERATOR_NAMES.get(operator, operator)
         col = self._compute(opname, '(%s %s %s)' % (str(left), operator, str(right)),
-                            extra_computedvars=computedvars, extra_computedvarsprogram=computedvarsprogram)
+                            extra_computedvars=computedvars,
+                            extra_computedvarsprogram=computedvarsprogram)
         return col
 
     def abs(self):
@@ -7376,7 +7381,7 @@ class CASColumn(CASTable):
             Sort by values.
         ascending : boolean, optional
             If True, sort in ascending order.
-        bins : int, optional 
+        bins : int, optional
             Not implemented.
         dropna : boolean, optional
             If True, do not include missing values.
@@ -7749,7 +7754,7 @@ class CASTableGroupBy(object):
 
         Returns
         -------
-        list of strings 
+        list of strings
 
         '''
         return self._table.get_groupby_vars()
@@ -7762,7 +7767,7 @@ class CASTableGroupBy(object):
     def head(self, *args, **kwargs):
         '''
         Retrieve first values of each group
- 
+
         See Also
         --------
         :class:`CASTable.head`
@@ -7776,7 +7781,7 @@ class CASTableGroupBy(object):
     def tail(self, *args, **kwargs):
         '''
         Retrieve last values of each group
- 
+
         See Also
         --------
         :class:`CASTable.tail`
@@ -7790,7 +7795,7 @@ class CASTableGroupBy(object):
     def slice(self, *args, **kwargs):
         '''
         Retrieve requested values of each group
- 
+
         See Also
         --------
         :class:`CASTable.slice`
@@ -7802,7 +7807,7 @@ class CASTableGroupBy(object):
         return self._table.slice(*args, **kwargs)
 
     def to_frame(self, *args, **kwargs):
-        ''' 
+        '''
         Retrieve all values into a DataFrame
 
         See Also
@@ -8148,8 +8153,8 @@ class CASTableGroupBy(object):
 
         See Also
         --------
-        :meth:`CASTable.nlargest` 
-        :meth:`CASColumn.nlargest` 
+        :meth:`CASTable.nlargest`
+        :meth:`CASColumn.nlargest`
 
         '''
         if self._as_index:
@@ -8163,8 +8168,8 @@ class CASTableGroupBy(object):
 
         See Also
         --------
-        :meth:`CASTable.nsmallest` 
-        :meth:`CASColumn.nsmallest` 
+        :meth:`CASTable.nsmallest`
+        :meth:`CASColumn.nsmallest`
 
         '''
         if self._as_index:

@@ -211,7 +211,7 @@ class CASResults(RendererMixin, OrderedDict):
     Ordered collection of results from a CAS action
 
     The output of all CAS actions is a :class:`CASResults` object.
-    This is a Python ordered dictionary with a few methods added to 
+    This is a Python ordered dictionary with a few methods added to
     assist in handling the output keys, and attributes added to
     report information from the CAS action.
 
@@ -258,13 +258,15 @@ class CASResults(RendererMixin, OrderedDict):
     Accessing keys.
 
     >>> print(out['About'])
-    {'license': {'siteNum': 1, 'warningPeriod': 31, 'expires': '08Sep2016:00:00:00', ... }}
+    {'license': {'siteNum': 1, 'warningPeriod': 31,
+     'expires': '08Sep2016:00:00:00', ... }}
 
-    You can also access keys using attribute syntax as long as the 
+    You can also access keys using attribute syntax as long as the
     key name doesn't collide with an existing attribute or method.
 
     >>> print(out.About)
-    {'license': {'siteNum': 1, 'warningPeriod': 31, 'expires': '08Sep2016:00:00:00', ... }}
+    {'license': {'siteNum': 1, 'warningPeriod': 31,
+     'expires': '08Sep2016:00:00:00', ... }}
 
     Iterating over items.
 
@@ -281,7 +283,7 @@ class CASResults(RendererMixin, OrderedDict):
 
     >>> print(out.severity)
     0
-    
+
     >>> print(out.performance)
     CASPerformance(cpu_system_time=0.004999, cpu_user_time=0.020997,
                    data_movement_bytes=0, data_movement_time=0.0,
@@ -320,7 +322,7 @@ class CASResults(RendererMixin, OrderedDict):
         '''
         Return a :class:`CASResults` object of the By group set
 
-        Some CAS actions support multiple By group sets.  This 
+        Some CAS actions support multiple By group sets.  This
         method can be used to retrieve the values for a particular
         set index.
 
@@ -336,11 +338,11 @@ class CASResults(RendererMixin, OrderedDict):
         >>> out = tbl.mdsummary(sets=[dict(groupby=['Origin']),
                                       dict(groupby=['Cylinders'])])
 
-        Return the first By group set objects       
+        Return the first By group set objects
 
         >>> print(out.get_set(1))
 
-        Return the second By group set objects       
+        Return the second By group set objects
 
         >>> print(out.get_set(2))
 
@@ -356,7 +358,7 @@ class CASResults(RendererMixin, OrderedDict):
         prefix = 'ByGroupSet%s.' % num
         for key, value in six.iteritems(self):
             if key.startswith(prefix):
-                out[key.replace(prefix, '', 1)] = value 
+                out[key.replace(prefix, '', 1)] = value
 
         if out:
             return out
@@ -364,7 +366,7 @@ class CASResults(RendererMixin, OrderedDict):
         raise IndexError('No By group set matched the given index.')
 
     def get_group(_self_, *name, **kwargs):
-        ''' 
+        '''
         Return a :class:`CASResults` object of the specified By group tables
 
         Parameters
@@ -434,14 +436,14 @@ class CASResults(RendererMixin, OrderedDict):
                 if kwargs:
                     if attrs['ByVar%sValue' % i] != kwargs[byname] and \
                             attrs['ByVar%sValueFormatted' % i] != kwargs[byname]:
-                        match = False 
-                        break 
+                        match = False
+                        break
                 elif name:
                     try:
                         if attrs['ByVar%sValue' % i] != name[i-1] and \
                                 attrs['ByVar%sValueFormatted' % i] != name[i-1]:
-                            match = False 
-                            break 
+                            match = False
+                            break
                     except IndexError:
                         raise KeyError('No matching By group keys were found.')
                 i = i + 1
@@ -497,7 +499,8 @@ class CASResults(RendererMixin, OrderedDict):
             return [self[name]]
 
         if set is None and 'ByGroupSet1.ByGroupInfo' in self:
-            raise ValueError('Multiple By group sets exist, but no set index was specified.')
+            raise ValueError('Multiple By group sets exist, but no set '
+                             'index was specified.')
 
         out = []
         by_re = re.compile(r'^(ByGroupSet%s\.)?ByGroup\d+\.%s$' % (set, re.escape(name)))
@@ -522,7 +525,7 @@ class CASResults(RendererMixin, OrderedDict):
             else:
                 return pd.concat(out, **kwargs)
 
-        return out 
+        return out
 
     def concat_bygroups(self, inplace=False, **kwargs):
         '''
@@ -543,9 +546,9 @@ class CASResults(RendererMixin, OrderedDict):
 
         >>> print(list(out.keys()))
         ['ByGroupInfo', 'ByGroup1.Summary', 'ByGroup2.Summary', 'ByGroup3.Summary']
- 
+
         >>> out.concat_bygroups(inplace=True)
-        >>> print(list(out.keys())) 
+        >>> print(list(out.keys()))
         ['Summary']
 
         Returns

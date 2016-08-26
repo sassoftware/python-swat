@@ -103,7 +103,7 @@ class NotSupportedError(DatabaseError):
 
 def connect(dsn=None, user=None, password=None, host=None, port=0, database=None):
     '''
-    Return a new connection 
+    Return a new connection
 
     Parameters
     ----------
@@ -256,7 +256,7 @@ class Cursor(object):
     def _check_connection(self):
         ''' Verify that the connection still exists '''
         if self._connection is None:
-            self._raise_error(Error, 'Connection has been closed') 
+            self._raise_error(Error, 'Connection has been closed')
 
     def _retrieve(self, *args, **kwargs):
         ''' Retrieve the output of the action call '''
@@ -269,7 +269,7 @@ class Cursor(object):
                 self._raise_error(Error, out.status)
             return out
         except SWATError as exc:
-            self._raise_error(InterfaceError, str(exc))  
+            self._raise_error(InterfaceError, str(exc))
 
     def _reset_output(self):
         ''' Reset all variables between DB calls '''
@@ -291,7 +291,7 @@ class Cursor(object):
 
     @property
     def colnames(self):
-        ''' Return a tuple of column names ''' 
+        ''' Return a tuple of column names '''
         return self._colnames
 
     @property
@@ -305,7 +305,8 @@ class Cursor(object):
             self._description = None
             return
         colinfo = self._retrieve('table.columninfo', table=self._casout)['ColumnInfo']
-        colinfo = colinfo[['Column', 'Type', 'FormattedLength', 'RawLength', 'NFL', 'NFD']]
+        colinfo = colinfo[['Column', 'Type', 'FormattedLength',
+                           'RawLength', 'NFL', 'NFD']]
         colinfo['NullOK'] = colinfo.Type.isin(['double'])
         self._colnames = tuple(colinfo['Column'].tolist())
         self._coltypes = tuple(colinfo['Type'].tolist())
@@ -356,7 +357,7 @@ class Cursor(object):
         return self._casout
 
     def _format_params(self, parameters):
-        ''' Format parameters for use in a query ''' 
+        ''' Format parameters for use in a query '''
         if not parameters:
             return []
         keys = []
@@ -423,8 +424,8 @@ class Cursor(object):
         if self._casout is None:
             return
         out = self._retrieve('table.fetch', table=self._casout,
-                                        from_=self._rowid, to=self._rowid,
-                                        sastypes=False, noindex=True)
+                             from_=self._rowid, to=self._rowid,
+                             sastypes=False, noindex=True)
         self.messages.extend(out.messages)
         self._rowid += 1
         if self._rowid > self.rowcount:
@@ -441,9 +442,9 @@ class Cursor(object):
         if size is None:
             size = max(self.arraysize, 1)
         out = self._retrieve('table.fetch', table=self._casout,
-                                        from_=self._rowid,
-                                        to=self._rowid + size,
-                                        sastypes=False, noindex=True)
+                             from_=self._rowid,
+                             to=self._rowid + size,
+                             sastypes=False, noindex=True)
         self.messages.extend(out.messages)
         self._rowid += size
         if self._rowid > self.rowcount:
@@ -458,8 +459,8 @@ class Cursor(object):
         if self._casout is None:
             return
         out = self._retrieve('table.fetch', table=self._casout,
-                                        from_=self._rowid, to=self.rowcount,
-                                        sastypes=False, noindex=True)
+                             from_=self._rowid, to=self.rowcount,
+                             sastypes=False, noindex=True)
         self.messages.extend(out.messages)
         self._retrieve('table.droptable', table=self._casout)
         self._casout = None
@@ -476,7 +477,7 @@ class Cursor(object):
 
     def setoutputsize(self, size, column):
         ''' Set output sizes '''
-        return 
+        return
 
     @property
     def connection(self):
@@ -531,7 +532,7 @@ def Date(year, month, day):
 
 
 def Time(hour, minute, second):
-    ''' Construct a time value ''' 
+    ''' Construct a time value '''
     return datetime.time(hour, minute, second)
 
 

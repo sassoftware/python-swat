@@ -8,13 +8,23 @@ The SWAT package can be installed using standard Python tools.  This includes bo
 and ``conda``.  The packages work with Python 2.7 and Python 3.4+.
 
 Before installing, you should make sure that you have fulfilled the following
-requirements:
+requirements.  These requirements are for the CAS binary protocol (recommended).
 
-* **64-bit** Python 2.7 or **64-bit** Python 3.4+
+* **64-bit** Python 2.7+/3.4+ on Linux
 * Pandas 0.16.0+
 
-Also, this package is merely a client to a CAS server.  It has no utility unless you 
-have a licensed CAS server to connect to.
+**The binary protocol requires pre-compiled components found in the Pip Wheel
+files and Conda installers only.  These pieces are not available as source code and
+are under a separate license.**  The binary protocol offers better performance
+than REST, especially when transferring larger amounts of data.  It also offers
+more advanced data loading from the client and data formatting features.
+
+To access the CAS REST interface only, you can use the pure Python code which
+runs in Python 2.7+/3.4+.  While not as fast as the binary protocol, the pure Python
+interface is more portable.
+
+Note tha this package is merely a client to a CAS server.  It has no utility unless
+you have a licensed CAS server to connect to.
 
 Conda
 -----

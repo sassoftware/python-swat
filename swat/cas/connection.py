@@ -179,7 +179,7 @@ class CAS(object):
 
     If you use an authinfo file and it is in your home directory, you don't
     have to specify any username or password.  You can override the authinfo
-    file location with the authinfo= parameter.  This form also works for 
+    file location with the authinfo= parameter.  This form also works for
     Kerberos authentication.
 
     >>> conn = swat.CAS('mycashost.com', 12345)
@@ -200,7 +200,7 @@ class CAS(object):
 
     >>> conn = swat.CAS('mycashost.com', 12345, locale='es_US')
 
-    To limit the number of worker nodes in a grid, you use the nworkers= 
+    To limit the number of worker nodes in a grid, you use the nworkers=
     parameter.
 
     >>> conn = swat.CAS('mycashost.com', 12345, nworkers=4)
@@ -500,14 +500,14 @@ class CAS(object):
         return name in self._action_classes
 
     def has_actionset(self, name):
-        ''' 
+        '''
         Does the given actionset name exist?
 
         Parameters
         ----------
         name : string
             The name of the CAS action set to look for.
- 
+
         Returns
         -------
         boolean
@@ -906,7 +906,7 @@ class CAS(object):
         uses_inputs = False
         uses_fetchvars = False
         for param in parmlist:
-            ptype = param['parmType']         
+            ptype = param['parmType']
             key = param['name']
             key = casekeys.get(key, key)
             key_lower = key.lower()
@@ -966,8 +966,8 @@ class CAS(object):
                 if not uses_inputs:
                     if inputs:
                         if 'vars' not in kwargs:
-                             kwargs[key]['vars'] = inputs
-                    inputs = None 
+                            kwargs[key]['vars'] = inputs
+                    inputs = None
 
         # Apply input variables
         if uses_inputs and inputs and 'inputs' not in kwargs:
@@ -1074,16 +1074,16 @@ class CAS(object):
         This method is a thin wrapper around the `table.upload` CAS action.
         The primary difference between this data loader and the other data
         loaders on this class is that, in this case, the parsing of the data
-        is done on the server.  This method simply uploads the file as 
+        is done on the server.  This method simply uploads the file as
         binary data which is then parsed by `table.loadtable` on the server.
 
         While the server parsers may not be quite a flexible as Python, they
-        are generally much faster.  Files such as CSV can be parsed on the 
+        are generally much faster.  Files such as CSV can be parsed on the
         server in multiple threads across many machines in the grid.
 
         Notes
         -----
-        This method uses paths that are on the **client side**.  This means 
+        This method uses paths that are on the **client side**.  This means
         you need to use paths to files that are **on the same machine that Python
         is running on**.  If you want to load files from the CAS server side, you
         would use the `table.loadtable` action.
@@ -1188,7 +1188,8 @@ class CAS(object):
         else:
             resp = errorcheck(self._sw_connection.upload(a2n(filename),
                                                          py2cas(self._soptions,
-                                                                self._sw_error, **kwargs)),
+                                                                self._sw_error,
+                                                                **kwargs)),
                               self._sw_connection)
 
         # Remove temporary file as needed
@@ -1203,7 +1204,7 @@ class CAS(object):
     def upload_file(self, data, importoptions=None, casout=None):
         '''
         Upload a client-side data file to CAS and parse it into a CAS table
-        
+
         Parameters
         ----------
         data : string
@@ -1228,7 +1229,7 @@ class CAS(object):
     def upload_frame(self, data, importoptions=None, casout=None):
         '''
         Upload a client-side data file to CAS and parse it into a CAS table
-        
+
         Parameters
         ----------
         data : :class:`pandas.DataFrame`
@@ -1876,7 +1877,7 @@ class CAS(object):
 
         Notes
         -----
-        The path specified must exist on the **server side**.  For loading 
+        The path specified must exist on the **server side**.  For loading
         data from the client side, see the ``read_*`` and :meth:`upload` methods.
 
         Examples
@@ -1984,7 +1985,7 @@ class CAS(object):
                 caslib : string, optional
                     CASLib for the output CAS table.
                 label : string, optional
-                    The label to apply to the output CAS table. 
+                    The label to apply to the output CAS table.
                 promote : boolean, optional
                     If True, the output CAS table will be visible in all sessions.
                 replace : boolean, optional
@@ -2005,7 +2006,7 @@ class CAS(object):
 
         See Also
         --------
-        :func:`pandas.read_pickle` 
+        :func:`pandas.read_pickle`
 
         Returns
         -------
@@ -2041,7 +2042,7 @@ class CAS(object):
                     table with the same name.
         **kwargs : any, optional
             Keyword arguments to :func:`pandas.read_table`.
-      
+
         Notes
         -----
         Paths to specified files point to files on the client machine.
@@ -2054,7 +2055,7 @@ class CAS(object):
 
         See Also
         --------
-        :func:`pandas.read_table` 
+        :func:`pandas.read_table`
         :meth:`upload_file`
 
         Returns
@@ -2558,7 +2559,7 @@ class CAS(object):
         -----
         The data from the database will be pulled to the client machine
         in the form of a :class:`pandas.DataFrame` then uploaded to CAS.
-        If you are moving large amounts of data, you may want to use 
+        If you are moving large amounts of data, you may want to use
         a direct database connecter from CAS.
 
         See Also
@@ -2614,7 +2615,7 @@ class CAS(object):
         -----
         The data from the database will be pulled to the client machine
         in the form of a :class:`pandas.DataFrame` then uploaded to CAS.
-        If you are moving large amounts of data, you may want to use 
+        If you are moving large amounts of data, you may want to use
         a direct database connecter from CAS.
 
         See Also

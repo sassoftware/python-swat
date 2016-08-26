@@ -52,12 +52,14 @@ def _import_pyswat():
         libname = '_pyswat'
 
     try:
-        _pyswat = importlib.import_module('.lib.%s.%s' % (platform, libname), package='swat')
+        _pyswat = importlib.import_module('.lib.%s.%s' % (platform, libname),
+                                          package='swat')
 
     except ImportError:
         raise ValueError(('Could not import import %s.  This is likely due to an '
-                          'incorrect TK path or an error while loading the TK subsystem. ' 
-                          'Try using the HTTP port for the REST interface.') % libname)
+                          'incorrect TK path or an error while loading the TK '
+                          'subsystem. Try using the HTTP port for the REST '
+                          'interface.') % libname)
 
 
 def SW_CASConnection(*args, **kwargs):

@@ -59,8 +59,6 @@ Call an action from the library
 
 from __future__ import print_function, division, absolute_import, unicode_literals
 
-__version__ = '1.0.0'
-
 # Configuration
 from . import config
 from .config import (set_option, get_option, reset_option, describe_option,
@@ -82,3 +80,5 @@ from .exceptions import SWATError, SWATOptionError, SWATCASActionError
 
 # SAS Formatter
 from .formatter import SASFormatter
+
+__version__ = '1.0.0'

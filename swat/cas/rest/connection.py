@@ -205,7 +205,7 @@ class REST_CASConnection(object):
         try:
             if session:
                 res = self._req_sess.get(urllib.parse.urljoin(self._baseurl,
-                                        'cas/sessions/%s' % session), data=b'')
+                                         'cas/sessions/%s' % session), data=b'')
                 self._session = json.loads(a2u(res.text, 'utf-8'))['uuid']
             else:
                 res = self._req_sess.put(urllib.parse.urljoin(self._baseurl,
@@ -215,7 +215,7 @@ class REST_CASConnection(object):
                 if locale:
                     self.invoke('session.setlocale', dict(locale=locale))
                     if self._results.get('disposition').get('severity', '') == 'Error':
-                        raise SWATError(self._results.get('disposition') \
+                        raise SWATError(self._results.get('disposition')
                                         .get('formattedStatus',
                                              'Invalid locale: %s' % locale))
                     self._results.clear()
@@ -255,8 +255,8 @@ class REST_CASConnection(object):
 
         try:
             res = self._req_sess.post(urllib.parse.urljoin(self._baseurl,
-                                      'cas/sessions/%s/actions/%s' %
-                                      (self._session, action_name)),
+                                                           'cas/sessions/%s/actions/%s' %
+                                                           (self._session, action_name)),
                                       data=post_data)
             res = res.text
         except Exception as exc:
@@ -266,7 +266,7 @@ class REST_CASConnection(object):
             self._results = json.loads(a2u(res, 'utf-8'), strict=False)
             if self._results.get('disposition', None) is None:
                 if self._results.get('error'):
-                    raise SWATError(self._results['error']) 
+                    raise SWATError(self._results['error'])
                 else:
                     raise SWATError('Unknown error')
         except ValueError as exc:
@@ -355,9 +355,10 @@ class REST_CASConnection(object):
             'JSON-Parameters': json.dumps(_normalize_params(params))
         })
         try:
-            res = self._req_sess.put(urllib.parse.urljoin(self._baseurl,
-                                                          'cas/sessions/%s/actions/upload' %
-                                                          self._session), data=data)
+            res = self._req_sess.put(
+                      urllib.parse.urljoin(self._baseurl,
+                                           'cas/sessions/%s/actions/upload' %
+                                           self._session), data=data)
             res = res.text
         except Exception as exc:
             raise SWATError(str(exc))

@@ -225,8 +225,9 @@ def ctb2tabular(_sw_table, soptions='', connection=None):
                 nitems = check(_sw_table.getAttributeNItems(), _sw_table)
                 attrs[ukey] = []
                 for i in range(nitems):
-                    attrs[ukey].append(check(_sw_table.getIntDoubleArrayAttributeItem(key, i),
-                                             _sw_table))
+                    attrs[ukey].append(check(
+                        _sw_table.getIntDoubleArrayAttributeItem(key, i),
+                        _sw_table))
     kwargs['attrs'] = attrs
 
     ncolumns = check(_sw_table.getNColumns(), _sw_table)
@@ -315,10 +316,14 @@ def ctb2tabular(_sw_table, soptions='', connection=None):
     cdf.columns = [a2u(x[0], 'utf-8') for x in dtypes]
 
     # Check for By group information
-    cdf = cdf.reshape_bygroups(bygroup_columns=get_option('cas.dataset.bygroup_columns'),
-                               bygroup_as_index=get_option('cas.dataset.bygroup_as_index'),
-                               bygroup_formatted_suffix=get_option('cas.dataset.bygroup_formatted_suffix'),
-                               bygroup_collision_suffix=get_option('cas.dataset.bygroup_collision_suffix'))
+    optbycol = get_option('cas.dataset.bygroup_columns')
+    optbyidx = get_option('cas.dataset.bygroup_as_index')
+    optbysfx = get_option('cas.dataset.bygroup_formatted_suffix')
+    optbycolsfx = get_option('cas.dataset.bygroup_collision_suffix')
+    cdf = cdf.reshape_bygroups(bygroup_columns=optbycol,
+                               bygroup_as_index=optbyidx,
+                               bygroup_formatted_suffix=optbysfx,
+                               bygroup_collision_suffix=optbycolsfx)
 
     # Add an index as needed
     index = get_option('cas.dataset.index_name')
@@ -342,7 +347,6 @@ def ctb2tabular(_sw_table, soptions='', connection=None):
                     cdf.index.names = names
                 # Only set one index
                 break
-
 
     # Detect casout tables
     if not(tablename) and unknownname and columnscol and rowscol:

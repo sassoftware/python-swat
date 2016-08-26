@@ -65,6 +65,7 @@ class SWATInstaller(install):
         elif not has_tk():
             print('')
             print('NOTE: Only the REST interface is supported with the pure Python installation.')
+            print('      Currently, only Linux installations support the binary protocol.')
             print('      Use the pip or conda installers for binary protocol support.')
             print('')
             install.run(self)

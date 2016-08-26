@@ -165,10 +165,11 @@ def reshape_bygroups(items, bygroup_columns='formatted',
     out = []
     for item in items:
         if hasattr(item, 'reshape_bygroups'):
-            out.append(item.reshape_bygroups(bygroup_columns=bygroup_columns,
-                                             bygroup_as_index=bygroup_as_index,
-                                             bygroup_formatted_suffix=bygroup_formatted_suffix,
-                                             bygroup_collision_suffix=bygroup_collision_suffix))
+            out.append(
+                item.reshape_bygroups(bygroup_columns=bygroup_columns,
+                                      bygroup_as_index=bygroup_as_index,
+                                      bygroup_formatted_suffix=bygroup_formatted_suffix,
+                                      bygroup_collision_suffix=bygroup_collision_suffix))
         else:
             out.append(item)
     return out
@@ -833,8 +834,11 @@ class SASDataFrame(pd.DataFrame):
 
         attrs = dframe.attrs
 
-        attrs.setdefault('ByGroupMode', 'attributes') # 'attributes', 'index', or 'columns'
-        attrs.setdefault('ByGroupColumns', 'none') # 'none', 'raw', 'formatted', or 'both'
+        # 'attributes', 'index', or 'columns'
+        attrs.setdefault('ByGroupMode', 'attributes')
+
+        # 'none', 'raw', 'formatted', or 'both'
+        attrs.setdefault('ByGroupColumns', 'none')
 
         # Short circuit if possible
         if bygroup_columns == attrs['ByGroupColumns']:
@@ -900,7 +904,8 @@ class SASDataFrame(pd.DataFrame):
                 sasfmt = attrs.get(bykey + 'Format')
                 sasfmtwidth = split_format(sasfmt).width
                 if bygroup_columns == 'both' or bygroup_columns == 'raw':
-                    dframe = dframe.set_index(pd.Series(data=[byval] * len(dframe), name=byname),
+                    dframe = dframe.set_index(pd.Series(data=[byval] * len(dframe),
+                                                        name=byname),
                                               append=appendlevels)
                     dframe.colinfo[byname] = SASColumnSpec(byname, label=bylabel,
                                                            dtype=dtype_from_var(byval),
@@ -911,7 +916,8 @@ class SASDataFrame(pd.DataFrame):
                 if bygroup_columns == 'both' or bygroup_columns == 'formatted':
                     if bygroup_columns == 'both':
                         byname = byname + bygroup_formatted_suffix
-                    dframe = dframe.set_index(pd.Series(data=[byvalfmt] * len(dframe), name=byname),
+                    dframe = dframe.set_index(pd.Series(data=[byvalfmt] * len(dframe),
+                                                        name=byname),
                                               append=appendlevels)
                     dframe.colinfo[byname] = SASColumnSpec(byname, label=bylabel,
                                                            dtype='varchar',

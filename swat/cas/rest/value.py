@@ -47,7 +47,7 @@ def _value2python(_value, soptions, errors, connection,
                                      ctb2tabular, b64decode, cas2python_datetime,
                                      cas2python_date, cas2python_time)
         return out
-          
+
     if isinstance(_value, items_types):
         out = []
         for i, value in enumerate(_value):

@@ -938,59 +938,53 @@ def dvar(name, **kwargs):
     dict
 
     '''
-    return dict(name=name, **kwargs)    
+    return dict(name=name, **kwargs)
 
 
 class terms(dict):
-   '''
-   A combination of terms in an effect list
+    ''' A combination of terms in an effect list '''
 
-   '''
+    def __init__(self, *terms, **kwargs):
+        self['eff'] = []
+        for term in terms:
+            for eff in term['eff']:
+                self['eff'].append(eff)
+        self['flags'] = kwargs.get('flags', 'individual')
+        self['maxinteract'] = max(0, int(kwargs.get('maxinteract', 0)))
 
-   def __init__(self, *terms, **kwargs):
-       self['eff'] = []
-       for term in terms:
-           for eff in term['eff']:
-               self['eff'].append(eff)
-       self['flags'] = kwargs.get('flags', 'individual')
-       self['maxinteract'] = max(0, int(kwargs.get('maxinteract', 0)))
+    def __or__(self, other):
+        return terms(self, other, flags='bar')
 
-   def __or__(self, other):
-       return terms(self, other, flags='bar')
+    def __mul__(self, other):
+        return terms(self, other, flags='cross')
 
-   def __mul__(self, other):
-       return terms(self, other, flags='cross')
+    def __lt__(self, other):
+        return terms(self, flags=self['flags'],
+                     maxinteract=int(other) - 1)
 
-   def __lt__(self, other):
-       return terms(self, flags=self['flags'],
-                    maxinteract=int(other) - 1)
-
-   def __le__(self, other):
-       return terms(self, flags=self['flags'],
-                    maxinteract=int(other))
+    def __le__(self, other):
+        return terms(self, flags=self['flags'],
+                     maxinteract=int(other))
 
 
 class term(dict):
-   '''
-   A term of an effect list
+    ''' A term of an effect list '''
 
-   '''
+    def __init__(self, name, nest=None):
+        if nest:
+            if isinstance(nest, term):
+                nest = nest['eff']['varlist']
+            elif not isinstance(nest, (list, tuple, set)):
+                nest = [nest]
+            self['eff'] = [dict(varlist=[name], nest=nest)]
+            return
+        self['eff'] = [dict(varlist=[name])]
 
-   def __init__(self, name, nest=None):
-       if nest:
-           if isinstance(nest, term):
-               nest = nest['eff']['varlist']
-           elif not isinstance(nest, (list, tuple, set)):
-               nest = [nest]
-           self['eff'] = [dict(varlist=[name], nest=nest)]
-           return
-       self['eff'] = [dict(varlist=[name])]
+    def __or__(self, other):
+        return terms(self, other, flags='bar')
 
-   def __or__(self, other):
-       return terms(self, other, flags='bar')
-
-   def __mul__(self, other):
-       return terms(self, other, flags='cross')
+    def __mul__(self, other):
+        return terms(self, other, flags='cross')
 
 
 def collection(name, *varlist, **kwargs):
@@ -1001,7 +995,7 @@ def collection(name, *varlist, **kwargs):
     ----------
     name : string
         Specifies the name of the effect
-    *varlist : one or more strings  
+    *varlist : one or more strings
         Defines a set of variables that are treated as a single effect
         with multiple degrees of freedom. The columns in the design
         matrix that are contributed by a collection effect are the design
