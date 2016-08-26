@@ -6778,13 +6778,15 @@ class CASColumn(CASTable):
         ''' Return a boolean CASColumn indicating if the value is in the given values '''
         if not isinstance(values, items_types):
             values = [values]
-        return self._compute('isin', '({value} in {values})', values=values)
+        return self._compute('isin', '({value} in {values})',
+                             values=values, eval_values=True)
 
     def __invert__(self):
         return self._compute('invert', '(^({value}))')
 
     def _compute(self, funcname, code, use_quotes=True, extra_computedvars=None,
-                 extra_computedvarsprogram=None, add_length=False, dtype=None, **kwargs):
+                 extra_computedvarsprogram=None, add_length=False, dtype=None,
+                 eval_values=False, **kwargs):
         '''
         Create a computed column from given expression
 
@@ -6807,10 +6809,13 @@ class CASColumn(CASTable):
             Add a 'length varname varchar(*)' for the output variable
         dtype : string, optional
             The output data type for the computed value
+        eval_values : boolean, optional
+            Should the values of CASColumn / Series values be evaluated
+            before being substituted?
 
         Returns
         -------
-        CASColumn object
+        :class:`CASColumn`
 
         '''
         out = self.copy()
@@ -6837,6 +6842,8 @@ class CASColumn(CASTable):
             computedvarsprogram.append(extra_computedvarsprogram)
 
         for key, value in six.iteritems(kwargs):
+            if eval_values and isinstance(value, (CASColumn, pd.Series)):
+                value = value.unique().tolist()
             if isinstance(value, CASColumn):
                 aexpr, acomputedvars, acomputedvarsprogram = value._to_expression()
                 computedvars.append(acomputedvars)
@@ -6848,7 +6855,14 @@ class CASColumn(CASTable):
             elif isinstance(value, items_types):
                 items = []
                 for item in value:
-                    if isinstance(item, CASColumn):
+                    if eval_values and isinstance(item, (CASColumn, pd.Series)):
+                        for subitem in item.unique().tolist():
+                            if isinstance(subitem, text_types) or \
+                                isinstance(subitem, binary_types):
+                                items.append('"%s"' % _escape_string(subitem))
+                            else:
+                                items.append(str(subitem))
+                    elif isinstance(item, CASColumn):
                         aexpr, acomputedvars, acomputedvarsprogram = item._to_expression()
                         computedvars.append(acomputedvars)
                         computedvarsprogram.append(acomputedvarsprogram)

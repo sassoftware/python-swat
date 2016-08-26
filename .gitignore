@@ -9,3 +9,4 @@ generated/
 *.dll
 *.dylib
 *.old
+*.bak
