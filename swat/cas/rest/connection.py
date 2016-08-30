@@ -198,7 +198,7 @@ class REST_CASConnection(object):
         self._req_sess = requests.Session()
         self._req_sess.headers.update({
             'Content-Type': 'application/json',
-            'Content-Length': 0,
+            'Content-Length': '0',
             'Authorization': self._auth,
         })
 
@@ -206,11 +206,17 @@ class REST_CASConnection(object):
             if session:
                 res = self._req_sess.get(urllib.parse.urljoin(self._baseurl,
                                          'cas/sessions/%s' % session), data=b'')
-                self._session = json.loads(a2u(res.text, 'utf-8'))['uuid']
+                out = json.loads(a2u(res.text, 'utf-8'))
+                if res.status_code != 200 and 'error' in out:
+                    raise SWATError(out['error'])
+                self._session = out['uuid']
             else:
                 res = self._req_sess.put(urllib.parse.urljoin(self._baseurl,
                                          'cas/sessions'), data=b'')
-                self._session = json.loads(a2u(res.text, 'utf-8'))['session']
+                out = json.loads(a2u(res.text, 'utf-8'))
+                if res.status_code != 200 and 'error' in out:
+                    raise SWATError(out['error'])
+                self._session = out['session']
 
                 if locale:
                     self.invoke('session.setlocale', dict(locale=locale))
@@ -250,7 +256,7 @@ class REST_CASConnection(object):
         post_data = a2u(kwargs).encode('utf-8')
         self._req_sess.headers.update({
             'Content-Type': 'application/json',
-            'Content-Length': len(post_data),
+            'Content-Length': str(len(post_data)),
         })
 
         try:
@@ -338,7 +344,7 @@ class REST_CASConnection(object):
         if self._session and self._req_sess is not None:
             self._req_sess.headers.update({
                 'Content-Type': 'application/json',
-                'Content-Length': 0,
+                'Content-Length': '0',
             })
             res = self._req_sess.delete(urllib.parse.urljoin(self._baseurl,
                                         'cas/sessions/%s' % self._session), data=b'')
@@ -351,7 +357,7 @@ class REST_CASConnection(object):
             data = datafile.read()
         self._req_sess.headers.update({
             'Content-Type': 'application/octet-stream',
-            'Content-Length': len(data),
+            'Content-Length': str(len(data)),
             'JSON-Parameters': json.dumps(_normalize_params(params))
         })
         try:
