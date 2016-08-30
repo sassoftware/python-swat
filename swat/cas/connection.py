@@ -1179,7 +1179,9 @@ class CAS(object):
 
         if casout is None:
             casout = {}
-        if isinstance(casout, (dict, ParamManager)) and 'name' not in casout:
+        if isinstance(casout, CASTable):
+            casout = casout.to_outtable_params()
+        if isinstance(casout, dict) and 'name' not in casout:
             casout['name'] = name
         kwargs['casout'] = casout
 
@@ -1843,7 +1845,9 @@ class CAS(object):
         out = {}
         kwargs = kwargs.copy()
         casout = kwargs.pop('casout', {})
-        if not isinstance(casout, dict):
+        if isinstance(casout, CASTable):
+            casout = casout.to_outtable_params()
+        elif not isinstance(casout, dict):
             casout = dict(name=casout)
         out['table'] = casout.get('name', None)
         out['caslib'] = casout.get('caslib', None)
