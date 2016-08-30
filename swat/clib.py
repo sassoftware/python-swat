@@ -35,7 +35,9 @@ def _import_pyswat():
     ''' Import version-specific _pyswat package '''
     global _pyswat
 
+    import glob
     import importlib
+    import os
     import sys
 
     platform = 'linux'
@@ -51,6 +53,21 @@ def _import_pyswat():
     else:
         libname = '_pyswat'
 
+    # Bail out if we aren't on Linux
+    if platform != 'linux':
+        raise ValueError('Currently, Linux is the only platform with support '
+                         'for the binary protocol.  You must connect to CAS '
+                         'using the REST interface on this platform.')
+
+    # Bail out if the C extension doesn't exist
+    if not glob.glob(os.path.join(os.path.dirname(__file__), 'lib',
+                                  platform, libname + '.*')):
+        raise ValueError('The extensions for the binary protocol have not been '
+                         'installed.  You can either install them using the full '
+                         'pip or conda installers, or use the REST interface '
+                         'as an alternative.')
+
+    # Try to import the C extension
     try:
         _pyswat = importlib.import_module('.lib.%s.%s' % (platform, libname),
                                           package='swat')
@@ -58,8 +75,8 @@ def _import_pyswat():
     except ImportError:
         raise ValueError(('Could not import import %s.  This is likely due to an '
                           'incorrect TK path or an error while loading the TK '
-                          'subsystem. Try using the HTTP port for the REST '
-                          'interface.') % libname)
+                          'subsystem. You can try using the REST interface '
+                          'as an alternative.') % libname)
 
 
 def SW_CASConnection(*args, **kwargs):
