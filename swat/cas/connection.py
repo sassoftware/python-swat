@@ -206,50 +206,60 @@ class CAS(object):
     >>> conn = swat.CAS('mycashost.com', 12345, nworkers=4)
 
     '''
-    trait_names = None  # Block IPython's look of this
+    trait_names = None  # Block IPython's query for this
     sessions = weakref.WeakValueDictionary()
     _sessioncount = 1
 
     def __init__(self, hostname=None, port=None, username=None, password=None,
-                 session=None, locale=None, nworkers=None,
-                 name=None, authinfo=None, protocol=None, **kwargs):
+                 session=None, locale=None, nworkers=None, name=None,
+                 authinfo=None, protocol=None, **kwargs):
 
-        if hostname is None:
-            hostname = cf.get_option('cas.hostname')
-        if port is None:
-            port = cf.get_option('cas.port')
-
-        # Detect protocol
-        if hasattr(hostname, 'startswith') and (hostname.startswith('http:') or
-                                                hostname.startswith('https:')):
-            protocol = hostname.split(':', 1)[0]
-        else:
-            protocol = self._detect_protocol(hostname, port, protocol=protocol)
-
-        # Use the prototype to make a copy
+        # If a prototype exists, use it for the connection config
         prototype = kwargs.get('prototype')
         if prototype is not None:
             soptions = prototype._soptions
+
         else:
+            # Get connection parameters from config
+            if hostname is None:
+                hostname = cf.get_option('cas.hostname')
+            if port is None:
+                port = cf.get_option('cas.port')
+
+            # Detect protocol
+            if hasattr(hostname, 'startswith') and (hostname.startswith('http:') or
+                                                    hostname.startswith('https:')):
+                protocol = hostname.split(':', 1)[0]
+            else:
+                protocol = self._detect_protocol(hostname, port, protocol=protocol)
+
             soptions = getsoptions(session=session, locale=locale,
                                    nworkers=nworkers, protocol=protocol)
 
+        # Create error handler
         try:
             if protocol in ['http', 'https']:
                 self._sw_error = rest.REST_CASError(a2n(soptions))
             else:
                 self._sw_error = clib.SW_CASError(a2n(soptions))
         except SystemError:
-            raise SWATError('Could not create CAS object. Check your TK path setting.')
+            raise SWATError('Could not create CAS error handler object. '
+                            'Check your SAS TK path setting.')
 
         # Make the connection
         try:
+            # Make a copy of the prototype connection
             if prototype is not None:
                 self._sw_connection = errorcheck(prototype._sw_connection.copy(),
                                                  prototype._sw_connection)
+
+            # Create a new connection
             else:
+                # Set up hostnames
                 if isinstance(hostname, items_types):
                     hostname = ' '.join(a2n(x) for x in hostname if x)
+
+                # Set up authinfo paths
                 if authinfo is not None and password is None:
                     password = ''
                     if not isinstance(authinfo, items_types):
@@ -257,28 +267,26 @@ class CAS(object):
                     for item in authinfo:
                         password += '{%s}' % item
                     password = 'authinfo={%s}' % password
+
+                # Set up connection parameters
+                params = (a2n(hostname), int(port), a2n(username), a2n(password),
+                          a2n(soptions), self._sw_error)
                 if protocol in ['http', 'https']:
-                    self._sw_connection = rest.REST_CASConnection(a2n(hostname),
-                                                                  int(port),
-                                                                  a2n(username),
-                                                                  a2n(password),
-                                                                  a2n(soptions),
-                                                                  self._sw_error)
+                    self._sw_connection = rest.REST_CASConnection(*params)
                 else:
-                    self._sw_connection = clib.SW_CASConnection(a2n(hostname),
-                                                                int(port),
-                                                                a2n(username),
-                                                                a2n(password),
-                                                                a2n(soptions),
-                                                                self._sw_error)
+                    self._sw_connection = clib.SW_CASConnection(*params)
+
+                # If we don't have a connection, bail out.
                 if self._sw_connection is None:
                     raise SystemError
+
         except SystemError:
             raise SWATError(self._sw_error.getLastErrorMessage())
 
+        # Set up index origin for error messages
         errorcheck(self._sw_connection.setZeroIndexedParameters(), self._sw_connection)
 
-        # Get instance structure values from C layer
+        # Get instance structure values from connection layer
         self._hostname = errorcheck(
             a2u(self._sw_connection.getHostname(), 'utf-8'), self._sw_connection)
         self._port = errorcheck(self._sw_connection.getPort(), self._sw_connection)
