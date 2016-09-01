@@ -24,6 +24,7 @@ TK utilities for interfacing with CAS
 from __future__ import print_function, division, absolute_import, unicode_literals
 
 from ... import clib
+from ...utils.compat import a2n
 
 
 def InitializeTK(path):
