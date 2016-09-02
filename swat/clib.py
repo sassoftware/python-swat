@@ -64,7 +64,8 @@ def _import_pyswat():
                                   platform, libname + '.*')):
         raise ValueError('The extensions for the binary protocol have not been '
                          'installed.  You can either install them using the full '
-                         'pip installer, or use the REST interface as an alternative.')
+                         'platform-dependent install file, or use the REST interface '
+                         'as an alternative.')
 
     # Try to import the C extension
     try:

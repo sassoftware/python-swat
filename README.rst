@@ -47,15 +47,16 @@ the pure Python interface is more portable.
 Installation
 ------------
 
-The easiest way to install SWAT is to use ``pip`` or ``conda``.  These
-will install the correct package for your platform.  The command to
-install from ``conda`` is::
+SWAT can be installed from `<https://github.com/sassoftware/python-swat/releases>`_.
+Simply locate the file for your platform and install it using ``pip`` as 
+follows:
 
-    conda install -c conda-forge swat
+    pip install https://github.com/sassoftware/python-swat/releases/download/vX.X.X/swat-X.X.X-platform.tar.gz
 
-To install using ``pip``, you would run::
-
-    pip install swat
+Where ``X.X.X`` is the release you want to install, and ``platform`` is the 
+platform you are installing on.  You can also use the source code distribution
+if you only want to use the CAS REST interface.  It does not contain support
+for the binary protocol.
 
 
 Getting Started
