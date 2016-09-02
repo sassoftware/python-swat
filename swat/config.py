@@ -65,8 +65,10 @@ def _initialize_tkpath():
 
 
 register_option('tkpath', 'string', set_tkpath, _initialize_tkpath(),
-                'Specifies the path for TK components.  This can only be specified\n' +
-                'once and must be specified before connections are made.')
+                'Displays the path for SAS TK components.  This is determined\n' +
+                'when SWAT is imported.  By default, it points to the platform\n' +
+                'directory under the swat.lib module.  It can be overridden by\n' +
+                'setting a TKPATH environment variable.')
 
 #
 # General options

@@ -65,8 +65,7 @@ from .config import (set_option, get_option, reset_option, describe_option,
                      options, option_context)
 
 # CAS utilities
-from .cas import (InitializeTK, CAS, vl, nil, getone, getnext,
-                  datamsghandlers, blob, initialize_tk)
+from .cas import (CAS, vl, nil, getone, getnext, datamsghandlers, blob)
 from .cas.table import CASTable
 
 # Conflicts with .cas.table, so we import it excplicitly here
