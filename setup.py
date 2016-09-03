@@ -27,7 +27,7 @@ except:
     README = 'See README.rst'
 
 if glob.glob('swat/lib/*/tk*'):
-    LICENSE = 'Apache v2.0 + SAS Additional Functionality'
+    LICENSE = 'Apache v2.0 (SWAT) + SAS Additional Functionality (SAS TK)'
 else:
     LICENSE = 'Apache v2.0'
 

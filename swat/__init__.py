@@ -59,6 +59,12 @@ Call an action from the library
 
 from __future__ import print_function, division, absolute_import, unicode_literals
 
+# Make sure we meet the minimum requirements
+import sys
+
+if sys.hexversion < 0x02070000:
+    raise RuntimeError('Python 2.7 or newer is required to use this package.')
+
 # Configuration
 from . import config
 from .config import (set_option, get_option, reset_option, describe_option,
