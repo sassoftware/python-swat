@@ -38,6 +38,14 @@ Session Management
 Reading Data
 ~~~~~~~~~~~~
 
+There are various ways of loading data into CAS: server-side parsed and loaded,
+client-side parsed, and client-side files uploaded and parsed on the server.
+They follow the a naming convention to prevent confusion.
+
+    * load_* : Loads server-side paths
+    * read_* : Uses client-side parsers, then uploads the result
+    * upload_* : Uploads client-side files as-is which are parsed on the server
+
 Server-Side Files
 .................
 

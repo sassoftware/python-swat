@@ -25,6 +25,12 @@ fast as the binary protocol, the pure Python interface is more portable.
 Note tha this package is merely a client to a CAS server.  It has no utility unless
 you have a licensed CAS server to connect to.
 
+If you do not already have a modern Python installation, it is highly recommended
+that you install the `Anaconda Python distribution from Continuum Analytics
+<https://www.continuum.io/downloads>`_.  This distribution includes dozens of 
+commonly used Python packages, and can even be installed without administrator
+privileges.
+
 Pip
 ---
 
