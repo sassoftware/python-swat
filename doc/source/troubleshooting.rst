@@ -86,14 +86,14 @@ port.
    
    clib.py in _import_pyswat()
         43         raise ValueError(('Could not import import %s.  This is likely due to an '
-        44                           'incorrect TK path or an error while loading the TK subsystem. '
-   ---> 45                           'Try using the HTTP port for the REST interface.') % libname)
+        44                           'incorrect SAS TK path or an error while loading the SAS TK subsystem. '
+   ---> 45                           'You can try using the REST interface as an alternative.') % libname)
         46 
         47 
    
-   ValueError: Could not import import _py34swat.  This is likely due to an incorrect TK
-               path or an error while loading the TK subsystem. Try using the HTTP port 
-               for the REST interface.
+   ValueError: Could not import import _py34swat.  This is likely due to an incorrect SAS TK
+               path or an error while loading the SAS TK subsystem.  You can try using the
+               REST interface as an alternative.
 
 
 Refused Connection

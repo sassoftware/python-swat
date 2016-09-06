@@ -1,6 +1,8 @@
 
 .. Copyright SAS Institute
 
+.. _licenses:
+
 ********
 Licenses
 ********

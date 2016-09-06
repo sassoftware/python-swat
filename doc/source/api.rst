@@ -14,6 +14,10 @@ API Reference
 CAS
 ---
 
+The :class:`CAS` object is the connection to the CAS server.  CAS actions
+can be called on this object.  It also incorporates many of the data 
+reader functions of the Pandas package.
+
 Constructor
 ~~~~~~~~~~~
 
@@ -99,6 +103,11 @@ Running Actions
 CASResults
 ----------
 
+The :class:`CASResults` object is a subclass of Python's ordered
+dictionary.  CAS actions can return any number of result objects
+which are accessible by the dictionary keys.  This class also
+defines several methods for handling tables in By groups.
+
 Constructor
 ~~~~~~~~~~~
 
@@ -123,6 +132,11 @@ By Group Processing
 
 SASDataFrame
 ------------
+
+The :class:`SASDataFrame` object is a simple subclass of :class:`pandas.DataFrame`.
+It merely adds attributes to hold SAS metadata such as titles, labels, column
+metadata, etc.  It also adds a few utility methods for handling By group
+representations.
 
 Constructor
 ~~~~~~~~~~~
@@ -157,6 +171,12 @@ Utilities
 SASFormatter
 ------------
 
+The :class:`SASFormatter` object can be used to apply SAS data formats to 
+Python values.  It will only work with builtin SAS data formats; not
+user-defined formats.  If you need user-defined formats, the ``fetch``
+action can be configured to bring back formatted values rather than
+raw values.
+
 Constructor
 ~~~~~~~~~~~
 
@@ -178,6 +198,11 @@ Formatting Data
 
 CASTable
 --------
+
+The :class:`CASTable` is essentially a client-side view of a table
+in the CAS server.  CAS actions can be called on it directly just like
+a CAS connection object, and it also supports much of the Pandas
+:class:`pandas.DataFrame` API.
 
 Constructor
 ~~~~~~~~~~~
@@ -300,6 +325,10 @@ Reindexing / Selection / Label manipulation
 Sorting
 ~~~~~~~
 
+.. note:: There is no concept of a sorted table in the server.
+          The ``sort_values`` merely stores sorting information that
+          is applied when fetching data.
+
 .. autosummary::
    :toctree: generated/
 
@@ -375,6 +404,13 @@ Serialization / IO / Conversion
 
 CASColumn
 ---------
+
+While CAS does not have a true concept of a standalone column, the
+:class:`CASColumn` object emulates one by creating a client-side view
+of the CAS table using just a single column. :class:`CASColumn` objects
+are used much in the same way as :class:`pandas.Series` objects.
+They support many of the :class:`pandas.Series` methods, and can
+also be used in indexing operations to filter data in a CAS table.
 
 Constructor
 ~~~~~~~~~~~
@@ -502,6 +538,10 @@ Selection
 
 Sorting
 ~~~~~~~
+
+.. note:: There is no concept of a sorted table in the server.
+          The ``sort_values`` merely stores sorting information that
+          is applied when fetching data.
 
 .. autosummary::
    :toctree: generated/
@@ -687,6 +727,12 @@ Computations / Descriptive Statistics
 CASResponse
 -----------
 
+:class:`CASResponse` objects are primarily used internally, but they
+can be used in more advanced workflows.  They are never instantiated
+directly, they will always be created by the :class:`CAS` connection
+object and retured by an iterator.
+
+
 Constructor
 ~~~~~~~~~~~
 
@@ -710,6 +756,13 @@ Response Properties
 Data Message Handlers
 ---------------------
 
+Data message handlers are used to create custom data loaders.
+They construct the parameters to the ``addtable`` CAS action and
+handle the piecewise loading of data into the server.
+
+.. note:: Data message handlers are not currently supported in the
+          REST interface.
+
 .. currentmodule:: swat.cas.datamsghandlers
 
 .. autosummary::
@@ -732,6 +785,9 @@ Data Message Handlers
 
 Date and Time Functions
 -----------------------
+
+The following date / time / datetime functions can be used to convert
+dates to and from Python, CAS, and SAS date values.
 
 .. currentmodule:: swat.cas.utils.datetime
 

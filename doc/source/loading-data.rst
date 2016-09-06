@@ -94,6 +94,8 @@ of data that Python can handle.  These are called "data message handlers" and ar
 in the :class:`CASDataMsgHandler` class.  The :class:`CASDataMsgHandler` class can not be
 used directly, but is the base class for all data message handlers classes.
 
+.. note:: Data message handlers are not supported in the REST interface.
+
 To implement your own data message handler, you only need to implement two things in
 the subclass.
 

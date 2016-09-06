@@ -11,17 +11,17 @@ SWAT (SAS Wrapper for Analytics Transfer)
 
 **Date**: |today| **Version**: |version|
 
-**Binary Installers:** http://github.com/sassoftware/python-swat/releases
+**Binary Installers:** `<http://github.com/sassoftware/python-swat/releases>`_
 
-**Source Repository:** http://github.com/sassoftware/python-swat
+**Source Repository:** `<http://github.com/sassoftware/python-swat>`_
 
-**Issues & Ideas:** https://github.com/sassoftware/python-swat/issues
+**Issues & Ideas:** `<https://github.com/sassoftware/python-swat/issues>`_
 
-**Q&A Support:** https://communities.sas.com/t5/SAS-Viya-Coders-Library/tkb-p/cas%40tkb
+**Q&A Support:** `<https://communities.sas.com/t5/SAS-Viya-Coders-Library/tkb-p/cas%40tkb>`_
 
-**SAS Viya:** http://www.sas.com/en_us/software/viya.html
+**SAS Viya:** `<http://www.sas.com/en_us/software/viya.html>`_
 
-**CAS Action Reference:** http://documentation.sas.com/#/?cdcId=cascdc&cdcVersion=1.1
+**CAS Action Reference:** `<http://documentation.sas.com/#/?cdcId=cascdc&cdcVersion=1.1>`_
 
 
 The **SWAT** package is a Python interface to **SAS Cloud Analytic Services (CAS)** 
@@ -48,6 +48,7 @@ to the best of both worlds.
    install
    getting-started
    workflows
+   binary-vs-rest
    loading-data
    table-vs-dataframe
    indexing
@@ -56,6 +57,7 @@ to the best of both worlds.
    api
    gotchas
    troubleshooting
+   sas-tk
    licenses
 
 
