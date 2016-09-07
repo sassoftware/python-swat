@@ -140,7 +140,7 @@ action call as follows::
                  subSet=['N'])
 
 While you would never actually type code in like that, you may build parameters up 
-programatically and mistakenly put in mixed case keys.  When you send this action call to
+programmatically and mistakenly put in mixed case keys.  When you send this action call to
 CAS the action will fail because they are considered duplicate keys.
 
 The SWAT client automatically lower-cases all of the action and parameter names in the 

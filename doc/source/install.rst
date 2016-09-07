@@ -24,7 +24,7 @@ runs in Python 2.7+/3.4+.  You will still need Pandas installed.  While not as
 fast as the binary protocol, the pure Python interface is more portable.
 For more information, see :ref:`Binary vs. REST <binaryvsrest>`.
 
-Note tha this package is merely a client to a CAS server.  It has no utility unless
+Note that this package is merely a client to a CAS server.  It has no utility unless
 you have a licensed CAS server to connect to.
 
 If you do not already have a modern Python installation, it is highly recommended

@@ -5,7 +5,7 @@
 Sorting
 *******
 
-Since data in CAS can be spread acros many machines and may even be redistributed
+Since data in CAS can be spread across many machines and may even be redistributed
 depending on events that occur, the data is not stored in an ordered form.
 In general, when using statistical actions, this doesn't make much difference
 since the CAS actions doing the work will handle the data regardless of the

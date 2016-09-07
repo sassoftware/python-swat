@@ -730,7 +730,7 @@ CASResponse
 :class:`CASResponse` objects are primarily used internally, but they
 can be used in more advanced workflows.  They are never instantiated
 directly, they will always be created by the :class:`CAS` connection
-object and retured by an iterator.
+object and returned by an iterator.
 
 
 Constructor
@@ -758,7 +758,7 @@ Data Message Handlers
 
 Data message handlers are used to create custom data loaders.
 They construct the parameters to the ``addtable`` CAS action and
-handle the piecewise loading of data into the server.
+handle the piece-wise loading of data into the server.
 
 .. note:: Data message handlers are not currently supported in the
           REST interface.

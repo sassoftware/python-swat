@@ -5,7 +5,7 @@
 Troubleshooting
 ***************
 
-Just as with any autenticated network service, you may run into problems
+Just as with any authenticated network service, you may run into problems
 from time to time while connecting to CAS.  These are some of the more
 common problems you may run across.
 
@@ -134,7 +134,7 @@ Authentication Issues
 Authentication problems can occur for many reasons.  The examples below show 
 two possible issues.  The first one is an issue with the Authinfo file that
 contains the passwords.  It requires the file permissions to be readable by
-the owner ownly.  In this case, the Authinfo file was readable by others, 
+the owner only.  In this case, the Authinfo file was readable by others, 
 which is invalid.
 
 Other issues that can occur with an Authinfo file include not having a 

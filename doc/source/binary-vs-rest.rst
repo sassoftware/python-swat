@@ -49,7 +49,7 @@ connection constructor.
     
    conn = swat.CAS(cashost, casport, protocol='cas')
 
-The REST procotol requires more conversions due to the fact that 
+The REST protocol requires more conversions due to the fact that 
 communication is primarily done using JSON.  Let's look at that in the
 next section.
 
@@ -84,7 +84,7 @@ cons of each protocol in the last section.
 Synopsis
 --------
 
-Binary (CAS) Procotol
+Binary (CAS) Protocol
 ~~~~~~~~~~~~~~~~~~~~~
 
 Pros

@@ -19,7 +19,7 @@ based on that.
 
 There are a few properties that allow indexing a :class:`CASTable` object in
 various ways.  These properties work just like they :class:`pandas.DataFrame`
-counterparts (with the limitations desribed above).
+counterparts (with the limitations described above).
 
 ======================  ====================================================
 Property / Method       Description

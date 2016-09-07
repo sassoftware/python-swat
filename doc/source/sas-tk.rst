@@ -7,7 +7,7 @@
 SAS TK
 ******
 
-The SAS TK subsytem is a set of components used for various operations in
+The SAS TK subsystem is a set of components used for various operations in
 SAS products.  It can be thought of as SAS' standard library.  The binary
 communication used by CAS is included in the functionality of these components.
 

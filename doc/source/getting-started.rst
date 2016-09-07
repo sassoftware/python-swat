@@ -105,7 +105,7 @@ is the simplest way, it's probably not the best way for large data sets.  Those 
 be loaded from the server side if possible.
 
 The :meth:`CAS.read_csv` method works just like the :meth:`pandas.read_csv` function.
-In fact, :meth:`CAS.read_csv` usesing :meth:`pandas.read_csv` in the background.
+In fact, :meth:`CAS.read_csv` uses :meth:`pandas.read_csv` in the background.
 When :meth:`pandas.read_csv` finishes parsing the CSV file into a :class:`pandas.DataFrame`,
 it gets uploaded to a CAS table by :meth:`CAS.read_csv`.  The returned object is
 a :class:`CASTable` object.
