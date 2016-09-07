@@ -10,7 +10,7 @@ Binary vs. REST
 
 As we have mentioned in other sections of documentation on SWAT, there
 are two methods of connecting to CAS: binary and REST.  The binary 
-protocol is implemented in the SAS TK subsystem which is bundled as part
+protocol is implemented in the :ref:`SAS TK <sastk>` subsystem which is bundled as part
 of the SWAT installation (on platforms where it is supported).  This 
 protocol packs all data as efficient binary transmissions.
 

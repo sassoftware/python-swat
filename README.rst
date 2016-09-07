@@ -32,9 +32,9 @@ To access the CAS binary protocol (recommended), you need the following:
 1. **64-bit** Python 2.7+/3.4+ on Linux
 2. Pandas 0.16.0+
 
-**The binary protocol requires pre-compiled components found in the
-Pip Wheel files and Conda installers only.  These pieces are not available
-as source code and are under a separate license.**  The binary protocol
+The binary protocol requires pre-compiled components found in the
+``pip`` installer only.  These pieces are not available as source code and
+are under a separate license (see documentation on SAS TK).  The binary protocol
 offers better performance than REST, especially when transferring larger
 amounts of data.  It also offers more advanced data loading from the client
 and data formatting features.
