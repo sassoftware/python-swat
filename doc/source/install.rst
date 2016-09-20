@@ -28,10 +28,9 @@ Note that this package is merely a client to a CAS server.  It has no utility un
 you have a licensed CAS server to connect to.
 
 If you do not already have a modern Python installation, it is highly recommended
-that you install the `Anaconda Python distribution from Continuum Analytics
-<https://www.continuum.io/downloads>`_.  This distribution includes dozens of 
-commonly used Python packages, and can even be installed without administrator
-privileges.
+that you install the `Anaconda Python distribution <https://www.continuum.io/downloads>`_
+from Continuum Analytics.  This distribution includes dozens of commonly used Python
+packages, and can even be installed without administrator privileges.
 
 Pip
 ---
@@ -45,4 +44,6 @@ follows::
 Where ``X.X.X`` is the release you want to install, and ``platform`` is the
 platform you are installing on.  You can also use the source code distribution
 if you only want to use the CAS REST interface.  It does not contain support
-for the binary protocol.
+for the binary protocol::
+
+    pip install https://github.com/sassoftware/python-swat/archive/vX.X.X.tar.gz

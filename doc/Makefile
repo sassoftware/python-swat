@@ -67,6 +67,7 @@ html:
 	find $(BUILDDIR)/html -type f -name '*.html' | xargs perl -i -pe 's/swat.CAS((\.\w+)?\.html)/swat.cas.connection.CAS\1/g;'
 	find $(BUILDDIR)/html -type f -name '*.html' | xargs perl -i -pe 's/swat.SASDataFrame((\.\w+)?\.html)/swat.dataframe.SASDataFrame\1/g;'
 	find $(BUILDDIR)/html -type f -name '*.html' | xargs perl -i -pe 's/swat.SASFormatter((\.\w+)?\.html)/swat.formatter.SASFormatter\1/g;'
+	find $(BUILDDIR)/html -type f -name '*.html' | xargs perl -i -pe 's/\w+\.unx\.sas\.com/mycompany.com/g;'
 	@echo
 	@echo "Build finished. The HTML pages are in $(BUILDDIR)/html."
 

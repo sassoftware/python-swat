@@ -62,6 +62,10 @@ all of the Pandas parsing options.
                         usecols=[0, 1, 2, 3], names=['A', 'B', 'C', 'D'], skiprows=1)
    cars.head()
 
+.. note:: Loading data from the client-side will be slower than loading data
+          files from the server.  Client-side data loading is intended for 
+          smaller data sets.
+
 
 Parsing Client-Side Data on the Server
 --------------------------------------
@@ -83,6 +87,10 @@ if a URL is specified, it must be downloaded to the client then uploaded CAS.
    cars = conn.upload_file('https://raw.githubusercontent.com/'
                            'sassoftware/sas-viya-programming/master/data/cars.csv')
    cars.head()
+
+.. note:: Loading data from the client-side will be slower than loading data
+          files from the server.  Client-side data loading is intended for 
+          smaller data sets.
 
 
 Creating Custom Data Loaders
@@ -154,6 +162,10 @@ While this example uses an explicit list of data and passes that to the data mes
 class to index into, it doesn't have to be done this way.  In fact, there is a :class:`DBAPI`
 data message handler in the :mod:`swat.cas.datamsghandlers` module that takes a Python database
 connection that queries for the data that is returned by :meth:`getrow`.
+
+.. note:: Loading data from the client-side will be slower than loading data
+          files from the server.  Client-side data loading is intended for 
+          smaller data sets.
 
 
 Server-Side Data Files and Sources

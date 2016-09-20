@@ -121,6 +121,15 @@ of the :class:`pandas.DataFrame` methods and attributes.  The :class:`pandas.Dat
 API is mirrored as much as possible, the only difference is that behind-the-scenes 
 the real work is being done by CAS.
 
+If you don't want the difficult-to-read generated name for a table, you can specify one
+using the ``casout=`` parameter.
+
+.. ipython:: python
+
+   tbl = conn.read_csv('https://raw.githubusercontent.com/'
+                       'sassoftware/sas-viya-programming/master/data/cars.csv',
+                       casout='cars')
+
 Since we started down this path with the intent to use the ``summary`` action, let's 
 do that first.
 

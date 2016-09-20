@@ -14,6 +14,12 @@ constructs.  :class:`CASTable` objects do not contain actual data.  They are sim
 a client-side view of the data in a CAS table on a CAS server.  DataFrames and 
 SASDataFrames contain data in-memory on the client machine.
 
+Since these objects work very much the same way, it can be a little confusing when
+you start to work with them.  The rule to remember is that if the type of the object
+contains "DataFrame" (i.e., DataFrame or SASDataFrame), the data is local.  If the
+type of the object contains "Table" or "Column" (i.e., CASTable or CASColumn), it is
+a client-side view of the data in a CAS table on the server.
+
 Even though they are very different architectures, :class:`CASTable` objects support
 much of the :class:`pandas.DataFrame` API.  However, since CAS tables can contain
 enormous amounts of data that wouldn't fit into the memory of a single machine, there
