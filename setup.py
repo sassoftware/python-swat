@@ -47,7 +47,7 @@ setup(
     },
     install_requires = [
         'pandas >= 0.16.0',
-        'six >= 0.9.0',
+        'six >= 1.9.0',
         'requests',
     ],
     classifiers = [
