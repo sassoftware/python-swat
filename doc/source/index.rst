@@ -3,9 +3,9 @@
 
 :tocdepth: 4
 
-*****************************************
-SWAT (SAS Wrapper for Analytics Transfer)
-*****************************************
+***************************************************
+SAS Scripting Wrapper for Analytics Transfer (SWAT)
+***************************************************
 
 .. module:: swat
 
@@ -24,7 +24,7 @@ SWAT (SAS Wrapper for Analytics Transfer)
 **CAS Action Reference:** `<http://documentation.sas.com/#/?cdcId=cascdc&cdcVersion=1.1>`_
 
 
-The **SWAT** package is a Python interface to **SAS Cloud Analytic Services (CAS)** 
+The **SAS SWAT** package is a Python interface to **SAS Cloud Analytic Services (CAS)** 
 (the centerpiece of the `SAS Viya <http://www.sas.com/en_us/software/viya.html>`__ framework).
 With this package, you can load and analyze 
 data sets of any size on your desktop or in the cloud.  Since CAS can be used on a local

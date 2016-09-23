@@ -9,7 +9,7 @@ The SWAT package can be installed using either ``pip`` or just by running
 you should make sure that you have fulfilled the following requirements.
 These requirements are for the CAS binary protocol (recommended).
 
-* **64-bit** Python 2.7+/3.4+ on Linux
+* **64-bit** Python 2.7+/3.4+ on Linux (see shared library notes below)
 * Pandas 0.16.0+
 
 The binary protocol requires pre-compiled components found in the ``pip``
@@ -32,6 +32,17 @@ that you install the `Anaconda Python distribution <https://www.continuum.io/dow
 from Continuum Analytics.  This distribution includes dozens of commonly used Python
 packages, and can even be installed without administrator privileges.
 
+
+Linux Library Dependencies
+--------------------------
+
+Some Linux distributions may not install all of the needed shared libraries
+by default.  Most notably, the shared library ``libnuma.so.1`` is required to
+make binary protocol connections to CAS.  If you do not have this library on
+your machine you can install the ``numactl`` package for your distribution
+to make it available to SWAT.
+
+
 Pip
 ---
 
@@ -39,7 +50,7 @@ SWAT can be installed from `<https://github.com/sassoftware/python-swat/releases
 Simply locate the file for your platform and install it using ``pip`` as
 follows::
 
-    pip install https://github.com/sassoftware/python-swat/releases/download/vX.X.X/swat-X.X.X-platform.tar.gz
+    pip install https://github.com/sassoftware/python-swat/releases/download/vX.X.X/python-swat-X.X.X-platform.tar.gz
 
 Where ``X.X.X`` is the release you want to install, and ``platform`` is the
 platform you are installing on.  You can also use the source code distribution

@@ -16,7 +16,7 @@
 #  limitations under the License.
 #
 
-''' Install the SAS Wrapper for Analytics Transfer (SWAT) module '''
+''' Install the SAS Scripting Wrapper for Analytics Transfer (SWAT) module '''
 
 import glob
 from setuptools import setup, find_packages
@@ -35,7 +35,7 @@ setup(
     zip_safe = False,
     name = 'swat',
     version = '1.0.0',
-    description = 'SAS Wrapper for Analytics Transfer (SWAT)',
+    description = 'SAS Scripting Wrapper for Analytics Transfer (SWAT)',
     long_description = README,
     author = 'SAS',
     author_email = 'Kevin.Smith@sas.com',

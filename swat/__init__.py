@@ -17,8 +17,8 @@
 #
 
 '''
-SWAT (SAS Wrapper for Analytics Transfer)
-=========================================
+SAS Scripting Wrapper for Analytics Transfer (SWAT)
+===================================================
 
 This package allows you to connect to a SAS CAS host and call actions.
 The responses and results are returned as Python objects.
