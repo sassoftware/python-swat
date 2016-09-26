@@ -29,6 +29,9 @@ that you install the `Anaconda Python distribution <https://www.continuum.io/dow
 from Continuum Analytics.  This distribution includes dozens of commonly used Python
 packages, and can even be installed without administrator privileges.
 
+If you do not have ``pip`` installed, you can use ``easy_install pip`` to add
+it to your current Python installation.
+
 
 Linux Library Dependencies
 --------------------------

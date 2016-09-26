@@ -42,6 +42,9 @@ To access the CAS REST interface only, you can use the pure Python code
 which runs in Python 2.7/3.4+.  While not as fast as the binary protocol,
 the pure Python interface is more portable.
 
+If you do not have ``pip`` installed, you can use ``easy_install pip`` to add
+it to your current Python installation.
+
 Linux Library Dependencies
 ==========================
 
