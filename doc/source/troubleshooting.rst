@@ -9,6 +9,26 @@ Just as with any authenticated network service, you may run into problems
 from time to time while connecting to CAS.  These are some of the more
 common problems you may run across.
 
+Missing Linux Library Dependencies
+==================================
+
+SWAT uses various shared libraries commonly available on Linux machines.
+If you are missing a shared library that SWAT requires, you may see a message
+such as the following when creating a CAS connection.
+
+.. code-block:: python
+
+   In [1]: conn = swat.CAS(hostname, port)
+   tkBoot failed:  Cannot dlopen [tkmk.so] : [libnuma.so.1: cannot open shared object file: No such file or directory]
+
+This particular error can be solved by installing the ``numactl`` package of
+your Linux distribution.  If you do not have system administrator privileges,
+you can set an environment variable ``LD_LIBRARY_PATH`` to the location of
+a copy of ``libnuma.so.1``.  However, it is recommended that you contact your system
+administrator to install this library so that it will receive regular updates
+with the system.
+
+
 Incorrect SAS TK Configuration
 ==============================
 

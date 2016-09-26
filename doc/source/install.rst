@@ -4,13 +4,10 @@
 Installation
 ============
 
-The SWAT package can be installed using either ``pip`` or just by running
-``python setup.py install`` in the expanded tar.gz file.  Before installing,
-you should make sure that you have fulfilled the following requirements.
-These requirements are for the CAS binary protocol (recommended).
+The SWAT package is installed using the ``pip`` command.  The requirements
+for using the binary protocol of CAS (recommended) are as follows.
 
-* **64-bit** Python 2.7+/3.4+ on Linux (see shared library notes below)
-* Pandas 0.16.0+
+* **64-bit** Python 2.7, 3.4, or 3.5 on Linux (see shared library notes below)
 
 The binary protocol requires pre-compiled components found in the ``pip``
 installer only.  These pieces are not available as source code and
@@ -20,7 +17,7 @@ amounts of data.  It also offers more advanced data loading from the client
 and data formatting features.
 
 To access the CAS REST interface only, you can use the pure Python code which
-runs in Python 2.7+/3.4+.  You will still need Pandas installed.  While not as
+runs in Python 2.7/3.4+.  You will still need Pandas installed.  While not as
 fast as the binary protocol, the pure Python interface is more portable.
 For more information, see :ref:`Binary vs. REST <binaryvsrest>`.
 
@@ -41,6 +38,15 @@ by default.  Most notably, the shared library ``libnuma.so.1`` is required to
 make binary protocol connections to CAS.  If you do not have this library on
 your machine you can install the ``numactl`` package for your distribution
 to make it available to SWAT.
+
+
+Python Dependencies
+-------------------
+
+The SWAT package uses many features of the Pandas Python package and other
+dependencies of Pandas.  If you do not already have version 0.16.0 or greater
+of Pandas installed, ``pip`` will install or update it for you when you
+install SWAT.
 
 
 Pip
