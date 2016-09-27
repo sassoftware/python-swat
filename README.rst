@@ -81,6 +81,9 @@ for the binary protocol.
 Getting Started
 ---------------
 
+For the full documentation see `<https://sassoftware.github.io/python-swat/>`__.
+A simple example is shown below.
+
 Once you have SWAT installed and you have a CAS server to connect to,
 you can import swat and create a connection::
 
