@@ -1,0 +1,370 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>swat.CAS.retrieve &mdash; SWAT 1.0.0 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+
+  
+    <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+
+  
+    <link rel="top" title="SWAT 1.0.0 documentation" href="../index.html"/>
+        <link rel="up" title="API Reference" href="../api.html"/>
+        <link rel="next" title="swat.CAS.invoke" href="swat.cas.connection.CAS.invoke.html"/>
+        <link rel="prev" title="swat.CAS.upload_frame" href="swat.cas.connection.CAS.upload_frame.html"/> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> SWAT
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.0.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting-started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../workflows.html">Workflows</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../binary-vs-rest.html">Binary vs. REST</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../loading-data.html">Loading Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../table-vs-dataframe.html">CASTable vs. DataFrame vs. SASDataFrame</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../indexing.html">Indexing and Data Selection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../bygroups.html">Handling By Groups</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../sorting.html">Sorting</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../api.html">API Reference</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../api.html#cas">CAS</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../api.html#constructor">Constructor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../api.html#session-management">Session Management</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../api.html#reading-data">Reading Data</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="../api.html#running-actions">Running Actions</a><ul class="current">
+<li class="toctree-l4 current"><a class="current reference internal" href="#">swat.CAS.retrieve</a></li>
+<li class="toctree-l4"><a class="reference internal" href="swat.cas.connection.CAS.invoke.html">swat.CAS.invoke</a></li>
+<li class="toctree-l4"><a class="reference internal" href="swat.cas.connection.CAS.__iter__.html">swat.CAS.__iter__</a></li>
+<li class="toctree-l4"><a class="reference internal" href="swat.cas.connection.getone.html">swat.cas.connection.getone</a></li>
+<li class="toctree-l4"><a class="reference internal" href="swat.cas.connection.getnext.html">swat.cas.connection.getnext</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#casresults">CASResults</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#sasdataframe">SASDataFrame</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#sasformatter">SASFormatter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#castable">CASTable</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#cascolumn">CASColumn</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#castablegroupby">CASTableGroupBy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#casresponse">CASResponse</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#data-message-handlers">Data Message Handlers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#date-and-time-functions">Date and Time Functions</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../gotchas.html">Programming Gotchas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../troubleshooting.html">Troubleshooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../sas-tk.html">SAS TK</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../licenses.html">Licenses</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../index.html">SWAT</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+ 
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../index.html">Docs</a> &raquo;</li>
+      
+        <li><a href="../api.html">API Reference</a> &raquo;</li>
+      
+    <li>swat.CAS.retrieve</li>
+    <li class="wy-breadcrumbs-aside">
+      
+          
+          <a href="../_sources/generated/swat.CAS.retrieve.txt" rel="nofollow"> View page source</a>
+        
+      
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="swat-cas-connection-cas-retrieve">
+<h1>swat.CAS.retrieve<a class="headerlink" href="#swat-cas-connection-cas-retrieve" title="Permalink to this headline">¶</a></h1>
+<dl class="method">
+<dt id="swat.CAS.retrieve">
+<code class="descclassname">CAS.</code><code class="descname">retrieve</code><span class="sig-paren">(</span><em>_name_</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#swat.CAS.retrieve" title="Permalink to this definition">¶</a></dt>
+<dd><p>Call the action and aggregate the results</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>_name_</strong> : string</p>
+<blockquote>
+<div><p>Name of the action</p>
+</div></blockquote>
+<p><strong>**kwargs</strong> : any, optional</p>
+<blockquote>
+<div><p>Arbitrary keyword arguments</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><code class="xref py py-class docutils literal"><span class="pre">CASResults</span></code> object</p>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<dl class="last docutils">
+<dt><a class="reference internal" href="swat.cas.connection.CAS.invoke.html#swat.CAS.invoke" title="swat.CAS.invoke"><code class="xref py py-meth docutils literal"><span class="pre">invoke()</span></code></a></dt>
+<dd>Calls action, but does not retrieve results</dd>
+</dl>
+</div>
+<p class="rubric">Examples</p>
+<p>The code below demonstrates how you invoke an action on the server and
+retrieve the results.</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">out</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">retrieve</span><span class="p">(</span><span class="s1">&#39;help&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">out</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+<span class="go">[&#39;builtins&#39;, &#39;casidx&#39;, &#39;casmeta&#39;, &#39;espact&#39;, &#39;tkacon&#39;, &#39;table&#39;, &#39;tkcsessn&#39;,</span>
+<span class="go"> &#39;tkcstate&#39;]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">out</span><span class="p">[</span><span class="s1">&#39;builtins&#39;</span><span class="p">])</span>
+<span class="go">              name                                        description</span>
+<span class="go">0          addnode                           Add a node to the server</span>
+<span class="go">1             help                        Lists the available actions</span>
+<span class="go">2        listnodes                              List the server nodes</span>
+<span class="go">.</span>
+<span class="go">.</span>
+<span class="go">.</span>
+</pre></div>
+</div>
+<p>Status and performance information is also available on the returned object.
+Here is an example of an action call to an action that doesn&#8217;t exist.</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">out</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">retrieve</span><span class="p">(</span><span class="s1">&#39;foo&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">out</span><span class="o">.</span><span class="n">status</span><span class="p">)</span>
+<span class="go">&#39;The specified action was not found.&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">out</span><span class="o">.</span><span class="n">severity</span><span class="p">)</span>
+<span class="go">2</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">out</span><span class="o">.</span><span class="n">messages</span><span class="p">)</span>
+<span class="go">[&quot;ERROR: Action &#39;foo&#39; was not found.&quot;,</span>
+<span class="go"> &#39;ERROR: The CAS server stopped processing this action because of errors.&#39;]</span>
+</pre></div>
+</div>
+<p>Here is an example that demonstrates the performance metrics that are available.</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">out</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">retrieve</span><span class="p">(</span><span class="s1">&#39;help&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">out</span><span class="o">.</span><span class="n">performance</span><span class="p">)</span>
+<span class="go">&lt;swat.CASPerformance object at 0x33b1c50&gt;</span>
+</pre></div>
+</div>
+<p>Performance values are loaded lazily, but you can get a dictionary of
+all of them using the <code class="docutils literal"><span class="pre">to_dict</span></code> method.</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">out</span><span class="o">.</span><span class="n">performance</span><span class="o">.</span><span class="n">to_dict</span><span class="p">())</span>
+<span class="go">{&#39;system_cores&#39;: 1152L, &#39;memory_quota&#39;: 303759360L, &#39;cpu_user_time&#39;: 0.014995,</span>
+<span class="go"> &#39;elapsed_time&#39;: 0.004200000000000001, &#39;system_nodes&#39;: 48L,</span>
+<span class="go"> &#39;memory_system&#39;: 432093312L, &#39;cpu_system_time&#39;: 0.018999, &#39;memory&#39;: 150688L,</span>
+<span class="go"> &#39;memory_os&#39;: 294322176L, &#39;system_total_memory&#39;: 4868538236928L}</span>
+</pre></div>
+</div>
+<p>Rather than having the <code class="docutils literal"><span class="pre">retrieve</span></code> method compile all of the results into one
+object, you can control how the responses and results from the server are
+handled in your own functions using the <code class="docutils literal"><span class="pre">responsefunc</span></code> or <code class="docutils literal"><span class="pre">resultfunc</span></code> keyword
+arguments.</p>
+<p>The <code class="docutils literal"><span class="pre">responsefunc</span></code> argument allows you to specify a function that is called for
+each response from the server after the action is called.  The <code class="docutils literal"><span class="pre">resultfunc</span></code>
+is called for each result in a response.  These functions can not be used at the
+same time though.  In the case where both are specified, only the resultfunc
+will be used.  Below is an example of using a responsefunc function.
+This function closely mimics what the <cite>retrieve</cite> method does by default.</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">def</span> <span class="nf">myfunc</span><span class="p">(</span><span class="n">response</span><span class="p">,</span> <span class="n">connection</span><span class="p">,</span> <span class="n">userdata</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="k">if</span> <span class="n">userdata</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+<span class="gp">... </span>        <span class="n">userdata</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="gp">... </span>    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">response</span><span class="p">:</span>
+<span class="gp">... </span>        <span class="n">userdata</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+<span class="gp">... </span>    <span class="k">return</span> <span class="n">userdata</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">out</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">retrieve</span><span class="p">(</span><span class="s1">&#39;help&#39;</span><span class="p">,</span> <span class="n">responsefunc</span><span class="o">=</span><span class="n">myfunc</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">out</span><span class="p">[</span><span class="s1">&#39;builtins&#39;</span><span class="p">])</span>
+<span class="go">              name                                        description</span>
+<span class="go">0          addnode                           Add a node to the server</span>
+<span class="go">1             help                        Lists the available actions</span>
+<span class="go">2        listnodes                              List the server nodes</span>
+<span class="go">.</span>
+<span class="go">.</span>
+<span class="go">.</span>
+</pre></div>
+</div>
+<p>The same result can be gotten using the <code class="docutils literal"><span class="pre">resultfunc</span></code> option as well.</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">def</span> <span class="nf">myfunc</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">response</span><span class="p">,</span> <span class="n">connection</span><span class="p">,</span> <span class="n">userdata</span><span class="p">):</span>
+<span class="gp">... </span>   <span class="k">if</span> <span class="n">userdata</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+<span class="gp">... </span>      <span class="n">userdata</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="gp">... </span>   <span class="n">userdata</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+<span class="gp">... </span>   <span class="k">return</span> <span class="n">userdata</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">out</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">retrieve</span><span class="p">(</span><span class="s1">&#39;help&#39;</span><span class="p">,</span> <span class="n">resultfunc</span><span class="o">=</span><span class="n">myfunc</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">out</span><span class="p">[</span><span class="s1">&#39;builtins&#39;</span><span class="p">])</span>
+<span class="go">              name                                        description</span>
+<span class="go">0          addnode                           Add a node to the server</span>
+<span class="go">1             help                        Lists the available actions</span>
+<span class="go">2        listnodes                              List the server nodes</span>
+<span class="go">.</span>
+<span class="go">.</span>
+<span class="go">.</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="swat.cas.connection.CAS.invoke.html" class="btn btn-neutral float-right" title="swat.CAS.invoke" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="swat.cas.connection.CAS.upload_frame.html" class="btn btn-neutral" title="swat.CAS.upload_frame" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016 SAS Institute Inc. All Rights Reserved..
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'1.0.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

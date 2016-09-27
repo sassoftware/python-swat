@@ -1,0 +1,279 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>swat.cas.table.CASTableGroupBy.unique &mdash; SWAT 1.0.0 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+
+  
+    <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+
+  
+    <link rel="top" title="SWAT 1.0.0 documentation" href="../index.html"/>
+        <link rel="up" title="API Reference" href="../api.html"/>
+        <link rel="next" title="swat.cas.table.CASTableGroupBy.uss" href="swat.cas.table.CASTableGroupBy.uss.html"/>
+        <link rel="prev" title="swat.cas.table.CASTableGroupBy.tvalue" href="swat.cas.table.CASTableGroupBy.tvalue.html"/> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> SWAT
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.0.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting-started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../workflows.html">Workflows</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../binary-vs-rest.html">Binary vs. REST</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../loading-data.html">Loading Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../table-vs-dataframe.html">CASTable vs. DataFrame vs. SASDataFrame</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../indexing.html">Indexing and Data Selection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../bygroups.html">Handling By Groups</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../sorting.html">Sorting</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../api.html">API Reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../api.html#cas">CAS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#casresults">CASResults</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#sasdataframe">SASDataFrame</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#sasformatter">SASFormatter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#castable">CASTable</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#cascolumn">CASColumn</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../api.html#castablegroupby">CASTableGroupBy</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../api.html#id10">Constructor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../api.html#indexing-and-iteration">Indexing and Iteration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../api.html#conversion">Conversion</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="../api.html#computations-descriptive-statistics">Computations / Descriptive Statistics</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="swat.cas.table.CASTableGroupBy.css.html">swat.cas.table.CASTableGroupBy.css</a></li>
+<li class="toctree-l4"><a class="reference internal" href="swat.cas.table.CASTableGroupBy.cv.html">swat.cas.table.CASTableGroupBy.cv</a></li>
+<li class="toctree-l4"><a class="reference internal" href="swat.cas.table.CASTableGroupBy.describe.html">swat.cas.table.CASTableGroupBy.describe</a></li>
+<li class="toctree-l4"><a class="reference internal" href="swat.cas.table.CASTableGroupBy.head.html">swat.cas.table.CASTableGroupBy.head</a></li>
+<li class="toctree-l4"><a class="reference internal" href="swat.cas.table.CASTableGroupBy.max.html">swat.cas.table.CASTableGroupBy.max</a></li>
+<li class="toctree-l4"><a class="reference internal" href="swat.cas.table.CASTableGroupBy.mean.html">swat.cas.table.CASTableGroupBy.mean</a></li>
+<li class="toctree-l4"><a class="reference internal" href="swat.cas.table.CASTableGroupBy.median.html">swat.cas.table.CASTableGroupBy.median</a></li>
+<li class="toctree-l4"><a class="reference internal" href="swat.cas.table.CASTableGroupBy.min.html">swat.cas.table.CASTableGroupBy.min</a></li>
+<li class="toctree-l4"><a class="reference internal" href="swat.cas.table.CASTableGroupBy.mode.html">swat.cas.table.CASTableGroupBy.mode</a></li>
+<li class="toctree-l4"><a class="reference internal" href="swat.cas.table.CASTableGroupBy.nth.html">swat.cas.table.CASTableGroupBy.nth</a></li>
+<li class="toctree-l4"><a class="reference internal" href="swat.cas.table.CASTableGroupBy.nmiss.html">swat.cas.table.CASTableGroupBy.nmiss</a></li>
+<li class="toctree-l4"><a class="reference internal" href="swat.cas.table.CASTableGroupBy.nlargest.html">swat.cas.table.CASTableGroupBy.nlargest</a></li>
+<li class="toctree-l4"><a class="reference internal" href="swat.cas.table.CASTableGroupBy.nsmallest.html">swat.cas.table.CASTableGroupBy.nsmallest</a></li>
+<li class="toctree-l4"><a class="reference internal" href="swat.cas.table.CASTableGroupBy.nunique.html">swat.cas.table.CASTableGroupBy.nunique</a></li>
+<li class="toctree-l4"><a class="reference internal" href="swat.cas.table.CASTableGroupBy.probt.html">swat.cas.table.CASTableGroupBy.probt</a></li>
+<li class="toctree-l4"><a class="reference internal" href="swat.cas.table.CASTableGroupBy.quantile.html">swat.cas.table.CASTableGroupBy.quantile</a></li>
+<li class="toctree-l4"><a class="reference internal" href="swat.cas.table.CASTableGroupBy.std.html">swat.cas.table.CASTableGroupBy.std</a></li>
+<li class="toctree-l4"><a class="reference internal" href="swat.cas.table.CASTableGroupBy.stderr.html">swat.cas.table.CASTableGroupBy.stderr</a></li>
+<li class="toctree-l4"><a class="reference internal" href="swat.cas.table.CASTableGroupBy.sum.html">swat.cas.table.CASTableGroupBy.sum</a></li>
+<li class="toctree-l4"><a class="reference internal" href="swat.cas.table.CASTableGroupBy.tvalue.html">swat.cas.table.CASTableGroupBy.tvalue</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">swat.cas.table.CASTableGroupBy.unique</a></li>
+<li class="toctree-l4"><a class="reference internal" href="swat.cas.table.CASTableGroupBy.uss.html">swat.cas.table.CASTableGroupBy.uss</a></li>
+<li class="toctree-l4"><a class="reference internal" href="swat.cas.table.CASTableGroupBy.value_counts.html">swat.cas.table.CASTableGroupBy.value_counts</a></li>
+<li class="toctree-l4"><a class="reference internal" href="swat.cas.table.CASTableGroupBy.var.html">swat.cas.table.CASTableGroupBy.var</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#casresponse">CASResponse</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#data-message-handlers">Data Message Handlers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#date-and-time-functions">Date and Time Functions</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../gotchas.html">Programming Gotchas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../troubleshooting.html">Troubleshooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../sas-tk.html">SAS TK</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../licenses.html">Licenses</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../index.html">SWAT</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+ 
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../index.html">Docs</a> &raquo;</li>
+      
+        <li><a href="../api.html">API Reference</a> &raquo;</li>
+      
+    <li>swat.cas.table.CASTableGroupBy.unique</li>
+    <li class="wy-breadcrumbs-aside">
+      
+          
+          <a href="../_sources/generated/swat.cas.table.CASTableGroupBy.unique.txt" rel="nofollow"> View page source</a>
+        
+      
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="swat-cas-table-castablegroupby-unique">
+<h1>swat.cas.table.CASTableGroupBy.unique<a class="headerlink" href="#swat-cas-table-castablegroupby-unique" title="Permalink to this headline">¶</a></h1>
+<dl class="method">
+<dt id="swat.cas.table.CASTableGroupBy.unique">
+<code class="descclassname">CASTableGroupBy.</code><code class="descname">unique</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#swat.cas.table.CASTableGroupBy.unique" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get unique values using groups</p>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last"><code class="xref py py-class docutils literal"><span class="pre">CASTable.unique</span></code>, <a class="reference internal" href="swat.cas.table.CASColumn.unique.html#swat.cas.table.CASColumn.unique" title="swat.cas.table.CASColumn.unique"><code class="xref py py-class docutils literal"><span class="pre">CASColumn.unique</span></code></a></p>
+</div>
+</dd></dl>
+
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="swat.cas.table.CASTableGroupBy.uss.html" class="btn btn-neutral float-right" title="swat.cas.table.CASTableGroupBy.uss" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="swat.cas.table.CASTableGroupBy.tvalue.html" class="btn btn-neutral" title="swat.cas.table.CASTableGroupBy.tvalue" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016 SAS Institute Inc. All Rights Reserved..
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'1.0.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

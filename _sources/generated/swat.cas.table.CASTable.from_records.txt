@@ -1,0 +1,6 @@
+swat.cas.table.CASTable.from_records
+====================================
+
+.. currentmodule:: swat.cas.table
+
+.. automethod:: CASTable.from_records

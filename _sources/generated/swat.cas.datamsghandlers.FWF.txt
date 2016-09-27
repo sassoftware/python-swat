@@ -1,0 +1,33 @@
+swat.cas.datamsghandlers.FWF
+============================
+
+.. currentmodule:: swat.cas.datamsghandlers
+
+.. autoclass:: FWF
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~FWF.__init__
+      ~FWF.finish
+      ~FWF.getone
+      ~FWF.getrow
+      ~FWF.send
+      ~FWF.write
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~FWF.args
+   
+   

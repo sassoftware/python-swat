@@ -1,0 +1,399 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Troubleshooting &mdash; SWAT 1.0.0 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+    <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+
+  
+    <link rel="top" title="SWAT 1.0.0 documentation" href="index.html"/>
+        <link rel="next" title="SAS TK" href="sas-tk.html"/>
+        <link rel="prev" title="Programming Gotchas" href="gotchas.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> SWAT
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.0.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="workflows.html">Workflows</a></li>
+<li class="toctree-l1"><a class="reference internal" href="binary-vs-rest.html">Binary vs. REST</a></li>
+<li class="toctree-l1"><a class="reference internal" href="loading-data.html">Loading Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="table-vs-dataframe.html">CASTable vs. DataFrame vs. SASDataFrame</a></li>
+<li class="toctree-l1"><a class="reference internal" href="indexing.html">Indexing and Data Selection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bygroups.html">Handling By Groups</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sorting.html">Sorting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gotchas.html">Programming Gotchas</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Troubleshooting</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#missing-linux-library-dependencies">Missing Linux Library Dependencies</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#incorrect-sas-tk-configuration">Incorrect SAS TK Configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#unable-to-import-pyxxswat">Unable to Import _pyXXswat</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#refused-connection">Refused Connection</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#authentication-issues">Authentication Issues</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="sas-tk.html">SAS TK</a></li>
+<li class="toctree-l1"><a class="reference internal" href="licenses.html">Licenses</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="index.html">SWAT</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+ 
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+      
+    <li>Troubleshooting</li>
+    <li class="wy-breadcrumbs-aside">
+      
+          
+          <a href="_sources/troubleshooting.txt" rel="nofollow"> View page source</a>
+        
+      
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="troubleshooting">
+<h1>Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permalink to this headline">¶</a></h1>
+<p>Just as with any authenticated network service, you may run into problems
+from time to time while connecting to CAS.  These are some of the more
+common problems you may run across.</p>
+<div class="section" id="missing-linux-library-dependencies">
+<h2>Missing Linux Library Dependencies<a class="headerlink" href="#missing-linux-library-dependencies" title="Permalink to this headline">¶</a></h2>
+<p>SWAT uses various shared libraries commonly available on Linux machines.
+If you are missing a shared library that SWAT requires, you may see a message
+such as the following when creating a CAS connection.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">In</span> <span class="p">[</span><span class="mi">1</span><span class="p">]:</span> <span class="n">conn</span> <span class="o">=</span> <span class="n">swat</span><span class="o">.</span><span class="n">CAS</span><span class="p">(</span><span class="n">hostname</span><span class="p">,</span> <span class="n">port</span><span class="p">)</span>
+<span class="n">tkBoot</span> <span class="n">failed</span><span class="p">:</span>  <span class="n">Cannot</span> <span class="n">dlopen</span> <span class="p">[</span><span class="n">tkmk</span><span class="o">.</span><span class="n">so</span><span class="p">]</span> <span class="p">:</span> <span class="p">[</span><span class="n">libnuma</span><span class="o">.</span><span class="n">so</span><span class="o">.</span><span class="mi">1</span><span class="p">:</span> <span class="n">cannot</span> <span class="nb">open</span> <span class="n">shared</span> <span class="nb">object</span> <span class="nb">file</span><span class="p">:</span> <span class="n">No</span> <span class="n">such</span> <span class="nb">file</span> <span class="ow">or</span> <span class="n">directory</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>This particular error can be solved by installing the <code class="docutils literal"><span class="pre">numactl</span></code> package of
+your Linux distribution.  If you do not have system administrator privileges,
+you can set an environment variable <code class="docutils literal"><span class="pre">LD_LIBRARY_PATH</span></code> to the location of
+a copy of <code class="docutils literal"><span class="pre">libnuma.so.1</span></code>.  However, it is recommended that you contact your system
+administrator to install this library so that it will receive regular updates
+with the system.</p>
+</div>
+<div class="section" id="incorrect-sas-tk-configuration">
+<h2>Incorrect SAS TK Configuration<a class="headerlink" href="#incorrect-sas-tk-configuration" title="Permalink to this headline">¶</a></h2>
+<p>The following error can occur if you do not have the SAS TK system properly
+configured.  Normally, the correct TK settings are applied when SWAT is loaded.
+However, if you are using an installation of the libraries in a separate
+directory, you may get errors if the correct files are not in that directory.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">In</span> <span class="p">[</span><span class="mi">1</span><span class="p">]:</span> <span class="n">conn</span> <span class="o">=</span> <span class="n">swat</span><span class="o">.</span><span class="n">CAS</span><span class="p">(</span><span class="n">hostname</span><span class="p">,</span> <span class="n">port</span><span class="p">)</span>
+<span class="n">tkBoot</span> <span class="n">failed</span><span class="p">:</span>  <span class="n">Cannot</span> <span class="n">Locate</span> <span class="p">[</span><span class="n">tkmk</span><span class="p">]</span> <span class="ow">in</span> <span class="p">[</span><span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">swat</span><span class="o">-</span><span class="n">tk</span><span class="p">:</span><span class="o">/</span><span class="n">opt</span><span class="o">/</span><span class="n">sas</span><span class="o">/</span><span class="n">viya</span><span class="o">/</span><span class="n">SASFoundation</span><span class="o">/</span><span class="n">sasexe</span><span class="o">/</span><span class="p">:</span>
+<span class="n">Could</span> <span class="ow">not</span> <span class="n">get</span> <span class="n">TK</span> <span class="n">handle</span>
+<span class="o">---------------------------------------------------------------------------</span>
+
+<span class="o">.</span> <span class="o">.</span> <span class="o">.</span>
+
+<span class="n">SWATError</span>                                 <span class="n">Traceback</span> <span class="p">(</span><span class="n">most</span> <span class="n">recent</span> <span class="n">call</span> <span class="n">last</span><span class="p">)</span>
+<span class="o">&lt;</span><span class="n">ipython</span><span class="o">-</span><span class="nb">input</span><span class="o">-</span><span class="mi">2</span><span class="o">-</span><span class="n">d18c0dfd66ee</span><span class="o">&gt;</span> <span class="ow">in</span> <span class="o">&lt;</span><span class="n">module</span><span class="o">&gt;</span><span class="p">()</span>
+<span class="o">----&gt;</span> <span class="mi">1</span> <span class="n">s</span> <span class="o">=</span> <span class="n">swat</span><span class="o">.</span><span class="n">CAS</span><span class="p">(</span><span class="s1">&#39;my-cas&#39;</span><span class="p">,</span> <span class="mi">12345</span><span class="p">)</span>
+
+<span class="n">connection</span><span class="o">.</span><span class="n">py</span> <span class="ow">in</span> <span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hostname</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="n">username</span><span class="p">,</span> <span class="n">password</span><span class="p">,</span> <span class="n">session</span><span class="p">,</span>
+                          <span class="n">locale</span><span class="p">,</span> <span class="n">nworkers</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">authinfo</span><span class="p">,</span> <span class="n">protocol</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="mi">225</span>                 <span class="bp">self</span><span class="o">.</span><span class="n">_sw_error</span> <span class="o">=</span> <span class="n">clib</span><span class="o">.</span><span class="n">SW_CASError</span><span class="p">(</span><span class="n">a2n</span><span class="p">(</span><span class="n">soptions</span><span class="p">))</span>
+    <span class="mi">226</span>         <span class="k">except</span> <span class="ne">SystemError</span><span class="p">:</span>
+<span class="o">--&gt;</span> <span class="mi">227</span>             <span class="k">raise</span> <span class="n">SWATError</span><span class="p">(</span><span class="s1">&#39;Could not create CAS object. Check your TK path setting.&#39;</span><span class="p">)</span>
+    <span class="mi">228</span>
+    <span class="mi">229</span>         <span class="c1"># Make the connection</span>
+
+<span class="n">SWATError</span><span class="p">:</span> <span class="n">Could</span> <span class="ow">not</span> <span class="n">create</span> <span class="n">CAS</span> <span class="nb">object</span><span class="o">.</span> <span class="n">Check</span> <span class="n">your</span> <span class="n">TK</span> <span class="n">path</span> <span class="n">setting</span><span class="o">.</span>
+</pre></div>
+</div>
+<p>To fix this issue, make sure that <code class="docutils literal"><span class="pre">swat.options.tkpath</span></code> is set to the location of the
+SAS TK libraries.</p>
+</div>
+<div class="section" id="unable-to-import-pyxxswat">
+<h2>Unable to Import _pyXXswat<a class="headerlink" href="#unable-to-import-pyxxswat" title="Permalink to this headline">¶</a></h2>
+<p>If you are creating a CAS connection and you get the following error, it
+generally means that you don&#8217;t have the SAS TK libraries or the Python
+extension installed.  This can happen if you only installed the Python
+source version of SWAT (not the installer that bundles the SAS TK
+libraries) and you tried to connect to CAS using the binary protocol.</p>
+<p>The source-only Python installer can only connect to the REST interface of
+CAS, so you must point <code class="xref py py-class docutils literal"><span class="pre">CAS</span></code> to a REST port rather than a binary
+port.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">In</span> <span class="p">[</span><span class="mi">1</span><span class="p">]:</span> <span class="n">conn</span> <span class="o">=</span> <span class="n">swat</span><span class="o">.</span><span class="n">CAS</span><span class="p">(</span><span class="n">hostname</span><span class="p">,</span> <span class="n">port</span><span class="p">)</span>
+
+<span class="o">.</span> <span class="o">.</span> <span class="o">.</span>
+
+<span class="n">During</span> <span class="n">handling</span> <span class="n">of</span> <span class="n">the</span> <span class="n">above</span> <span class="n">exception</span><span class="p">,</span> <span class="n">another</span> <span class="n">exception</span> <span class="n">occurred</span><span class="p">:</span>
+
+<span class="ne">ValueError</span>                                <span class="n">Traceback</span> <span class="p">(</span><span class="n">most</span> <span class="n">recent</span> <span class="n">call</span> <span class="n">last</span><span class="p">)</span>
+<span class="o">&lt;</span><span class="n">ipython</span><span class="o">-</span><span class="nb">input</span><span class="o">-</span><span class="mi">2</span><span class="o">-</span><span class="n">cb8d2ab92685</span><span class="o">&gt;</span> <span class="ow">in</span> <span class="o">&lt;</span><span class="n">module</span><span class="o">&gt;</span><span class="p">()</span>
+<span class="o">----&gt;</span> <span class="mi">1</span> <span class="n">swat</span><span class="o">.</span><span class="n">CAS</span><span class="p">(</span><span class="s1">&#39;my-cas&#39;</span><span class="p">,</span> <span class="mi">12345</span><span class="p">)</span>
+
+<span class="n">connection</span><span class="o">.</span><span class="n">py</span> <span class="ow">in</span> <span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hostname</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="n">username</span><span class="p">,</span> <span class="n">password</span><span class="p">,</span> <span class="n">session</span><span class="p">,</span>
+                          <span class="n">locale</span><span class="p">,</span> <span class="n">nworkers</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">authinfo</span><span class="p">,</span> <span class="n">protocol</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="mi">223</span>                 <span class="bp">self</span><span class="o">.</span><span class="n">_sw_error</span> <span class="o">=</span> <span class="n">rest</span><span class="o">.</span><span class="n">REST_CASError</span><span class="p">(</span><span class="n">a2n</span><span class="p">(</span><span class="n">soptions</span><span class="p">))</span>
+    <span class="mi">224</span>             <span class="k">else</span><span class="p">:</span>
+<span class="o">--&gt;</span> <span class="mi">225</span>                 <span class="bp">self</span><span class="o">.</span><span class="n">_sw_error</span> <span class="o">=</span> <span class="n">clib</span><span class="o">.</span><span class="n">SW_CASError</span><span class="p">(</span><span class="n">a2n</span><span class="p">(</span><span class="n">soptions</span><span class="p">))</span>
+    <span class="mi">226</span>         <span class="k">except</span> <span class="ne">SystemError</span><span class="p">:</span>
+    <span class="mi">227</span>             <span class="k">raise</span> <span class="n">SWATError</span><span class="p">(</span><span class="s1">&#39;Could not create CAS object. Check your TK path setting.&#39;</span><span class="p">)</span>
+
+<span class="n">clib</span><span class="o">.</span><span class="n">py</span> <span class="ow">in</span> <span class="n">SW_CASError</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+     <span class="mi">84</span>     <span class="s1">&#39;&#39;&#39; Return a CASError (importing _pyswat as needed) &#39;&#39;&#39;</span>
+     <span class="mi">85</span>     <span class="k">if</span> <span class="n">_pyswat</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+<span class="o">---&gt;</span> <span class="mi">86</span>         <span class="n">_import_pyswat</span><span class="p">()</span>
+     <span class="mi">87</span>     <span class="k">return</span> <span class="n">_pyswat</span><span class="o">.</span><span class="n">SW_CASError</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+     <span class="mi">88</span>
+
+<span class="n">clib</span><span class="o">.</span><span class="n">py</span> <span class="ow">in</span> <span class="n">_import_pyswat</span><span class="p">()</span>
+     <span class="mi">43</span>         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">((</span><span class="s1">&#39;Could not import import </span><span class="si">%s</span><span class="s1">.  This is likely due to an &#39;</span>
+     <span class="mi">44</span>                           <span class="s1">&#39;incorrect SAS TK path or an error while loading the SAS TK subsystem. &#39;</span>
+<span class="o">---&gt;</span> <span class="mi">45</span>                           <span class="s1">&#39;You can try using the REST interface as an alternative.&#39;</span><span class="p">)</span> <span class="o">%</span> <span class="n">libname</span><span class="p">)</span>
+     <span class="mi">46</span>
+     <span class="mi">47</span>
+
+<span class="ne">ValueError</span><span class="p">:</span> <span class="n">Could</span> <span class="ow">not</span> <span class="kn">import</span> <span class="nn">import</span> <span class="nn">_py34swat.</span>  <span class="nn">This</span> <span class="nn">is</span> <span class="nn">likely</span> <span class="nn">due</span> <span class="nn">to</span> <span class="nn">an</span> <span class="nn">incorrect</span> <span class="nn">SAS</span> <span class="nn">TK</span>
+            <span class="n">path</span> <span class="ow">or</span> <span class="n">an</span> <span class="n">error</span> <span class="k">while</span> <span class="n">loading</span> <span class="n">the</span> <span class="n">SAS</span> <span class="n">TK</span> <span class="n">subsystem</span><span class="o">.</span>  <span class="n">You</span> <span class="n">can</span> <span class="k">try</span> <span class="n">using</span> <span class="n">the</span>
+            <span class="n">REST</span> <span class="n">interface</span> <span class="k">as</span> <span class="n">an</span> <span class="n">alternative</span><span class="o">.</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="refused-connection">
+<h2>Refused Connection<a class="headerlink" href="#refused-connection" title="Permalink to this headline">¶</a></h2>
+<p>If you get an error saying that the connection was refused, you probably do not
+a CAS server running on that host or port, or you are behind a firewall that is
+preventing your from accessing that server.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">In</span> <span class="p">[</span><span class="mi">1</span><span class="p">]:</span> <span class="n">conn</span> <span class="o">=</span> <span class="n">swat</span><span class="o">.</span><span class="n">CAS</span><span class="p">(</span><span class="s1">&#39;my-cas&#39;</span><span class="p">,</span> <span class="mi">12345</span><span class="p">)</span>
+<span class="n">ERROR</span><span class="p">:</span> <span class="n">The</span> <span class="n">TCP</span><span class="o">/</span><span class="n">IP</span> <span class="n">tcpSockConnect</span> <span class="n">support</span> <span class="n">routine</span> <span class="n">failed</span> <span class="k">with</span> <span class="n">error</span> <span class="mi">61</span> <span class="p">(</span><span class="n">The</span> <span class="n">connection</span> <span class="n">was</span> <span class="n">refused</span><span class="o">.</span><span class="p">)</span><span class="o">.</span>
+<span class="n">ERROR</span><span class="p">:</span> <span class="n">Failed</span> <span class="n">to</span> <span class="n">connect</span> <span class="n">to</span> <span class="n">host</span> <span class="s1">&#39;my-cas&#39;</span><span class="p">,</span> <span class="n">port</span> <span class="mf">12345.</span>
+
+<span class="o">.</span> <span class="o">.</span> <span class="o">.</span>
+
+<span class="n">During</span> <span class="n">handling</span> <span class="n">of</span> <span class="n">the</span> <span class="n">above</span> <span class="n">exception</span><span class="p">,</span> <span class="n">another</span> <span class="n">exception</span> <span class="n">occurred</span><span class="p">:</span>
+
+<span class="n">SWATError</span>                                 <span class="n">Traceback</span> <span class="p">(</span><span class="n">most</span> <span class="n">recent</span> <span class="n">call</span> <span class="n">last</span><span class="p">)</span>
+<span class="o">&lt;</span><span class="n">ipython</span><span class="o">-</span><span class="nb">input</span><span class="o">-</span><span class="mi">3</span><span class="o">-</span><span class="mi">404</span><span class="n">a7919d58a</span><span class="o">&gt;</span> <span class="ow">in</span> <span class="o">&lt;</span><span class="n">module</span><span class="o">&gt;</span><span class="p">()</span>
+<span class="o">----&gt;</span> <span class="mi">1</span> <span class="n">conn</span> <span class="o">=</span> <span class="n">swat</span><span class="o">.</span><span class="n">CAS</span><span class="p">(</span><span class="s1">&#39;my-cas&#39;</span><span class="p">,</span> <span class="mi">12345</span><span class="p">)</span>
+
+<span class="n">cas</span><span class="o">/</span><span class="n">connection</span><span class="o">.</span><span class="n">py</span> <span class="ow">in</span> <span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hostname</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="n">username</span><span class="p">,</span> <span class="n">password</span><span class="p">,</span> <span class="n">session</span><span class="p">,</span>
+                              <span class="n">locale</span><span class="p">,</span> <span class="n">nworkers</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">authinfo</span><span class="p">,</span> <span class="n">protocol</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="mi">259</span>                     <span class="k">raise</span> <span class="ne">SystemError</span>
+    <span class="mi">260</span>         <span class="k">except</span> <span class="ne">SystemError</span><span class="p">:</span>
+<span class="o">--&gt;</span> <span class="mi">261</span>             <span class="k">raise</span> <span class="n">SWATError</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_sw_error</span><span class="o">.</span><span class="n">getLastErrorMessage</span><span class="p">())</span>
+    <span class="mi">262</span>
+    <span class="mi">263</span>         <span class="n">errorcheck</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_sw_connection</span><span class="o">.</span><span class="n">setZeroIndexedParameters</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sw_connection</span><span class="p">)</span>
+
+<span class="n">SWATError</span><span class="p">:</span> <span class="n">Could</span> <span class="ow">not</span> <span class="n">connect</span> <span class="n">to</span> <span class="s1">&#39;my-cas&#39;</span> <span class="n">on</span> <span class="n">port</span> <span class="mf">12345.</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="authentication-issues">
+<h2>Authentication Issues<a class="headerlink" href="#authentication-issues" title="Permalink to this headline">¶</a></h2>
+<p>Authentication problems can occur for many reasons.  The examples below show
+two possible issues.  The first one is an issue with the Authinfo file that
+contains the passwords.  It requires the file permissions to be readable by
+the owner only.  In this case, the Authinfo file was readable by others,
+which is invalid.</p>
+<p>Other issues that can occur with an Authinfo file include not having a
+hostname and port that matches the one used in the <code class="xref py py-class docutils literal"><span class="pre">CAS</span></code> constructor
+or simply having the incorrect (possibly outdated) password in the file.
+The second code sample below shows the error for an incorrect password.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">In</span> <span class="p">[</span><span class="mi">1</span><span class="p">]:</span> <span class="n">conn</span> <span class="o">=</span> <span class="n">swat</span><span class="o">.</span><span class="n">CAS</span><span class="p">(</span><span class="s1">&#39;my-cas&#39;</span><span class="p">,</span> <span class="mi">12345</span><span class="p">)</span>
+<span class="n">WARNING</span><span class="p">:</span> <span class="n">Incorrect</span> <span class="n">permissions</span> <span class="n">on</span> <span class="n">netrc</span><span class="o">/</span><span class="n">authinfo</span> <span class="nb">file</span><span class="o">.</span>
+<span class="n">ERROR</span><span class="p">:</span> <span class="n">Kerberos</span> <span class="n">initialization</span> <span class="n">failed</span><span class="o">.</span> <span class="n">Your</span> <span class="n">credential</span> <span class="n">cache</span> <span class="ow">is</span> <span class="n">either</span> <span class="n">expired</span> <span class="ow">or</span> <span class="n">missing</span><span class="o">.</span>
+<span class="o">---------------------------------------------------------------------------</span>
+<span class="ne">SystemError</span>                               <span class="n">Traceback</span> <span class="p">(</span><span class="n">most</span> <span class="n">recent</span> <span class="n">call</span> <span class="n">last</span><span class="p">)</span>
+<span class="n">connection</span><span class="o">.</span><span class="n">py</span> <span class="n">in__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hostname</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="n">username</span><span class="p">,</span> <span class="n">password</span><span class="p">,</span> <span class="n">session</span><span class="p">,</span>
+                         <span class="n">locale</span><span class="p">,</span> <span class="n">nworkers</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">authinfo</span><span class="p">,</span> <span class="n">protocol</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="mi">256</span>                                                                 <span class="n">a2n</span><span class="p">(</span><span class="n">soptions</span><span class="p">),</span>
+<span class="o">--&gt;</span> <span class="mi">257</span>                                                                 <span class="bp">self</span><span class="o">.</span><span class="n">_sw_error</span><span class="p">)</span>
+    <span class="mi">258</span>                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sw_connection</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+
+<span class="o">.</span> <span class="o">.</span> <span class="o">.</span>
+
+<span class="n">SWATError</span><span class="p">:</span> <span class="n">Could</span> <span class="ow">not</span> <span class="n">connect</span> <span class="n">to</span> <span class="s1">&#39;my-cas&#39;</span> <span class="n">on</span> <span class="n">port</span> <span class="mf">12345.</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">In</span> <span class="p">[</span><span class="mi">1</span><span class="p">]:</span> <span class="n">conn</span> <span class="o">=</span> <span class="n">swat</span><span class="o">.</span><span class="n">CAS</span><span class="p">(</span><span class="s1">&#39;my-cas&#39;</span><span class="p">,</span> <span class="mi">12345</span><span class="p">)</span>
+<span class="n">ERROR</span><span class="p">:</span> <span class="n">Connection</span> <span class="n">failed</span><span class="o">.</span> <span class="n">Server</span> <span class="n">returned</span><span class="p">:</span> <span class="n">Authentication</span> <span class="n">failed</span><span class="p">:</span> <span class="n">Access</span> <span class="n">denied</span><span class="o">.</span>
+<span class="o">---------------------------------------------------------------------------</span>
+<span class="ne">SystemError</span>                               <span class="n">Traceback</span> <span class="p">(</span><span class="n">most</span> <span class="n">recent</span> <span class="n">call</span> <span class="n">last</span><span class="p">)</span>
+<span class="n">connection</span><span class="o">.</span><span class="n">py</span> <span class="ow">in</span> <span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hostname</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="n">username</span><span class="p">,</span> <span class="n">password</span><span class="p">,</span> <span class="n">session</span><span class="p">,</span>
+                          <span class="n">locale</span><span class="p">,</span> <span class="n">nworkers</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">authinfo</span><span class="p">,</span> <span class="n">protocol</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="mi">256</span>                                                                 <span class="n">a2n</span><span class="p">(</span><span class="n">soptions</span><span class="p">),</span>
+<span class="o">--&gt;</span> <span class="mi">257</span>                                                                 <span class="bp">self</span><span class="o">.</span><span class="n">_sw_error</span><span class="p">)</span>
+    <span class="mi">258</span>                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sw_connection</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+
+<span class="o">.</span> <span class="o">.</span> <span class="o">.</span>
+
+<span class="n">SWATError</span><span class="p">:</span> <span class="n">Could</span> <span class="ow">not</span> <span class="n">connect</span> <span class="n">to</span> <span class="s1">&#39;my-cas&#39;</span> <span class="n">on</span> <span class="n">port</span> <span class="mf">12345.</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="sas-tk.html" class="btn btn-neutral float-right" title="SAS TK" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="gotchas.html" class="btn btn-neutral" title="Programming Gotchas" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016 SAS Institute Inc. All Rights Reserved..
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'1.0.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

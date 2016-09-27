@@ -1,0 +1,6 @@
+swat.cas.table.CASTable.get_dtype_counts
+========================================
+
+.. currentmodule:: swat.cas.table
+
+.. automethod:: CASTable.get_dtype_counts

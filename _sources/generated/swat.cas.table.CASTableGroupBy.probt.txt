@@ -1,0 +1,6 @@
+swat.cas.table.CASTableGroupBy.probt
+====================================
+
+.. currentmodule:: swat.cas.table
+
+.. automethod:: CASTableGroupBy.probt

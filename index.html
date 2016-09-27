@@ -1,0 +1,423 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>SAS Scripting Wrapper for Analytics Transfer (SWAT) &mdash; SWAT 1.0.0 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+    <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+
+  
+    <link rel="top" title="SWAT 1.0.0 documentation" href="#"/>
+        <link rel="next" title="Installation" href="install.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="#" class="icon icon-home"> SWAT
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.0.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="workflows.html">Workflows</a></li>
+<li class="toctree-l1"><a class="reference internal" href="binary-vs-rest.html">Binary vs. REST</a></li>
+<li class="toctree-l1"><a class="reference internal" href="loading-data.html">Loading Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="table-vs-dataframe.html">CASTable vs. DataFrame vs. SASDataFrame</a></li>
+<li class="toctree-l1"><a class="reference internal" href="indexing.html">Indexing and Data Selection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bygroups.html">Handling By Groups</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sorting.html">Sorting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gotchas.html">Programming Gotchas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="troubleshooting.html">Troubleshooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sas-tk.html">SAS TK</a></li>
+<li class="toctree-l1"><a class="reference internal" href="licenses.html">Licenses</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="#">SWAT</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+ 
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="#">Docs</a> &raquo;</li>
+      
+    <li>SAS Scripting Wrapper for Analytics Transfer (SWAT)</li>
+    <li class="wy-breadcrumbs-aside">
+      
+          
+          <a href="_sources/index.txt" rel="nofollow"> View page source</a>
+        
+      
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-swat">
+<span id="sas-scripting-wrapper-for-analytics-transfer-swat"></span><h1>SAS Scripting Wrapper for Analytics Transfer (SWAT)<a class="headerlink" href="#module-swat" title="Permalink to this headline">¶</a></h1>
+<p><strong>Date</strong>: Sep 27, 2016 <strong>Version</strong>: 1.0.0</p>
+<p><strong>Binary Installers:</strong> <a class="reference external" href="http://github.com/sassoftware/python-swat/releases">http://github.com/sassoftware/python-swat/releases</a></p>
+<p><strong>Source Repository:</strong> <a class="reference external" href="http://github.com/sassoftware/python-swat">http://github.com/sassoftware/python-swat</a></p>
+<p><strong>Issues &amp; Ideas:</strong> <a class="reference external" href="https://github.com/sassoftware/python-swat/issues">https://github.com/sassoftware/python-swat/issues</a></p>
+<p><strong>Q&amp;A Support:</strong> <a class="reference external" href="https://communities.sas.com/t5/SAS-Viya-Coders-Library/tkb-p/cas%40tkb">https://communities.sas.com/t5/SAS-Viya-Coders-Library/tkb-p/cas%40tkb</a></p>
+<p><strong>SAS Viya:</strong> <a class="reference external" href="https://support.sas.com/documentation/onlinedoc/viya/index.html">https://support.sas.com/documentation/onlinedoc/viya/index.html</a></p>
+<p>The <strong>SAS SWAT</strong> package is a Python interface to <strong>SAS Cloud Analytic Services (CAS)</strong>
+(the centerpiece of the <a class="reference external" href="http://www.sas.com/en_us/software/viya.html">SAS Viya</a> framework).
+With this package, you can load and analyze
+data sets of any size on your desktop or in the cloud.  Since CAS can be used on a local
+desktop or in a hosted cloud environment, you can analyze extremely large data sets using
+as much processing power as you need, while still retaining the ease-of-use of Python
+on the client side.</p>
+<p>Using SWAT, you can execute workflows of CAS analytic actions, then pull down
+the summarized data to further process on the client side in Python, or to merge with data
+from other sources using familiar <a class="reference external" href="http://pandas.pydata.org">Pandas</a> data structures.  In fact,
+the SWAT package mimics much of the API of the Pandas package so that using CAS should
+feel familiar to current Pandas users.</p>
+<p>With the best-of-breed SAS analytics in the cloud and the use of Python and
+its large collection of open source packages, the SWAT package gives you access
+to the best of both worlds.</p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="install.html#linux-library-dependencies">Linux Library Dependencies</a></li>
+<li class="toctree-l2"><a class="reference internal" href="install.html#python-dependencies">Python Dependencies</a></li>
+<li class="toctree-l2"><a class="reference internal" href="install.html#pip">Pip</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting Started</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="getting-started.html#running-cas-actions">Running CAS Actions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting-started.html#handling-the-output">Handling the Output</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting-started.html#simple-statistics">Simple Statistics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting-started.html#loading-cas-action-sets">Loading CAS Action Sets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting-started.html#cas-tables-as-dataframes">CAS Tables as DataFrames</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting-started.html#closing-the-connection">Closing the Connection</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting-started.html#authentication">Authentication</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="workflows.html">Workflows</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="workflows.html#the-easy-way">The Easy Way</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflows.html#using-response-and-result-callbacks">Using Response and Result Callbacks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflows.html#handling-multiple-actions-simultaneously">Handling Multiple Actions Simultaneously</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="binary-vs-rest.html">Binary vs. REST</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="binary-vs-rest.html#binary-cas-protocol">Binary (CAS) Protocol</a></li>
+<li class="toctree-l2"><a class="reference internal" href="binary-vs-rest.html#rest-protocol">REST Protocol</a></li>
+<li class="toctree-l2"><a class="reference internal" href="binary-vs-rest.html#synopsis">Synopsis</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="binary-vs-rest.html#id1">Binary (CAS) Protocol</a></li>
+<li class="toctree-l3"><a class="reference internal" href="binary-vs-rest.html#id2">REST Protocol</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="loading-data.html">Loading Data</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="loading-data.html#client-side-data-files-and-sources">Client-Side Data Files and Sources</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="loading-data.html#using-client-side-parsers">Using Client-Side Parsers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="loading-data.html#parsing-client-side-data-on-the-server">Parsing Client-Side Data on the Server</a></li>
+<li class="toctree-l3"><a class="reference internal" href="loading-data.html#creating-custom-data-loaders">Creating Custom Data Loaders</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="loading-data.html#server-side-data-files-and-sources">Server-Side Data Files and Sources</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="loading-data.html#using-server-side-parsers">Using Server-Side Parsers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="loading-data.html#loading-data-from-other-sources">Loading Data from Other Sources</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="table-vs-dataframe.html">CASTable vs. DataFrame vs. SASDataFrame</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="table-vs-dataframe.html#pandas-dataframe-vs-sasdataframe">Pandas DataFrame vs. SASDataFrame</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="indexing.html">Indexing and Data Selection</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="indexing.html#the-basics">The Basics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="indexing.html#selecting-by-name">Selecting by Name</a></li>
+<li class="toctree-l2"><a class="reference internal" href="indexing.html#selecting-by-position">Selecting by Position</a></li>
+<li class="toctree-l2"><a class="reference internal" href="indexing.html#mixing-names-and-position">Mixing Names and Position</a></li>
+<li class="toctree-l2"><a class="reference internal" href="indexing.html#selecting-a-cross-section">Selecting a Cross Section</a></li>
+<li class="toctree-l2"><a class="reference internal" href="indexing.html#boolean-indexing">Boolean Indexing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="indexing.html#the-query-method">The <code class="docutils literal"><span class="pre">query</span></code> Method</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="bygroups.html">Handling By Groups</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="bygroups.html#selecting-tables-by-name-across-by-groups">Selecting Tables by Name Across By Groups</a></li>
+<li class="toctree-l2"><a class="reference internal" href="bygroups.html#concatenating-by-group-tables">Concatenating By Group Tables</a></li>
+<li class="toctree-l2"><a class="reference internal" href="bygroups.html#selecting-a-specific-by-group">Selecting a Specific By Group</a></li>
+<li class="toctree-l2"><a class="reference internal" href="bygroups.html#multiple-sets-of-by-groups">Multiple Sets of By Groups</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="sorting.html">Sorting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api.html#cas">CAS</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api.html#constructor">Constructor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api.html#session-management">Session Management</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api.html#reading-data">Reading Data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api.html#running-actions">Running Actions</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#casresults">CASResults</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api.html#id1">Constructor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api.html#by-group-processing">By Group Processing</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#sasdataframe">SASDataFrame</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api.html#id2">Constructor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api.html#column-metadata">Column Metadata</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api.html#utilities">Utilities</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#sasformatter">SASFormatter</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api.html#id3">Constructor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api.html#formatting-data">Formatting Data</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#castable">CASTable</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api.html#id4">Constructor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api.html#cas-connections">CAS Connections</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api.html#setters-and-getters">Setters and Getters</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api.html#attributes-and-underlying-data">Attributes and Underlying Data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api.html#indexing-iteration">Indexing, Iteration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api.html#groupby">GroupBy</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api.html#computations-descriptive-stats">Computations / Descriptive Stats</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api.html#reindexing-selection-label-manipulation">Reindexing / Selection / Label manipulation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api.html#sorting">Sorting</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api.html#plotting">Plotting</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api.html#serialization-io-conversion">Serialization / IO / Conversion</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#cascolumn">CASColumn</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api.html#id5">Constructor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api.html#attributes">Attributes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api.html#id6">Indexing, Iteration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api.html#binary-operator-functions">Binary Operator Functions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api.html#id7">GroupBy</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api.html#id8">Computations / Descriptive Stats</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api.html#selection">Selection</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api.html#id9">Sorting</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api.html#datetime-properties">Datetime Properties</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api.html#string-handling">String Handling</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api.html#sas-functions">SAS Functions</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#castablegroupby">CASTableGroupBy</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api.html#id10">Constructor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api.html#indexing-and-iteration">Indexing and Iteration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api.html#conversion">Conversion</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api.html#computations-descriptive-statistics">Computations / Descriptive Statistics</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#casresponse">CASResponse</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api.html#id11">Constructor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api.html#response-properties">Response Properties</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#data-message-handlers">Data Message Handlers</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="generated/swat.cas.datamsghandlers.CASDataMsgHandler.html">swat.cas.datamsghandlers.CASDataMsgHandler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/swat.cas.datamsghandlers.PandasDataFrame.html">swat.cas.datamsghandlers.PandasDataFrame</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/swat.cas.datamsghandlers.SAS7BDAT.html">swat.cas.datamsghandlers.SAS7BDAT</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/swat.cas.datamsghandlers.CSV.html">swat.cas.datamsghandlers.CSV</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/swat.cas.datamsghandlers.Text.html">swat.cas.datamsghandlers.Text</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/swat.cas.datamsghandlers.FWF.html">swat.cas.datamsghandlers.FWF</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/swat.cas.datamsghandlers.JSON.html">swat.cas.datamsghandlers.JSON</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/swat.cas.datamsghandlers.HTML.html">swat.cas.datamsghandlers.HTML</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/swat.cas.datamsghandlers.SQLTable.html">swat.cas.datamsghandlers.SQLTable</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/swat.cas.datamsghandlers.SQLQuery.html">swat.cas.datamsghandlers.SQLQuery</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/swat.cas.datamsghandlers.Excel.html">swat.cas.datamsghandlers.Excel</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/swat.cas.datamsghandlers.Clipboard.html">swat.cas.datamsghandlers.Clipboard</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/swat.cas.datamsghandlers.DBAPI.html">swat.cas.datamsghandlers.DBAPI</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#date-and-time-functions">Date and Time Functions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api.html#cas-dates-and-times">CAS Dates and Times</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api.html#sas-dates-and-times">SAS Dates and Times</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="gotchas.html">Programming Gotchas</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="gotchas.html#return-values">Return Values</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gotchas.html#name-collisions">Name Collisions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gotchas.html#case-sensitivity">Case-Sensitivity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gotchas.html#sasdataframe-vs-pandas-dataframe">SASDataFrame vs pandas.DataFrame</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gotchas.html#weak-cas-object-references">Weak CAS Object References</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="troubleshooting.html">Troubleshooting</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="troubleshooting.html#missing-linux-library-dependencies">Missing Linux Library Dependencies</a></li>
+<li class="toctree-l2"><a class="reference internal" href="troubleshooting.html#incorrect-sas-tk-configuration">Incorrect SAS TK Configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="troubleshooting.html#unable-to-import-pyxxswat">Unable to Import _pyXXswat</a></li>
+<li class="toctree-l2"><a class="reference internal" href="troubleshooting.html#refused-connection">Refused Connection</a></li>
+<li class="toctree-l2"><a class="reference internal" href="troubleshooting.html#authentication-issues">Authentication Issues</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="sas-tk.html">SAS TK</a></li>
+<li class="toctree-l1"><a class="reference internal" href="licenses.html">Licenses</a></li>
+</ul>
+</div>
+<div class="section" id="index">
+<h2>Index<a class="headerlink" href="#index" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></li>
+</ul>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="install.html" class="btn btn-neutral float-right" title="Installation" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016 SAS Institute Inc. All Rights Reserved..
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'1.0.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

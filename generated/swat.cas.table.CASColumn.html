@@ -1,0 +1,802 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>swat.cas.table.CASColumn &mdash; SWAT 1.0.0 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+
+  
+    <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+
+  
+    <link rel="top" title="SWAT 1.0.0 documentation" href="../index.html"/>
+        <link rel="up" title="API Reference" href="../api.html"/>
+        <link rel="next" title="swat.cas.table.CASColumn.values" href="swat.cas.table.CASColumn.values.html"/>
+        <link rel="prev" title="swat.cas.table.CASTable.to_clipboard" href="swat.cas.table.CASTable.to_clipboard.html"/> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> SWAT
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.0.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting-started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../workflows.html">Workflows</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../binary-vs-rest.html">Binary vs. REST</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../loading-data.html">Loading Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../table-vs-dataframe.html">CASTable vs. DataFrame vs. SASDataFrame</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../indexing.html">Indexing and Data Selection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../bygroups.html">Handling By Groups</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../sorting.html">Sorting</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../api.html">API Reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../api.html#cas">CAS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#casresults">CASResults</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#sasdataframe">SASDataFrame</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#sasformatter">SASFormatter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#castable">CASTable</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../api.html#cascolumn">CASColumn</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="../api.html#id5">Constructor</a><ul class="current">
+<li class="toctree-l4 current"><a class="current reference internal" href="#">swat.cas.table.CASColumn</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../api.html#attributes">Attributes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../api.html#id6">Indexing, Iteration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../api.html#binary-operator-functions">Binary Operator Functions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../api.html#id7">GroupBy</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../api.html#id8">Computations / Descriptive Stats</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../api.html#selection">Selection</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../api.html#id9">Sorting</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../api.html#datetime-properties">Datetime Properties</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../api.html#string-handling">String Handling</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../api.html#sas-functions">SAS Functions</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#castablegroupby">CASTableGroupBy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#casresponse">CASResponse</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#data-message-handlers">Data Message Handlers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#date-and-time-functions">Date and Time Functions</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../gotchas.html">Programming Gotchas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../troubleshooting.html">Troubleshooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../sas-tk.html">SAS TK</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../licenses.html">Licenses</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../index.html">SWAT</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+ 
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../index.html">Docs</a> &raquo;</li>
+      
+        <li><a href="../api.html">API Reference</a> &raquo;</li>
+      
+    <li>swat.cas.table.CASColumn</li>
+    <li class="wy-breadcrumbs-aside">
+      
+          
+          <a href="../_sources/generated/swat.cas.table.CASColumn.txt" rel="nofollow"> View page source</a>
+        
+      
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="swat-cas-table-cascolumn">
+<h1>swat.cas.table.CASColumn<a class="headerlink" href="#swat-cas-table-cascolumn" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="swat.cas.table.CASColumn">
+<em class="property">class </em><code class="descclassname">swat.cas.table.</code><code class="descname">CASColumn</code><span class="sig-paren">(</span><em>name</em>, <em>**table_params</em><span class="sig-paren">)</span><a class="headerlink" href="#swat.cas.table.CASColumn" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="swat.cas.table.CASTable.html#swat.cas.table.CASTable" title="swat.cas.table.CASTable"><code class="xref py py-class docutils literal"><span class="pre">swat.cas.table.CASTable</span></code></a></p>
+<p>Special subclass of CASTable for holding single columns</p>
+<dl class="method">
+<dt id="swat.cas.table.CASColumn.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>name</em>, <em>**table_params</em><span class="sig-paren">)</span><a class="headerlink" href="#swat.cas.table.CASColumn.__init__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<p class="rubric">Methods</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="#swat.cas.table.CASColumn.__init__" title="swat.cas.table.CASColumn.__init__"><code class="xref py py-obj docutils literal"><span class="pre">__init__</span></code></a>(name,&nbsp;**table_params)</td>
+<td></td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="swat.cas.table.CASColumn.abs.html#swat.cas.table.CASColumn.abs" title="swat.cas.table.CASColumn.abs"><code class="xref py py-obj docutils literal"><span class="pre">abs</span></code></a>()</td>
+<td>Return absolute values element-wise</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="swat.cas.table.CASColumn.add.html#swat.cas.table.CASColumn.add" title="swat.cas.table.CASColumn.add"><code class="xref py py-obj docutils literal"><span class="pre">add</span></code></a>(other[,&nbsp;level,&nbsp;fill_value,&nbsp;axis])</td>
+<td>Addition of CASColumn with other, element-wise</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="swat.cas.table.CASColumn.all.html#swat.cas.table.CASColumn.all" title="swat.cas.table.CASColumn.all"><code class="xref py py-obj docutils literal"><span class="pre">all</span></code></a>([axis,&nbsp;bool_only,&nbsp;skipna,&nbsp;level])</td>
+<td>Return whether all elements are True</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="swat.cas.table.CASColumn.any.html#swat.cas.table.CASColumn.any" title="swat.cas.table.CASColumn.any"><code class="xref py py-obj docutils literal"><span class="pre">any</span></code></a>([axis,&nbsp;bool_only,&nbsp;skipna,&nbsp;level])</td>
+<td>Return whether any elements are True</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">append_columns</span></code>(*items,&nbsp;**kwargs)</td>
+<td>Append variable names to action inputs parameter</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">append_computed_columns</span></code>(names,&nbsp;code[,&nbsp;inplace])</td>
+<td>Append computed columns as specified</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">append_computedvars</span></code>(*items,&nbsp;**kwargs)</td>
+<td>Append variable names to tbl.computedvars parameter</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">append_computedvarsprogram</span></code>(*items,&nbsp;**kwargs)</td>
+<td>Append code to tbl.computedvarsprogram parameter</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">append_groupby</span></code>(*items,&nbsp;**kwargs)</td>
+<td>Append variable names to tbl.groupby parameter</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">append_orderby</span></code>(*items,&nbsp;**kwargs)</td>
+<td>Append orderby parameters</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">append_where</span></code>(*items,&nbsp;**kwargs)</td>
+<td>Append code to where parameter</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">as_matrix</span></code>([columns,&nbsp;n])</td>
+<td>Convert the CASTable to its Numpy-array representation</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="swat.cas.table.CASColumn.between.html#swat.cas.table.CASColumn.between" title="swat.cas.table.CASColumn.between"><code class="xref py py-obj docutils literal"><span class="pre">between</span></code></a>(left,&nbsp;right[,&nbsp;inclusive])</td>
+<td>Return boolean CASColumn equivalent to left &lt;= value &lt;= right</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">boxplot</span></code>(*args,&nbsp;**kwargs)</td>
+<td>Make a boxplot from the table data</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="swat.cas.table.CASColumn.clip.html#swat.cas.table.CASColumn.clip" title="swat.cas.table.CASColumn.clip"><code class="xref py py-obj docutils literal"><span class="pre">clip</span></code></a>([lower,&nbsp;upper,&nbsp;out,&nbsp;axis])</td>
+<td>Trim values at input threshold(s)</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="swat.cas.table.CASColumn.clip_lower.html#swat.cas.table.CASColumn.clip_lower" title="swat.cas.table.CASColumn.clip_lower"><code class="xref py py-obj docutils literal"><span class="pre">clip_lower</span></code></a>(threshold[,&nbsp;axis])</td>
+<td>Trim values below given threshold</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="swat.cas.table.CASColumn.clip_upper.html#swat.cas.table.CASColumn.clip_upper" title="swat.cas.table.CASColumn.clip_upper"><code class="xref py py-obj docutils literal"><span class="pre">clip_upper</span></code></a>(threshold[,&nbsp;axis])</td>
+<td>Trim values above given threshold</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">copy</span></code>([deep,&nbsp;exclude])</td>
+<td>Make a copy of the <cite>CASTable</cite> object</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">corr</span></code>(other[,&nbsp;method,&nbsp;min_periods])</td>
+<td>Compute correlation with other column</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="swat.cas.table.CASColumn.count.html#swat.cas.table.CASColumn.count" title="swat.cas.table.CASColumn.count"><code class="xref py py-obj docutils literal"><span class="pre">count</span></code></a>([level])</td>
+<td>Return the number of non-NA/null observations in the CASColumn</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="swat.cas.table.CASColumn.css.html#swat.cas.table.CASColumn.css" title="swat.cas.table.CASColumn.css"><code class="xref py py-obj docutils literal"><span class="pre">css</span></code></a>()</td>
+<td>Return corrected sum of squares of the values</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="swat.cas.table.CASColumn.cv.html#swat.cas.table.CASColumn.cv" title="swat.cas.table.CASColumn.cv"><code class="xref py py-obj docutils literal"><span class="pre">cv</span></code></a>()</td>
+<td>Return coefficient of variation of the values</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">datastep</span></code>(code[,&nbsp;casout])</td>
+<td>Execute Data step code against the CAS table</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">del_action_params</span></code>(*names)</td>
+<td>Delete parameters for specified action names</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">del_param</span></code>(*keys)</td>
+<td>Delete parameters</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">del_params</span></code>(*keys)</td>
+<td>Delete parameters</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="swat.cas.table.CASColumn.describe.html#swat.cas.table.CASColumn.describe" title="swat.cas.table.CASColumn.describe"><code class="xref py py-obj docutils literal"><span class="pre">describe</span></code></a>([percentiles,&nbsp;include,&nbsp;exclude,&nbsp;stats])</td>
+<td>Generate various summary statistics</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="swat.cas.table.CASColumn.div.html#swat.cas.table.CASColumn.div" title="swat.cas.table.CASColumn.div"><code class="xref py py-obj docutils literal"><span class="pre">div</span></code></a>(other[,&nbsp;level,&nbsp;fill_value,&nbsp;axis])</td>
+<td>Floating division of CASColumn and other, element-wise</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">drop</span></code>(labels[,&nbsp;axis,&nbsp;level,&nbsp;inplace,&nbsp;errors])</td>
+<td>Return a new <a class="reference internal" href="swat.cas.table.CASTable.html#swat.cas.table.CASTable" title="swat.cas.table.CASTable"><code class="xref py py-class docutils literal"><span class="pre">CASTable</span></code></a> object with the specified columns removed</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="swat.cas.table.CASColumn.eq.html#swat.cas.table.CASColumn.eq" title="swat.cas.table.CASColumn.eq"><code class="xref py py-obj docutils literal"><span class="pre">eq</span></code></a>(other[,&nbsp;axis])</td>
+<td>Equal-to comparison of CASColumn and other, element-wise</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="swat.cas.table.CASColumn.floordiv.html#swat.cas.table.CASColumn.floordiv" title="swat.cas.table.CASColumn.floordiv"><code class="xref py py-obj docutils literal"><span class="pre">floordiv</span></code></a>(other[,&nbsp;level,&nbsp;fill_value,&nbsp;axis])</td>
+<td>Integer division of CASColumn and other, element-wise</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">from_csv</span></code>(connection,&nbsp;path[,&nbsp;header,&nbsp;sep,&nbsp;...])</td>
+<td>Create a CASColumn from a CSV file</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">from_dict</span></code>(connection,&nbsp;data,&nbsp;*args,&nbsp;**kwargs)</td>
+<td>Create a CASTable from a dictionary</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">from_items</span></code>(connection,&nbsp;items,&nbsp;*args,&nbsp;**kwargs)</td>
+<td>Create a CASTable from a (key, value) pairs</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">from_records</span></code>(connection,&nbsp;data,&nbsp;*args,&nbsp;**kwargs)</td>
+<td>Create a CASTable from records</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="swat.cas.table.CASColumn.ge.html#swat.cas.table.CASColumn.ge" title="swat.cas.table.CASColumn.ge"><code class="xref py py-obj docutils literal"><span class="pre">ge</span></code></a>(other[,&nbsp;axis])</td>
+<td>Greater-than-or-equal-to comparison of CASColumn and other, element-wise</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">get</span></code>(key[,&nbsp;default])</td>
+<td>Get item from CASColumn for the given key</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">get_action_names</span></code>()</td>
+<td>Return a list of available CAS actions</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">get_action_params</span></code>(name,&nbsp;*default)</td>
+<td>Return parameters for specified action name</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">get_actionset_names</span></code>()</td>
+<td>Return a list of available actionsets</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">get_connection</span></code>()</td>
+<td>Get the registered connection object</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">get_dtype_counts</span></code>()</td>
+<td>Retrieve the frequency of CAS table column data types</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">get_fetch_params</span></code>()</td>
+<td>Return options to be used during the table.fetch action</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">get_ftype_counts</span></code>()</td>
+<td>Retrieve the frequency of CAS table column data types</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">get_groupby_vars</span></code>()</td>
+<td>Return a list of By group variable names</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">get_inputs_param</span></code>()</td>
+<td>Return the column names for the inputs= action parameter</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">get_param</span></code>(key,&nbsp;*default)</td>
+<td>Return the value of a parameter</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">get_params</span></code>(*keys)</td>
+<td>Return the values of one or more parameters</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">get_value</span></code>(index,&nbsp;col,&nbsp;**kwargs)</td>
+<td>Retrieve a single scalar value</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="swat.cas.table.CASColumn.groupby.html#swat.cas.table.CASColumn.groupby" title="swat.cas.table.CASColumn.groupby"><code class="xref py py-obj docutils literal"><span class="pre">groupby</span></code></a>(by[,&nbsp;axis,&nbsp;level,&nbsp;as_index,&nbsp;sort,&nbsp;...])</td>
+<td>Specify grouping variables for the table</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="swat.cas.table.CASColumn.gt.html#swat.cas.table.CASColumn.gt" title="swat.cas.table.CASColumn.gt"><code class="xref py py-obj docutils literal"><span class="pre">gt</span></code></a>(other[,&nbsp;axis])</td>
+<td>Greater-than comparison of CASColumn and other, element-wise</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">has_groupby_vars</span></code>()</td>
+<td>Does the table have By group variables configured?</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">has_param</span></code>(*keys)</td>
+<td>Return a boolean indicating whether or not the parameters exist</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">has_params</span></code>(*keys)</td>
+<td>Return a boolean indicating whether or not the parameters exist</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="swat.cas.table.CASColumn.head.html#swat.cas.table.CASColumn.head" title="swat.cas.table.CASColumn.head"><code class="xref py py-obj docutils literal"><span class="pre">head</span></code></a>([n,&nbsp;bygroup_as_index])</td>
+<td>Return first <cite>n</cite> rows of the column in a Series</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">hist</span></code>(*args,&nbsp;**kwargs)</td>
+<td>Make a histogram from the table data</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">info</span></code>([verbose,&nbsp;buf,&nbsp;max_cols,&nbsp;memory_usage,&nbsp;...])</td>
+<td>Print summary of <a class="reference internal" href="swat.cas.table.CASTable.html#swat.cas.table.CASTable" title="swat.cas.table.CASTable"><code class="xref py py-class docutils literal"><span class="pre">CASTable</span></code></a> information</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">invoke</span></code>(_name_,&nbsp;**kwargs)</td>
+<td>Invoke an action on the registered connection</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="swat.cas.table.CASColumn.isin.html#swat.cas.table.CASColumn.isin" title="swat.cas.table.CASColumn.isin"><code class="xref py py-obj docutils literal"><span class="pre">isin</span></code></a>(values)</td>
+<td>Return a boolean CASColumn indicating if the value is in the given values</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">isnull</span></code>()</td>
+<td>Return a boolean <a class="reference internal" href="#swat.cas.table.CASColumn" title="swat.cas.table.CASColumn"><code class="xref py py-class docutils literal"><span class="pre">CASColumn</span></code></a> indicating if the values are null</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="swat.cas.table.CASColumn.iteritems.html#swat.cas.table.CASColumn.iteritems" title="swat.cas.table.CASColumn.iteritems"><code class="xref py py-obj docutils literal"><span class="pre">iteritems</span></code></a>([chunksize])</td>
+<td>Lazily iterate over (index, value) tuples</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">iterrows</span></code>([chunksize])</td>
+<td>Iterate over the rows of a CAS table as (index, <a class="reference external" href="http://pandas.pydata.org/pandas-docs/version/0.18.0/generated/pandas.Series.html#pandas.Series" title="(in pandas v0.18.0)"><code class="xref py py-class docutils literal"><span class="pre">pandas.Series</span></code></a>) pairs</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">itertuples</span></code>([index,&nbsp;chunksize])</td>
+<td>Iterate over rows as tuples</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="swat.cas.table.CASColumn.le.html#swat.cas.table.CASColumn.le" title="swat.cas.table.CASColumn.le"><code class="xref py py-obj docutils literal"><span class="pre">le</span></code></a>(other[,&nbsp;axis])</td>
+<td>Less-than-or-equal-to comparison of CASColumn and other, element-wise</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">lookup</span></code>(row_labels,&nbsp;col_labels)</td>
+<td>Retrieve values indicated by row_labels, col_labels positions</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="swat.cas.table.CASColumn.lt.html#swat.cas.table.CASColumn.lt" title="swat.cas.table.CASColumn.lt"><code class="xref py py-obj docutils literal"><span class="pre">lt</span></code></a>(other[,&nbsp;axis])</td>
+<td>Less-than comparison of CASColumn and other, element-wise</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="swat.cas.table.CASColumn.max.html#swat.cas.table.CASColumn.max" title="swat.cas.table.CASColumn.max"><code class="xref py py-obj docutils literal"><span class="pre">max</span></code></a>([axis,&nbsp;skipna,&nbsp;level])</td>
+<td>Return the maximum value</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="swat.cas.table.CASColumn.mean.html#swat.cas.table.CASColumn.mean" title="swat.cas.table.CASColumn.mean"><code class="xref py py-obj docutils literal"><span class="pre">mean</span></code></a>([axis,&nbsp;skipna,&nbsp;level])</td>
+<td>Return the mean value</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="swat.cas.table.CASColumn.median.html#swat.cas.table.CASColumn.median" title="swat.cas.table.CASColumn.median"><code class="xref py py-obj docutils literal"><span class="pre">median</span></code></a>([q,&nbsp;axis,&nbsp;interpolation])</td>
+<td>Return the median value</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="swat.cas.table.CASColumn.min.html#swat.cas.table.CASColumn.min" title="swat.cas.table.CASColumn.min"><code class="xref py py-obj docutils literal"><span class="pre">min</span></code></a>([axis,&nbsp;skipna,&nbsp;level])</td>
+<td>Return the minimum value</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="swat.cas.table.CASColumn.mod.html#swat.cas.table.CASColumn.mod" title="swat.cas.table.CASColumn.mod"><code class="xref py py-obj docutils literal"><span class="pre">mod</span></code></a>(other[,&nbsp;level,&nbsp;fill_value,&nbsp;axis])</td>
+<td>Modulo of CASColumn and other, element-wise</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="swat.cas.table.CASColumn.mode.html#swat.cas.table.CASColumn.mode" title="swat.cas.table.CASColumn.mode"><code class="xref py py-obj docutils literal"><span class="pre">mode</span></code></a>([axis,&nbsp;max_tie])</td>
+<td>Return the mode values</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="swat.cas.table.CASColumn.mul.html#swat.cas.table.CASColumn.mul" title="swat.cas.table.CASColumn.mul"><code class="xref py py-obj docutils literal"><span class="pre">mul</span></code></a>(other[,&nbsp;level,&nbsp;fill_value,&nbsp;axis])</td>
+<td>Multiplication of CASColumn with other, element-wise</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="swat.cas.table.CASColumn.ne.html#swat.cas.table.CASColumn.ne" title="swat.cas.table.CASColumn.ne"><code class="xref py py-obj docutils literal"><span class="pre">ne</span></code></a>(other[,&nbsp;axis])</td>
+<td>Not-equal-to comparison of CASColumn and other, element-wise</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">next</span></code>()</td>
+<td>Return next item in the iteration</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="swat.cas.table.CASColumn.nlargest.html#swat.cas.table.CASColumn.nlargest" title="swat.cas.table.CASColumn.nlargest"><code class="xref py py-obj docutils literal"><span class="pre">nlargest</span></code></a>([n,&nbsp;keep])</td>
+<td>Return the n largest values</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="swat.cas.table.CASColumn.nmiss.html#swat.cas.table.CASColumn.nmiss" title="swat.cas.table.CASColumn.nmiss"><code class="xref py py-obj docutils literal"><span class="pre">nmiss</span></code></a>()</td>
+<td>Return number of missing values</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">notnull</span></code>()</td>
+<td>Return a boolean <a class="reference internal" href="#swat.cas.table.CASColumn" title="swat.cas.table.CASColumn"><code class="xref py py-class docutils literal"><span class="pre">CASColumn</span></code></a> indicating if the values are not null</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="swat.cas.table.CASColumn.nsmallest.html#swat.cas.table.CASColumn.nsmallest" title="swat.cas.table.CASColumn.nsmallest"><code class="xref py py-obj docutils literal"><span class="pre">nsmallest</span></code></a>([n,&nbsp;keep])</td>
+<td>Return the n smallest values</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">nth</span></code>(n[,&nbsp;dropna,&nbsp;bygroup_as_index])</td>
+<td>Return the nth row</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="swat.cas.table.CASColumn.nunique.html#swat.cas.table.CASColumn.nunique" title="swat.cas.table.CASColumn.nunique"><code class="xref py py-obj docutils literal"><span class="pre">nunique</span></code></a>([dropna])</td>
+<td>Return number of unique elements in the CASColumn</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">pop</span></code>(colname)</td>
+<td>Remove a column from the CASTable and return it</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="swat.cas.table.CASColumn.pow.html#swat.cas.table.CASColumn.pow" title="swat.cas.table.CASColumn.pow"><code class="xref py py-obj docutils literal"><span class="pre">pow</span></code></a>(other[,&nbsp;level,&nbsp;fill_value,&nbsp;axis])</td>
+<td>Exponential power of CASColumn and other, element-wise</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="swat.cas.table.CASColumn.probt.html#swat.cas.table.CASColumn.probt" title="swat.cas.table.CASColumn.probt"><code class="xref py py-obj docutils literal"><span class="pre">probt</span></code></a>()</td>
+<td>Return p-value of the T-statistic</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="swat.cas.table.CASColumn.quantile.html#swat.cas.table.CASColumn.quantile" title="swat.cas.table.CASColumn.quantile"><code class="xref py py-obj docutils literal"><span class="pre">quantile</span></code></a>([q,&nbsp;axis,&nbsp;interpolation])</td>
+<td>Return the value at the given quantile</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">query</span></code>(expr[,&nbsp;inplace,&nbsp;engine])</td>
+<td>Query the table with a boolean expression</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="swat.cas.table.CASColumn.radd.html#swat.cas.table.CASColumn.radd" title="swat.cas.table.CASColumn.radd"><code class="xref py py-obj docutils literal"><span class="pre">radd</span></code></a>(other[,&nbsp;level,&nbsp;fill_value,&nbsp;axis])</td>
+<td>Addition of CASColumn and other, element-wise</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="swat.cas.table.CASColumn.rdiv.html#swat.cas.table.CASColumn.rdiv" title="swat.cas.table.CASColumn.rdiv"><code class="xref py py-obj docutils literal"><span class="pre">rdiv</span></code></a>(other[,&nbsp;level,&nbsp;fill_value,&nbsp;axis])</td>
+<td>Floating division of CASColumn and other, element-wise</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">retrieve</span></code>(_name_,&nbsp;**kwargs)</td>
+<td>Invoke an action on the registered connection and retrieve results</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="swat.cas.table.CASColumn.rfloordiv.html#swat.cas.table.CASColumn.rfloordiv" title="swat.cas.table.CASColumn.rfloordiv"><code class="xref py py-obj docutils literal"><span class="pre">rfloordiv</span></code></a>(other[,&nbsp;level,&nbsp;fill_value,&nbsp;axis])</td>
+<td>Integer division of CASColumn and other, element-wise</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="swat.cas.table.CASColumn.rmod.html#swat.cas.table.CASColumn.rmod" title="swat.cas.table.CASColumn.rmod"><code class="xref py py-obj docutils literal"><span class="pre">rmod</span></code></a>(other[,&nbsp;level,&nbsp;fill_value,&nbsp;axis])</td>
+<td>Modulo of CASColumn and other, element-wise</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="swat.cas.table.CASColumn.rmul.html#swat.cas.table.CASColumn.rmul" title="swat.cas.table.CASColumn.rmul"><code class="xref py py-obj docutils literal"><span class="pre">rmul</span></code></a>(other[,&nbsp;level,&nbsp;fill_value,&nbsp;axis])</td>
+<td>Multiplication of CASColumn and other, element-wise</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="swat.cas.table.CASColumn.round.html#swat.cas.table.CASColumn.round" title="swat.cas.table.CASColumn.round"><code class="xref py py-obj docutils literal"><span class="pre">round</span></code></a>([decimals,&nbsp;out])</td>
+<td>Round each value of the CASColumn to the given number of decimals</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="swat.cas.table.CASColumn.rpow.html#swat.cas.table.CASColumn.rpow" title="swat.cas.table.CASColumn.rpow"><code class="xref py py-obj docutils literal"><span class="pre">rpow</span></code></a>(other[,&nbsp;level,&nbsp;fill_value,&nbsp;axis])</td>
+<td>Exponential power of CASColumn and other, element-wise</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="swat.cas.table.CASColumn.rsub.html#swat.cas.table.CASColumn.rsub" title="swat.cas.table.CASColumn.rsub"><code class="xref py py-obj docutils literal"><span class="pre">rsub</span></code></a>(other[,&nbsp;level,&nbsp;fill_value,&nbsp;axis])</td>
+<td>Subtraction of CASColumn and other, element-wise</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="swat.cas.table.CASColumn.rtruediv.html#swat.cas.table.CASColumn.rtruediv" title="swat.cas.table.CASColumn.rtruediv"><code class="xref py py-obj docutils literal"><span class="pre">rtruediv</span></code></a>(other[,&nbsp;level,&nbsp;fill_value,&nbsp;axis])</td>
+<td>Floating division of CASColumn and other, element-wise</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">select_dtypes</span></code>([include,&nbsp;exclude,&nbsp;inplace])</td>
+<td>Return a subset <a class="reference internal" href="swat.cas.table.CASTable.html#swat.cas.table.CASTable" title="swat.cas.table.CASTable"><code class="xref py py-class docutils literal"><span class="pre">CASTable</span></code></a> including/excluding columns based on data type</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">set_action_params</span></code>(name,&nbsp;**kwargs)</td>
+<td>Set parameters for specified action name</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">set_connection</span></code>(connection)</td>
+<td>Set the connection to use for action calls</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">set_param</span></code>(*args,&nbsp;**kwargs)</td>
+<td>Set paramaters according to key/value pairs</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">set_params</span></code>(*args,&nbsp;**kwargs)</td>
+<td>Set paramaters according to key/value pairs</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">slice</span></code>([start,&nbsp;stop,&nbsp;bygroup_as_index])</td>
+<td>Return from rows from <cite>start</cite> to <cite>stop</cite> in a Series</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">sort</span></code>([axis,&nbsp;ascending,&nbsp;inplace,&nbsp;kind,&nbsp;...])</td>
+<td>Apply sort order parameters to fetches of the data in this column</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="swat.cas.table.CASColumn.sort_values.html#swat.cas.table.CASColumn.sort_values" title="swat.cas.table.CASColumn.sort_values"><code class="xref py py-obj docutils literal"><span class="pre">sort_values</span></code></a>([axis,&nbsp;ascending,&nbsp;inplace,&nbsp;...])</td>
+<td>Apply sort order parameters to fetches of the data in this column</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="swat.cas.table.CASColumn.std.html#swat.cas.table.CASColumn.std" title="swat.cas.table.CASColumn.std"><code class="xref py py-obj docutils literal"><span class="pre">std</span></code></a>([axis,&nbsp;skipna,&nbsp;level,&nbsp;ddof])</td>
+<td>Return the standard deviation of the values</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="swat.cas.table.CASColumn.stderr.html#swat.cas.table.CASColumn.stderr" title="swat.cas.table.CASColumn.stderr"><code class="xref py py-obj docutils literal"><span class="pre">stderr</span></code></a>()</td>
+<td>Return standard error of the values</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="swat.cas.table.CASColumn.sub.html#swat.cas.table.CASColumn.sub" title="swat.cas.table.CASColumn.sub"><code class="xref py py-obj docutils literal"><span class="pre">sub</span></code></a>(other[,&nbsp;level,&nbsp;fill_value,&nbsp;axis])</td>
+<td>Subtraction of CASColumn with other, element-wise</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="swat.cas.table.CASColumn.sum.html#swat.cas.table.CASColumn.sum" title="swat.cas.table.CASColumn.sum"><code class="xref py py-obj docutils literal"><span class="pre">sum</span></code></a>([axis,&nbsp;skipna,&nbsp;level])</td>
+<td>Return the sum of the values</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="swat.cas.table.CASColumn.tail.html#swat.cas.table.CASColumn.tail" title="swat.cas.table.CASColumn.tail"><code class="xref py py-obj docutils literal"><span class="pre">tail</span></code></a>([n,&nbsp;bygroup_as_index])</td>
+<td>Return last <cite>n</cite> rows of the column in a Series</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">to_clipboard</span></code>(*args,&nbsp;**kwargs)</td>
+<td>Write the CAS table data to the clipboard</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">to_csv</span></code>(*args,&nbsp;**kwargs)</td>
+<td>Write CAS table data to comma separated values (CSV)</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">to_dense</span></code>(*args,&nbsp;**kwargs)</td>
+<td>Return dense representation of CAS table data</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">to_dict</span></code>(*args,&nbsp;**kwargs)</td>
+<td>Convert CAS table data to a Python dictionary</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">to_excel</span></code>(*args,&nbsp;**kwargs)</td>
+<td>Write CAS table data to an Excel spreadsheet</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">to_frame</span></code>(*args,&nbsp;**kwargs)</td>
+<td>Convert <a class="reference internal" href="#swat.cas.table.CASColumn" title="swat.cas.table.CASColumn"><code class="xref py py-class docutils literal"><span class="pre">CASColumn</span></code></a> to a <a class="reference external" href="http://pandas.pydata.org/pandas-docs/version/0.18.0/generated/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v0.18.0)"><code class="xref py py-class docutils literal"><span class="pre">pandas.DataFrame</span></code></a></td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">to_gbq</span></code>(*args,&nbsp;**kwargs)</td>
+<td>Write CAS table data to a Google BigQuery table</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">to_hdf</span></code>(*args,&nbsp;**kwargs)</td>
+<td>Write CAS table data to HDF</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">to_html</span></code>(*args,&nbsp;**kwargs)</td>
+<td>Render the CAS table data to an HTML table</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">to_json</span></code>(*args,&nbsp;**kwargs)</td>
+<td>Convert the CAS table data to a JSON string</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">to_latex</span></code>(*args,&nbsp;**kwargs)</td>
+<td>Render the CAS table data to a LaTeX tabular environment</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">to_msgpack</span></code>(*args,&nbsp;**kwargs)</td>
+<td>Write CAS table data to msgpack object</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">to_outtable</span></code>()</td>
+<td>Create a copy of the CASTable object with only output table paramaters</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">to_outtable_params</span></code>()</td>
+<td>Create a copy of the CASTable parameters using only the output table parameters</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">to_params</span></code>()</td>
+<td>Return the parameters as a dictionary</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">to_pickle</span></code>(*args,&nbsp;**kwargs)</td>
+<td>Pickle (serialize) the CAS table data</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">to_records</span></code>(*args,&nbsp;**kwargs)</td>
+<td>Convert CAS table data to record array</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">to_series</span></code>(*args,&nbsp;**kwargs)</td>
+<td>Retrieve all elements into a Series</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">to_sparse</span></code>(*args,&nbsp;**kwargs)</td>
+<td>Convert CAS table data to SparseDataFrame</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">to_sql</span></code>(*args,&nbsp;**kwargs)</td>
+<td>Write CAS table records to SQL database</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">to_stata</span></code>(*args,&nbsp;**kwargs)</td>
+<td>Write CAS table data to Stata file</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">to_string</span></code>(*args,&nbsp;**kwargs)</td>
+<td>Render the CAS table to a console-friendly tabular output</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">to_table</span></code>()</td>
+<td>Create a copy of the CASTable object with only input table paramaters</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">to_table_name</span></code>()</td>
+<td>Return the name of the table</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">to_table_params</span></code>()</td>
+<td>Create a copy of the table parameters containing only input table parameters</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">to_view</span></code>(*args,&nbsp;**kwargs)</td>
+<td>Create a view using the current CASTable parameters</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">to_xarray</span></code>(*args,&nbsp;**kwargs)</td>
+<td>Return an xarray object from the CASColumn</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">tolist</span></code>()</td>
+<td>Return a list of the column values</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="swat.cas.table.CASColumn.truediv.html#swat.cas.table.CASColumn.truediv" title="swat.cas.table.CASColumn.truediv"><code class="xref py py-obj docutils literal"><span class="pre">truediv</span></code></a>(other[,&nbsp;level,&nbsp;fill_value,&nbsp;axis])</td>
+<td>Floating division of CASColumn and other, element-wise</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="swat.cas.table.CASColumn.tvalue.html#swat.cas.table.CASColumn.tvalue" title="swat.cas.table.CASColumn.tvalue"><code class="xref py py-obj docutils literal"><span class="pre">tvalue</span></code></a>()</td>
+<td>Return value of T-statistic for hypothetical testing</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="swat.cas.table.CASColumn.unique.html#swat.cas.table.CASColumn.unique" title="swat.cas.table.CASColumn.unique"><code class="xref py py-obj docutils literal"><span class="pre">unique</span></code></a>()</td>
+<td>Return array of unique values in the CASColumn</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="swat.cas.table.CASColumn.uss.html#swat.cas.table.CASColumn.uss" title="swat.cas.table.CASColumn.uss"><code class="xref py py-obj docutils literal"><span class="pre">uss</span></code></a>()</td>
+<td>Return uncorrected sum of squares of the values</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="swat.cas.table.CASColumn.value_counts.html#swat.cas.table.CASColumn.value_counts" title="swat.cas.table.CASColumn.value_counts"><code class="xref py py-obj docutils literal"><span class="pre">value_counts</span></code></a>([normalize,&nbsp;sort,&nbsp;ascending,&nbsp;...])</td>
+<td>Return object containing counts of unique values</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="swat.cas.table.CASColumn.var.html#swat.cas.table.CASColumn.var" title="swat.cas.table.CASColumn.var"><code class="xref py py-obj docutils literal"><span class="pre">var</span></code></a>([axis,&nbsp;skipna,&nbsp;level,&nbsp;ddof])</td>
+<td>Return the unbiased variance of the values</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">xs</span></code>(*args,&nbsp;**kwargs)</td>
+<td>Only exists for CASTable</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Attributes</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">all_params</span></code></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">at</span></code></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">axes</span></code></td>
+<td>Return the row axis labels and column axis labels</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">columns</span></code></td>
+<td>The visible columns in the table</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">dt</span></code></td>
+<td>Accessor for the datetime methods</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="swat.cas.table.CASColumn.dtype.html#swat.cas.table.CASColumn.dtype" title="swat.cas.table.CASColumn.dtype"><code class="xref py py-obj docutils literal"><span class="pre">dtype</span></code></a></td>
+<td>The data type of the underlying data</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">dtypes</span></code></td>
+<td>Series of the data types in the table</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="swat.cas.table.CASColumn.ftype.html#swat.cas.table.CASColumn.ftype" title="swat.cas.table.CASColumn.ftype"><code class="xref py py-obj docutils literal"><span class="pre">ftype</span></code></a></td>
+<td>The data type and whether it is sparse or dense</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">ftypes</span></code></td>
+<td>Series of the ftypes (indication of sparse/dense and dtype) in the table</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">getdoc</span></code></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">iat</span></code></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="swat.cas.table.CASColumn.iloc.html#swat.cas.table.CASColumn.iloc" title="swat.cas.table.CASColumn.iloc"><code class="xref py py-obj docutils literal"><span class="pre">iloc</span></code></a></td>
+<td>Integer location based indexing for selection by position</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">index</span></code></td>
+<td>The table index</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="swat.cas.table.CASColumn.is_unique.html#swat.cas.table.CASColumn.is_unique" title="swat.cas.table.CASColumn.is_unique"><code class="xref py py-obj docutils literal"><span class="pre">is_unique</span></code></a></td>
+<td>Return boolean indicating if the values in the CASColumn are unique</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">itemsize</span></code></td>
+<td>Return the size of the data type of the underlying data</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="swat.cas.table.CASColumn.ix.html#swat.cas.table.CASColumn.ix" title="swat.cas.table.CASColumn.ix"><code class="xref py py-obj docutils literal"><span class="pre">ix</span></code></a></td>
+<td>Label-based indexer with integer position fallback</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="swat.cas.table.CASColumn.loc.html#swat.cas.table.CASColumn.loc" title="swat.cas.table.CASColumn.loc"><code class="xref py py-obj docutils literal"><span class="pre">loc</span></code></a></td>
+<td>Label-based indexer</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">name</span></code></td>
+<td>Return the column name</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="swat.cas.table.CASColumn.ndim.html#swat.cas.table.CASColumn.ndim" title="swat.cas.table.CASColumn.ndim"><code class="xref py py-obj docutils literal"><span class="pre">ndim</span></code></a></td>
+<td>Return the number of dimensions of the underlying data</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">outtable_params</span></code></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">param_names</span></code></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">plot</span></code></td>
+<td>Make plots of the data in the CAS table</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">sas</span></code></td>
+<td>Accessor for the sas methods</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="swat.cas.table.CASColumn.shape.html#swat.cas.table.CASColumn.shape" title="swat.cas.table.CASColumn.shape"><code class="xref py py-obj docutils literal"><span class="pre">shape</span></code></a></td>
+<td>Return a tuple of the shape of the underlying data</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="swat.cas.table.CASColumn.size.html#swat.cas.table.CASColumn.size" title="swat.cas.table.CASColumn.size"><code class="xref py py-obj docutils literal"><span class="pre">size</span></code></a></td>
+<td>Return the number of elements in the underlying data</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">str</span></code></td>
+<td>Accessor for string methods</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">table_params</span></code></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="swat.cas.table.CASColumn.values.html#swat.cas.table.CASColumn.values" title="swat.cas.table.CASColumn.values"><code class="xref py py-obj docutils literal"><span class="pre">values</span></code></a></td>
+<td>Return column data as <code class="xref py py-func docutils literal"><span class="pre">numpy.ndarray()</span></code></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="swat.cas.table.CASColumn.values.html" class="btn btn-neutral float-right" title="swat.cas.table.CASColumn.values" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="swat.cas.table.CASTable.to_clipboard.html" class="btn btn-neutral" title="swat.cas.table.CASTable.to_clipboard" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016 SAS Institute Inc. All Rights Reserved..
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'1.0.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

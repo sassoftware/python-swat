@@ -1,0 +1,6 @@
+swat.cas.table.SASColumnMethods.gamma
+=====================================
+
+.. currentmodule:: swat.cas.table
+
+.. automethod:: SASColumnMethods.gamma

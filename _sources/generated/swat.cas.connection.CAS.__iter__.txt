@@ -1,0 +1,6 @@
+swat.cas.connection.CAS.__iter__
+================================
+
+.. currentmodule:: swat.cas.connection
+
+.. automethod:: CAS.__iter__

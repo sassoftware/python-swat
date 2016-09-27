@@ -1,0 +1,6 @@
+swat.cas.table.CASTableGroupBy.median
+=====================================
+
+.. currentmodule:: swat.cas.table
+
+.. automethod:: CASTableGroupBy.median
