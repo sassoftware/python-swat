@@ -59,7 +59,7 @@ SWAT can be installed from `<https://github.com/sassoftware/python-swat/releases
 Simply locate the file for your platform and install it using ``pip`` as
 follows::
 
-    pip install https://github.com/sassoftware/python-swat/releases/download/vX.X.X/python-swat-X.X.X-platform.tgz
+    pip install https://github.com/sassoftware/python-swat/releases/download/vX.X.X/python-swat-X.X.X-platform.tar.gz
 
 Where ``X.X.X`` is the release you want to install, and ``platform`` is the
 platform you are installing on.  You can also use the source code distribution
