@@ -13,3 +13,5 @@
 *.dta binary
 *.xls binary
 *.xlsx binary
+*.bat text eol=crlf
+*.html text
