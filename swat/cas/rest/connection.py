@@ -56,11 +56,17 @@ def _print_params(params, prefix=''):
 
 def _print_params_list(plist, prefix=''):
     ''' Print parameter list for tracing actions '''
-    for i, item in enumerate(plist):
-        if isinstance(item, dict):
-            _print_params(item, prefix='%s[%s].' % (prefix, i))
-        elif isinstance(item, items_types):
-            _print_params_list(item, prefix='%s[%s].' % (prefix, i))
+    if plist:
+        for i, item in enumerate(plist):
+            if isinstance(item, dict):
+                _print_params(item, prefix='%s[%s].' % (prefix, i))
+            elif isinstance(item, items_types):
+                _print_params_list(item, prefix='%s[%s].' % (prefix, i))
+    else:
+        if prefix.endswith('.'):
+            print('%s = []' % prefix[:-1])
+        else:
+            print('%s = []' % prefix)
 
 
 def _normalize_params(params):
