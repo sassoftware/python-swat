@@ -1427,6 +1427,10 @@ class CASTable(ParamManager, ActionParamManager):
         any
 
         '''
+        # Short-circuit calls to notebook rendering methods
+        if re.match(r'_repr_[a-z]+_', name) or re.match(r'_render_[a-z]+_', name):
+            raise AttributeError(name)
+
         origname = name
         name = name.lower()
 
