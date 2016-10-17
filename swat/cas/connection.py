@@ -953,22 +953,26 @@ class CAS(object):
                     param.get('isTableDef'):
                 kwargs[key] = {'name': kwargs[key]}
 
-            elif tbl is not None and param.get('isTableDef') and key_lower == 'table':
+            elif tbl is not None and param.get('isTableDef') and \
+                    key_lower == 'table' and 'table' not in casekeys:
                 inputs = tbl.get_inputs_param()
                 fetch = tbl.get_fetch_params()
                 kwargs[key] = tbl.to_table_params()
 
-            elif tbl is not None and param.get('isTableName') and key_lower == 'name':
+            elif tbl is not None and param.get('isTableName') and \
+                    key_lower == 'name' and 'name' not in casekeys:
                 inputs = tbl.get_inputs_param()
                 fetch = tbl.get_fetch_params()
                 if caslib and 'caslib' not in kwargs and tbl.has_param('caslib'):
                     kwargs['caslib'] = tbl.get_param('caslib')
                 kwargs[key] = tbl.to_table_name()
 
-            # Workaround for columninfo which doesn't define table= as
+            # Workaround for columninfo / update which doesn't define table= as
             # a table definition.
             elif tbl is not None and key_lower == 'table' and \
-                    action.lower() in ['columninfo', 'table.columninfo']:
+                    action.lower() in ['columninfo', 'table.columninfo',
+                                       'update', 'table.update'] and \
+                    'table' not in casekeys:
                 inputs = tbl.get_inputs_param()
                 kwargs[key] = tbl.to_table_params()
                 if not uses_inputs:
