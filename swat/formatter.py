@@ -29,6 +29,7 @@ from . import clib
 from .cas import utils
 from .clib import errorcheck
 from .cas.table import CASTable
+from .exceptions import SWATError
 from pandas import Timestamp
 from .utils import getsoptions
 from .utils.compat import (a2n, a2u, int32, int64, float64, float64_types,
@@ -127,30 +128,58 @@ class SASFormatter(object):
             if np.isnan(value) or value is None:
                 out = a2u(str(value))
             else:
-                out = errorcheck(a2u(self._sw_formatter.formatDouble(
-                                     float64(value), a2n(sasfmt), int32(width)),
-                                     a2n('utf-8')),
-                                 self._sw_formatter)
+                try:
+                    out = errorcheck(a2u(self._sw_formatter.formatDouble(
+                                         float64(value), a2n(sasfmt), int32(width)),
+                                         a2n('utf-8')),
+                                     self._sw_formatter)
+                except SWATError:
+                    out = errorcheck(a2u(self._sw_formatter.formatDouble(
+                                         float64(value), a2n('best12.'), int32(width)),
+                                         a2n('utf-8')),
+                                     self._sw_formatter)
         elif isinstance(value, int64_types):
-            out = errorcheck(a2u(self._sw_formatter.formatInt64(
-                                 int64(value), a2n(sasfmt), int32(width)), a2n('utf-8')),
-                             self._sw_formatter)
-        elif isinstance(value, int32_types):
             try:
-                out = errorcheck(a2u(self._sw_formatter.formatInt32(
-                                     int32(value), a2n(sasfmt), int32(width)),
-                                     a2n('utf-8')),
-                                 self._sw_formatter)
-            except OverflowError:
                 out = errorcheck(a2u(self._sw_formatter.formatInt64(
                                      int64(value), a2n(sasfmt), int32(width)),
                                      a2n('utf-8')),
                                  self._sw_formatter)
+            except SWATError:
+                out = errorcheck(a2u(self._sw_formatter.formatInt64(
+                                     int64(value), a2n('best12.'), int32(width)),
+                                     a2n('utf-8')),
+                                 self._sw_formatter)
+        elif isinstance(value, int32_types):
+            try:
+                try:
+                    out = errorcheck(a2u(self._sw_formatter.formatInt32(
+                                         int32(value), a2n(sasfmt), int32(width)),
+                                         a2n('utf-8')),
+                                     self._sw_formatter)
+                except SWATError:
+                    out = errorcheck(a2u(self._sw_formatter.formatInt32(
+                                         int32(value), a2n('best12.'), int32(width)),
+                                         a2n('utf-8')),
+                                     self._sw_formatter)
+            except OverflowError:
+                try:
+                    out = errorcheck(a2u(self._sw_formatter.formatInt64(
+                                         int64(value), a2n(sasfmt), int32(width)),
+                                         a2n('utf-8')),
+                                     self._sw_formatter)
+                except SWATError:
+                    out = errorcheck(a2u(self._sw_formatter.formatInt64(
+                                         int64(value), a2n('best12.'), int32(width)),
+                                         a2n('utf-8')),
+                                     self._sw_formatter)
         elif isinstance(value, text_types):
-            out = errorcheck(a2u(self._sw_formatter.formatString(
-                                 a2n(value), a2n(sasfmt),
-                                 int32(width)), a2n('utf-8')),
-                             self._sw_formatter)
+            try:
+                out = errorcheck(a2u(self._sw_formatter.formatString(
+                                     a2n(value), a2n(sasfmt),
+                                     int32(width)), a2n('utf-8')),
+                                 self._sw_formatter)
+            except SWATError:
+                out = value
         # TODO: Should binary types ever get here?
         elif isinstance(value, binary_types):
             out = errorcheck(a2u(self._sw_formatter.formatString(
