@@ -1623,7 +1623,9 @@ class CASTable(ParamManager, ActionParamManager):
 
     def get_fetch_params(self):
         ''' Return options to be used during the table.fetch action '''
-        return dict(sortby=self._sortby, sastypes=False)
+        if self._sortby:
+            return dict(sortby=self._sortby, sastypes=False)
+        return dict(sastypes=False)
 
     def to_table_params(self):
         '''
