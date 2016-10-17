@@ -1677,6 +1677,10 @@ class CAS(object):
 
         asname, actname, asinfo = self._get_reflection_info(name, showhidden=showhidden)
 
+        # If action name is None, it is the same as the action set name
+        if actname is None:
+            actname = asname
+
         # Populate action set info while we're here
         self._actionset_info[asname.lower()] = asname, None, asinfo
 
