@@ -4093,8 +4093,6 @@ class CASTable(ParamManager, ActionParamManager):
 #   def tz_localize(self, *args, **kwargs):
 #       raise NotImplementedError
 
-    # Plotting
-
     def _fetch(self, grouped=False, **kwargs):
         '''
         Return the fetched DataFrame given the fetch parameters
@@ -4132,7 +4130,10 @@ class CASTable(ParamManager, ActionParamManager):
         if 'index' not in kwargs:
             kwargs['index'] = True
 
-        out = df.concat(list(self._retrieve('table.fetch', **kwargs).values()))
+        # Sort based on 'Fetch#' key.  This will be out of order in REST.
+        values = [x[1] for x in sorted(self._retrieve('table.fetch', **kwargs).items(),
+                                       key=lambda x: int(x[0].replace('Fetch', '') or '0'))]
+        out = df.concat(values)
 
         if len(out.columns) and out.columns[0] == '_Index_':
             out['_Index_'] = out['_Index_'] - 1
@@ -4148,8 +4149,11 @@ class CASTable(ParamManager, ActionParamManager):
     def _fetchall(self, grouped=False, **kwargs):
         ''' Fetch all rows '''
         kwargs = kwargs.copy()
-        kwargs['to'] = MAX_INT64_INDEX
+        if 'to' not in kwargs:
+            kwargs['to'] = MAX_INT64_INDEX
         return self._fetch(grouped=grouped, **kwargs)
+
+    # Plotting
 
     def boxplot(self, *args, **kwargs):
         '''
