@@ -25,6 +25,7 @@ from __future__ import print_function, division, absolute_import, unicode_litera
 
 import base64
 import json
+import os
 import requests
 import six
 import socket
@@ -202,6 +203,8 @@ class REST_CASConnection(object):
             ('%s:%s' % (username, password)).encode('utf-8')).strip()
 
         self._req_sess = requests.Session()
+        if 'CAS_CLIENT_SSL_CA_LIST' in os.environ:
+            self.cert = os.environ['CAS_CLIENT_SSL_CA_LIST']
         self._req_sess.headers.update({
             'Content-Type': 'application/json',
             'Content-Length': '0',
