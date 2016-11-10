@@ -43,7 +43,7 @@ setup(
     license = LICENSE,
     packages = find_packages(),
     package_data = {
-        'swat': ['lib/*/*'],
+        'swat': ['lib/*/*', 'tests/datasources/*'],
     },
     install_requires = [
         'pandas >= 0.16.0',
