@@ -731,6 +731,27 @@ class TestDataFrame(tm.TestCase):
         self.assertEqual(out[0].Origin[0], 'Asia')
         self.assertEqual(out[0].Cylinders[0], 4)
 
+    def test_apply_labels(self):
+        out = self.table.crosstab(col='Cylinders', row='Horsepower')['Crosstab']
+
+        self.assertEqual(list(out.columns),
+                         ['Horsepower', 'Col1', 'Col2', 'Col3', 'Col4',
+                          'Col5', 'Col6', 'Col7'])
+
+        newout = out.apply_labels()
+
+        self.assertEqual(list(out.columns),
+                         ['Horsepower', 'Col1', 'Col2', 'Col3', 'Col4',
+                          'Col5', 'Col6', 'Col7'])
+        self.assertEqual(list(newout.columns),
+                         ['Horsepower', '3', '4', '5', '6', '8', '10', '12'])
+
+        newout = out.apply_labels(inplace=True)
+
+        self.assertTrue(newout is None)
+        self.assertEqual(list(out.columns),
+                         ['Horsepower', '3', '4', '5', '6', '8', '10', '12'])
+
 
 # NOTE: Javascript will not be supported at this time
 #   def test_alltypes_javascript(self):

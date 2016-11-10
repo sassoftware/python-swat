@@ -970,6 +970,23 @@ class SASDataFrame(pd.DataFrame):
 
         return dframe
 
+    def apply_labels(self, **kwargs):
+        '''
+        Rename columns using the label value
+
+        Notes
+        -----
+        Keyword parameters are simply passed to the underlying
+        :meth:`pandas.DataFrame.rename` call.
+
+        Returns
+        -------
+        :class:`SASDataFrame`
+
+        '''
+        return self.rename(columns={k: v.label for k, v in self.colinfo.items()
+                                    if v.label}, **kwargs)
+
     def _get_byvars(self):
         '''
         Get the list of By variables
