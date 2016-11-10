@@ -56,6 +56,9 @@ dist
 .coverage
 swat.egg-info/
 __pycache__/
+_stats.txt
+cover/
+test-reports/
 
 ## OS generated files
 .directory
