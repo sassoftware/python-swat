@@ -3913,5 +3913,38 @@ class TestCASTable(tm.TestCase):
         sorttbl = self.table.sort_values(SORT_KEYS).to_frame(maxrows=20)
         self.assertTablesEqual(df, sorttbl)
 
+    def test_fillna(self):
+        df = self.get_cars_df().sort_values(SORT_KEYS)
+        sorttbl = self.table.sort_values(SORT_KEYS)
+
+        self.assertTablesEqual(df.fillna(value=50),
+                               sorttbl.fillna(value=50))
+
+        self.assertTablesEqual(df.fillna(value={'Cylinders':50}),
+                               sorttbl.fillna(value={'Cylinders':50}))
+
+        self.assertTablesEqual(df.fillna(value=pd.Series([50], index=['Cylinders'])),
+                               sorttbl.fillna(value=pd.Series([50], index=['Cylinders'])))
+
+        # TODO: This should work according to the Pandas doc, but I can't
+        #       figure out what form it wants the arguments in.
+#       self.assertTablesEqual(df.fillna(value=pd.DataFrame([[50, 40]], columns=['Cylinders', 'Foo'])),
+#                              sorttbl.fillna(value=pd.DataFrame([[50, 40]], columns=['Cylinders', 'Foo'])))
+
+        self.assertTablesEqual(df.fillna(value={'Cylinders':50}, inplace=True),
+                               sorttbl.fillna(value={'Cylinders':50}, inplace=True))
+
+        self.assertTablesEqual(df, sorttbl)
+
+    def test_dropna(self):
+        df = self.get_cars_df().sort_values(SORT_KEYS)
+        sorttbl = self.table.sort_values(SORT_KEYS)
+        swat.options.print_messages = True
+
+        self.assertTablesEqual(df.dropna(), sorttbl.dropna())
+
+        self.assertTablesEqual(df.dropna(how='all'), sorttbl.dropna(how='all'))
+
+
 if __name__ == '__main__':
     tm.runtests()

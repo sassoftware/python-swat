@@ -80,11 +80,18 @@ def _gen_ds_name():
             return name
 
 
-def _nlit(name):
+def _nlit(name, quote=False):
     ''' Return `name` as an nlit '''
     if re.match(r'[A-Za-z_]\w*', name):
+        if quote:
+            return '"%s"' % _escape_string(name)
         return name
     return '"%s"n' % _escape_string(name)
+
+
+def _quote(name):
+    ''' Return `name` as a quoted string or nlit '''
+    return _nlit(name, quote=True)
 
 
 def _escape_string(val):
@@ -3924,14 +3931,284 @@ class CASTable(ParamManager, ActionParamManager):
 
     # Missing data handling
 
-#   def dropna(self, *args, **kwargs):
-#       raise NotImplementedError
+    def dropna(self, axis=0, how='any', thresh=None, subset=None,
+               inplace=False, **kwargs):
+        '''
+        Drop rows that contain missing values
 
-#   def fillna(self, *args, **kwargs):
-#       raise NotImplementedError
+        Parameters
+        ----------
+        axis : int or string, optional
+            Not supported.  Only dropping of rows is supported.
+        how : string, optional
+            If any, the row is dropped if any value is missing.
+            If all, the row is dropped only if all values are missing.
+        thresh : int, optional
+            Not supported
+        subset : list-of-strings, optional
+            Not supported
+        inplace : boolean, optional
+            Should the table be modified in place, or should a new
+            table be created?
 
-#   def replace(self, *args, **kwargs):
-#       raise NotImplementedError
+        Returns
+        -------
+        :class:`CASTable` object
+
+        '''
+        dtypes = self.dtypes
+        all_dtypes_len = len(dtypes)
+        dtypes = dtypes[dtypes.isin(['double', 'char', 'varchar'])].to_dict()
+        miss_dtypes_len = len(dtypes)
+
+        code = []
+
+        if how == 'any':
+            else_str = ''
+            for name, dtype in dtypes.items():
+                code.append('    %sif ( missing(%s) ) then delete;' %
+                            (else_str, _nlit(name)))
+                else_str = 'else '
+
+        elif how == 'all':
+            if all_dtypes_len == miss_dtypes_len:
+                for name, dtype in dtypes.items():
+                    code.append('missing(%s)' % _nlit(name))
+                code = '    if ( %s ) then delete;' % ' and \n'.join(code)
+
+        else:
+            raise ValueError('Unknown value for parameter "how": %s' % how)
+
+        return self._apply_datastep(code, inplace=inplace)
+
+    def fillna(self, value=None, method=None, axis=None, inplace=False,
+               limit=None, downcast=None, **kwargs):
+        '''
+        Fill missing values using the specified method
+
+        Parameters
+        ----------
+        value : scalar or dict or Series or DataFrame or CASColumn or CASTable
+            The value used to fill missing values.  If a dict, Series,
+            or DataFrame is specified, the keys / index values
+            will be used as the column names.
+        method : string, optional
+            Not supported
+        axis : int or string, optional
+            Not supported.   The axis is always 'columns'.
+        inplace : boolean, optional
+            Should the data be modified in-place, or should a new table
+            be created?
+        limit : int, optional
+            Not supported
+        downcast : dict, optional
+            Not supported
+
+        Returns
+        -------
+        :class:`CASTable` object
+
+        '''
+        is_scalar = False
+        if isinstance(value, dict):
+            pass
+        elif isinstance(value, pd.Series):
+            value = value.to_dict()
+        elif isinstance(value, pd.DataFrame):
+            value = value.iloc[0, :].to_dict()
+        else:
+            is_scalar = True
+
+        dtypes = self.dtypes
+        dtypes = dtypes[dtypes.isin(['double', 'char', 'varchar'])].to_dict()
+
+        code = []
+        if is_scalar:
+            for name, dtype in dtypes.items():
+                code.append('    if ( missing(%s) ) then %s = %s;' %
+                            (_nlit(name), _nlit(name), float(value)))
+        else:
+            for name, repl in value.items():
+                if name in dtypes:
+                    code.append('     if ( missing(%s) ) then %s = %s;' %
+                                (_nlit(name), _nlit(name), float(repl)))
+
+        return self._apply_datastep(code, inplace=inplace)
+
+    def replace(self, to_replace=None, value=None, inplace=False, limit=None,
+                regex=False, method='pad', **kwargs):
+        '''
+        Replace values in the data set
+
+        Parameters
+        ----------
+        to_replace : str or regex or list or dict or Series or Numeric or None, optional
+            * str or regex
+                - str : string matching this value will be replaced with `value`
+                - regex : string matching this pattern will be replaced with `value`
+            * list-of-strings or list-of-regexes or list-of-numerics
+                - This list **must** be the same length as `value`.
+                - If `regex=True`, both this list and `value` are regexes.
+            * dict
+                - Dictionaries are of the form {'col': {'value': rep-value}}.
+                  The top-level contains the column names to match, the inner
+                  dictionary specifies the values to match and the replacement
+                  values.
+            * None
+                - This means that the `regex=` parameter contains the patterns
+                  to match.
+        value : scalar or dict or list or string or regex or None
+            Values to use as replacements.  If a dict is specified, it takes
+            the same form as a dictionary in the `to_replace=` parameter.
+        inplace : boolean, optional
+            Should the table be modified in-place, or should a new table be created?
+        limit : int, optional
+            Not supported
+        regex : boolean or same types as `to_replace`, optional
+            If True, the `to_replace=` and/or `value=` values are interpreted
+            as regular expressions.
+        method : string, optional
+            Not supported
+
+        Raises
+        ------
+        AssertionError
+            If regex is not a boolean and `to_replace` is not None.
+        TypeError
+            If `to_replace` is None and `value` is not a list, dict, or Series.
+            If `to_replace` is None and `regex` is a list, dict, or Series.
+        ValueError
+            If `to_replace` and `value` are lists, but are not the same length.
+
+        Returns
+        -------
+        :class:`CASTable` object
+
+        '''
+        if regex is not True and regex is not False:
+            assert(to_replace is None)
+
+        def is_regex(val):
+            ''' See if value should be considered a regex '''
+            if regex and (isinstance(val, text_types) or
+                          isinstance(val, bytes_types)):
+                return bool(regex)
+            return False
+
+        def dict_to_repl(to_replace, dct):
+            ''' Convert dict to replacements '''
+            out = {}
+            for k, v in value.items():
+                out[k] = {(to_replace, is_regex(to_replace)): (v, is_regex(v))}
+            return out
+
+        def scalar_to_repl(to_replace, val):
+            ''' Setup scalar replacement '''
+            return {None: {(to_replace, is_regex(to_replace)): (val, is_regex(v))}}
+
+        def list_to_repl(to_replace, vals):
+            ''' Convert list replacements to dict '''
+            if len(to_replace) != len(vals):
+                raise ValueError('replacements value lists are not the same length')
+
+        repl = {}
+
+        # to_replace is a string
+        if isinstance(to_replace, text_types) or isinstance(to_replace, bytes_types):
+            if isinstance(value, text_types) or isinstance(value, bytes_types):
+                repl.update(scalar_to_repl(to_replace, value))
+            elif isinstance(value, dict):
+                repl.update(dict_to_repl(to_replace, value))
+            else:
+                raise TypeError('value=%s is not compatible with to_replace=string'
+                                % type(value))
+
+        # to_replace is numeric
+        elif isinstance(to_replace, int_types) or isinstance(to_replace, float64_types):
+            if isinstance(value, int_types) or isinstance(value, float64_types):
+                repl.update(scalar_to_repl(to_replace, value))
+            elif isinstance(value, dict):
+                repl.update(dict_to_repl(to_replace, value))
+            else:
+                raise TypeError('value=%s is not compatible with to_replace=numeric'
+                                % type(value))
+
+        # to_replace is a list
+        elif isinstance(to_replace, items_types):
+            if isinstance(value, items_types):
+                repl.update(list_to_repl(to_replace, value))
+
+    def _apply_datastep(self, code, inplace=False, casout=None):
+        '''
+        Apply the given data step code to the table
+
+        If a CASLib is specified in the `casout=` parameter, that CASLib
+        will be used for the resulting table.  If no CASLib is specified,
+        the new table will be created in the CASLib of the source table.
+
+        If no table name is specified in the `casout=` parameter, a name
+        is generated.  The exception being that if `inplace=True` is
+        specified, then the same table name as the source is used.
+
+        In all cases, the `casout=` parameter takes highest priority.
+
+        Parameters
+        ----------
+        code : string or list-of-strings
+            The date step code to apply
+        inplace : boolean, optional
+            Should the table be modified in-place?
+        casout : dict, optional
+            The output table specification
+
+        Returns
+        -------
+        :class:`CASTable` object
+
+        '''
+        if casout is None:
+            casout = {}
+
+        if casout.get('caslib'):
+            caslib = casout['caslib']
+        elif inplace and 'caslib' in self.params:
+            caslib = self.params['caslib']
+        else:
+            caslib = self.getsessopt('caslib').caslib
+
+        if casout.get('name'):
+            newname = casout['name']
+        elif inplace:
+            newname = self.params['name']
+        else:
+            newname = _gen_ds_name()
+
+        dscode = []
+        dscode.append('data %s(caslib=%s);' % (_quote(newname), _quote(caslib)))
+        dscode.append('    set %s(caslib=%s);' % (_quote(self.params.name), _quote(caslib)))
+        if isinstance(code, items_types):
+            dscode.extend(code)
+        else:
+            dscode.append(code)
+        dscode.append('run;')
+        dscode = '\n'.join(dscode)
+
+        out = self.get_connection().retrieve('datastep.runcode', code=dscode,
+                                             _apptag='UI', _messagelevel='error')
+        if out.status:
+            raise SWATError(out.status)
+
+        if inplace:
+            return self
+
+        tbl = out['OutputCasTables'].ix[0, 'casTable']
+
+        out = copy.deepcopy(self)
+
+        out.params['name'] = tbl.params['name']
+        out.params['caslib'] = tbl.params['caslib']
+
+        return out
 
     # Reshaping, sorting, transposing
 
