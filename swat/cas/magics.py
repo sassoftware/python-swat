@@ -41,6 +41,11 @@ class CASMagics(Magics):
         '''
         Call datastep.runcode action with cell content as source
 
+        %%casds [ options ] conn-object
+
+        -q, --quiet : Don't display the result
+        -o var, --output=var : Store output of action in Python variable `var`
+
         '''
         shell = self.shell
         opts, argsl = self.parse_options(line, 'qo:', 'quiet', 'output=')
@@ -57,9 +62,10 @@ class CASMagics(Magics):
         except KeyError:
             SWATError('No connection object was supplied')
 
-        if not session.retrieve('builtins.queryactionset',
-                                actionset='datastep', _apptag='UI').get('dataStep', None):
-            session.retrieve('builtins.loadactionset', actionset='datastep', _apptag='UI')
+        out = session.retrieve('builtins.loadactionset', actionset='datastep',
+                               _messagelevel='error', _apptag='UI')
+        if out.status:
+            raise SWATError(out.status)
 
         code = ''
         if not cell and len(args) == 2:
@@ -67,7 +73,10 @@ class CASMagics(Magics):
         elif cell:
             code = cell
 
-        out = session.retrieve('datastep.runcode', _apptag='UI', code=code)
+        out = session.retrieve('datastep.runcode', code=code, _apptag='UI',
+                               _messagelevel='error')
+        if out.status:
+            raise SWATError(out.status)
 
         if 'quiet' in opts and 'output' not in opts:
             return
@@ -83,9 +92,13 @@ class CASMagics(Magics):
         '''
         Call fedsql.execdirect action with cell content as source
 
-        '''
-        # TODO: Check for existence of fedsql action set first
+        %%cassql [ options ] conn-object
 
+        -q, --quiet : Don't display the result
+        -o var, --output=var : Store output of action in Python variable `var`
+        -k, --keep : Keep the temporary result table on the server?
+
+        '''
         shell = self.shell
         opts, argsl = self.parse_options(line, 'qo:k', 'quiet', 'output=', 'keep')
         args = re.split(r'\s+', argsl, 1)
@@ -98,10 +111,15 @@ class CASMagics(Magics):
             opts['keep'] = opts['k']
 
         # Get session variable
-        session = shell.user_ns[args[0]]
+        try:
+            session = shell.user_ns[args[0]]
+        except KeyError:
+            SWATError('No connection object was supplied')
 
-        if not session.queryactionset('fedsql', _apptag='UI')['fedsql']:
-            session.loadactionset('fedsql', _apptag='UI')
+        out = session.retrieve('builtins.loadactionset', actionset='fedsql',
+                               _messagelevel='error', _apptag='UI')
+        if out.status:
+            raise SWATError(out.status)
 
         code = ''
         if not cell and len(args) == 2:
@@ -111,17 +129,22 @@ class CASMagics(Magics):
         code = code.strip()
 
         outtable = '_PY_T_' + str(uuid.uuid4()).replace('-', '_')
-        out = session.retrieve('fedsql.execdirect', _apptag='UI',
-                               query=code, casout=outtable)
+        out = session.retrieve('fedsql.execdirect',
+                               query=code, casout=outtable,
+                               _apptag='UI', _messagelevel='error')
+        if out.status:
+            raise SWATError(out.status)
 
         if 'quiet' in opts and 'output' not in opts:
             return
 
         if 'output' in opts:
             out = session.fetch(table=outtable)['Fetch']
+            out.label = None
             shell.user_ns[opts['output']] = out
             if 'keep' not in opts:
-                session.retrieve('table.droptable', _apptag='UI', table=outtable)
+                session.retrieve('table.droptable', table=outtable,
+                                 _apptag='UI', _messagelevel='error')
 
         if 'quiet' not in opts:
             return out
