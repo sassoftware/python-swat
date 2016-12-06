@@ -48,6 +48,7 @@ class TestCASTable(tm.TestCase):
 
     # Create a class attribute to hold the cas host type
     server_type = None
+    server_version = None
 
     def setUp(self):
         swat.reset_option()
@@ -61,6 +62,9 @@ class TestCASTable(tm.TestCase):
         if type(self).server_type is None:
             # Set once per class and have every test use it. No need to change between tests.
             type(self).server_type = tm.get_cas_host_type(self.s)
+
+        if type(self).server_version is None:
+            type(self).server_version = tm.get_cas_version(self.s)
 
         self.srcLib = tm.get_casout_lib(self.server_type)
 
@@ -336,7 +340,8 @@ class TestCASTable(tm.TestCase):
 
         self.assertEqual(tbl.name, 'foo')
         self.assertEqual(tbl.caslib, 'MyCaslib')
-        self.assertEqual(tbl.replace, True)
+        # NOTE: This will return the `replace` method
+        #self.assertEqual(tbl.replace, True)
         self.assertEqual(tbl.SinglePass, True)
         self.assertEqual(tbl.importOptions, dict(filetype='xlsx'))
 
@@ -3939,11 +3944,143 @@ class TestCASTable(tm.TestCase):
     def test_dropna(self):
         df = self.get_cars_df().sort_values(SORT_KEYS)
         sorttbl = self.table.sort_values(SORT_KEYS)
-        swat.options.print_messages = True
 
         self.assertTablesEqual(df.dropna(), sorttbl.dropna())
 
         self.assertTablesEqual(df.dropna(how='all'), sorttbl.dropna(how='all'))
+
+    def test_replace(self):
+        df = self.get_cars_df().sort_values(SORT_KEYS)
+        sorttbl = self.table.sort_values(SORT_KEYS)
+
+        # Scalars
+        self.assertTablesEqual(df.replace('BMW', 'AAAAA'),
+                               sorttbl.replace('BMW', 'AAAAA'))
+        self.assertTablesEqual(df.replace(8, 1000),
+                               sorttbl.replace(8, 1000))
+        self.assertTablesEqual(df.replace(6.00, 2000),
+                               sorttbl.replace(6.00, 2000))
+
+        # Mixed types - Pandas automatically changes type, but data step can't
+        df2 = df.replace(8.00, '3000')
+        df2['Cylinders'] = df2['Cylinders'].astype(float)
+        self.assertTablesEqual(df2, sorttbl.replace(8.00, '3000'))
+        self.assertTablesEqual(df.replace('6.00', 4000),
+                               sorttbl.replace('6.00', 4000))
+
+        # Lists
+        self.assertTablesEqual(df.replace(['BMW', 'Audi'], ['FFFFF', 'GGGGG']),
+                               sorttbl.replace(['BMW', 'Audi'], ['FFFFF', 'GGGGG']))
+        self.assertTablesEqual(df.replace([6, 8], [5000, 6000]),
+                               sorttbl.replace([6, 8], [5000, 6000]))
+
+        self.assertTablesEqual(df.replace(['BMW', 'Audi'], 'HHHHH'),
+                               sorttbl.replace(['BMW', 'Audi'], 'HHHHH'))
+        self.assertTablesEqual(df.replace([6, 8], 7000),
+                               sorttbl.replace([6, 8], 7000))
+
+        with self.assertRaises(TypeError):
+            sorttbl.replace('BMW', ['IIIII'])
+        with self.assertRaises(TypeError):
+            sorttbl.replace(6, [8000])
+
+# TODO: This works for data step, but I can't figure out how Pandas works
+        # Series
+#       before = pd.Series(['BMW', 'Audi'])
+#       after = pd.Series(['IIIII', 'JJJJJ'])
+#       self.assertTablesEqual(df.replace(before, after),
+#                              sorttbl.replace(before, after))
+#       before = pd.Series([6, 8])
+#       after = pd.Series([8000, 9000])
+#       self.assertTablesEqual(df.replace(before, after),
+#                              sorttbl.replace(before, after))
+
+        # Dictionaries
+        self.assertTablesEqual(df.replace({'Make': {'BMW': 'CCCCC', 'Foo': 'Bar'}}),
+                               sorttbl.replace({'Make': {'BMW': 'CCCCC', 'Foo': 'Bar'}}))
+
+        self.assertTablesEqual(df.replace({'Make': {'BMW': 'DDDDD'},
+                                           'Model': {'4dr': 'E'}}),
+                               sorttbl.replace({'Make': {'BMW': 'DDDDD'},
+                                                'Model': {'4dr': 'E'}}))
+
+        # Mixed types - This doesn't work well.  Numbers get padded.
+        df2 = df.replace({'Make': {'BMW': '           20'}})
+        self.assertTablesEqual(df2, sorttbl.replace({'Make': {'BMW': 20}}))
+
+    def test_replace_regex(self):
+        if self.server_version < (3, 2):
+            tm.TestCase.skipTest(self, 'Requires CAS version > 3.01.')
+
+        df = self.get_cars_df().sort_values(SORT_KEYS)
+        sorttbl = self.table.sort_values(SORT_KEYS)
+
+        import re
+
+        # Scalars
+        self.assertTablesEqual(df.replace(r'B(\w+W)', r'Q\1AAA', regex=True),
+                               sorttbl.replace(r'B(\w+W)', r'Q\1AAA', regex=True))
+        self.assertTablesEqual(df.replace(regex=r'B(\w+W)', value=r'Q\1BBB'),
+                               sorttbl.replace(regex=r'B(\w+W)', value=r'Q\1BBB'))
+        self.assertTablesEqual(df.replace(re.compile(r'B(\w+W)', re.I), r'Q\1CCC'),
+                               sorttbl.replace(re.compile(r'B(\w+W)', re.I), r'Q\1CCC'))
+        self.assertTablesEqual(df.replace(re.compile(r'b(\w+w)', re.I), r'Q\1DDD'),
+                               sorttbl.replace(re.compile(r'b(\w+w)', re.I), r'Q\1DDD'))
+        self.assertTablesEqual(df.replace(regex=re.compile(r'b(\w+w)', re.I), value=r'Q\1EEE'),
+                               sorttbl.replace(regex=re.compile(r'b(\w+w)', re.I), value=r'Q\1EEE'))
+
+        self.assertTablesEqual(df.replace(8, 1000, regex=True),
+                               sorttbl.replace(8, 1000, regex=True)),
+        self.assertTablesEqual(df.replace(6.00, 2000, regex=True),
+                               sorttbl.replace(6.00, 2000, regex=True))
+
+        # Mixed types - Pandas automatically changes type, but data step can't
+        with self.assertRaises(TypeError):
+            sorttbl.replace(8.00, '3000', regex=True)
+        with self.assertRaises(TypeError):
+            sorttbl.replace('6.00', 4000, regex=True)
+
+        return
+
+        # Lists
+        self.assertTablesEqual(df.replace([re.compile(r'B(\w+)W'), 'Audi'], [r'F\1F', 'GGGGG']),
+                               sorttbl.replace([re.compile(r'B(\w+)W'), 'Audi'], [r'F\1F', 'GGGGG']))
+        self.assertTablesEqual(df.replace([6, 8], [5000, 6000], regex=True),
+                               sorttbl.replace([6, 8], [5000, 6000], regex=True))
+
+        self.assertTablesEqual(df.replace([re.compile(r'B(\w+)W'), re.compile(r'A[ud]*i')], 'HHHHH'),
+                               sorttbl.replace([re.compile(r'B(\w+)W'), re.compile(r'A[ud*]i')], 'HHHHH'))
+        self.assertTablesEqual(df.replace([6, 8], 7000, regex=True),
+                               sorttbl.replace([6, 8], 7000, regex=True))
+
+        with self.assertRaises(TypeError):
+            sorttbl.replace(re.compile(r'B\w+W'), ['IIIII'])
+        with self.assertRaises(TypeError):
+            sorttbl.replace(6, [8000], regex=True)
+
+# TODO: This works for data step, but I can't figure out how Pandas works
+        # Series
+#       before = pd.Series(['BMW', 'Audi'])
+#       after = pd.Series(['IIIII', 'JJJJJ'])
+#       self.assertTablesEqual(df.replace(before, after),
+#                              sorttbl.replace(before, after))
+#       before = pd.Series([6, 8])
+#       after = pd.Series([8000, 9000])
+#       self.assertTablesEqual(df.replace(before, after),
+#                              sorttbl.replace(before, after))
+
+        # Dictionaries
+        self.assertTablesEqual(df.replace({'Make': {re.compile(r'B\w+W'): r'J\1J', 'Foo': 'Bar'}}),
+                               sorttbl.replace({'Make': {re.compile(r'B\w+W'): r'J\1J', 'Foo': 'Bar'}}))
+
+        self.assertTablesEqual(df.replace({'Make': {'BMW': 'KKKKK'},
+                                           'Model': {re.compile(r'[456]dr'): 'L'}}),
+                               sorttbl.replace({'Make': {'BMW': 'KKKKK'},
+                                                'Model': {re.compile(r'[456]dr'): 'L'}}))
+
+        # Mixed types - This doesn't work well.  Numbers get padded.
+        df2 = df.replace({'Make': {re.compile(r'B\w+W'): '           20'}})
+        self.assertTablesEqual(df2, sorttbl.replace({'Make': {re.compile(r'B\w+W'): 20}}))
 
 
 if __name__ == '__main__':

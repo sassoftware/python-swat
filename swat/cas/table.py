@@ -36,7 +36,7 @@ from ..config import get_option
 from ..exceptions import SWATError
 from ..utils import dict2kwargs, getattr_safe_property
 from ..utils.compat import (int_types, binary_types, text_types, items_types,
-                            patch_pandas_sort)
+                            patch_pandas_sort, char_types, num_types)
 from ..utils.keyword import dekeywordify
 from .utils.params import ParamManager, ActionParamManager
 from .actions import format_params
@@ -72,14 +72,6 @@ def _gen_table_name():
     return '_PY_T_%s' % str(uuid.uuid4()).replace('-', '_').upper()
 
 
-def _gen_ds_name():
-    ''' Generate a unique datastep table name '''
-    while True:
-        name = str(uuid.uuid4()).replace('-', '').upper()
-        if re.match(r'^[A-Z]', name):
-            return name
-
-
 def _nlit(name, quote=False):
     ''' Return `name` as an nlit '''
     if re.match(r'[A-Za-z_]\w*', name):
@@ -90,8 +82,15 @@ def _nlit(name, quote=False):
 
 
 def _quote(name):
-    ''' Return `name` as a quoted string or nlit '''
-    return _nlit(name, quote=True)
+    ''' Return `name` as a quoted string '''
+    return '"%s"' % _escape_string(name)
+
+
+def _quote_if_string(name):
+    ''' Return `name` as a quoted string if it is a string '''
+    if isinstance(name, char_types):
+        return '"%s"' % _escape_string(name)
+    return name
 
 
 def _escape_string(val):
@@ -1965,17 +1964,17 @@ class CASTable(ParamManager, ActionParamManager):
         names = out['Column'].tolist()
         dtypes = out['Type'].tolist()
 
-        char_types = set(['char', 'varchar', 'binary', 'varbinary'])
-        num_types = set(dtypes).difference(char_types)
+        char_dtypes = set(['char', 'varchar', 'binary', 'varbinary'])
+        num_dtypes = set(dtypes).difference(char_dtypes)
         integer_types = set(['int32', 'int64', 'date', 'time', 'datetime'])
-        float_types = num_types.difference(integer_types)
+        float_types = num_dtypes.difference(integer_types)
 
         if 'character' in include or 'O' in include or \
                 object in include or 'all' in include:
-            include.update(char_types)
+            include.update(char_dtypes)
         if 'number' in include or 'numeric' in include or \
                 np.number in include or 'all' in include:
-            include.update(num_types)
+            include.update(num_dtypes)
         if 'floating' in include or 'all' in include:
             include.update(float_types)
         if 'integer' in include or 'all' in include:
@@ -1983,10 +1982,10 @@ class CASTable(ParamManager, ActionParamManager):
 
         if 'character' in exclude or 'O' in exclude or \
                 object in exclude or 'all' in exclude:
-            exclude.update(char_types)
+            exclude.update(char_dtypes)
         if 'number' in exclude or 'numeric' in exclude or \
                 np.number in exclude or 'all' in exclude:
-            exclude.update(num_types)
+            exclude.update(num_dtypes)
         if 'floating' in exclude or 'all' in exclude:
             exclude.update(float_types)
         if 'integer' in exclude or 'all' in exclude:
@@ -2594,16 +2593,18 @@ class CASTable(ParamManager, ActionParamManager):
         :class:`CASResults` object
 
         '''
-        view = self.to_view(name=_gen_ds_name())
+        view = self.to_view(name=_gen_table_name())
         if casout is None:
-            casout = {'name': _gen_ds_name()}
+            casout = {'name': _gen_table_name()}
         elif isinstance(casout, text_types) or isinstance(casout, binary_types):
             casout = {'name': casout}
         outdata = casout['name']
         if 'caslib' in casout:
-            outdata = '%s(caslib=%s)' % (outdata, casout['caslib'])
+            outdata = '%s(caslib=%s)' % (_quote(outdata), _quote(casout['caslib']))
+        else:
+            outdata = _quote(outdata)
         code = 'data %s;\n   set %s;\n %s;\nrun;' % (outdata,
-                                                     view.get_param('name'),
+                                                     _quote(view.get_param('name')),
                                                      code)
         kwargs = kwargs.copy()
         kwargs['code'] = code
@@ -3008,11 +3009,11 @@ class CASTable(ParamManager, ActionParamManager):
 
         columns = tbl.columns
         dtypes = tbl.dtypes
-        char_types = set(['char', 'varchar', 'binary', 'varbinary'])
+        char_dtypes = set(['char', 'varchar', 'binary', 'varbinary'])
 
         # See if we need to do numeric summarization
-        has_numeric = set(dtypes).difference(char_types) and True or False
-        has_character = set(dtypes).intersection(char_types) and True or False
+        has_numeric = set(dtypes).difference(char_dtypes) and True or False
+        has_character = set(dtypes).intersection(char_dtypes) and True or False
 
         # Get top value and frequency
         topk_freq = None
@@ -4088,14 +4089,17 @@ class CASTable(ParamManager, ActionParamManager):
         if regex is not True and regex is not False:
             assert(to_replace is None)
 
+        regex_type = type(re.compile(''))
+
         def is_regex(val):
             ''' See if value should be considered a regex '''
-            if regex and (isinstance(val, text_types) or
-                          isinstance(val, bytes_types)):
-                return bool(regex)
+            if regex and isinstance(val, char_types):
+                return True
+            elif type(val) is regex_type:
+                return True
             return False
 
-        def dict_to_repl(to_replace, dct):
+        def dict_to_repl(to_replace, value):
             ''' Convert dict to replacements '''
             out = {}
             for k, v in value.items():
@@ -4104,18 +4108,44 @@ class CASTable(ParamManager, ActionParamManager):
 
         def scalar_to_repl(to_replace, val):
             ''' Setup scalar replacement '''
-            return {None: {(to_replace, is_regex(to_replace)): (val, is_regex(v))}}
+            return {None: {(to_replace, is_regex(to_replace)): (val, is_regex(val))}}
 
         def list_to_repl(to_replace, vals):
             ''' Convert list replacements to dict '''
             if len(to_replace) != len(vals):
                 raise ValueError('replacements value lists are not the same length')
+            out = {}
+            for before, after in zip(to_replace, vals):
+                if isinstance(after, dict):
+                    out.update(dict_to_repl(before, after))
+                else:
+                    if None not in out:
+                        out[None] = {}
+                    out[None].update({(before, is_regex(before)):
+                                      (after, is_regex(after))})
+            return out
+
+        def repl_to_repl(to_replace):
+            ''' Normalize dictionary to replacement dictionary '''
+            out = {}
+            for k, v in to_replace.items():
+                if k not in out:
+                    out[k] = {}
+                for pat, repl in v.items():
+                    out[k].update({(pat, is_regex(pat)): (repl, is_regex(repl))})
+            return out
 
         repl = {}
 
+        # Use regex rather than to_replace
+        if to_replace is None:
+            to_replace = regex
+            regex = True
+
         # to_replace is a string
-        if isinstance(to_replace, text_types) or isinstance(to_replace, bytes_types):
-            if isinstance(value, text_types) or isinstance(value, bytes_types):
+        if isinstance(to_replace, char_types) or isinstance(to_replace, regex_type):
+            if isinstance(value, char_types) or isinstance(value, num_types) or \
+                    isinstance(value, regex_type):
                 repl.update(scalar_to_repl(to_replace, value))
             elif isinstance(value, dict):
                 repl.update(dict_to_repl(to_replace, value))
@@ -4124,8 +4154,9 @@ class CASTable(ParamManager, ActionParamManager):
                                 % type(value))
 
         # to_replace is numeric
-        elif isinstance(to_replace, int_types) or isinstance(to_replace, float64_types):
-            if isinstance(value, int_types) or isinstance(value, float64_types):
+        elif isinstance(to_replace, num_types):
+            if isinstance(value, num_types) or isinstance(value, char_types) or \
+                    isinstance(value, regex_type):
                 repl.update(scalar_to_repl(to_replace, value))
             elif isinstance(value, dict):
                 repl.update(dict_to_repl(to_replace, value))
@@ -4134,9 +4165,112 @@ class CASTable(ParamManager, ActionParamManager):
                                 % type(value))
 
         # to_replace is a list
-        elif isinstance(to_replace, items_types):
-            if isinstance(value, items_types):
-                repl.update(list_to_repl(to_replace, value))
+        elif isinstance(to_replace, items_types) or isinstance(to_replace, pd.Series):
+            to_replace = list(to_replace)
+            if isinstance(value, items_types) or isinstance(value, pd.Series):
+                repl.update(list_to_repl(to_replace, list(value)))
+            else:
+                repl.update(list_to_repl(to_replace, [value] * len(to_replace)))
+
+        # to_replace is a dictionary
+        elif isinstance(to_replace, dict):
+            if value is not None:
+                raise TypeError('Replacement values are not allowed when '
+                                'to_replace is a dictionary')
+            repl.update(repl_to_repl(to_replace))
+
+        # Construct data step code for the replacements
+        code = []
+        columns = None
+        dtypes = None
+        col_char_types = set(['char', 'varchar', 'binary', 'varbinary'])
+
+        def re_flags_to_str(flags):
+            ''' Convert regex flags to string representation '''
+            out = []
+            if hasattr(re, 'A') and (flags & re.A):
+                out.append('a')
+            if flags & re.I:
+                out.append('i')
+            if flags & re.L:
+                out.append('L')
+            if flags & re.M:
+                out.append('m')
+            if flags & re.S:
+                out.append('s')
+#           if flags & re.U:
+#               out.append('u')
+            if flags & re.X:
+                out.append('x')
+            return ''.join(out)
+
+        def to_re_match(patt):
+            ''' Convert object to regex pattern match syntax '''
+            flags = ''
+            if type(patt) is regex_type:
+                flags = re_flags_to_str(patt.flags)
+                patt = patt.pattern
+            if not isinstance(patt, char_types):
+                raise TypeError('Regular expression pattern is not a string: %s' % patt)
+            return _quote('/%s/%s' % (patt, flags))
+
+        def to_re_sub(patt, to):
+            ''' Convert object to regex pattern substitution syntax '''
+            flags = ''
+            if type(from_) is regex_type:
+                flags = re_flags_to_str(patt.flags)
+                patt = patt.pattern
+            if not isinstance(patt, char_types):
+                raise TypeError('Regular expression pattern is not a string: %s' % patt)
+            if not isinstance(to, char_types):
+                raise TypeError('Regular expression substitution is not a string: %s' % to)
+            to = re.sub(r'\\(\d)', r'$\1', to)
+            return _quote('s/%s/%s/%s' % (patt, to, flags))
+
+        # Generate data step code
+        for col, repl_dict in repl.items():
+
+            # Cache column list
+            if col is None and columns is None:
+                dtypes = self.dtypes
+                columns = [x[0] for x in dtypes.iteritems()]
+                dtypes = [x[1] for x in dtypes.iteritems()]
+
+            # Apply replacements for each column
+            for from_, to in repl_dict.items():
+                from_, from_is_regex = from_
+                to, to_is_regex = to
+
+                # If col is None, it applies to all columns
+                if col is None:
+                    for colname, dtype in zip(columns, dtypes):
+                        if from_is_regex or to_is_regex:
+                            if dtype not in col_char_types:
+                                continue
+                            code.append(('if ( prxmatch(%s, %s) ) '
+                                         'then %s = prxchange(%s, -1, %s);') %
+                                        (to_re_match(from_), _nlit(colname),
+                                         _nlit(colname),
+                                         to_re_sub(from_, to), _nlit(colname)))
+                        else:
+                            code.append('if ( %s = %s ) then %s = %s;' % 
+                                        (_nlit(colname), _quote_if_string(from_),
+                                         _nlit(colname), _quote_if_string(to)))
+                else:
+                    if from_is_regex or to_is_regex:
+                        if dtype not in col_char_types:
+                            continue
+                        code.append(('if ( prxmatch(%s, %s) ) '
+                                     'then %s = prxchange(%s, -1, %s);') %
+                                    (to_re_match(from_), _nlit(col),
+                                     _nlit(col),
+                                     to_re_sub(from_, to), _nlit(col)))
+                    else:
+                        code.append('if ( %s = %s ) then %s = %s;' % 
+                                    (_nlit(col), _quote_if_string(from_),
+                                     _nlit(col), _quote_if_string(to)))
+        
+        return self._apply_datastep(code, inplace=inplace)
 
     def _apply_datastep(self, code, inplace=False, casout=None):
         '''
@@ -4181,7 +4315,7 @@ class CASTable(ParamManager, ActionParamManager):
         elif inplace:
             newname = self.params['name']
         else:
-            newname = _gen_ds_name()
+            newname = _gen_table_name()
 
         dscode = []
         dscode.append('data %s(caslib=%s);' % (_quote(newname), _quote(caslib)))

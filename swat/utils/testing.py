@@ -380,4 +380,9 @@ def get_cas_host_type(conn):
         return ostype + '.' + stype
 
 
+def get_cas_version(conn):
+    ''' Return CAS version '''
+    return tuple([int(x) for x in conn.about()['About']['Version'].split('.')])
+
+
 getcashosttype = get_cas_host_type

@@ -140,7 +140,8 @@ class TestBuiltins(tm.TestCase):
             self.assertEqual( r['Nodes'], [] )
         else:
             # SMP mode
-            self.assertEqual( r.status, "Nodes cannot be added when the server is running with in SMP mode." )
+            self.assertIn( r.status, ['Error parsing action parameters.',
+                           "Nodes cannot be added when the server is running with in SMP mode."] )
 
         r = self.s.addnode(salt='controller', node=['pepper'])
         self.assertContainsMessage(r, "ERROR: Expecting one of the following: role, node.")
@@ -158,7 +159,7 @@ class TestBuiltins(tm.TestCase):
         # prettyprint(b)
         # The builtin library should be loaded at least
         self.assertEqual(len(b.columns), 2)
-        self.assertEqual(len(b), 23)
+        self.assertTrue(len(b) >= 23)
         self.assertEqual(b.columns[0], 'name')
         self.assertEqual(b.colinfo['name'].label, 'Name')
         self.assertEqual(b.colinfo['name'].name, 'name')
@@ -169,29 +170,32 @@ class TestBuiltins(tm.TestCase):
         self.assertEqual(b.colinfo['description'].name, 'description')
         self.assertIn(b.colinfo['description'].dtype, ['char','varchar'])
         self.assertEqual(b.colinfo['description'].width, 256)
-        self.assertEqual(b.iloc[0].tolist(), ['addNode','Adds a machine to the server'])
-        self.assertEqual(b.iloc[1].tolist(), ['removeNode','Remove one or more machines from the server'])
-        self.assertEqual(b.iloc[2].tolist(), ['help','Shows the parameters for an action or lists all available actions'])
-        self.assertEqual(b.iloc[3].tolist(), ['listNodes','Shows the host names used by the server'])
-        self.assertEqual(b.iloc[4].tolist(), ['loadActionSet','Loads an action set for use in this session'])
-        self.assertEqual(b.iloc[5].tolist(), ['installActionSet','Loads an action set in new sessions automatically'])
-        self.assertEqual(b.iloc[6].tolist(), ['log', 'Shows and modifies logging levels'])
-        self.assertEqual(b.iloc[7].tolist(), ['queryActionSet','Shows whether an action set is loaded'])
-        self.assertEqual(b.iloc[8].tolist(), ['queryName', 'Checks whether a name is an action or action set name'])
-        self.assertEqual(b.iloc[9].tolist(), ['reflect','Shows detailed parameter information for an action or all actions in an action set'])
-        self.assertEqual(b.iloc[10].tolist(), ['serverStatus','Shows the status of the server'])
-        self.assertEqual(b.iloc[11].tolist(), ['about', 'Shows the status of the server'])
-        self.assertEqual(b.iloc[12].tolist(), ['shutdown','Shuts down the server'])
-        self.assertEqual(b.iloc[13].tolist(), ['userInfo','Shows the user information for your connection'])
-        self.assertEqual(b.iloc[14].tolist(), ['actionSetInfo','Shows the build information from loaded action sets'])
-        self.assertEqual(b.iloc[15].tolist(), ['history','Shows the actions that were run in this session'])
-        self.assertEqual(b.iloc[16].tolist(), ['casCommon','Provides parameters that are common to many actions'])
-        self.assertEqual(b.iloc[17].tolist(), ['ping','Sends a single request to the server to confirm that the connection is working'])
-        self.assertEqual(b.iloc[18].tolist(), ['echo','Prints the supplied parameters to the client log'])
-        self.assertEqual(b.iloc[19].tolist(), ['modifyQueue','Modifies the action response queue settings'])
-        self.assertEqual(b.iloc[20].tolist(), ['getLicenseInfo','Shows the license information for a SAS product'])
-        self.assertEqual(b.iloc[21].tolist(), ['refreshLicense','Refresh SAS license information from a file'])
-        self.assertEqual(b.iloc[22].tolist(), ['httpAddress','Shows the HTTP address for the server monitor'])
+ 
+        data = list(list(x) for x in b.itertuples(index=False))
+
+        self.assertIn(['addNode','Adds a machine to the server'], data)
+        self.assertIn(['removeNode','Remove one or more machines from the server'], data)
+        self.assertIn(['help','Shows the parameters for an action or lists all available actions'], data)
+        self.assertIn(['listNodes','Shows the host names used by the server'], data)
+        self.assertIn(['loadActionSet','Loads an action set for use in this session'], data)
+        self.assertIn(['installActionSet','Loads an action set in new sessions automatically'], data)
+        self.assertIn(['log', 'Shows and modifies logging levels'], data)
+        self.assertIn(['queryActionSet','Shows whether an action set is loaded'], data)
+        self.assertIn(['queryName', 'Checks whether a name is an action or action set name'], data)
+        self.assertIn(['reflect','Shows detailed parameter information for an action or all actions in an action set'], data)
+        self.assertIn(['serverStatus','Shows the status of the server'], data)
+        self.assertIn(['about', 'Shows the status of the server'], data)
+        self.assertIn(['shutdown','Shuts down the server'], data)
+        self.assertIn(['userInfo','Shows the user information for your connection'], data)
+        self.assertIn(['actionSetInfo','Shows the build information from loaded action sets'], data)
+        self.assertIn(['history','Shows the actions that were run in this session'], data)
+        self.assertIn(['casCommon','Provides parameters that are common to many actions'], data)
+        self.assertIn(['ping','Sends a single request to the server to confirm that the connection is working'], data)
+        self.assertIn(['echo','Prints the supplied parameters to the client log'], data)
+        self.assertIn(['modifyQueue','Modifies the action response queue settings'], data)
+        self.assertIn(['getLicenseInfo','Shows the license information for a SAS product'], data)
+        self.assertIn(['refreshLicense','Refresh SAS license information from a file'], data)
+        self.assertIn(['httpAddress','Shows the HTTP address for the server monitor'], data)
 
     def test_listactions(self):
         # NOTE: 'listactions' is an alias to 'help'
@@ -278,35 +282,17 @@ class TestBuiltins(tm.TestCase):
         self.assertEqual(list(r.keys())[0], 'setinfo')
         setinfo = r['setinfo']
         # Get the actionset column
-        actionsets = setinfo.ix[:,'actionset']
-        bltnFound = False
-        armFound = False
-        for aset in actionsets:
-            #print(aset)
-            if aset == 'builtins':
-                bltnFound = True
-            elif aset == 'ruleMining':
-                armFound = True    
-            
-        self.assertTrue(bltnFound)
-        self.assertFalse(armFound)
+        actionsets = setinfo.ix[:,'actionset'].tolist()
+        self.assertIn('builtins', actionsets)
         
         r = self.s.actionsetinfo(all=True) 
         self.assertEqual(list(r.keys())[0], 'setinfo')
         setinfo = r['setinfo']
         # Get the actionset column
-        actionsets = setinfo.ix[:,'actionset']
-        armFound = False
-        unknFound = False
-        for aset in actionsets:
-            #print(aset)
-            if aset == 'ruleMining':
-                armFound = True
-            elif aset == 'unknown':
-                unknFound = True    
-            
-        self.assertTrue(armFound)
-        self.assertFalse(unknFound)                           
+        allactionsets = setinfo.ix[:,'actionset'].tolist()
+        self.assertIn('builtins', allactionsets)
+        self.assertNotIn('unknown', allactionsets)
+        self.assertTrue(len(allactionsets) > len(actionsets))
                                     
     def test_log(self):
         r = self.s.log(invalid='parameter')

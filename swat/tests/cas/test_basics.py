@@ -218,13 +218,13 @@ class TestBasics(tm.TestCase):
 
         self.assertEqual(summ.columns[1], 'Min')
         self.assertEqual(summ.colinfo['Min'].name, 'Min')
-        self.assertEqual(summ.colinfo['Min'].label, 'Min')
+        self.assertIn(summ.colinfo['Min'].label, ['Min', 'Minimum'])
         self.assertEqual(summ.colinfo['Min'].dtype, 'double')
         self.assertEqual(summ.colinfo['Min'].width, 8)
 
         self.assertEqual(summ.columns[4], 'NMiss')
         self.assertEqual(summ.colinfo['NMiss'].name, 'NMiss')
-        self.assertEqual(summ.colinfo['NMiss'].label, 'Number Missing')
+        self.assertIn(summ.colinfo['NMiss'].label, ['N Miss', 'Number Missing'])
         self.assertEqual(summ.colinfo['NMiss'].dtype, 'double')
         self.assertEqual(summ.colinfo['NMiss'].width, 8)
         self.assertEqual(summ.colinfo['NMiss'].format, 'BEST10.')
