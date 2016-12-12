@@ -2134,7 +2134,7 @@ class TestCASTable(tm.TestCase):
         self.assertAlmostEqual(tbl['MSRP'].sas.constant('logbig').head(1)[0], 709.78271289338397)
         self.assertTrue(tbl['MSRP'].sas.constant('sqrtbig').head(1)[0] > 1.3407807929000000e+154)
         self.assertAlmostEqual(tbl['MSRP'].sas.constant('small').head(1)[0], 2.2250738585072014e-308)
-        self.assertAlmostEqual(tbl['MSRP'].sas.constant('logsmall').head(1)[0], -708.40183374461219)
+        self.assertAlmostEqual(tbl['MSRP'].sas.constant('logsmall').head(1)[0], -708.40183374461219, 1)
         self.assertAlmostEqual(tbl['MSRP'].sas.constant('sqrtsmall').head(1)[0], 1.4916681462400413e-154)
         self.assertAlmostEqual(tbl['MSRP'].sas.constant('maceps').head(1)[0], 2.2204460492503131e-16)
         self.assertAlmostEqual(tbl['MSRP'].sas.constant('logmaceps').head(1)[0], -36.043653389117154)
