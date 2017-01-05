@@ -2594,26 +2594,35 @@ class CASTable(ParamManager, ActionParamManager):
 
         '''
         view = self.to_view(name=_gen_table_name())
+
         if casout is None:
             casout = {'name': _gen_table_name()}
         elif isinstance(casout, text_types) or isinstance(casout, binary_types):
             casout = {'name': casout}
+
         outdata = casout['name']
+
         if 'caslib' in casout:
             outdata = '%s(caslib=%s)' % (_quote(outdata), _quote(casout['caslib']))
         else:
             outdata = _quote(outdata)
+
         code = 'data %s;\n   set %s;\n %s;\nrun;' % (outdata,
                                                      _quote(view.get_param('name')),
                                                      code)
+        self._loadactionset('datastep')
+
         kwargs = kwargs.copy()
         kwargs['code'] = code
-        self._loadactionset('datastep')
+        kwargs['_apptag'] = 'UI'
+        kwargs['_messagelevel'] = 'error'
         out = self.get_connection().retrieve('datastep.runcode', *args, **kwargs)
+
         try:
             return out['OutputCasTables']['casTable'][0]
         except (KeyError, IndexError):
             pass
+
         raise SWATError(out.status)
 
 #   def isin(self, values, casout=None):
