@@ -141,12 +141,9 @@ class REST_CASTable(object):
         ''' Get the column type '''
         ctype = COL_TYPE_MAP.get(self._obj.get('schema')[i].get('type'),
                                  self._obj.get('schema')[i].get('type'))
-        if ctype == 'double' and self.getColumnWidth(i) > 8:
-            return 'double-array'
-        if ctype == 'int64' and self.getColumnWidth(i) > 8:
-            return 'int64-array'
-        if ctype == 'binary':
-            return 'varbinary'
+        rows = self._obj.get('rows')
+        if rows and rows[0] and isinstance(rows[0][i], (list, tuple)):
+            return '%s-array' % ctype
         return ctype
 
     def getColumnWidth(self, i):
@@ -160,12 +157,9 @@ class REST_CASTable(object):
     def getColumnArrayNItems(self, i):
         ''' Get the number of array items in a column '''
         ctype = self.getColumnType(i)
-        if ctype == 'double-array':
-            return int(self.getColumnWidth(i) / 8)
-        if ctype == 'int64-array':
-            return int(self.getColumnWidth(i) / 8)
-        if ctype == 'int32-array':
-            return int(self.getColumnWidth(i) / 4)
+        if ctype.endswith('-array'):
+            rows = self._obj.get('rows')
+            return len(rows[0][i])
         return 1
 
     def getLastErrorMessage(self):
