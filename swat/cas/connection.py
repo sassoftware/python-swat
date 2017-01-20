@@ -726,6 +726,11 @@ class CAS(object):
         ''' Close the CAS connection '''
         errorcheck(self._sw_connection.close(), self._sw_connection)
 
+    def terminate(self):
+        ''' End the session and close the CAS connection '''
+        self.retrieve('session.endsession', _messagelevel='error', _apptag='UI')
+        self.close()
+
     def _set_option(self, **kwargs):
         '''
         Set connection options
