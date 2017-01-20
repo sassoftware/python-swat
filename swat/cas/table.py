@@ -2607,6 +2607,9 @@ class CASTable(ParamManager, ActionParamManager):
         else:
             outdata = _quote(outdata)
 
+        if isinstance(code, (list, tuple)):
+            code = ';\n'.join(list(code)) + ';'
+
         code = 'data %s;\n   set %s;\n %s;\nrun;' % (outdata,
                                                      _quote(view.get_param('name')),
                                                      code)
