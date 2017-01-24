@@ -2621,14 +2621,11 @@ class CASTable(ParamManager, ActionParamManager):
         kwargs['_messagelevel'] = 'error'
         out = self.get_connection().retrieve('datastep.runcode', *args, **kwargs)
 
+        view._retrieve('table.droptable', _messagelevel='error')
+
         try:
             return out['OutputCasTables']['casTable'][0]
         except (KeyError, IndexError):
-            pass
-
-        try:
-            view._retrieve('table.droptable')
-        except SWATError:
             pass
 
         raise SWATError(out.status)
