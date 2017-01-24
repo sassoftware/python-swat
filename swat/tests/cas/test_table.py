@@ -4084,6 +4084,29 @@ class TestCASTable(tm.TestCase):
         df2 = df.replace({'Make': {re.compile(r'B\w+W'): '           20'}})
         self.assertTablesEqual(df2, sorttbl.replace({'Make': {re.compile(r'B\w+W'): 20}}))
 
+    def test_partition_inputs(self):
+        tbl = self.table
+
+        tbl['One'] = 1
+        tbl['Two'] = 2
+         
+        colinfo = tbl.columninfo()['ColumnInfo'].set_index('Column').T
+
+        out = tbl.partition(casout=dict(name='test_partition_table', replace=True))
+        pcolinfo = out.casTable.columninfo()['ColumnInfo'].set_index('Column').T
+        self.assertTablesEqual(colinfo, pcolinfo)
+        
+        colinfo = colinfo.drop('ID').drop('Label')
+
+        out = tbl[['Model', 'MSRP']].partition(casout=dict(name='test_partition_table', replace=True))
+        pcolinfo = out.casTable.columninfo()['ColumnInfo'].set_index('Column').T
+        pcolinfo = pcolinfo.drop('ID')
+        self.assertTablesEqual(colinfo[['Model', 'MSRP']], pcolinfo)
+
+        out = tbl[['Two', 'Model', 'One', 'MSRP']].partition(casout=dict(name='test_partition_table', replace=True))
+        pcolinfo = out.casTable.columninfo()['ColumnInfo'].set_index('Column').T
+        pcolinfo = pcolinfo.drop('ID')
+        self.assertTablesEqual(colinfo[['Two', 'Model', 'One', 'MSRP']], pcolinfo)
 
 if __name__ == '__main__':
     tm.runtests()

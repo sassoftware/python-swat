@@ -1001,6 +1001,15 @@ class CAS(object):
                     continue
                 kwargs[key] = value
 
+        # Apply inputs= to specific actions that don't support it
+        if 'table' in kwargs and not uses_inputs and inputs \
+                and action.lower() in ['partition', 'table.partition',
+                                       'save', 'table.save']:
+            tbl = kwargs['table']
+            if not isinstance(tbl, dict):
+                tbl = dict(name=tbl)
+            tbl['vars'] = inputs
+
         kwargs.pop('__table__', None)
 
         # Workaround for tableinfo which aliases table= to name=, but
