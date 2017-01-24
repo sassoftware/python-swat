@@ -530,8 +530,8 @@ def python2cas_time(pytm):
 
     Examples
     --------
-    >>> cas2python_time(43200000000)
-    datetime.time(12, 0)
+    >>> cas2python_time(datetime.time(12, 0))
+    43200000000
 
     Returns
     -------
@@ -554,8 +554,8 @@ def python2cas_date(pydt):
 
     Examples
     --------
-    >>> cas2python_date(3653)
-    datetime.date(1970, 1, 1)
+    >>> cas2python_date(datetime.date(1970, 1, 1))
+    3653
 
     Returns
     -------
