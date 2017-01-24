@@ -1433,8 +1433,8 @@ class CASTable(ParamManager, ActionParamManager):
         any
 
         '''
-        # Short-circuit calls to notebook rendering methods
-        if re.match(r'_repr_[a-z]+_', name) or re.match(r'_render_[a-z]+_', name):
+        # Short-circuit all protected / private attributes
+        if name.startswith('_'):
             raise AttributeError(name)
 
         origname = name
@@ -2624,6 +2624,11 @@ class CASTable(ParamManager, ActionParamManager):
         try:
             return out['OutputCasTables']['casTable'][0]
         except (KeyError, IndexError):
+            pass
+
+        try:
+            view._retrieve('table.droptable')
+        except SWATError:
             pass
 
         raise SWATError(out.status)
@@ -4265,7 +4270,7 @@ class CASTable(ParamManager, ActionParamManager):
                                          _nlit(colname),
                                          to_re_sub(from_, to), _nlit(colname)))
                         else:
-                            code.append('if ( %s = %s ) then %s = %s;' % 
+                            code.append('if ( %s = %s ) then %s = %s;' %
                                         (_nlit(colname), _quote_if_string(from_),
                                          _nlit(colname), _quote_if_string(to)))
                 else:
@@ -4278,10 +4283,10 @@ class CASTable(ParamManager, ActionParamManager):
                                      _nlit(col),
                                      to_re_sub(from_, to), _nlit(col)))
                     else:
-                        code.append('if ( %s = %s ) then %s = %s;' % 
+                        code.append('if ( %s = %s ) then %s = %s;' %
                                     (_nlit(col), _quote_if_string(from_),
                                      _nlit(col), _quote_if_string(to)))
-        
+
         return self._apply_datastep(code, inplace=inplace)
 
     def _apply_datastep(self, code, inplace=False, casout=None):
@@ -8592,6 +8597,8 @@ class CASTableGroupBy(object):
         out = self._table.describe(*args, **kwargs)
         if isinstance(out, pd.Series):
             out = out.unstack(level=-1)
+            # Prevent CategoricalIndex from causing problems
+            out.columns = list(out.columns)
         return out.reset_index(self.get_groupby_vars())
 
     def nlargest(self, *args, **kwargs):

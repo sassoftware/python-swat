@@ -441,6 +441,7 @@ class TestByGroups(tm.TestCase):
         self.assertColsEqual(dfgrp, tblgrp, sort=True, include_index=True)
 
         tblgrp = tbl['EngineSize'].groupby(['Origin', 'Cylinders'], as_index=False).value_counts()
+        dfgrp.name = None
         self.assertTablesEqual(dfgrp.reset_index().set_index('EngineSize'), tblgrp, sortby=None)
 
     def test_value_counts(self):

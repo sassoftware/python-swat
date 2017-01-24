@@ -1050,7 +1050,7 @@ class TestCASTable(tm.TestCase):
         self.assertEqual(desc.columns.tolist(), dfdesc.columns.tolist())
 
         desc = self.table.describe(percentiles=0.4)
-        dfdesc = df.describe(percentiles=0.4)
+        dfdesc = df.describe(percentiles=[0.4])
         self.assertEqual(desc.index.tolist(), dfdesc.index.tolist())
         self.assertEqual(desc.columns.tolist(), dfdesc.columns.tolist())
 
@@ -1399,6 +1399,7 @@ class TestCASTable(tm.TestCase):
 
         self.assertEqual(dfqnt[1:10].tolist(), tblqnt[1:10].tolist())
 
+    @unittest.skipIf(int(pd.__version__.split('.')[1]) >= 19, 'Bug in Pandas 19 returns too many results')
     def test_nlargest(self):
         if not hasattr(pd.DataFrame, 'nlargest'):
             tm.TestCase.skipTest(self, 'DataFrame does not support nlargest')
@@ -1412,6 +1413,7 @@ class TestCASTable(tm.TestCase):
         self.assertEqual(df.nlargest(5, 'Invoice').to_csv(index=False),
                          tbl.nlargest(5, 'Invoice').to_csv(index=False))
 
+    @unittest.skipIf(int(pd.__version__.split('.')[1]) >= 19, 'Bug in Pandas 19 returns too many results')
     def test_nsmallest(self):
         if not hasattr(pd.DataFrame, 'nsmallest'):
             tm.TestCase.skipTest(self, 'DataFrame does not support nsmallest')
