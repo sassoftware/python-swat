@@ -41,27 +41,23 @@ some extra setup involved in getting your tests configured to run
 against your CAS server.  Normally this involves setting the following
 environment variables.
 
-    * CASHOST - the hostname or IP address of your CAS server
-    * CASPORT - the port of your CAS server
-    * CASPROTOCOL - the protocol being using ('cas', 'http', 'https' or 'auto')
+* CASHOST - the hostname or IP address of your CAS server (Default: None)
+* CASPORT - the port of your CAS server (Default: None)
+* CASPROTOCOL - the protocol being using ('cas', 'http', 'https' or 'auto'; Default: 'cas')
 
-    * CASUSER - the CAS account username
-    * CASPASSWORD - the CAS account password
+* CASUSER - the CAS account username (Default: None)
+* CASPASSWORD - the CAS account password (Default: None)
 
-    * CASDATALIB    - the CASLib where data sources are found
-                      (Default: CASTestTmp)
-    * CASMPPDATALIB - the CASLib on MPP servers where the data sources
-                      are found (Default: HPS)
-    * CASOUTLIB     - the CASLib to use for output CAS tables
-                      (Default: CASUSER)
-    * CASMPPOUTLIB  - the CASLib to use for output CAS tables on MPP servers
-                      (Default: CASUSER)
+* CASDATALIB    - the CASLib where data sources are found (Default: CASTestTmp)
+* CASMPPDATALIB - the CASLib on MPP servers where the data sources are found (Default: HPS)
+* CASOUTLIB     - the CASLib to use for output CAS tables (Default: CASUSER)
+* CASMPPOUTLIB  - the CASLib to use for output CAS tables on MPP servers (Default: CASUSER)
 
 Some of these can alternatively be specified using configuration files.
 The CASHOST, CASPORT, and CASPROTOCOL variables can be specified in a .casrc
 in your home directory (or in any directory from the directory you are 
 running from all the way up to your home directory).  It is actually written
-in Lua, but the most basic form is as follows:
+in Lua, but the most basic form is as follows::
 
     cashost = 'myhost.com'
     casport = 5570
@@ -82,10 +78,10 @@ people will likely set them all to CASUSER and create a directory called
 `datasources` in their home directory with the contents of the 
 `swat/tests/datasources/` directory.
 
-Once you have these setup, you can use tools like nosetest to run the suite:
+Once you have these setup, you can use tools like nosetest to run the suite::
 
     nosetests -v swat.tests
 
-You can also run each test individually using profiling as follows:
+You can also run each test individually using profiling as follows::
 
     python swat/tests/cas/test_basics.py --profile
