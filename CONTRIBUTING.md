@@ -1,6 +1,4 @@
-*************************
-SAS SWAT Developer How-To
-*************************
+# SAS SWAT Developer How-To
 
 Developing SWAT using the REST interface is just like developing any 
 other project on GitHub.  You clone the project, do your work, 
@@ -8,8 +6,7 @@ and submit a pull request.  However, the binary interface is a bit
 different since it requires the bundled SAS TK libraries and Python
 C extension modules.
 
-Developing Against the Binary CAS Interface
-===========================================
+## Developing Against the Binary CAS Interface
 
 In order to run against CAS using the binary interface, you must copy
 the C libraries from a platform-specific distribution to your git
@@ -19,16 +16,17 @@ Linux-specific tar.gz file, unzip it, and copy the swat/lib/linux/\*.so
 files to your clone directory.  From that point on, you should be able
 to connect to both REST and binary CAS ports from your clone.
 
-Submitting a Pull Request
-=========================
+## Submitting a Pull Request
 
 Submitting a pull request uses the standard process at GitHub.
 Note that in the submitted changes, there must always be a unit test
 for the code being contributed.  Pull requests that do not have a
 unit test will not be accepted.
 
-Testing
-=======
+You also must include the text from the ContributerAgreement.txt file
+along with your sign-off verifying that the change originated from you.
+
+## Testing
 
 For the most part, testing the SAS SWAT package is just like testing
 any other Python package.  Tests are written using the standard unittest
@@ -57,14 +55,14 @@ Some of these can alternatively be specified using configuration files.
 The CASHOST, CASPORT, and CASPROTOCOL variables can be specified in a .casrc
 in your home directory (or in any directory from the directory you are 
 running from all the way up to your home directory).  It is actually written
-in Lua, but the most basic form is as follows::
+in Lua, but the most basic form is as follows:
 
     cashost = 'myhost.com'
     casport = 5570
     casprotocol = 'cas'
 
 The CASUSER and CASPASSWORD variables are usually extracted from your
-~/.authinfo file automatically.  The only reason you should use environment
+`~/.authinfo` file automatically.  The only reason you should use environment
 variables is if you have a generalized test running account that is
 shared across various tools.
 
@@ -78,10 +76,10 @@ people will likely set them all to CASUSER and create a directory called
 `datasources` in their home directory with the contents of the 
 `swat/tests/datasources/` directory.
 
-Once you have these setup, you can use tools like nosetest to run the suite::
+Once you have these setup, you can use tools like nosetest to run the suite:
 
     nosetests -v swat.tests
 
-You can also run each test individually using profiling as follows::
+You can also run each test individually using profiling as follows:
 
     python swat/tests/cas/test_basics.py --profile
