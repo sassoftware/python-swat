@@ -4799,7 +4799,7 @@ class CASTable(ParamManager, ActionParamManager):
         '''
         return cls._from_any('records', connection, data, *args, **kwargs)
 
-    def info(self, verbose=None, buf=sys.stdout, max_cols=None,
+    def info(self, verbose=None, buf=None, max_cols=None,
              memory_usage=None, null_counts=None):
         '''
         Print summary of :class:`CASTable` information
@@ -4822,6 +4822,9 @@ class CASTable(ParamManager, ActionParamManager):
         :meth:`pandas.DataFrame.info`
 
         '''
+        if buf is None:
+            buf = sys.stdout
+
         buf.write(u'%s\n' % self)
 
         nrows, ncols = self.shape
