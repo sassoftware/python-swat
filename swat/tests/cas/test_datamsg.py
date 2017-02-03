@@ -415,13 +415,13 @@ class TestDataMsgHandlers(tm.TestCase):
 
     def test_dbapi(self):              
         try:
-            import swat.tests as st
+            import sqlite3 as lite
         except ImportError:
             tm.TestCase.skipTest(self, 'SQLite3 package is not available')
 
         import csv
         import tempfile
-        import sqlite3 as lite
+        import swat.tests as st
 
         myFile = os.path.join(os.path.dirname(st.__file__), 'datasources', 'cars.csv')
 
