@@ -2014,7 +2014,7 @@ class CAS(object):
             Path to a local pickle file.
         casout : string or :class:`CASTable`, optional
             The output table specification.  This includes the following parameters.
-                table : string, optional
+                name : string, optional
                     Name of the output CAS table.
                 caslib : string, optional
                     CASLib for the output CAS table.
@@ -2063,7 +2063,7 @@ class CAS(object):
             Path, URL, or buffer to read.
         casout : string or :class:`CASTable`, optional
             The output table specification.  This includes the following parameters.
-                table : string, optional
+                name : string, optional
                     Name of the output CAS table.
                 caslib : string, optional
                     CASLib for the output CAS table.
@@ -2124,7 +2124,7 @@ class CAS(object):
             Path, URL, or buffer to read.
         casout : string or :class:`CASTable`, optional
             The output table specification.  This includes the following parameters.
-                table : string, optional
+                name : string, optional
                     Name of the output CAS table.
                 caslib : string, optional
                     CASLib for the output CAS table.
@@ -2185,7 +2185,7 @@ class CAS(object):
             Path, URL, or buffer to read.
         casout : string or :class:`CASTable`, optional
             The output table specification.  This includes the following parameters.
-                table : string, optional
+                name : string, optional
                     Name of the output CAS table.
                 caslib : string, optional
                     CASLib for the output CAS table.
@@ -2240,7 +2240,7 @@ class CAS(object):
         ----------
         casout : string or :class:`CASTable`, optional
             The output table specification.  This includes the following parameters.
-                table : string, optional
+                name : string, optional
                     Name of the output CAS table.
                 caslib : string, optional
                     CASLib for the output CAS table.
@@ -2281,7 +2281,7 @@ class CAS(object):
             File-like object, URL, or pandas ExcelFile.
         casout : string or :class:`CASTable`, optional
             The output table specification.  This includes the following parameters.
-                table : string, optional
+                name : string, optional
                     Name of the output CAS table.
                 caslib : string, optional
                     CASLib for the output CAS table.
@@ -2327,7 +2327,7 @@ class CAS(object):
             The path, URL, or file object that contains the JSON data.
         casout : string or :class:`CASTable`, optional
             The output table specification.  This includes the following parameters.
-                table : string, optional
+                name : string, optional
                     Name of the output CAS table.
                 caslib : string, optional
                     CASLib for the output CAS table.
@@ -2372,7 +2372,7 @@ class CAS(object):
             Unserialized JSON objects
         casout : string or :class:`CASTable`, optional
             The output table specification.  This includes the following parameters.
-                table : string, optional
+                name : string, optional
                     Name of the output CAS table.
                 caslib : string, optional
                     CASLib for the output CAS table.
@@ -2417,7 +2417,7 @@ class CAS(object):
             The path, URL, or file object that contains the HTML data.
         casout : string or :class:`CASTable`, optional
             The output table specification.  This includes the following parameters.
-                table : string, optional
+                name : string, optional
                     Name of the output CAS table.
                 caslib : string, optional
                     CASLib for the output CAS table.
@@ -2476,7 +2476,7 @@ class CAS(object):
             The path, URL, or file object that contains the HDF data.
         casout : string or :class:`CASTable`, optional
             The output table specification.  This includes the following parameters.
-                table : string, optional
+                name : string, optional
                     Name of the output CAS table.
                 caslib : string, optional
                     CASLib for the output CAS table.
@@ -2521,7 +2521,7 @@ class CAS(object):
             The path, URL, or file object that contains the HDF data.
         casout : string or :class:`CASTable`, optional
             The output table specification.  This includes the following parameters.
-                table : string, optional
+                name : string, optional
                     Name of the output CAS table.
                 caslib : string, optional
                     CASLib for the output CAS table.
@@ -2569,7 +2569,7 @@ class CAS(object):
             Database connection.
         casout : string or :class:`CASTable`, optional
             The output table specification.  This includes the following parameters.
-                table : string, optional
+                name : string, optional
                     Name of the output CAS table.
                 caslib : string, optional
                     CASLib for the output CAS table.
@@ -2625,7 +2625,7 @@ class CAS(object):
             Database connection.
         casout : string or :class:`CASTable`, optional
             The output table specification.  This includes the following parameters.
-                table : string, optional
+                name : string, optional
                     Name of the output CAS table.
                 caslib : string, optional
                     CASLib for the output CAS table.
@@ -2681,7 +2681,7 @@ class CAS(object):
             Database connection.
         casout : string or :class:`CASTable`, optional
             The output table specification.  This includes the following parameters.
-                table : string, optional
+                name : string, optional
                     Name of the output CAS table.
                 caslib : string, optional
                     CASLib for the output CAS table.
@@ -2735,7 +2735,7 @@ class CAS(object):
             SQL-like query to return data values.
         casout : string or :class:`CASTable`, optional
             The output table specification.  This includes the following parameters.
-                table : string, optional
+                name : string, optional
                     Name of the output CAS table.
                 caslib : string, optional
                     CASLib for the output CAS table.
@@ -2774,7 +2774,7 @@ class CAS(object):
             Path to .dta file or file-like object containing data.
         casout : string or :class:`CASTable`, optional
             The output table specification.  This includes the following parameters.
-                table : string, optional
+                name : string, optional
                     Name of the output CAS table.
                 caslib : string, optional
                     CASLib for the output CAS table.
