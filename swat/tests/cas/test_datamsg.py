@@ -349,8 +349,12 @@ class TestDataMsgHandlers(tm.TestCase):
         self.assertTablesEqual(f, s, sortby=SORT_KEYS)
 
     def test_sql(self):              
+        try:
+            import sqlite3 as lite
+        except ImportError:
+            tm.TestCase.skipTest(self, 'SQLite3 package is not available')
+
         import tempfile
-        import sqlite3 as lite
 
         tmph, tmpf = tempfile.mkstemp(suffix='.db')
 
@@ -410,10 +414,14 @@ class TestDataMsgHandlers(tm.TestCase):
         self.assertTablesEqual(f, s, sortby=SORT_KEYS)
 
     def test_dbapi(self):              
+        try:
+            import swat.tests as st
+        except ImportError:
+            tm.TestCase.skipTest(self, 'SQLite3 package is not available')
+
         import csv
         import tempfile
         import sqlite3 as lite
-        import swat.tests as st
 
         myFile = os.path.join(os.path.dirname(st.__file__), 'datasources', 'cars.csv')
 

@@ -27,6 +27,7 @@ import copy
 import os
 import numpy as np
 import pandas as pd
+import re
 import six
 import swat
 import swat.utils.testing as tm
@@ -983,7 +984,14 @@ class TestCASTable(tm.TestCase):
 
         self.assertEqual(corr.columns.tolist(), dfcorr.columns.tolist())
         self.assertEqual(corr.columns.tolist(), columns)
-        self.assertEqual(str(corr).rstrip(), 'Pearson Correlation Coefficients for DATASOURCES.CARS_SINGLE\n\n' + str(dfcorr).rstrip())
+        self.assertEqual(re.sub(r'(\.\d{8})\d+', r'\1', corr.to_csv())\
+                                .replace('0.99999999', '1.0')\
+                                .replace('1.00000000', '1.0')\
+                                .split('\n'),
+                         re.sub(r'(\.\d{8})\d+', r'\1', dfcorr.to_csv())\
+                                .replace('0.99999999', '1.0')\
+                                .replace('1.00000000', '1.0')\
+                                .split('\n'))
 
     def test_count(self):
         count = self.table.count()
