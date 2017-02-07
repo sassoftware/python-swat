@@ -49,8 +49,8 @@ numpydoc_show_class_members = False
 autodoc_default_flags = ['show-inheritance']
 autoclass_content = 'class'
 
-intersphinx_mapping = {'python': ('https://docs.python.org/3.5', None),
-                       'pandas': ('http://pandas.pydata.org/pandas-docs/version/0.18.0', None),
+intersphinx_mapping = {'python': ('https://docs.python.org/', None),
+                       'pandas': ('http://pandas.pydata.org/pandas-docs/version/stable/', None),
                        'numpy': ('http://docs.scipy.org/doc/numpy/', None),
                        'scipy': ('http://docs.scipy.org/doc/scipy/reference/', None),
                        'matplotlib': ('http://matplotlib.sourceforge.net/', None)} 
