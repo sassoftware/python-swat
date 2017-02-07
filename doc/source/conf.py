@@ -50,7 +50,7 @@ autodoc_default_flags = ['show-inheritance']
 autoclass_content = 'class'
 
 intersphinx_mapping = {'python': ('https://docs.python.org/', None),
-                       'pandas': ('http://pandas.pydata.org/pandas-docs/version/stable/', None),
+                       'pandas': ('http://pandas.pydata.org/pandas-docs/version/0.19.2/', None),
                        'numpy': ('http://docs.scipy.org/doc/numpy/', None),
                        'scipy': ('http://docs.scipy.org/doc/scipy/reference/', None),
                        'matplotlib': ('http://matplotlib.sourceforge.net/', None)} 
