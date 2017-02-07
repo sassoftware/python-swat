@@ -1870,7 +1870,7 @@ class CAS(object):
     # Top-level Pandas functions
     #
 
-    def _get_table_args(self, *args, **kwargs):
+    def _get_table_args(self, **kwargs):
         ''' Extract table paramaters from function arguments '''
         out = {}
         kwargs = kwargs.copy()
@@ -1988,7 +1988,7 @@ class CAS(object):
 
         '''
         import pandas as pd
-        table, kwargs = self._get_table_args(*args, **kwargs)
+        table, kwargs = self._get_table_args(**kwargs)
         dframe = getattr(pd, _method_)(*args, **kwargs)
         # REST doesn't support table.addtable
         if self._protocol.startswith('http'):
@@ -2000,7 +2000,7 @@ class CAS(object):
         table.update(dmh.PandasDataFrame(dframe).args.addtable)
         return self.retrieve('table.addtable', **table).casTable
 
-    def read_pickle(self, path, **kwargs):
+    def read_pickle(self, path, casout=None, **kwargs):
         '''
         Load pickled pandas object from the specified path
 
@@ -2047,9 +2047,9 @@ class CAS(object):
         :class:`CASTable`
 
         '''
-        return self._read_any('read_pickle', path, **kwargs)
+        return self._read_any('read_pickle', path, casout=None, **kwargs)
 
-    def read_table(self, filepath_or_buffer, **kwargs):
+    def read_table(self, filepath_or_buffer, casout=None, **kwargs):
         '''
         Read general delimited file into a CAS table
 
@@ -2097,7 +2097,7 @@ class CAS(object):
         :class:`CASTable`
 
         '''
-        table, kwargs = self._get_table_args(filepath_or_buffer, **kwargs)
+        table, kwargs = self._get_table_args(casout=casout, **kwargs)
         # REST doesn't support table.addtable
         if self._protocol.startswith('http'):
             import pandas as pd
@@ -2110,7 +2110,7 @@ class CAS(object):
         table.update(dmh.Text(filepath_or_buffer, **kwargs).args.addtable)
         return self.retrieve('table.addtable', **table).casTable
 
-    def read_csv(self, filepath_or_buffer, **kwargs):
+    def read_csv(self, filepath_or_buffer, casout=None, **kwargs):
         '''
         Read CSV file into a CAS table
 
@@ -2158,7 +2158,7 @@ class CAS(object):
         :class:`CASTable`
 
         '''
-        table, kwargs = self._get_table_args(filepath_or_buffer, **kwargs)
+        table, kwargs = self._get_table_args(casout=casout, **kwargs)
         # REST doesn't support table.addtable
         if self._protocol.startswith('http'):
             import pandas as pd
@@ -2171,7 +2171,7 @@ class CAS(object):
         table.update(dmh.CSV(filepath_or_buffer, **kwargs).args.addtable)
         return self.retrieve('table.addtable', **table).casTable
 
-    def read_fwf(self, filepath_or_buffer, **kwargs):
+    def read_fwf(self, filepath_or_buffer, casout=None, **kwargs):
         '''
         Read a table of fixed-width formatted lines into a CAS table
 
@@ -2219,7 +2219,7 @@ class CAS(object):
         :class:`CASTable`
 
         '''
-        table, kwargs = self._get_table_args(filepath_or_buffer, **kwargs)
+        table, kwargs = self._get_table_args(casout=casout, **kwargs)
         # REST doesn't support table.addtable
         if self._protocol.startswith('http'):
             import pandas as pd
@@ -2232,7 +2232,7 @@ class CAS(object):
         table.update(dmh.FWF(filepath_or_buffer, **kwargs).args.addtable)
         return self.retrieve('table.addtable', **table).casTable
 
-    def read_clipboard(self, *args, **kwargs):
+    def read_clipboard(self, casout=None, **kwargs):
         '''
         Read text from clipboard and pass to :meth:`read_table`
 
@@ -2265,9 +2265,9 @@ class CAS(object):
         :class:`CASTable`
 
         '''
-        return self._read_any('read_clipboard', *args, **kwargs)
+        return self._read_any('read_clipboard', casout=casout, **kwargs)
 
-    def read_excel(self, io, **kwargs):
+    def read_excel(self, io, casout=None, **kwargs):
         '''
         Read an Excel table into a CAS table
 
@@ -2311,9 +2311,9 @@ class CAS(object):
         :class:`CASTable`
 
         '''
-        return self._read_any('read_excel', io, **kwargs)
+        return self._read_any('read_excel', io, casout=casout, **kwargs)
 
-    def read_json(self, path_or_buf=None, **kwargs):
+    def read_json(self, path_or_buf=None, casout=None, **kwargs):
         '''
         Read a JSON string into a CAS table
 
@@ -2356,9 +2356,9 @@ class CAS(object):
         :class:`CASTable`
 
         '''
-        return self._read_any('read_json', path_or_buf, **kwargs)
+        return self._read_any('read_json', path_or_buf, casout=casout, **kwargs)
 
-    def json_normalize(self, data, **kwargs):
+    def json_normalize(self, data, casout=None, **kwargs):
         '''
         "Normalize" semi-structured JSON data into a flat table and upload to a CAS table
 
@@ -2401,9 +2401,9 @@ class CAS(object):
         :class:`CASTable`
 
         '''
-        return self._read_any('json_normalize', data, **kwargs)
+        return self._read_any('json_normalize', data, casout=casout, **kwargs)
 
-    def read_html(self, io, **kwargs):
+    def read_html(self, io, casout=None, **kwargs):
         '''
         Read HTML tables into a list of CASTable objects
 
@@ -2450,7 +2450,7 @@ class CAS(object):
         from swat import datamsghandlers as dmh
         kwargs = kwargs.copy()
         out = []
-        table, kwargs = self._get_table_args(io, **kwargs)
+        table, kwargs = self._get_table_args(casout=casout, **kwargs)
         for i, dframe in enumerate(pd.read_html(io, **kwargs)):
             if i and table.get('table'):
                 table['table'] += str(i)
@@ -2462,7 +2462,7 @@ class CAS(object):
                 out.append(self.retrieve('table.addtable', **table).casTable)
         return out
 
-    def read_hdf(self, path_or_buf, **kwargs):
+    def read_hdf(self, path_or_buf, casout=None, **kwargs):
         '''
         Read from the HDF store and create a CAS table
 
@@ -2505,9 +2505,9 @@ class CAS(object):
         :class:`CASTable`
 
         '''
-        return self._read_any('read_hdf', path_or_buf, **kwargs)
+        return self._read_any('read_hdf', path_or_buf, casout=casout, **kwargs)
 
-    def read_sas(self, filepath_or_buffer, **kwargs):
+    def read_sas(self, filepath_or_buffer, casout=None, **kwargs):
         '''
         Read SAS files stored as XPORT or SAS7BDAT into a CAS table
 
@@ -2551,9 +2551,9 @@ class CAS(object):
         :class:`CASTable`
 
         '''
-        return self._read_any('read_sas', filepath_or_buffer, **kwargs)
+        return self._read_any('read_sas', filepath_or_buffer, casout=casout, **kwargs)
 
-    def read_sql_table(self, table_name, con, **kwargs):
+    def read_sql_table(self, table_name, con, casout=None, **kwargs):
         '''
         Read SQL database table into a CAS table
 
@@ -2607,9 +2607,9 @@ class CAS(object):
         :class:`CASTable`
 
         '''
-        return self._read_any('read_sql_table', table_name, con, **kwargs)
+        return self._read_any('read_sql_table', table_name, con, casout=casout, **kwargs)
 
-    def read_sql_query(self, sql, con, **kwargs):
+    def read_sql_query(self, sql, con, casout=None, **kwargs):
         '''
         Read SQL query table into a CAS table
 
@@ -2663,9 +2663,9 @@ class CAS(object):
         :class:`CASTable`
 
         '''
-        return self._read_any('read_sql_query', sql, con, **kwargs)
+        return self._read_any('read_sql_query', sql, con, casout=casout, **kwargs)
 
-    def read_sql(self, sql, con, **kwargs):
+    def read_sql(self, sql, con, casout=None, **kwargs):
         '''
         Read SQL query or database table into a CAS table
 
@@ -2719,9 +2719,9 @@ class CAS(object):
         :class:`CASTable`
 
         '''
-        return self._read_any('read_sql', sql, con, **kwargs)
+        return self._read_any('read_sql', sql, con, casout=casout, **kwargs)
 
-    def read_gbq(self, query, **kwargs):
+    def read_gbq(self, query, casout=None, **kwargs):
         '''
         Load data from a Google BigQuery into a CAS table
 
@@ -2758,9 +2758,9 @@ class CAS(object):
         :class:`CASTable`
 
         '''
-        return self._read_any('read_gbq', query, **kwargs)
+        return self._read_any('read_gbq', query, casout=casout, **kwargs)
 
-    def read_stata(self, filepath_or_buffer, **kwargs):
+    def read_stata(self, filepath_or_buffer, casout=None, **kwargs):
         '''
         Read Stata file into a CAS table
 
@@ -2797,7 +2797,7 @@ class CAS(object):
         :class:`CASTable`
 
         '''
-        return self._read_any('read_stata', filepath_or_buffer, **kwargs)
+        return self._read_any('read_stata', filepath_or_buffer, casout=casout, **kwargs)
 
 
 def getone(connection, datamsghandler=None):

@@ -4652,7 +4652,7 @@ class CASTable(ParamManager, ActionParamManager):
     # Serialization / IO / Conversion
 
     @classmethod
-    def from_csv(cls, connection, path, *args, **kwargs):
+    def from_csv(cls, connection, path, casout=None, **kwargs):
         '''
         Create a CASTable from a CSV file
 
@@ -4662,8 +4662,19 @@ class CASTable(ParamManager, ActionParamManager):
             The CAS connection to read the data into.
         path : string or file-like object
             The path, URL, or file-like object to get the data from.
-        *args : positional arguments
-            Positional arguments to pass to :func:`pandas.read_csv`.
+        casout : string or :class:`CASTable`, optional
+            The output table specification.  This includes the following parameters.
+                name : string, optional
+                    Name of the output CAS table.
+                caslib : string, optional
+                    CASLib for the output CAS table.
+                label : string, optional
+                    The label to apply to the output CAS table.
+                promote : boolean, optional
+                    If True, the output CAS table will be visible in all sessions.
+                replace : boolean, optional
+                    If True, the output CAS table will replace any existing CAS.
+                    table with the same name.
         **kwargs : keyword arguments
             Keyword arguments to pass to :func:`pandas.read_csv`.
 
@@ -4680,10 +4691,10 @@ class CASTable(ParamManager, ActionParamManager):
         kwargs = kwargs.copy()
         kwargs.setdefault('index_col', 0)
         kwargs.setdefault('parse_dates', True)
-        return connection.read_csv(path, *args, **kwargs)
+        return connection.read_csv(path, casout=casout, **kwargs)
 
     @classmethod
-    def _from_any(cls, name, connection, data, *args, **kwargs):
+    def _from_any(cls, name, connection, data, **kwargs):
         '''
         Upload data from various sources
 
@@ -4695,8 +4706,6 @@ class CASTable(ParamManager, ActionParamManager):
             The CAS connection to read the data into.
         data : :class:`pandas.DataFrame`
             The :class:`pandas.DataFrame` to upload.
-        *args : positional parameters
-            Positional parameters sent to data reader method.
         **kwargs : keyword parameters
             Keyword parameters sent to data reader method.
 
@@ -4706,8 +4715,8 @@ class CASTable(ParamManager, ActionParamManager):
 
         '''
         from swat.cas.datamsghandlers import PandasDataFrame
-        table, kwargs = connection._get_table_args(*args, **kwargs)
-        dframe = getattr(pd.DataFrame, 'from_' + name)(data, *args, **kwargs)
+        table, kwargs = connection._get_table_args(**kwargs)
+        dframe = getattr(pd.DataFrame, 'from_' + name)(data, **kwargs)
         if connection._protocol.startswith('http'):
             if 'table' in table:
                 table['name'] = table.pop('table')
@@ -4718,7 +4727,7 @@ class CASTable(ParamManager, ActionParamManager):
         return connection.retrieve('table.addtable', **table)['casTable']
 
     @classmethod
-    def from_dict(cls, connection, data, *args, **kwargs):
+    def from_dict(cls, connection, data, casout=None, **kwargs):
         '''
         Create a CASTable from a dictionary
 
@@ -4728,8 +4737,19 @@ class CASTable(ParamManager, ActionParamManager):
             The :class:`CAS` connection to read the data into.
         data : dict
             The dictionary containing the data.
-        *args : positional arguments
-            Positional arguments sent to :meth:`pandas.DataFrame.from_dict`.
+        casout : string or :class:`CASTable`, optional
+            The output table specification.  This includes the following parameters.
+                name : string, optional
+                    Name of the output CAS table.
+                caslib : string, optional
+                    CASLib for the output CAS table.
+                label : string, optional
+                    The label to apply to the output CAS table.
+                promote : boolean, optional
+                    If True, the output CAS table will be visible in all sessions.
+                replace : boolean, optional
+                    If True, the output CAS table will replace any existing CAS.
+                    table with the same name.
         **kwargs : keyword arguments
             Keyword arguments sent to :meth:`pandas.DataFrame.from_dict`.
 
@@ -4742,10 +4762,10 @@ class CASTable(ParamManager, ActionParamManager):
         :class:`CASTable`
 
         '''
-        return cls._from_any('dict', connection, data, *args, **kwargs)
+        return cls._from_any('dict', connection, data, casout=casout, **kwargs)
 
     @classmethod
-    def from_items(cls, connection, items, *args, **kwargs):
+    def from_items(cls, connection, items, casout=None, **kwargs):
         '''
         Create a CASTable from a (key, value) pairs
 
@@ -4756,8 +4776,19 @@ class CASTable(ParamManager, ActionParamManager):
         items : tuples
             The tuples containing the data.  The values should be arrays
             or :class:`pandas.Series`.
-        *args : positional arguments
-            Positional arguments sent to :meth:`pandas.DataFrame.from_items`.
+        casout : string or :class:`CASTable`, optional
+            The output table specification.  This includes the following parameters.
+                name : string, optional
+                    Name of the output CAS table.
+                caslib : string, optional
+                    CASLib for the output CAS table.
+                label : string, optional
+                    The label to apply to the output CAS table.
+                promote : boolean, optional
+                    If True, the output CAS table will be visible in all sessions.
+                replace : boolean, optional
+                    If True, the output CAS table will replace any existing CAS.
+                    table with the same name.
         **kwargs : keyword arguments
             Keyword arguments sent to :meth:`pandas.DataFrame.from_items`.
 
@@ -4770,10 +4801,10 @@ class CASTable(ParamManager, ActionParamManager):
         :class:`CASTable`
 
         '''
-        return cls._from_any('items', connection, items, *args, **kwargs)
+        return cls._from_any('items', connection, items, casout=casout, **kwargs)
 
     @classmethod
-    def from_records(cls, connection, data, *args, **kwargs):
+    def from_records(cls, connection, data, casout=None, **kwargs):
         '''
         Create a CASTable from records
 
@@ -4783,8 +4814,19 @@ class CASTable(ParamManager, ActionParamManager):
             The :class:`CAS` connection to read the data into.
         data : :func:`numpy.ndarray`, list-of-tuples, dict, or :class:`pandas.DataFrame`
             The data to upload.
-        *args : positional arguments
-            Positional arguments sent to :meth:`pandas.DataFrame.from_records`.
+        casout : string or :class:`CASTable`, optional
+            The output table specification.  This includes the following parameters.
+                name : string, optional
+                    Name of the output CAS table.
+                caslib : string, optional
+                    CASLib for the output CAS table.
+                label : string, optional
+                    The label to apply to the output CAS table.
+                promote : boolean, optional
+                    If True, the output CAS table will be visible in all sessions.
+                replace : boolean, optional
+                    If True, the output CAS table will replace any existing CAS.
+                    table with the same name.
         **kwargs : keyword arguments
             Keyword arguments sent to :meth:`pandas.DataFrame.from_records`.
 
@@ -4797,7 +4839,7 @@ class CASTable(ParamManager, ActionParamManager):
         :class:`CASTable`
 
         '''
-        return cls._from_any('records', connection, data, *args, **kwargs)
+        return cls._from_any('records', connection, data, casout=casout, **kwargs)
 
     def info(self, verbose=None, buf=None, max_cols=None,
              memory_usage=None, null_counts=None):
@@ -8028,11 +8070,12 @@ class CASColumn(CASTable):
 
     @classmethod
     def from_csv(cls, connection, path, header=0, sep=',', index_col=0, parse_dates=True,
-                 tupleize_cols=False, infer_datetime_format=False, **kwargs):
+                 tupleize_cols=False, infer_datetime_format=False, casout=None, **kwargs):
         ''' Create a CASColumn from a CSV file '''
         return connection.read_csv(path, header=header, sep=sep, index_col=index_col,
                                    parse_dates=parse_dates, tupleize_cols=tupleize_cols,
                                    infer_datetime_format=infer_datetime_format,
+                                   casout=casout,
                                    **kwargs)._to_column()
 
     def to_series(self, *args, **kwargs):
