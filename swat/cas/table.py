@@ -924,7 +924,15 @@ class CASTable(ParamManager, ActionParamManager):
         for i, block in enumerate(code):
             if not re.search(r';\s*$', block):
                 code[i] = '%s; ' % block.rstrip()
-        code = ''.join(_get_unique(code))
+        # Filter out duplicate lines of code
+        if code:
+            newcode = []
+            for item in code:
+                parts = [x for x in re.split(r';[\s+|$]', item) if x.strip()]
+                newcode.extend(parts)
+                code = '; '.join(_get_unique(newcode)) + '; '
+        else:
+            code = ''
         if kwargs.get('inplace', True):
             self.set_param('computedvarsprogram', code)
             return
