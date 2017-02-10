@@ -186,15 +186,26 @@ def _format_param(param, connection, indent=0, selector=None, path='', output=No
 
     if 'alternatives' in param:
         alttypes = list(set([prm['parmType'].replace('value_', '')
-                             for prm in param['alternatives']]))
+                             for prm in param['alternatives']
+                                 if not prm.get('hidden')]))
         if alttypes == ['list'] and param.get('selector'):
             alttypes = ['dict']
             for alt in param['alternatives']:
+                if alt.get('hidden'):
+                    continue
                 for prm in alt['parmList']:
                     if prm['name'] == param['selector']:
                         selector_values.extend(prm['allowedValues'])
                         selector_type = prm['parmType']
                         continue
+        elif 'string' in alttypes:
+            for alt in param['alternatives']:
+                if alt.get('hidden'):
+                    continue
+                if alt['parmType'] == 'string' and 'allowedValues' in alt:
+                    param.setdefault('allowedValues', []).extend(alt['allowedValues'])
+                if 'default' in alt:
+                    param.setdefault('default', alt['default'])
 
     elif alttypes == ['list']:
         if 'parmList' in param:
