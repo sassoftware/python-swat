@@ -4586,11 +4586,29 @@ class CASTable(ParamManager, ActionParamManager):
 
         return out
 
-    def _fetchall(self, grouped=False, **kwargs):
+    def _fetchall(self, grouped=False, sample_pct=100, sample_seed=None,
+                        fetchvars=None, **kwargs):
         ''' Fetch all rows '''
         kwargs = kwargs.copy()
         if 'to' not in kwargs:
             kwargs['to'] = MAX_INT64_INDEX
+
+        if sample_pct > 0 and sample_pct < 100:
+            self._loadactionset('sampling')
+
+            if fetchvars is None:
+                fetchvars = list(self.columns)
+
+            samptbl = self.copy()
+            samptbl.params.pop('groupby')
+            samptbl.params.pop('groupBy')
+
+            out = samptbl._retrieve('sampling.srs', samppct=sample_pct,
+                                    output=dict(casout=dict(name=_gen_table_name(),
+                                                            replace=True),
+                                                copyvars=fetchvars))
+            out = out['OutputCasTables'].ix[0, 'casTable']
+
         return self._fetch(grouped=grouped, **kwargs)
 
     # Plotting
