@@ -239,8 +239,11 @@ def ctb2tabular(_sw_table, soptions='', connection=None):
     unknownname = None
     dtypes = []
     colinfo = {}
+    mimetypes = {}
     for i in range(ncolumns):
         col = SASColumnSpec.fromtable(_sw_table, i)
+        if col.attrs.get('MIMEType'):
+            mimetypes[col.name] = col.attrs.get('MIMEType')
         lowercolname = col.name.lower()
         if lowercolname == 'caslib':
             caslib = col.name
@@ -314,6 +317,14 @@ def ctb2tabular(_sw_table, soptions='', connection=None):
 
     # Map column names back to unicode in pandas
     cdf.columns = [a2u(x[0], 'utf-8') for x in dtypes]
+
+    # Apply mimetype transformations
+    if mimetypes:
+        from PIL import Image
+        from io import BytesIO
+        for key, value in mimetypes.items():
+            if value.startswith('image/'):
+                cdf[key] = cdf[key].map(lambda x: Image.open(BytesIO(x)))
 
     # Check for By group information
     optbycol = get_option('cas.dataset.bygroup_columns')
