@@ -3012,6 +3012,13 @@ class CASTable(ParamManager, ActionParamManager):
         else:
             tbl = self.select_dtypes(include=include, exclude=exclude)
 
+        # Short circuit if there are no rows
+        if not numrows:
+            return pd.DataFrame([[0] * len(tbl.columns),
+                                 [0] * len(tbl.columns)],
+                                 index=['count', 'unique'],
+                                 columns=tbl.columns)
+
         # Get percentiles
         if percentiles is not None:
             if not isinstance(percentiles, items_types):
