@@ -137,10 +137,10 @@ The final workflow is the most hands-on, but also offers the most flexibility.
 For most cases, you can use the callback form to handle any size of data coming
 back from the CAS server.  However, in that mode, you can only run one action
 at a time.  If you want to run simultaneous actions and handle the responses
-as they come back from either connection, you need to use the :meth:`CAS.inovke`
+as they come back from either connection, you need to use the :meth:`CAS.invoke`
 method.
 
-The :meth:`CAS.inovke` method calls a CAS action, but doesn't automatically retrieve
+The :meth:`CAS.invoke` method calls a CAS action, but doesn't automatically retrieve
 the responses.  You must iterate over the connection object to get the responses.
 To iterate over the responses for multiple connections, you can use the 
 :func:`getnext` function.  Using this technique, you can take advantage of 
