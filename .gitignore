@@ -9,6 +9,7 @@
 *flymake*
 *.kdev4
 *.log
+*.nfs*
 *.swo
 *.swp
 *.pdb
