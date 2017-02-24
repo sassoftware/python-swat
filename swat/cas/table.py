@@ -1559,7 +1559,7 @@ class CASTable(ParamManager, ActionParamManager):
         CASResults object
 
         '''
-        out = self.retrieve(_name_, _apptag='UI', **kwargs)
+        out = self.retrieve(_name_, _apptag='UI', _messagelevel='error', **kwargs)
         if out.severity > 1:
             raise SWATError(out.status)
         return out
@@ -2625,11 +2625,9 @@ class CASTable(ParamManager, ActionParamManager):
 
         kwargs = kwargs.copy()
         kwargs['code'] = code
-        kwargs['_apptag'] = 'UI'
-        kwargs['_messagelevel'] = 'error'
         out = self.get_connection().retrieve('datastep.runcode', *args, **kwargs)
 
-        view._retrieve('table.droptable', _messagelevel='error')
+        view._retrieve('table.droptable')
 
         try:
             return out['OutputCasTables']['casTable'][0]
@@ -4533,7 +4531,7 @@ class CASTable(ParamManager, ActionParamManager):
 #   def tz_localize(self, *args, **kwargs):
 #       raise NotImplementedError
 
-    def _fetch(self, grouped=False, **kwargs):
+    def _fetch(self, grouped=False, sample_pct=None, sample_seed=None, **kwargs):
         '''
         Return the fetched DataFrame given the fetch parameters
 
@@ -4565,51 +4563,80 @@ class CASTable(ParamManager, ActionParamManager):
             from_ = kwargs['from_']
 
         if 'to' not in kwargs:
-            kwargs['to'] = from_ + get_option('cas.dataset.max_rows_fetched')
+            if sample_pct is not None:
+                kwargs['to'] = MAX_INT64_INDEX
+            else:
+                kwargs['to'] = from_ + get_option('cas.dataset.max_rows_fetched')
+        elif sample_pct is not None:
+            max_size = min(kwargs['to'] - from_, int(sample_pct * self._numrows))
+            kwargs['to'] = from_ + max_size
 
         if 'index' not in kwargs:
             kwargs['index'] = True
 
+        tbl = self
+
+        if sample_pct is not None and sample_pct > 0 and sample_pct < 1:
+            tbl = tbl._sample(sample_pct=sample_pct, sample_seed=sample_seed)
+
         # Sort based on 'Fetch#' key.  This will be out of order in REST.
-        values = [x[1] for x in sorted(self._retrieve('table.fetch', **kwargs).items(),
+        values = [x[1] for x in sorted(tbl._retrieve('table.fetch', **kwargs).items(),
                                        key=lambda x: int(x[0].replace('Fetch', '') or '0'))]
         out = df.concat(values)
+
+        if tbl is not self:
+            tbl._retrieve('table.droptable')
 
         if len(out.columns) and out.columns[0] == '_Index_':
             out['_Index_'] = out['_Index_'] - 1
             out = out.set_index('_Index_')
             out.index.name = None
 
-        groups = self.get_groupby_vars()
+        groups = tbl.get_groupby_vars()
         if grouped and groups:
             return out.groupby(groups)
 
         return out
 
-    def _fetchall(self, grouped=False, sample_pct=100, sample_seed=None,
-                        fetchvars=None, **kwargs):
+    def _sample(self, sample_pct=None, sample_seed=None, columns=None, **kwargs):
+        ''' Return a CASTable containing a sample of the rows '''
+        if sample_pct is None or (sample_pct <= 0 and sample_pct >= 1):
+            return self
+
+        self._loadactionset('sampling')
+
+        if columns is None:
+            columns = list(self.columns)
+
+        samptbl = self.copy()
+        groupby = samptbl.get_groupby_vars()
+
+        if groupby:
+            samptbl.params.pop('groupby', None)
+            samptbl.params.pop('groupBy', None)
+
+        params = dict(samppct=sample_pct * 100)
+        if sample_seed is not None:
+            params['seed'] = sample_seed
+
+        out = samptbl._retrieve('sampling.srs',
+                                output=dict(casout=dict(name=_gen_table_name(),
+                                                        replace=True),
+                                            copyvars=columns),
+                                **params)['OutputCasTables'].ix[0, 'casTable']
+
+        if groupby:
+            out.params['groupby'] = groupby
+
+        return out
+
+    def _fetchall(self, grouped=False, sample_pct=None, sample_seed=None, **kwargs):
         ''' Fetch all rows '''
         kwargs = kwargs.copy()
         if 'to' not in kwargs:
             kwargs['to'] = MAX_INT64_INDEX
-
-        if sample_pct > 0 and sample_pct < 100:
-            self._loadactionset('sampling')
-
-            if fetchvars is None:
-                fetchvars = list(self.columns)
-
-            samptbl = self.copy()
-            samptbl.params.pop('groupby')
-            samptbl.params.pop('groupBy')
-
-            out = samptbl._retrieve('sampling.srs', samppct=sample_pct,
-                                    output=dict(casout=dict(name=_gen_table_name(),
-                                                            replace=True),
-                                                copyvars=fetchvars))
-            out = out['OutputCasTables'].ix[0, 'casTable']
-
-        return self._fetch(grouped=grouped, **kwargs)
+        return self._fetch(grouped=grouped, sample_pct=sample_pct,
+                           sample_seed=sample_seed, **kwargs)
 
     # Plotting
 
@@ -4942,12 +4969,18 @@ class CASTable(ParamManager, ActionParamManager):
             buf.write(u'vardata size: %s\n' % details['VardataSize'])
             buf.write(u'memory usage: %s\n' % details['AllocatedMemory'])
 
-    def to_frame(self, **kwargs):
+    def to_frame(self, sample_pct=None, sample_seed=None, **kwargs):
         '''
         Retrieve entire table as a :class:`SASDataFrame`
 
         Parameters
         ----------
+        sample_pct : float, optional
+            Specifies the percentage of samples to return rather than the
+            entire data set.  The value should be a float between 0 and 1.
+        sample_seed : int, optional
+            The seed to use for sampling.  This is used when deterministic
+            results are required.
         **kwargs : keyword arguments, optional
             Additional keyword parameters to the ``table.fetch`` CAS action.
 
@@ -4956,7 +4989,8 @@ class CASTable(ParamManager, ActionParamManager):
         :class:`SASDataFrame`
 
         '''
-        return self._fetchall(**kwargs)
+        return self._fetchall(sample_pct=sample_pct, sample_seed=sample_seed,
+                              **kwargs)
 
     def _to_any(self, method, *args, **kwargs):
         '''
@@ -4973,8 +5007,15 @@ class CASTable(ParamManager, ActionParamManager):
 
         '''
         from ..dataframe import concat
+        kwargs = kwargs.copy()
+        params = {}
+        params['sample_pct'] = kwargs.pop('sample_pct', None)
+        params['sample_seed'] = kwargs.pop('sample_seed', None)
+        params['to'] = kwargs.pop('to', None)
+        params['from'] = kwargs.pop('from', kwargs.pop('from_', None))
+        params = {k:v for k, v in params.items() if v is not None}
         standard_dataframe = kwargs.pop('standard_dataframe', False)
-        dframe = self._fetch()
+        dframe = self._fetch(**params)
         if standard_dataframe:
             dframe = pd.DataFrame(dframe)
         return getattr(dframe, 'to_' + method)(*args, **kwargs)
@@ -8131,6 +8172,8 @@ class CASColumn(CASTable):
         ''' Generic converter to various forms '''
         kwargs = kwargs.copy()
         sort = kwargs.pop('sort', False)
+        sample_pct = kwargs.pop('sample_pct', None)
+        sample_seed = kwargs.pop('sample_seed', None)
         sortby = None
         if sort:
             if sort is True:
@@ -8139,7 +8182,8 @@ class CASColumn(CASTable):
                 sortby = [dict(name=self.name, order=sort)]
             else:
                 sortby = sort
-        out = self._fetch(sortby=sortby)[self.name]
+        out = self._fetch(sample_pct=sample_pct, sample_seed=sample_seed,
+                          sortby=sortby)[self.name]
         return getattr(out, 'to_' + method)(*args, **kwargs)
 
     def to_frame(self, *args, **kwargs):
