@@ -4116,5 +4116,90 @@ class TestCASTable(tm.TestCase):
         pcolinfo = pcolinfo.drop('ID')
         self.assertTablesEqual(colinfo[['Two', 'Model', 'One', 'MSRP']], pcolinfo)
 
+    def test_sampling(self):
+        tbl = self.table
+
+        # Basic tests
+        num_tables = len(tbl.tableinfo().TableInfo)
+        samp = tbl.to_frame(sample_pct=0.01, fetchvars=['Make', 'Model'])
+        self.assertEqual(len(samp), 4)
+        self.assertEqual(list(samp.columns), ['Make', 'Model'])
+        self.assertEqual(num_tables, len(tbl.tableinfo().TableInfo))
+
+        num_tables = len(tbl.tableinfo().TableInfo)
+        samp = tbl.to_frame(sample_pct=0.02, fetchvars=['Make', 'Model', 'Horsepower'])
+        self.assertEqual(len(samp), 9)
+        self.assertEqual(list(samp.columns), ['Make', 'Model', 'Horsepower'])
+        self.assertEqual(num_tables, len(tbl.tableinfo().TableInfo))
+
+        # Test to= / from= interactions
+        num_tables = len(tbl.tableinfo().TableInfo)
+        samp = tbl.to_frame(sample_pct=0.02, to=5, fetchvars=['Make', 'Model'])
+        self.assertEqual(len(samp), 5)
+        self.assertEqual(list(samp.columns), ['Make', 'Model'])
+        self.assertEqual(num_tables, len(tbl.tableinfo().TableInfo))
+
+        num_tables = len(tbl.tableinfo().TableInfo)
+        samp = tbl.to_frame(sample_pct=0.02, from_=2, to=5, fetchvars=['Make', 'Model'])
+        self.assertEqual(len(samp), 4)
+        self.assertEqual(list(samp.columns), ['Make', 'Model'])
+        self.assertEqual(num_tables, len(tbl.tableinfo().TableInfo))
+
+        # Test swat.options.cas.datasets.max_rows_fetched
+        swat.options.cas.dataset.max_rows_fetched = 5
+
+        # to_frame forces everything to get pulled down, so use _fetch here.
+        # All internal calls to pull data use _fetch and will obey the max_rows_fetched option.
+        num_tables = len(tbl.tableinfo().TableInfo)
+        samp = tbl._fetch(sample_pct=0.02, fetchvars=['Make', 'Model'])
+        self.assertEqual(len(samp), 5)
+        self.assertEqual(list(samp.columns), ['Make', 'Model'])
+        self.assertEqual(num_tables, len(tbl.tableinfo().TableInfo))
+
+        swat.options.cas.dataset.max_rows_fetched = 10000
+
+        # Test seed
+        num_tables = len(tbl.tableinfo().TableInfo)
+        samp1 = tbl.to_frame(sample_pct=0.01, sample_seed=123, fetchvars=['Make', 'Model'])
+        samp2 = tbl.to_frame(sample_pct=0.01, sample_seed=123, fetchvars=['Make', 'Model'])
+        self.assertEqual(len(samp1), 4)
+        self.assertEqual(len(samp2), 4)
+        self.assertEqual(list(samp1.columns), ['Make', 'Model'])
+        self.assertEqual(list(samp2.columns), ['Make', 'Model'])
+        self.assertTablesEqual(samp1, samp2)
+        self.assertEqual(num_tables, len(tbl.tableinfo().TableInfo))
+
+        # Test out-of-bounds sample_pct=
+        num_tables = len(tbl.tableinfo().TableInfo)
+        with self.assertRaises(ValueError):
+            tbl.to_frame(sample_pct=100)
+        with self.assertRaises(ValueError):
+            tbl.to_frame(sample_pct=0)
+        with self.assertRaises(ValueError):
+            tbl.to_frame(sample_pct=1)
+        self.assertEqual(num_tables, len(tbl.tableinfo().TableInfo))
+
+        # No options returns self
+        self.assertTrue(tbl._sample() is tbl)
+
+        # Test groupby
+        tbl.params.groupby = ['Origin']
+      
+        num_tables = len(tbl.tableinfo().TableInfo)
+        samp = tbl.to_frame(sample_pct=0.01, fetchvars=['Make', 'Model'])
+        self.assertEqual(len(samp), 4)
+        self.assertEqual(list(samp.columns), ['Make', 'Model'])
+        self.assertEqual(num_tables, len(tbl.tableinfo().TableInfo))
+
+        del tbl.params.groupby
+
+        num_tables = len(tbl.tableinfo().TableInfo)
+        samp = tbl.groupby('Origin', as_index=True).to_frame(sample_pct=0.01,
+                                                  fetchvars=['Make', 'Model'])
+        self.assertEqual(len(samp), 4)
+        self.assertEqual(list(samp.columns), ['Make', 'Model'])
+        self.assertEqual(list(samp.index.names), ['Origin'])
+        self.assertEqual(num_tables, len(tbl.tableinfo().TableInfo))
+
 if __name__ == '__main__':
     tm.runtests()

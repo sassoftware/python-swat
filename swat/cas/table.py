@@ -4548,6 +4548,7 @@ class CASTable(ParamManager, ActionParamManager):
         from .. import dataframe as df
 
         kwargs = kwargs.copy()
+        groups = self.get_groupby_vars()
 
         for key, value in six.iteritems(self.get_fetch_params()):
             if key in kwargs:
@@ -4563,21 +4564,22 @@ class CASTable(ParamManager, ActionParamManager):
             from_ = kwargs['from_']
 
         if 'to' not in kwargs:
-            if sample_pct is not None:
-                kwargs['to'] = MAX_INT64_INDEX
-            else:
-                kwargs['to'] = from_ + get_option('cas.dataset.max_rows_fetched')
-        elif sample_pct is not None:
-            max_size = min(kwargs['to'] - from_, int(sample_pct * self._numrows))
-            kwargs['to'] = from_ + max_size
+            kwargs['to'] = min(from_ + get_option('cas.dataset.max_rows_fetched'),
+                               MAX_INT64_INDEX)
 
         if 'index' not in kwargs:
             kwargs['index'] = True
 
-        tbl = self
+        # Add grouping columns if they aren't in the list
+        columns = None
+        if grouped and groups and 'fetchvars' in kwargs: 
+            kwargs['fetchvars'] = list(kwargs['fetchvars'])
+            for group in groups:
+                if group not in kwargs['fetchvars']:
+                    kwargs['fetchvars'].append(group)
+            columns = kwargs['fetchvars']
 
-        if sample_pct is not None and sample_pct > 0 and sample_pct < 1:
-            tbl = tbl._sample(sample_pct=sample_pct, sample_seed=sample_seed)
+        tbl = self._sample(sample_pct=sample_pct, sample_seed=sample_seed, columns=columns)
 
         # Sort based on 'Fetch#' key.  This will be out of order in REST.
         values = [x[1] for x in sorted(tbl._retrieve('table.fetch', **kwargs).items(),
@@ -4592,7 +4594,6 @@ class CASTable(ParamManager, ActionParamManager):
             out = out.set_index('_Index_')
             out.index.name = None
 
-        groups = tbl.get_groupby_vars()
         if grouped and groups:
             return out.groupby(groups)
 
@@ -4600,8 +4601,12 @@ class CASTable(ParamManager, ActionParamManager):
 
     def _sample(self, sample_pct=None, sample_seed=None, columns=None, **kwargs):
         ''' Return a CASTable containing a sample of the rows '''
-        if sample_pct is None or (sample_pct <= 0 and sample_pct >= 1):
+        if sample_pct is None:
             return self
+
+        if sample_pct is None or sample_pct <= 0 or sample_pct >= 1:
+            raise ValueError('Sample percentage should be a floating point '
+                             'value between 0 and 1')
 
         self._loadactionset('sampling')
 
@@ -8174,6 +8179,7 @@ class CASColumn(CASTable):
         sort = kwargs.pop('sort', False)
         sample_pct = kwargs.pop('sample_pct', None)
         sample_seed = kwargs.pop('sample_seed', None)
+        grouped = kwargs.pop('grouped', None)
         sortby = None
         if sort:
             if sort is True:
@@ -8183,7 +8189,7 @@ class CASColumn(CASTable):
             else:
                 sortby = sort
         out = self._fetch(sample_pct=sample_pct, sample_seed=sample_seed,
-                          sortby=sortby)[self.name]
+                          sortby=sortby, grouped=grouped)[self.name]
         return getattr(out, 'to_' + method)(*args, **kwargs)
 
     def to_frame(self, *args, **kwargs):
@@ -8378,7 +8384,7 @@ class CASTableGroupBy(object):
         kwargs.setdefault('bygroup_as_index', isinstance(self._table, CASColumn))
         return self._table.slice(*args, **kwargs)
 
-    def to_frame(self, *args, **kwargs):
+    def to_frame(self, **kwargs):
         '''
         Retrieve all values into a DataFrame
 
@@ -8392,12 +8398,19 @@ class CASTableGroupBy(object):
         :class:`pandas.DataFrame`
 
         '''
-        out = self._table.slice(0, -1, bygroup_as_index=self._as_index)
-        if isinstance(out, pd.Series):
-            out = out.to_frame()
-        return out
+        if isinstance(self._table, CASColumn):
+            tbl = self._table._to_table()
+        else:
+            tbl = self._table.copy()
+        if self._as_index:
+            from ..dataframe import concat
+            groups = tbl.get_groupby_vars()
+            tbl.append_columns(*groups, inplace=True)
+            out = tbl.to_frame(grouped=True, **kwargs)
+            return concat([x[1].set_index(groups) for x in out])
+        return tbl.to_frame(grouped=False, **kwargs)
 
-    def to_series(self, *args, **kwargs):
+    def to_series(self, name=None, **kwargs):
         '''
         Retrieve all values into a Series
 
@@ -8413,9 +8426,10 @@ class CASTableGroupBy(object):
         columns = list(self._table.columns)
         if len(columns) > 1:
             raise ValueError('Too many columns to convert to a Series')
-        if isinstance(self._table, CASColumn):
-            return self._table.slice(0, -1, bygroup_as_index=True)
-        return self._table.slice(0, -1, bygroup_as_index=True)[columns[0]]
+        out = self.to_frame(**kwargs)[columns[0]]
+        if name is not None:
+            out.name = name
+        return out
 
     def nth(self, n, dropna=None, **kwargs):
         '''
