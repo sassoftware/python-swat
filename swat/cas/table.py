@@ -4531,14 +4531,25 @@ class CASTable(ParamManager, ActionParamManager):
 #   def tz_localize(self, *args, **kwargs):
 #       raise NotImplementedError
 
-    def _fetch(self, grouped=False, sample_pct=None, sample_seed=None, **kwargs):
+    def _fetch(self, grouped=False, sample_pct=None, sample_seed=None,
+                     sample=False, **kwargs):
         '''
         Return the fetched DataFrame given the fetch parameters
 
         Parameters
         ----------
-        grouped : boolean, optional
+        grouped : bool, optional
             Should the output DataFrame be returned as By groups?
+        sample_pct : int, optional
+            Percentage of original data set to return as samples
+        sample_seed : int, optional
+            Random number seed
+        sample : bool, optional
+            Flag to indicate that the result set should be sampled.
+            This can be used instead of sample_pct to indicate that the
+            values returned in the range of to= / from=, or the rows
+            returned limited by swat.options.cas.dataset.max_rows_fetched
+            should be sampled.
 
         Returns
         -------
@@ -4566,6 +4577,13 @@ class CASTable(ParamManager, ActionParamManager):
         if 'to' not in kwargs:
             kwargs['to'] = min(from_ + get_option('cas.dataset.max_rows_fetched'),
                                MAX_INT64_INDEX)
+
+        # Compute sample percentage as needed
+        if sample_pct is None and sample:
+            ntblrows = self._numrows
+            nrows = kwargs['to'] - from_ + 1
+            if ntblrows > nrows:
+                sample_pct = float(nrows) / ntblrows
 
         if 'index' not in kwargs:
             kwargs['index'] = True
@@ -4604,7 +4622,7 @@ class CASTable(ParamManager, ActionParamManager):
         if sample_pct is None:
             return self
 
-        if sample_pct is None or sample_pct <= 0 or sample_pct >= 1:
+        if sample_pct <= 0 or sample_pct >= 1:
             raise ValueError('Sample percentage should be a floating point '
                              'value between 0 and 1')
 

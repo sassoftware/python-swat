@@ -4169,6 +4169,31 @@ class TestCASTable(tm.TestCase):
         self.assertTablesEqual(samp1, samp2)
         self.assertEqual(num_tables, len(tbl.tableinfo().TableInfo))
 
+        # Test sample= parameter
+        num_tables = len(tbl.tableinfo().TableInfo)
+        samp1 = tbl.to_frame(sample=True, to=5, fetchvars=['Make', 'Model'])
+        samp2 = tbl.to_frame(sample=True, to=5, fetchvars=['Make', 'Model'])
+        self.assertEqual(len(samp1), 5)
+        self.assertEqual(len(samp2), 5)
+        self.assertEqual(list(samp1.columns), ['Make', 'Model'])
+        self.assertEqual(list(samp2.columns), ['Make', 'Model'])
+        self.assertNotEqual(samp1.to_dict(), samp2.to_dict())
+        self.assertEqual(num_tables, len(tbl.tableinfo().TableInfo))
+
+        swat.options.cas.dataset.max_rows_fetched = 10 
+
+        num_tables = len(tbl.tableinfo().TableInfo)
+        samp1 = tbl._fetch(sample=True, fetchvars=['Make', 'Model'])
+        samp2 = tbl._fetch(sample=True, fetchvars=['Make', 'Model'])
+        self.assertEqual(len(samp1), 10)
+        self.assertEqual(len(samp2), 10)
+        self.assertEqual(list(samp1.columns), ['Make', 'Model'])
+        self.assertEqual(list(samp2.columns), ['Make', 'Model'])
+        self.assertNotEqual(samp1.to_dict(), samp2.to_dict())
+        self.assertEqual(num_tables, len(tbl.tableinfo().TableInfo))
+
+        swat.reset_option('cas.dataset.max_rows_fetched')
+
         # Test out-of-bounds sample_pct=
         num_tables = len(tbl.tableinfo().TableInfo)
         with self.assertRaises(ValueError):
