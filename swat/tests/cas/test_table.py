@@ -24,7 +24,9 @@
 
 
 import copy
+import io
 import os
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import re
@@ -34,6 +36,7 @@ import swat.utils.testing as tm
 import sys
 import unittest
 
+from PIL import Image
 from swat.utils.compat import patch_pandas_sort
 
 patch_pandas_sort()
@@ -4213,7 +4216,7 @@ class TestCASTable(tm.TestCase):
         num_tables = len(tbl.tableinfo().TableInfo)
         samp = tbl.to_frame(sample_pct=0.01, fetchvars=['Make', 'Model'])
         self.assertEqual(len(samp), 4)
-        self.assertEqual(list(samp.columns), ['Make', 'Model'])
+        self.assertEqual(list(samp.columns), ['Origin', 'Make', 'Model'])
         self.assertEqual(num_tables, len(tbl.tableinfo().TableInfo))
 
         del tbl.params.groupby
@@ -4225,6 +4228,163 @@ class TestCASTable(tm.TestCase):
         self.assertEqual(list(samp.columns), ['Make', 'Model'])
         self.assertEqual(list(samp.index.names), ['Origin'])
         self.assertEqual(num_tables, len(tbl.tableinfo().TableInfo))
+
+    def assertPlotsEqual(self, fig1, fig2):
+        buf1 = io.BytesIO()
+        buf2 = io.BytesIO()
+
+        fig1.figure.savefig(buf1, format='png')
+        out1 = buf1.getvalue()
+        buf1.close()
+        plt.close()
+
+        fig2.figure.savefig(buf2, format='png')
+        out2 = buf2.getvalue()
+        buf2.close()
+        plt.close()
+
+        return self.assertEqual(out1, out2)
+
+    def test_plot(self):
+        tbl = self.table
+        df = self.get_cars_df()
+
+        # Basic plot
+        self.assertPlotsEqual(
+            tbl.sort_values(['MSRP', 'Invoice']).plot('Make', ['MSRP', 'Invoice']),
+            df.sort_values(['MSRP', 'Invoice']).plot('Make', ['MSRP', 'Invoice'])
+        )
+
+        # Must reset index here because it uses that as X axis
+        self.assertPlotsEqual(
+            tbl.sort_values(['MSRP', 'Invoice']).plot(y=['MSRP', 'Invoice']),
+            df.sort_values(['MSRP', 'Invoice']).reset_index().plot(y=['MSRP', 'Invoice'])
+        )
+
+        # Test kind= parameter
+        self.assertPlotsEqual(
+            tbl.sort_values(['MSRP', 'Invoice']).plot('MSRP', 'Invoice', 'scatter'),
+            df.sort_values(['MSRP', 'Invoice']).plot('MSRP', 'Invoice', 'scatter')
+        )
+
+        self.assertPlotsEqual(
+            tbl.sort_values(['MSRP', 'Invoice']).plot('MSRP', 'Invoice', kind='scatter'),
+            df.sort_values(['MSRP', 'Invoice']).plot('MSRP', 'Invoice', kind='scatter')
+        )
+
+        self.assertPlotsEqual(
+            tbl.sort_values(['MSRP', 'Invoice']).plot('Make', ['MSRP', 'Invoice'], kind='bar'),
+            df.sort_values(['MSRP', 'Invoice']).plot('Make', ['MSRP', 'Invoice'], kind='bar')
+        )
+
+    def test_plot_sampling(self):
+        tbl = self.table
+
+        self.assertPlotsEqual(
+            tbl.sort_values(['MSRP', 'Invoice'])\
+               .plot('MSRP', 'Invoice', sample_pct=0.05, sample_seed=123),
+            tbl._fetch(sample_pct=0.05, sample_seed=123)\
+               .sort_values(['MSRP', 'Invoice']).plot('MSRP', 'Invoice')
+        )
+
+    def test_plot_area(self):
+        tbl = self.table
+        df = self.get_cars_df()
+
+        self.assertPlotsEqual(
+            tbl.sort_values(['MSRP', 'Invoice']).plot.area('Make', ['MSRP', 'Invoice']),
+            df.sort_values(['MSRP', 'Invoice']).plot.area('Make', ['MSRP', 'Invoice'])
+        )
+
+    def test_plot_bar(self):
+        tbl = self.table
+        df = self.get_cars_df()
+
+        self.assertPlotsEqual(
+            tbl['Cylinders'].sort_values().plot.bar(),
+            df['Cylinders'].sort_values().plot.bar()
+        )
+
+    def test_plot_barh(self):
+        tbl = self.table
+        df = self.get_cars_df()
+
+        self.assertPlotsEqual(
+            tbl['Cylinders'].sort_values().plot.barh(),
+            df['Cylinders'].sort_values().plot.barh()
+        )
+
+    def test_plot_box(self):
+        tbl = self.table
+        df = self.get_cars_df()
+
+        self.assertPlotsEqual(
+            tbl[['MSRP', 'Invoice']].plot.box(),
+            df[['MSRP', 'Invoice']].plot.box()
+        )
+
+    def test_plot_density(self):
+        tbl = self.table
+        df = self.get_cars_df()
+
+        self.assertPlotsEqual(
+            tbl[['MSRP', 'Invoice']].plot.density(),
+            df[['MSRP', 'Invoice']].plot.density()
+        )
+
+    def test_plot_hexbin(self):
+        tbl = self.table
+        df = self.get_cars_df()
+
+        self.assertPlotsEqual(
+            tbl.plot.hexbin('MSRP', 'Horsepower'),
+            df.plot.hexbin('MSRP', 'Horsepower')
+        )
+
+    def test_plot_hist(self):
+        tbl = self.table
+        df = self.get_cars_df()
+
+        self.assertPlotsEqual(
+            tbl.plot.hist(),
+            df.plot.hist(),
+        )
+
+    def test_plot_kde(self):
+        tbl = self.table
+        df = self.get_cars_df()
+
+        self.assertPlotsEqual(
+            tbl[['MSRP', 'Invoice']].plot.kde(),
+            df[['MSRP', 'Invoice']].plot.kde()
+        )
+
+    def test_plot_line(self):
+        tbl = self.table
+        df = self.get_cars_df()
+
+        self.assertPlotsEqual(
+            tbl.sort_values(['MSRP', 'Invoice']).plot.line('MSRP', 'Invoice'),
+            df.sort_values(['MSRP', 'Invoice']).plot.line('MSRP', 'Invoice')
+        )
+
+    def test_plot_pie(self):
+        tbl = self.table
+        df = self.get_cars_df()
+
+        self.assertPlotsEqual(
+            tbl['Cylinders'].sort_values().plot.pie(),
+            df['Cylinders'].sort_values().plot.pie()
+        )
+
+    def test_plot_scatter(self):
+        tbl = self.table
+        df = self.get_cars_df()
+
+        self.assertPlotsEqual(
+            tbl.plot.scatter('MSRP', 'Horsepower'),
+            df.plot.scatter('MSRP', 'Horsepower')
+        )
 
 if __name__ == '__main__':
     tm.runtests()
