@@ -320,6 +320,7 @@ Reindexing / Selection / Label manipulation
    :toctree: generated/
 
    CASTable.head
+   CASTable.sample
    CASTable.tail
 
 Sorting
@@ -346,6 +347,29 @@ specific plotting methods of the form ``CASTable.plot.<kind>``.
 .. note:: In all of the plotting methods, the rendering is done completely 
           on the client side.  This means that all of the data is fetched
           in the background prior to doing the plotting.
+
+Since plotting is done on the client-side, data must be downloaded to create
+the graphs.  By default, the amount of data pulled down is limited by the 
+``cas.dataset.max_rows_fetched`` option.  Sampling is used to randomize the 
+data that is plotted.  You can control the sampling with the following options:
+
+``sample_pct=float`` 
+    The percentage of the rows of the original table to return given as a float
+    value between 0 and 1.  Using this option disables the 
+    ``cas.dataset.max_rows_fetched`` option row limits.
+
+``sample_seed=int``
+    The seed for the random number generator given an as integer.  This can be 
+    set to create deterministic sampling.
+
+``stratify_by='var-name'``
+    Specifies the variable to do stratified sampling by.
+
+``sample=bool``
+    A boolean used to indicate that the values fetched should be sampled.
+    This is used in conjunction with the ``cas.dataset.max_rows_fetched`` option
+    to return random samples up to that limit.  It is assumed to be true 
+    when ``sample_pct=`` is specified.
 
 .. autosummary::
    :toctree: generated/
@@ -534,6 +558,7 @@ Selection
 
    CASColumn.head
    CASColumn.isin
+   CASColumn.sample
    CASColumn.tail
 
 Sorting
