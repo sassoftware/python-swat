@@ -371,7 +371,56 @@ class CASTablePlotter(object):
     def __init__(self, table):
         self._table = table
 
-    def __call__(self, *args, **kwargs):
+    def _get_fetchvars(self, x=None, y=None, by=None):
+        '''
+        Return a list of variables needed for the plot
+
+        '''
+        if x is None and y is None:
+            return None
+
+        x = x or []
+        if isinstance(x, six.string_types):
+            x = [x]
+
+        y = y or []
+        if isinstance(y, six.string_types):
+            y = [y]
+
+        if by is not None:
+            if isinstance(by, six.string_types):
+                by = [by]
+        else:
+            by = self._table.get_groupby_vars()
+
+        return list(by) + list(x) + list(y)
+
+    def _get_sampling_params(self, **kwargs):
+        '''
+        Extract sampling parameters from keyword arguments
+
+        '''
+        samp = {}
+        samp['sample'] = kwargs.pop('sample', True)
+        if 'sample_pct' in kwargs:
+            samp['sample_pct'] = kwargs.pop('sample_pct')
+        if 'sample_seed' in kwargs:
+            samp['sample_seed'] = kwargs.pop('sample_seed')
+        if 'stratify_by' in kwargs:
+            samp['stratify_by'] = kwargs.pop('stratify_by')
+        return samp, kwargs
+
+    def _get_plot_params(self, x=None, y=None, by=None, **kwargs):
+        '''
+        Split parameters into fetch and plot parameter groups
+
+        '''
+        params, kwargs = self._get_sampling_params(**kwargs) 
+        params['grouped'] = True
+        params['fetchvars'] = self._get_fetchvars(x=x, y=y, by=by)
+        return params, kwargs
+
+    def __call__(self, x=None, y=None, kind='line', **kwargs):
         '''
         Make a line plot of all columns in a table
 
@@ -385,9 +434,10 @@ class CASTablePlotter(object):
         :class:`matplotlib.AxesSubplot` or :class:`np.array` of them.
 
         '''
-        return self._table._fetch(grouped=True).plot(*args, **kwargs)
+        params, kwargs = self._get_plot_params(x=x, y=y, **kwargs)
+        return self._table._fetch(**params).plot(x=x, y=y, kind=kind, **kwargs)
 
-    def area(self, *args, **kwargs):
+    def area(self, x=None, y=None, **kwargs):
         '''
         Area plot
 
@@ -405,9 +455,10 @@ class CASTablePlotter(object):
         :class:`matplotlib.AxesSubplot` or :func:`numpy.array` of them.
 
         '''
-        return self._table._fetch(grouped=True).plot.area(*args, **kwargs)
+        params, kwargs = self._get_plot_params(x=x, y=y, **kwargs)
+        return self._table._fetch(**params).plot.area(x=x, y=y, **kwargs)
 
-    def bar(self, *args, **kwargs):
+    def bar(self, x=None, y=None, **kwargs):
         '''
         Bar plot
 
@@ -425,9 +476,10 @@ class CASTablePlotter(object):
         :class:`matplotlib.AxesSubplot` or :func:`numpy.array` of them.
 
         '''
-        return self._table._fetch(grouped=True).plot.bar(*args, **kwargs)
+        params, kwargs = self._get_plot_params(x=x, y=y, **kwargs)
+        return self._table._fetch(**params).plot.bar(x=None, y=None, **kwargs)
 
-    def barh(self, *args, **kwargs):
+    def barh(self, x=None, y=None, **kwargs):
         '''
         Horizontal bar plot
 
@@ -445,9 +497,10 @@ class CASTablePlotter(object):
         :class:`matplotlib.AxesSubplot` or :func:`numpy.array` of them.
 
         '''
-        return self._table._fetch(grouped=True).plot.barh(*args, **kwargs)
+        params, kwargs = self._get_plot_params(x=x, y=y, **kwargs)
+        return self._table._fetch(**params).plot.barh(x=x, y=y, **kwargs)
 
-    def box(self, *args, **kwargs):
+    def box(self, by=None, **kwargs):
         '''
         Boxplot
 
@@ -465,9 +518,10 @@ class CASTablePlotter(object):
         :class:`matplotlib.AxesSubplot` or :func:`numpy.array` of them.
 
         '''
-        return self._table._fetch(grouped=True).plot.box(*args, **kwargs)
+        params, kwargs = self._get_plot_params(by=by, **kwargs)
+        return self._table._fetch(**params).plot.box(by=by, **kwargs)
 
-    def density(self, *args, **kwargs):
+    def density(self, **kwargs):
         '''
         Kernel density estimate plot
 
@@ -485,9 +539,11 @@ class CASTablePlotter(object):
         :class:`matplotlib.AxesSubplot` or :func:`numpy.array` of them.
 
         '''
-        return self._table._fetch(grouped=True).plot.density(*args, **kwargs)
+        params, kwargs = self._get_plot_params(**kwargs)
+        return self._table._fetch(**params).plot.density(**kwargs)
 
-    def hexbin(self, *args, **kwargs):
+    def hexbin(self, x=None, y=None, C=None, reduce_C_function=None,
+                     gridsize=None, **kwargs):
         '''
         Hexbin plot
 
@@ -505,9 +561,11 @@ class CASTablePlotter(object):
         :class:`matplotlib.AxesSubplot` or :func:`numpy.array` of them.
 
         '''
-        return self._table._fetch(grouped=True).plot.hexbin(*args, **kwargs)
+        params, kwargs = self._get_plot_params(x=x, y=y, **kwargs)
+        return self._table._fetch(**params).plot.hexbin(x=x, y=y, C=C,
+                   reduce_C_function=reduce_C_function, gridsize=gridsize, **kwargs)
 
-    def hist(self, *args, **kwargs):
+    def hist(self, by=None, bins=10, **kwargs):
         '''
         Histogram
 
@@ -525,9 +583,10 @@ class CASTablePlotter(object):
         :class:`matplotlib.AxesSubplot` or :func:`numpy.array` of them.
 
         '''
-        return self._table._fetch(grouped=True).plot.hist(*args, **kwargs)
+        params, kwargs = self._get_plot_params(by=by, **kwargs)
+        return self._table._fetch(**params).plot.hist(by=by, bins=bins, **kwargs)
 
-    def kde(self, *args, **kwargs):
+    def kde(self, **kwargs):
         '''
         Kernel density estimate plot
 
@@ -545,9 +604,10 @@ class CASTablePlotter(object):
         :class:`matplotlib.AxesSubplot` or :func:`numpy.array` of them.
 
         '''
-        return self._table._fetch(grouped=True).plot.kde(*args, **kwargs)
+        params, kwargs = self._get_plot_params(**kwargs)
+        return self._table._fetch(**params).plot.kde(**kwargs)
 
-    def line(self, *args, **kwargs):
+    def line(self, x=None, y=None, **kwargs):
         '''
         Line plot
 
@@ -565,9 +625,10 @@ class CASTablePlotter(object):
         :class:`matplotlib.AxesSubplot` or :func:`numpy.array` of them.
 
         '''
-        return self._table._fetch(grouped=True).plot.line(*args, **kwargs)
+        params, kwargs = self._get_plot_params(x=x, y=y, **kwargs)
+        return self._table._fetch(**params).plot.line(x=x, y=y, **kwargs)
 
-    def pie(self, *args, **kwargs):
+    def pie(self, y=None, **kwargs):
         '''
         Pie chart
 
@@ -585,9 +646,12 @@ class CASTablePlotter(object):
         :class:`matplotlib.AxesSubplot` or :func:`numpy.array` of them.
 
         '''
-        return self._table._fetch(grouped=True).plot.pie(*args, **kwargs)
+        if y is None and isinstance(self._table, CASColumn):
+            y = self._table.columns[0]
+        params, kwargs = self._get_plot_params(y=y, **kwargs)
+        return self._table._fetch(**params).plot.pie(y=y, **kwargs)
 
-    def scatter(self, *args, **kwargs):
+    def scatter(self, x, y, s=None, c=None, **kwargs):
         '''
         Scatter plot
 
@@ -605,7 +669,8 @@ class CASTablePlotter(object):
         :class:`matplotlib.AxesSubplot` or :func:`numpy.array` of them.
 
         '''
-        return self._table._fetch(grouped=True).plot.scatter(*args, **kwargs)
+        params, kwargs = self._get_plot_params(x=x, y=y, **kwargs)
+        return self._table._fetch(**params).plot.scatter(x, y, s=s, c=c, **kwargs)
 
 
 @six.python_2_unicode_compatible
@@ -1559,7 +1624,7 @@ class CASTable(ParamManager, ActionParamManager):
         CASResults object
 
         '''
-        out = self.retrieve(_name_, _apptag='UI', **kwargs)
+        out = self.retrieve(_name_, _apptag='UI', _messagelevel='error', **kwargs)
         if out.severity > 1:
             raise SWATError(out.status)
         return out
@@ -2625,11 +2690,9 @@ class CASTable(ParamManager, ActionParamManager):
 
         kwargs = kwargs.copy()
         kwargs['code'] = code
-        kwargs['_apptag'] = 'UI'
-        kwargs['_messagelevel'] = 'error'
         out = self.get_connection().retrieve('datastep.runcode', *args, **kwargs)
 
-        view._retrieve('table.droptable', _messagelevel='error')
+        view._retrieve('table.droptable')
 
         try:
             return out['OutputCasTables']['casTable'][0]
@@ -3944,11 +4007,64 @@ class CASTable(ParamManager, ActionParamManager):
 #   def rename(self, *args, **kwargs):
 #       raise NotImplementedError
 
-#   def reset_index(self, *args, **kwargs):
-#       raise NotImplementedError
+    def reset_index(self, level=None, drop=False, inplace=False,
+                          col_level=0, col_fill='', **kwargs):
+        '''
+        Reset the CASTable index
 
-#   def sample(self, *args, **kwargs):
-#       raise NotImplementedError
+        NOTE: CAS tables do not support indexing, so this method
+              just returns self (if inplace=True), or a copy of
+              self (if inplace=False) simply for DataFrame 
+              compatibility.
+
+        Returns
+        -------
+        :class:`CASTable`
+
+        '''
+        if inplace:
+            return self
+        return copy.deepcopy(self)
+
+    def sample(self, n=None, frac=None, replace=False, weights=None,
+                     random_state=None, axis=None, stratify_by=None, **kwargs):
+        '''
+        Returns a random sample of the CAS table rows
+
+        Parameters
+        ----------
+        n : int, optional
+            The number of samples to return.  The default is 1 if frac=None.
+        frac : float, optional
+            The percentage of rows to return.
+        replace : bool, optional
+            Not supported.
+        weights : str or ndarray-like, optional
+            Not supported.
+        random_state : int, optional
+            Seed for the random number generator.
+        axis : int or string, optional
+            Not supported.
+        stratify_by : string, optional
+            The variable to stratify by.
+
+        Returns
+        -------
+        :class:`CASTable`
+
+        '''
+        if n is not None and frac is not None:
+            raise ValueError('Both `n` and `frac` can not be specified at the same time')
+
+        if n is None and frac is None:
+            n = 1
+
+        if n is not None:
+            numrows = self._numrows
+            frac = float(n) / self._numrows
+
+        return self._sample(sample_pct=frac, sample_seed=random_state,
+                            stratify_by=stratify_by)
 
 #   def select(self, *args, **kwargs):
 #       raise NotImplementedError
@@ -4533,14 +4649,27 @@ class CASTable(ParamManager, ActionParamManager):
 #   def tz_localize(self, *args, **kwargs):
 #       raise NotImplementedError
 
-    def _fetch(self, grouped=False, **kwargs):
+    def _fetch(self, grouped=False, sample_pct=None, sample_seed=None,
+                     stratify_by=None, sample=False, **kwargs):
         '''
         Return the fetched DataFrame given the fetch parameters
 
         Parameters
         ----------
-        grouped : boolean, optional
+        grouped : bool, optional
             Should the output DataFrame be returned as By groups?
+        sample_pct : int, optional
+            Percentage of original data set to return as samples
+        sample_seed : int, optional
+            Random number seed
+        stratify_by : string, optional
+            Variable name to stratify samples by
+        sample : bool, optional
+            Flag to indicate that the result set should be sampled.
+            This can be used instead of sample_pct to indicate that the
+            values returned in the range of to= / from=, or the rows
+            returned limited by swat.options.cas.dataset.max_rows_fetched
+            should be sampled.
 
         Returns
         -------
@@ -4550,6 +4679,7 @@ class CASTable(ParamManager, ActionParamManager):
         from .. import dataframe as df
 
         kwargs = kwargs.copy()
+        groups = self.get_groupby_vars()
 
         for key, value in six.iteritems(self.get_fetch_params()):
             if key in kwargs:
@@ -4565,33 +4695,105 @@ class CASTable(ParamManager, ActionParamManager):
             from_ = kwargs['from_']
 
         if 'to' not in kwargs:
-            kwargs['to'] = from_ + get_option('cas.dataset.max_rows_fetched')
+            kwargs['to'] = min(from_ + get_option('cas.dataset.max_rows_fetched'),
+                               MAX_INT64_INDEX)
+
+        # Compute sample percentage as needed
+        if sample_pct is None and sample:
+            ntblrows = self._numrows
+            nrows = kwargs['to'] - from_ + 1
+            if ntblrows > nrows:
+                sample_pct = float(nrows) / ntblrows
 
         if 'index' not in kwargs:
             kwargs['index'] = True
 
+        # Add grouping columns if they aren't in the list
+        columns = None
+        if groups and 'fetchvars' in kwargs: 
+            kwargs['fetchvars'] = list(kwargs['fetchvars'])
+            for group in reversed(groups):
+                if group not in kwargs['fetchvars']:
+                    kwargs['fetchvars'].insert(0, group)
+            columns = kwargs['fetchvars']
+        elif 'fetchvars' in kwargs:
+            columns = kwargs['fetchvars']
+
+        tbl = self._sample(sample_pct=sample_pct, sample_seed=sample_seed,
+                           stratify_by=stratify_by, columns=columns)
+
         # Sort based on 'Fetch#' key.  This will be out of order in REST.
-        values = [x[1] for x in sorted(self._retrieve('table.fetch', **kwargs).items(),
+        values = [x[1] for x in sorted(tbl._retrieve('table.fetch', **kwargs).items(),
                                        key=lambda x: int(x[0].replace('Fetch', '') or '0'))]
         out = df.concat(values)
+
+        if tbl is not self:
+            tbl._retrieve('table.droptable')
 
         if len(out.columns) and out.columns[0] == '_Index_':
             out['_Index_'] = out['_Index_'] - 1
             out = out.set_index('_Index_')
             out.index.name = None
 
-        groups = self.get_groupby_vars()
         if grouped and groups:
             return out.groupby(groups)
 
         return out
 
-    def _fetchall(self, grouped=False, **kwargs):
+    def _sample(self, sample_pct=None, sample_seed=None, stratify_by=None, columns=None):
+        ''' Return a CASTable containing a sample of the rows '''
+        if sample_pct is None:
+            return self
+
+        if sample_pct <= 0 or sample_pct >= 1:
+            raise ValueError('Sample percentage should be a floating point '
+                             'value between 0 and 1')
+
+        action_name = 'sampling.srs'
+
+        self._loadactionset('sampling')
+
+        if columns is None:
+            columns = list(self.columns)
+
+        samptbl = self.copy()
+        groupby = samptbl.get_groupby_vars()
+
+        if groupby:
+            samptbl.params.pop('groupby', None)
+            samptbl.params.pop('groupBy', None)
+
+        if stratify_by:
+            action_name = 'sampling.stratified'
+            samptbl.params['groupby'] = stratify_by
+
+        params = dict(samppct=sample_pct * 100)
+        if sample_seed is not None:
+            params['seed'] = sample_seed
+
+        out = samptbl._retrieve(action_name,
+                                output=dict(casout=dict(name=_gen_table_name(),
+                                                        replace=True),
+                                            copyvars=columns),
+                                **params)['OutputCasTables'].ix[0, 'casTable']
+
+        if stratify_by:
+            del samptbl.params['groupby']
+
+        if groupby:
+            out.params['groupby'] = groupby
+
+        return out
+
+    def _fetchall(self, grouped=False, sample_pct=None, sample_seed=None,
+                        sample=False, stratify_by=None, **kwargs):
         ''' Fetch all rows '''
         kwargs = kwargs.copy()
         if 'to' not in kwargs:
             kwargs['to'] = MAX_INT64_INDEX
-        return self._fetch(grouped=grouped, **kwargs)
+        return self._fetch(grouped=grouped, sample_pct=sample_pct,
+                           sample_seed=sample_seed, sample=sample,
+                           stratify_by=stratify_by, **kwargs)
 
     # Plotting
 
@@ -4924,12 +5126,19 @@ class CASTable(ParamManager, ActionParamManager):
             buf.write(u'vardata size: %s\n' % details['VardataSize'])
             buf.write(u'memory usage: %s\n' % details['AllocatedMemory'])
 
-    def to_frame(self, **kwargs):
+    def to_frame(self, sample_pct=None, sample_seed=None, sample=False,
+                       stratify_by=None, **kwargs):
         '''
         Retrieve entire table as a :class:`SASDataFrame`
 
         Parameters
         ----------
+        sample_pct : float, optional
+            Specifies the percentage of samples to return rather than the
+            entire data set.  The value should be a float between 0 and 1.
+        sample_seed : int, optional
+            The seed to use for sampling.  This is used when deterministic
+            results are required.
         **kwargs : keyword arguments, optional
             Additional keyword parameters to the ``table.fetch`` CAS action.
 
@@ -4938,7 +5147,8 @@ class CASTable(ParamManager, ActionParamManager):
         :class:`SASDataFrame`
 
         '''
-        return self._fetchall(**kwargs)
+        return self._fetchall(sample_pct=sample_pct, sample_seed=sample_seed,
+                              sample=sample, stratify_by=stratify_by, **kwargs)
 
     def _to_any(self, method, *args, **kwargs):
         '''
@@ -4955,8 +5165,17 @@ class CASTable(ParamManager, ActionParamManager):
 
         '''
         from ..dataframe import concat
+        kwargs = kwargs.copy()
+        params = {}
+        params['sample_pct'] = kwargs.pop('sample_pct', None)
+        params['sample_seed'] = kwargs.pop('sample_seed', None)
+        params['sample'] = kwargs.pop('sample', None)
+        params['stratify_by'] = kwargs.pop('stratify_by', None)
+        params['to'] = kwargs.pop('to', None)
+        params['from'] = kwargs.pop('from', kwargs.pop('from_', None))
+        params = {k:v for k, v in params.items() if v is not None}
         standard_dataframe = kwargs.pop('standard_dataframe', False)
-        dframe = self._fetch()
+        dframe = self._fetch(**params)
         if standard_dataframe:
             dframe = pd.DataFrame(dframe)
         return getattr(dframe, 'to_' + method)(*args, **kwargs)
@@ -8113,6 +8332,11 @@ class CASColumn(CASTable):
         ''' Generic converter to various forms '''
         kwargs = kwargs.copy()
         sort = kwargs.pop('sort', False)
+        sample_pct = kwargs.pop('sample_pct', None)
+        sample_seed = kwargs.pop('sample_seed', None)
+        sample = kwargs.pop('sample', None)
+        stratify_by = kwargs.pop('stratify_by', None)
+        grouped = kwargs.pop('grouped', None)
         sortby = None
         if sort:
             if sort is True:
@@ -8121,7 +8345,9 @@ class CASColumn(CASTable):
                 sortby = [dict(name=self.name, order=sort)]
             else:
                 sortby = sort
-        out = self._fetch(sortby=sortby)[self.name]
+        out = self._fetch(sample_pct=sample_pct, sample_seed=sample_seed,
+                          sample=sample, stratify_by=stratify_by,
+                          sortby=sortby, grouped=grouped)[self.name]
         return getattr(out, 'to_' + method)(*args, **kwargs)
 
     def to_frame(self, *args, **kwargs):
@@ -8316,7 +8542,7 @@ class CASTableGroupBy(object):
         kwargs.setdefault('bygroup_as_index', isinstance(self._table, CASColumn))
         return self._table.slice(*args, **kwargs)
 
-    def to_frame(self, *args, **kwargs):
+    def to_frame(self, **kwargs):
         '''
         Retrieve all values into a DataFrame
 
@@ -8330,12 +8556,19 @@ class CASTableGroupBy(object):
         :class:`pandas.DataFrame`
 
         '''
-        out = self._table.slice(0, -1, bygroup_as_index=self._as_index)
-        if isinstance(out, pd.Series):
-            out = out.to_frame()
-        return out
+        if isinstance(self._table, CASColumn):
+            tbl = self._table._to_table()
+        else:
+            tbl = self._table.copy()
+        if self._as_index:
+            from ..dataframe import concat
+            groups = tbl.get_groupby_vars()
+            tbl.append_columns(*groups, inplace=True)
+            out = tbl.to_frame(grouped=True, **kwargs)
+            return concat([x[1].set_index(groups) for x in out])
+        return tbl.to_frame(grouped=False, **kwargs)
 
-    def to_series(self, *args, **kwargs):
+    def to_series(self, name=None, **kwargs):
         '''
         Retrieve all values into a Series
 
@@ -8351,9 +8584,10 @@ class CASTableGroupBy(object):
         columns = list(self._table.columns)
         if len(columns) > 1:
             raise ValueError('Too many columns to convert to a Series')
-        if isinstance(self._table, CASColumn):
-            return self._table.slice(0, -1, bygroup_as_index=True)
-        return self._table.slice(0, -1, bygroup_as_index=True)[columns[0]]
+        out = self.to_frame(**kwargs)[columns[0]]
+        if name is not None:
+            out.name = name
+        return out
 
     def nth(self, n, dropna=None, **kwargs):
         '''

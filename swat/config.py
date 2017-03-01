@@ -190,7 +190,7 @@ register_option('cas.dataset.index_adjustment', 'int', check_int, -1,
                 'This can be used to adjust SAS 1-based index data sets to\n' +
                 '0-based Pandas DataFrames.')
 
-register_option('cas.dataset.max_rows_fetched', 'int', check_int, 3000,
+register_option('cas.dataset.max_rows_fetched', 'int', check_int, 10000,
                 'The maximum number of rows to fetch with methods that use\n' +
                 'the table.fetch action in the background (i.e. the head, tail,\n' +
                 'values, etc. of CASTable).')

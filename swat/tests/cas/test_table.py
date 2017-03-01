@@ -24,7 +24,9 @@
 
 
 import copy
+import io
 import os
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import re
@@ -34,6 +36,7 @@ import swat.utils.testing as tm
 import sys
 import unittest
 
+from PIL import Image
 from swat.utils.compat import patch_pandas_sort
 
 patch_pandas_sort()
@@ -4115,6 +4118,317 @@ class TestCASTable(tm.TestCase):
         pcolinfo = out.casTable.columninfo()['ColumnInfo'].set_index('Column').T
         pcolinfo = pcolinfo.drop('ID')
         self.assertTablesEqual(colinfo[['Two', 'Model', 'One', 'MSRP']], pcolinfo)
+
+    def test_reset_index(self):
+        tbl = self.table
+
+        out = tbl.reset_index()
+        self.assertTrue(out is not tbl)
+        self.assertEqual(tbl.params['name'], out.params['name'])
+
+        out = tbl.reset_index(inplace=True)
+        self.assertTrue(out is tbl)
+
+    def test_sample(self):
+        tbl = self.table
+ 
+        # Test n=
+        out = tbl.sample(n=12)
+        self.assertEqual(len(out), 12)
+        self.assertNotEqual(tbl.params['name'], out.params['name'])
+        out.droptable()
+
+        # Test frac=
+        out = tbl.sample(frac=0.02)
+        self.assertEqual(len(out), 9)
+        self.assertNotEqual(tbl.params['name'], out.params['name'])
+        out.droptable()
+
+        # Test n= and frac=
+        with self.assertRaises(ValueError):
+            tbl.sample(n=2, frac=0.02)
+
+        # Test no params
+        out = tbl.sample()
+        self.assertEqual(len(out), 1)
+        self.assertNotEqual(tbl.params['name'], out.params['name'])
+        out.droptable()
+
+        # Test random_state=
+        out1 = tbl.sample(n=10, random_state=123)
+        out2 = tbl.sample(n=10, random_state=123)
+        self.assertEqual(len(out1), 10)
+        self.assertEqual(len(out2), 10)
+        self.assertTablesEqual(out1, out2)
+        out1.droptable()
+        out2.droptable()
+
+    def test_sampling(self):
+        tbl = self.table
+
+        # Basic tests
+        num_tables = len(tbl.tableinfo().TableInfo)
+        samp = tbl.to_frame(sample_pct=0.01, fetchvars=['Make', 'Model'])
+        self.assertEqual(len(samp), 4)
+        self.assertEqual(list(samp.columns), ['Make', 'Model'])
+        self.assertEqual(num_tables, len(tbl.tableinfo().TableInfo))
+
+        num_tables = len(tbl.tableinfo().TableInfo)
+        samp = tbl.to_frame(sample_pct=0.02, fetchvars=['Make', 'Model', 'Horsepower'])
+        self.assertEqual(len(samp), 9)
+        self.assertEqual(list(samp.columns), ['Make', 'Model', 'Horsepower'])
+        self.assertEqual(num_tables, len(tbl.tableinfo().TableInfo))
+
+        # Test to= / from= interactions
+        num_tables = len(tbl.tableinfo().TableInfo)
+        samp = tbl.to_frame(sample_pct=0.02, to=5, fetchvars=['Make', 'Model'])
+        self.assertEqual(len(samp), 5)
+        self.assertEqual(list(samp.columns), ['Make', 'Model'])
+        self.assertEqual(num_tables, len(tbl.tableinfo().TableInfo))
+
+        num_tables = len(tbl.tableinfo().TableInfo)
+        samp = tbl.to_frame(sample_pct=0.02, from_=2, to=5, fetchvars=['Make', 'Model'])
+        self.assertEqual(len(samp), 4)
+        self.assertEqual(list(samp.columns), ['Make', 'Model'])
+        self.assertEqual(num_tables, len(tbl.tableinfo().TableInfo))
+
+        # Test swat.options.cas.datasets.max_rows_fetched
+        swat.options.cas.dataset.max_rows_fetched = 5
+
+        # to_frame forces everything to get pulled down, so use _fetch here.
+        # All internal calls to pull data use _fetch and will obey the max_rows_fetched option.
+        num_tables = len(tbl.tableinfo().TableInfo)
+        samp = tbl._fetch(sample_pct=0.02, fetchvars=['Make', 'Model'])
+        self.assertEqual(len(samp), 5)
+        self.assertEqual(list(samp.columns), ['Make', 'Model'])
+        self.assertEqual(num_tables, len(tbl.tableinfo().TableInfo))
+
+        swat.options.cas.dataset.max_rows_fetched = 10000
+
+        # Test seed
+        num_tables = len(tbl.tableinfo().TableInfo)
+        samp1 = tbl.to_frame(sample_pct=0.01, sample_seed=123, fetchvars=['Make', 'Model'])
+        samp2 = tbl.to_frame(sample_pct=0.01, sample_seed=123, fetchvars=['Make', 'Model'])
+        self.assertEqual(len(samp1), 4)
+        self.assertEqual(len(samp2), 4)
+        self.assertEqual(list(samp1.columns), ['Make', 'Model'])
+        self.assertEqual(list(samp2.columns), ['Make', 'Model'])
+        self.assertTablesEqual(samp1, samp2)
+        self.assertEqual(num_tables, len(tbl.tableinfo().TableInfo))
+
+        # Test sample= parameter
+        num_tables = len(tbl.tableinfo().TableInfo)
+        samp1 = tbl.to_frame(sample=True, to=5, fetchvars=['Make', 'Model'])
+        samp2 = tbl.to_frame(sample=True, to=5, fetchvars=['Make', 'Model'])
+        self.assertEqual(len(samp1), 5)
+        self.assertEqual(len(samp2), 5)
+        self.assertEqual(list(samp1.columns), ['Make', 'Model'])
+        self.assertEqual(list(samp2.columns), ['Make', 'Model'])
+        self.assertNotEqual(samp1.to_dict(), samp2.to_dict())
+        self.assertEqual(num_tables, len(tbl.tableinfo().TableInfo))
+
+        swat.options.cas.dataset.max_rows_fetched = 10 
+
+        num_tables = len(tbl.tableinfo().TableInfo)
+        samp1 = tbl._fetch(sample=True, fetchvars=['Make', 'Model'])
+        samp2 = tbl._fetch(sample=True, fetchvars=['Make', 'Model'])
+        self.assertEqual(len(samp1), 10)
+        self.assertEqual(len(samp2), 10)
+        self.assertEqual(list(samp1.columns), ['Make', 'Model'])
+        self.assertEqual(list(samp2.columns), ['Make', 'Model'])
+        self.assertNotEqual(samp1.to_dict(), samp2.to_dict())
+        self.assertEqual(num_tables, len(tbl.tableinfo().TableInfo))
+
+        swat.reset_option('cas.dataset.max_rows_fetched')
+
+        # Test out-of-bounds sample_pct=
+        num_tables = len(tbl.tableinfo().TableInfo)
+        with self.assertRaises(ValueError):
+            tbl.to_frame(sample_pct=100)
+        with self.assertRaises(ValueError):
+            tbl.to_frame(sample_pct=0)
+        with self.assertRaises(ValueError):
+            tbl.to_frame(sample_pct=1)
+        self.assertEqual(num_tables, len(tbl.tableinfo().TableInfo))
+
+        # No options returns self
+        self.assertTrue(tbl._sample() is tbl)
+
+        # Test groupby
+        tbl.params.groupby = ['Origin']
+      
+        num_tables = len(tbl.tableinfo().TableInfo)
+        samp = tbl.to_frame(sample_pct=0.01, fetchvars=['Make', 'Model'])
+        self.assertEqual(len(samp), 4)
+        self.assertEqual(list(samp.columns), ['Origin', 'Make', 'Model'])
+        self.assertEqual(num_tables, len(tbl.tableinfo().TableInfo))
+
+        del tbl.params.groupby
+
+        num_tables = len(tbl.tableinfo().TableInfo)
+        samp = tbl.groupby('Origin', as_index=True).to_frame(sample_pct=0.01,
+                                                  fetchvars=['Make', 'Model'])
+        self.assertEqual(len(samp), 4)
+        self.assertEqual(list(samp.columns), ['Make', 'Model'])
+        self.assertEqual(list(samp.index.names), ['Origin'])
+        self.assertEqual(num_tables, len(tbl.tableinfo().TableInfo))
+
+    def assertPlotsEqual(self, fig1, fig2):
+        buf1 = io.BytesIO()
+        buf2 = io.BytesIO()
+
+        fig1.figure.savefig(buf1, format='png')
+        out1 = buf1.getvalue()
+        buf1.close()
+        plt.close()
+
+        fig2.figure.savefig(buf2, format='png')
+        out2 = buf2.getvalue()
+        buf2.close()
+        plt.close()
+
+        return self.assertEqual(out1, out2)
+
+    def test_plot(self):
+        tbl = self.table
+        df = self.get_cars_df()
+
+        # Basic plot
+        self.assertPlotsEqual(
+            tbl.sort_values(['MSRP', 'Invoice']).plot('Make', ['MSRP', 'Invoice']),
+            df.sort_values(['MSRP', 'Invoice']).plot('Make', ['MSRP', 'Invoice'])
+        )
+
+        # Must reset index here because it uses that as X axis
+        self.assertPlotsEqual(
+            tbl.sort_values(['MSRP', 'Invoice']).plot(y=['MSRP', 'Invoice']),
+            df.sort_values(['MSRP', 'Invoice']).reset_index().plot(y=['MSRP', 'Invoice'])
+        )
+
+        # Test kind= parameter
+        self.assertPlotsEqual(
+            tbl.sort_values(['MSRP', 'Invoice']).plot('MSRP', 'Invoice', 'scatter'),
+            df.sort_values(['MSRP', 'Invoice']).plot('MSRP', 'Invoice', 'scatter')
+        )
+
+        self.assertPlotsEqual(
+            tbl.sort_values(['MSRP', 'Invoice']).plot('MSRP', 'Invoice', kind='scatter'),
+            df.sort_values(['MSRP', 'Invoice']).plot('MSRP', 'Invoice', kind='scatter')
+        )
+
+        self.assertPlotsEqual(
+            tbl.sort_values(['MSRP', 'Invoice']).plot('Make', ['MSRP', 'Invoice'], kind='bar'),
+            df.sort_values(['MSRP', 'Invoice']).plot('Make', ['MSRP', 'Invoice'], kind='bar')
+        )
+
+    def test_plot_sampling(self):
+        tbl = self.table
+
+        self.assertPlotsEqual(
+            tbl.sort_values(['MSRP', 'Invoice'])\
+               .plot('MSRP', 'Invoice', sample_pct=0.05, sample_seed=123),
+            tbl._fetch(sample_pct=0.05, sample_seed=123)\
+               .sort_values(['MSRP', 'Invoice']).plot('MSRP', 'Invoice')
+        )
+
+    def test_plot_area(self):
+        tbl = self.table
+        df = self.get_cars_df()
+
+        self.assertPlotsEqual(
+            tbl.sort_values(['MSRP', 'Invoice']).plot.area('Make', ['MSRP', 'Invoice']),
+            df.sort_values(['MSRP', 'Invoice']).plot.area('Make', ['MSRP', 'Invoice'])
+        )
+
+    def test_plot_bar(self):
+        tbl = self.table
+        df = self.get_cars_df()
+
+        self.assertPlotsEqual(
+            tbl['Cylinders'].sort_values().plot.bar(),
+            df['Cylinders'].sort_values().plot.bar()
+        )
+
+    def test_plot_barh(self):
+        tbl = self.table
+        df = self.get_cars_df()
+
+        self.assertPlotsEqual(
+            tbl['Cylinders'].sort_values().plot.barh(),
+            df['Cylinders'].sort_values().plot.barh()
+        )
+
+    def test_plot_box(self):
+        tbl = self.table
+        df = self.get_cars_df()
+
+        self.assertPlotsEqual(
+            tbl[['MSRP', 'Invoice']].plot.box(),
+            df[['MSRP', 'Invoice']].plot.box()
+        )
+
+    def test_plot_density(self):
+        tbl = self.table
+        df = self.get_cars_df()
+
+        self.assertPlotsEqual(
+            tbl[['MSRP', 'Invoice']].plot.density(),
+            df[['MSRP', 'Invoice']].plot.density()
+        )
+
+    def test_plot_hexbin(self):
+        tbl = self.table
+        df = self.get_cars_df()
+
+        self.assertPlotsEqual(
+            tbl.plot.hexbin('MSRP', 'Horsepower'),
+            df.plot.hexbin('MSRP', 'Horsepower')
+        )
+
+    def test_plot_hist(self):
+        tbl = self.table
+        df = self.get_cars_df()
+
+        self.assertPlotsEqual(
+            tbl.plot.hist(),
+            df.plot.hist(),
+        )
+
+    def test_plot_kde(self):
+        tbl = self.table
+        df = self.get_cars_df()
+
+        self.assertPlotsEqual(
+            tbl[['MSRP', 'Invoice']].plot.kde(),
+            df[['MSRP', 'Invoice']].plot.kde()
+        )
+
+    def test_plot_line(self):
+        tbl = self.table
+        df = self.get_cars_df()
+
+        self.assertPlotsEqual(
+            tbl.sort_values(['MSRP', 'Invoice']).plot.line('MSRP', 'Invoice'),
+            df.sort_values(['MSRP', 'Invoice']).plot.line('MSRP', 'Invoice')
+        )
+
+    def test_plot_pie(self):
+        tbl = self.table
+        df = self.get_cars_df()
+
+        self.assertPlotsEqual(
+            tbl['Cylinders'].sort_values().plot.pie(),
+            df['Cylinders'].sort_values().plot.pie()
+        )
+
+    def test_plot_scatter(self):
+        tbl = self.table
+        df = self.get_cars_df()
+
+        self.assertPlotsEqual(
+            tbl.plot.scatter('MSRP', 'Horsepower'),
+            df.plot.scatter('MSRP', 'Horsepower')
+        )
 
 if __name__ == '__main__':
     tm.runtests()
