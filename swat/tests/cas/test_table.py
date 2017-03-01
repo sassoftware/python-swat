@@ -4289,6 +4289,34 @@ class TestCASTable(tm.TestCase):
 
         return self.assertEqual(out1, out2)
 
+    def test_hist(self):
+        tbl = self.table
+        df = self.get_cars_df()
+
+        self.assertPlotsEqual(tbl.hist()[0][0], df.hist()[0][0])
+        self.assertPlotsEqual(tbl.hist()[0][1], df.hist()[0][1])
+        self.assertPlotsEqual(tbl.hist()[0][2], df.hist()[0][2])
+
+        self.assertPlotsEqual(tbl.hist()[1][0], df.hist()[1][0])
+        self.assertPlotsEqual(tbl.hist()[1][1], df.hist()[1][1])
+        self.assertPlotsEqual(tbl.hist()[1][2], df.hist()[1][2])
+
+        self.assertPlotsEqual(tbl.hist()[2][0], df.hist()[2][0])
+        self.assertPlotsEqual(tbl.hist()[2][1], df.hist()[2][1])
+        self.assertPlotsEqual(tbl.hist()[2][2], df.hist()[2][2])
+
+        self.assertPlotsEqual(tbl.hist()[3][0], df.hist()[3][0])
+        self.assertPlotsEqual(tbl.hist()[3][1], df.hist()[3][1])
+        self.assertPlotsEqual(tbl.hist()[3][2], df.hist()[3][2])
+
+    def test_boxplot(self):
+        tbl = self.table
+        df = self.get_cars_df()
+        self.assertPlotsEqual(
+            tbl[['MSRP', 'Invoice']].boxplot(return_type='axes'),
+            df[['MSRP', 'Invoice']].boxplot(return_type='axes')
+        )
+
     def test_plot(self):
         tbl = self.table
         df = self.get_cars_df()
