@@ -4007,11 +4007,64 @@ class CASTable(ParamManager, ActionParamManager):
 #   def rename(self, *args, **kwargs):
 #       raise NotImplementedError
 
-#   def reset_index(self, *args, **kwargs):
-#       raise NotImplementedError
+    def reset_index(self, level=None, drop=False, inplace=False,
+                          col_level=0, col_fill='', **kwargs):
+        '''
+        Reset the CASTable index
 
-#   def sample(self, *args, **kwargs):
-#       raise NotImplementedError
+        NOTE: CAS tables do not support indexing, so this method
+              just returns self (if inplace=True), or a copy of
+              self (if inplace=False) simply for DataFrame 
+              compatibility.
+
+        Returns
+        -------
+        :class:`CASTable`
+
+        '''
+        if inplace:
+            return self
+        return copy.deepcopy(self)
+
+    def sample(self, n=None, frac=None, replace=False, weights=None,
+                     random_state=None, axis=None, stratify_by=None, **kwargs):
+        '''
+        Returns a random sample of the CAS table rows
+
+        Parameters
+        ----------
+        n : int, optional
+            The number of samples to return.  The default is 1 if frac=None.
+        frac : float, optional
+            The percentage of rows to return.
+        replace : bool, optional
+            Not supported.
+        weights : str or ndarray-like, optional
+            Not supported.
+        random_state : int, optional
+            Seed for the random number generator.
+        axis : int or string, optional
+            Not supported.
+        stratify_by : string, optional
+            The variable to stratify by.
+
+        Returns
+        -------
+        :class:`CASTable`
+
+        '''
+        if n is not None and frac is not None:
+            raise ValueError('Both `n` and `frac` can not be specified at the same time')
+
+        if n is None and frac is None:
+            n = 1
+
+        if n is not None:
+            numrows = self._numrows
+            frac = float(n) / self._numrows
+
+        return self._sample(sample_pct=frac, sample_seed=random_state,
+                            stratify_by=stratify_by)
 
 #   def select(self, *args, **kwargs):
 #       raise NotImplementedError

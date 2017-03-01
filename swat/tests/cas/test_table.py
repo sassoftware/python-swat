@@ -4119,6 +4119,50 @@ class TestCASTable(tm.TestCase):
         pcolinfo = pcolinfo.drop('ID')
         self.assertTablesEqual(colinfo[['Two', 'Model', 'One', 'MSRP']], pcolinfo)
 
+    def test_reset_index(self):
+        tbl = self.table
+
+        out = tbl.reset_index()
+        self.assertTrue(out is not tbl)
+        self.assertEqual(tbl.params['name'], out.params['name'])
+
+        out = tbl.reset_index(inplace=True)
+        self.assertTrue(out is tbl)
+
+    def test_sample(self):
+        tbl = self.table
+ 
+        # Test n=
+        out = tbl.sample(n=12)
+        self.assertEqual(len(out), 12)
+        self.assertNotEqual(tbl.params['name'], out.params['name'])
+        out.droptable()
+
+        # Test frac=
+        out = tbl.sample(frac=0.02)
+        self.assertEqual(len(out), 9)
+        self.assertNotEqual(tbl.params['name'], out.params['name'])
+        out.droptable()
+
+        # Test n= and frac=
+        with self.assertRaises(ValueError):
+            tbl.sample(n=2, frac=0.02)
+
+        # Test no params
+        out = tbl.sample()
+        self.assertEqual(len(out), 1)
+        self.assertNotEqual(tbl.params['name'], out.params['name'])
+        out.droptable()
+
+        # Test random_state=
+        out1 = tbl.sample(n=10, random_state=123)
+        out2 = tbl.sample(n=10, random_state=123)
+        self.assertEqual(len(out1), 10)
+        self.assertEqual(len(out2), 10)
+        self.assertTablesEqual(out1, out2)
+        out1.droptable()
+        out2.droptable()
+
     def test_sampling(self):
         tbl = self.table
 
