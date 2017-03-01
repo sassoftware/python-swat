@@ -4797,7 +4797,7 @@ class CASTable(ParamManager, ActionParamManager):
 
     # Plotting
 
-    def boxplot(self, *args, **kwargs):
+    def boxplot(self, column=None, by=None, **kwargs):
         '''
         Make a boxplot from the table data
 
@@ -4815,9 +4815,10 @@ class CASTable(ParamManager, ActionParamManager):
         :class:`matplotlib.AxesSubplot` or :func:`numpy.array` of them.
 
         '''
-        return self._fetch(grouped=True).boxplot(*args, **kwargs)
+        params, kwargs = self._plot._get_plot_params(**kwargs)
+        return self._fetch(**params).boxplot(column=column, by=by, **kwargs)
 
-    def hist(self, *args, **kwargs):
+    def hist(self, column=None, by=None, **kwargs):
         '''
         Make a histogram from the table data
 
@@ -4835,7 +4836,8 @@ class CASTable(ParamManager, ActionParamManager):
         :class:`matplotlib.AxesSubplot` or :func:`numpy.array` of them.
 
         '''
-        return self._fetch(grouped=True).hist(*args, **kwargs)
+        params, kwargs = self._plot._get_plot_params(**kwargs)
+        return self._fetch(**params).hist(column=column, by=by, **kwargs)
 
     @getattr_safe_property
     def plot(self):
