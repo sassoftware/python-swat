@@ -118,7 +118,7 @@ register_option('cas.protocol', 'string',
                                   valid_values=['auto', 'cas', 'http', 'https']),
                 'auto',
                 'Communication protocol for talking to CAS server.\n' +
-                'The value of "auto" will try to auto-detect the type. ' +
+                'The value of "auto" will try to auto-detect the type.\n' +
                 'Using "http" or "https" will use the REST interface.',
                 environ='CASPROTOCOL')
 
