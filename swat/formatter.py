@@ -225,6 +225,8 @@ class SASFormatter(object):
 
     def _generic_format(self, value, sasfmt=None, width=12):
         ''' Generic formatter for when tkefmt isn't available '''
+        out = None
+
         if isinstance(value, float64_types):
             if np.isnan(value) or value is None:
                 out = a2u(str(value))
