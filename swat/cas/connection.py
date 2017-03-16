@@ -218,6 +218,7 @@ class CAS(object):
         prototype = kwargs.get('prototype')
         if prototype is not None:
             soptions = prototype._soptions
+            protocol = prototype._protocol
 
         else:
             # Get connection parameters from config
