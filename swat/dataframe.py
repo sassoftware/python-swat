@@ -29,7 +29,6 @@ import json
 import re
 import pandas as pd
 import six
-import textwrap
 from .cas.table import CASTable
 from .utils.compat import (a2u, a2n, int32, int64, float64, int32_types,
                            int64_types, float64_types, bool_types, text_types,
@@ -564,7 +563,6 @@ class SASDataFrame(pd.DataFrame):
         if html is None:
             return
 
-        import re
         try:
             from html import escape
         except ImportError:
@@ -1005,7 +1003,7 @@ class SASDataFrame(pd.DataFrame):
                     col = self.attrs[byvar]
                     if col in self.columns:
                         out.append(col)
-                    if (byvar + 'Formatted') in self.attrs:
+                    if byvar + 'Formatted' in self.attrs:
                         col = self.attrs[byvar + 'Formatted']
                         if col in self.columns:
                             out.append(col)

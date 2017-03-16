@@ -24,11 +24,9 @@ Utilities for converting to and from Python and CAS arguments
 from __future__ import print_function, division, absolute_import, unicode_literals
 
 import base64
-import collections
 import datetime
 import numpy as np
 import pandas as pd
-import re
 import six
 from .utils import datetime as casdt
 from .. import clib

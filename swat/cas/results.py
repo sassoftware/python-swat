@@ -24,17 +24,13 @@ Utilities for collecting results from a CAS action
 from __future__ import print_function, division, absolute_import, unicode_literals
 
 import collections
-import json
 import pandas as pd
 import pandas.core.common as pdcom
 import pprint
 import re
 import six
-from ..config import get_option
 from ..dataframe import SASDataFrame, concat
-from ..exceptions import SWATError
-from ..utils.compat import OrderedDict, items_types
-from ..utils import escapejson
+from ..utils.compat import OrderedDict
 from ..utils.xdict import xadict
 
 
@@ -414,11 +410,12 @@ class CASResults(RendererMixin, OrderedDict):
         out = CASResults()
 
         def set_bykey(attrs, bykey=[]):
+            ''' Locate By variable keys '''
             if bykey:
                 return bykey
             i = 1
             while True:
-                if ('ByVar%s' % i) not in attrs:
+                if 'ByVar%s' % i not in attrs:
                     break
                 bykey.append(attrs['ByVar%s' % i])
                 i = i + 1
@@ -514,7 +511,7 @@ class CASResults(RendererMixin, OrderedDict):
                 attrs.pop('ByGroup', None)
                 attrs.pop('ByGroupIndex', None)
                 i = 1
-                while ('ByVar%d' % i) in attrs:
+                while 'ByVar%d' % i in attrs:
                     attrs.pop('ByVar%dValue' % i, None)
                     attrs.pop('ByVar%dValueFormatted' % i, None)
                     i = i + 1

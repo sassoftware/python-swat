@@ -187,7 +187,7 @@ def _format_param(param, connection, indent=0, selector=None, path='', output=No
     if 'alternatives' in param:
         alttypes = list(set([prm['parmType'].replace('value_', '')
                              for prm in param['alternatives']
-                                 if not prm.get('hidden')]))
+                             if not prm.get('hidden')]))
         if alttypes == ['list'] and param.get('selector'):
             alttypes = ['dict']
             for alt in param['alternatives']:

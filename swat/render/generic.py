@@ -27,4 +27,5 @@ from .html import render_html
 
 
 def render(results):
+    ''' Render the object using appropriate rendering function '''
     render_html(results)

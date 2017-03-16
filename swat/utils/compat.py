@@ -73,10 +73,9 @@ def patch_pandas_sort():
     import pandas as pd
 
     if not hasattr(pd.DataFrame, 'sort_values'):
-        import types
-
         def sort_values(self, by, axis=0, ascending=True, inplace=False,
                         kind='quicksort', na_position='last'):
+            ''' `sort` wrapper for new-style sorting API '''
             return self.sort(columns=by, axis=axis, ascending=ascending, inplace=inplace,
                              kind=kind, na_position=na_position)
 
@@ -84,6 +83,7 @@ def patch_pandas_sort():
 
         def sort_values(self, axis=0, ascending=True, inplace=False,
                         kind='quicksort', na_position='last'):
+            ''' `sort` wrapper for new-style sorting API '''
             return self.sort(axis=axis, ascending=ascending, inplace=inplace,
                              kind=kind, na_position=na_position)
 

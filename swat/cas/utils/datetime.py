@@ -24,8 +24,8 @@ Datetime utilities for interfacing with CAS
 from __future__ import print_function, division, absolute_import, unicode_literals
 
 import datetime
+import numpy as np
 import pandas as pd
-import six
 import time
 from ...utils.compat import int64, int32
 

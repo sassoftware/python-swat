@@ -39,7 +39,6 @@ from ..utils.compat import (int_types, binary_types, text_types, items_types,
                             patch_pandas_sort, char_types, num_types)
 from ..utils.keyword import dekeywordify
 from .utils.params import ParamManager, ActionParamManager
-from .actions import format_params
 
 # pylint: disable=W0212, W0221, W0613, R0904, C0330
 
@@ -415,7 +414,7 @@ class CASTablePlotter(object):
         Split parameters into fetch and plot parameter groups
 
         '''
-        params, kwargs = self._get_sampling_params(**kwargs) 
+        params, kwargs = self._get_sampling_params(**kwargs)
         params['grouped'] = True
         params['fetchvars'] = self._get_fetchvars(x=x, y=y, by=by)
         return params, kwargs
@@ -543,7 +542,7 @@ class CASTablePlotter(object):
         return self._table._fetch(**params).plot.density(**kwargs)
 
     def hexbin(self, x=None, y=None, C=None, reduce_C_function=None,
-                     gridsize=None, **kwargs):
+               gridsize=None, **kwargs):
         '''
         Hexbin plot
 
@@ -562,8 +561,10 @@ class CASTablePlotter(object):
 
         '''
         params, kwargs = self._get_plot_params(x=x, y=y, **kwargs)
-        return self._table._fetch(**params).plot.hexbin(x=x, y=y, C=C,
-                   reduce_C_function=reduce_C_function, gridsize=gridsize, **kwargs)
+        return self._table._fetch(**params)\
+                   .plot.hexbin(x=x, y=y, C=C,
+                                reduce_C_function=reduce_C_function,
+                                gridsize=gridsize, **kwargs)
 
     def hist(self, by=None, bins=10, **kwargs):
         '''
@@ -1175,9 +1176,6 @@ class CASTable(ParamManager, ActionParamManager):
 
         '''
         if not cls.table_params or not cls.outtable_params:
-            tblparams = 'Unknown'
-            outtblparams = 'Unknown'
-
             param_names = []
 
             actinfo = connection._get_action_info('builtins.cascommon')
@@ -1187,18 +1185,12 @@ class CASTable(ParamManager, ActionParamManager):
                     # Populate valid fields for tables and outtables
                     if item['name'] == 'castable':
                         cls.table_params = set([x['name'] for x in item['parmList']])
-                        tblparams = format_params(item['parmList'], connection,
-                                                  param_names=param_names).rstrip()
 
                     elif item['name'] == 'casouttable':
                         cls.outtable_params = set([x['name'] for x in item['parmList']])
-                        outtblparams = format_params(item['parmList'], connection,
-                                                     param_names=param_names).rstrip()
 
                     elif item['name'] == 'casouttablebasic':
                         cls.outtable_params = set([x['name'] for x in item['parmList']])
-                        outtblparams = format_params(item['parmList'], connection,
-                                                     param_names=param_names).rstrip()
 
             for name in list(param_names):
                 if keyword.iskeyword(name):
@@ -3079,8 +3071,8 @@ class CASTable(ParamManager, ActionParamManager):
         if not numrows:
             return pd.DataFrame([[0] * len(tbl.columns),
                                  [0] * len(tbl.columns)],
-                                 index=['count', 'unique'],
-                                 columns=tbl.columns)
+                                index=['count', 'unique'],
+                                columns=tbl.columns)
 
         # Get percentiles
         if percentiles is not None:
@@ -3277,8 +3269,6 @@ class CASTable(ParamManager, ActionParamManager):
         :class:`pandas.DataFrame`
 
         '''
-        from ..dataframe import reshape_bygroups
-
         if numeric_only:
             inputs = self._get_dtypes(include='numeric')
         else:
@@ -4008,13 +3998,13 @@ class CASTable(ParamManager, ActionParamManager):
 #       raise NotImplementedError
 
     def reset_index(self, level=None, drop=False, inplace=False,
-                          col_level=0, col_fill='', **kwargs):
+                    col_level=0, col_fill='', **kwargs):
         '''
         Reset the CASTable index
 
         NOTE: CAS tables do not support indexing, so this method
               just returns self (if inplace=True), or a copy of
-              self (if inplace=False) simply for DataFrame 
+              self (if inplace=False) simply for DataFrame
               compatibility.
 
         Returns
@@ -4027,7 +4017,7 @@ class CASTable(ParamManager, ActionParamManager):
         return copy.deepcopy(self)
 
     def sample(self, n=None, frac=None, replace=False, weights=None,
-                     random_state=None, axis=None, stratify_by=None, **kwargs):
+               random_state=None, axis=None, stratify_by=None, **kwargs):
         '''
         Returns a random sample of the CAS table rows
 
@@ -4368,7 +4358,8 @@ class CASTable(ParamManager, ActionParamManager):
             if not isinstance(patt, char_types):
                 raise TypeError('Regular expression pattern is not a string: %s' % patt)
             if not isinstance(to, char_types):
-                raise TypeError('Regular expression substitution is not a string: %s' % to)
+                raise TypeError('Regular expression substitution is not a string: %s'
+                                % to)
             to = re.sub(r'\\(\d)', r'$\1', to)
             return _quote('s/%s/%s/%s' % (patt, to, flags))
 
@@ -4464,7 +4455,8 @@ class CASTable(ParamManager, ActionParamManager):
 
         dscode = []
         dscode.append('data %s(caslib=%s);' % (_quote(newname), _quote(caslib)))
-        dscode.append('    set %s(caslib=%s);' % (_quote(self.params.name), _quote(caslib)))
+        dscode.append('    set %s(caslib=%s);' % (_quote(self.params.name),
+                                                  _quote(caslib)))
         if isinstance(code, items_types):
             dscode.extend(code)
         else:
@@ -4650,7 +4642,7 @@ class CASTable(ParamManager, ActionParamManager):
 #       raise NotImplementedError
 
     def _fetch(self, grouped=False, sample_pct=None, sample_seed=None,
-                     stratify_by=None, sample=False, **kwargs):
+               stratify_by=None, sample=False, **kwargs):
         '''
         Return the fetched DataFrame given the fetch parameters
 
@@ -4710,7 +4702,7 @@ class CASTable(ParamManager, ActionParamManager):
 
         # Add grouping columns if they aren't in the list
         columns = None
-        if groups and 'fetchvars' in kwargs: 
+        if groups and 'fetchvars' in kwargs:
             kwargs['fetchvars'] = list(kwargs['fetchvars'])
             for group in reversed(groups):
                 if group not in kwargs['fetchvars']:
@@ -4724,7 +4716,8 @@ class CASTable(ParamManager, ActionParamManager):
 
         # Sort based on 'Fetch#' key.  This will be out of order in REST.
         values = [x[1] for x in sorted(tbl._retrieve('table.fetch', **kwargs).items(),
-                                       key=lambda x: int(x[0].replace('Fetch', '') or '0'))]
+                                       key=lambda x: int(x[0].replace('Fetch', '') or
+                                                         '0'))]
         out = df.concat(values)
 
         if tbl is not self:
@@ -4786,7 +4779,7 @@ class CASTable(ParamManager, ActionParamManager):
         return out
 
     def _fetchall(self, grouped=False, sample_pct=None, sample_seed=None,
-                        sample=False, stratify_by=None, **kwargs):
+                  sample=False, stratify_by=None, **kwargs):
         ''' Fetch all rows '''
         kwargs = kwargs.copy()
         if 'to' not in kwargs:
@@ -4940,7 +4933,7 @@ class CASTable(ParamManager, ActionParamManager):
             if 'table' in table:
                 table['name'] = table.pop('table')
             return connection.upload_frame(dframe, casout=table and table or None)
-#                                          importoptions=connection._importoptions_from_dframe(dframe)
+#                      importoptions=connection._importoptions_from_dframe(dframe)
         dmh = PandasDataFrame(dframe)
         table.update(dmh.args.addtable)
         return connection.retrieve('table.addtable', **table)['casTable']
@@ -5129,7 +5122,7 @@ class CASTable(ParamManager, ActionParamManager):
             buf.write(u'memory usage: %s\n' % details['AllocatedMemory'])
 
     def to_frame(self, sample_pct=None, sample_seed=None, sample=False,
-                       stratify_by=None, **kwargs):
+                 stratify_by=None, **kwargs):
         '''
         Retrieve entire table as a :class:`SASDataFrame`
 
@@ -5175,7 +5168,7 @@ class CASTable(ParamManager, ActionParamManager):
         params['stratify_by'] = kwargs.pop('stratify_by', None)
         params['to'] = kwargs.pop('to', None)
         params['from'] = kwargs.pop('from', kwargs.pop('from_', None))
-        params = {k:v for k, v in params.items() if v is not None}
+        params = {k: v for k, v in params.items() if v is not None}
         standard_dataframe = kwargs.pop('standard_dataframe', False)
         dframe = self._fetch(**params)
         if standard_dataframe:
@@ -7574,7 +7567,7 @@ class CASColumn(CASTable):
                     if eval_values and isinstance(item, (CASColumn, pd.Series)):
                         for subitem in item.unique().tolist():
                             if isinstance(subitem, text_types) or \
-                                isinstance(subitem, binary_types):
+                                    isinstance(subitem, binary_types):
                                 items.append('"%s"' % _escape_string(subitem))
                             else:
                                 items.append(str(subitem))

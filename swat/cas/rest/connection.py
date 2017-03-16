@@ -119,6 +119,7 @@ def _normalize_params(params):
 
 
 def _normalize_list(items):
+    ''' Normalize objects using standard python types '''
     newitems = []
     for item in items:
         if isinstance(item, dict):
