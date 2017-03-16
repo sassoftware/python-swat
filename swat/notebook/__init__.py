@@ -17,7 +17,7 @@
 #
 
 '''
-Utilities for IPython Notebook integration
+Utilities for Notebook integration
 
 '''
 
