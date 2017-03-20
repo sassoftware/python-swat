@@ -26,7 +26,6 @@
 import copy
 import io
 import os
-import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import re
@@ -4274,6 +4273,11 @@ class TestCASTable(tm.TestCase):
         self.assertEqual(num_tables, len(tbl.tableinfo().TableInfo))
 
     def assertPlotsEqual(self, fig1, fig2):
+        try:
+            import matplotlib.pyplot as plt
+        except ImportError:
+            tm.TestCase.skipTest(self, 'Need matplotlib to run this test')
+
         buf1 = io.BytesIO()
         buf2 = io.BytesIO()
 

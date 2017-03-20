@@ -105,6 +105,9 @@ class TestUnicode(tm.TestCase):
         self.assertEqual(str(s), repr(s))
 
     def test_formatter(self):
+        if self.s._protocol in ['http', 'https']:
+            unittest.TestCase.skipTest(self, 'REST does not support SAS data formats')
+
         f = swat.SASFormatter()
 
         self.assertTrue(isinstance(f.format(123.56, sasfmt='f10.5', width=20), unicode))
