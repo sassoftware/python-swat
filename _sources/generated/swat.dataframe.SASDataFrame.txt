@@ -23,10 +23,12 @@ swat.dataframe.SASDataFrame
       ~SASDataFrame.any
       ~SASDataFrame.append
       ~SASDataFrame.apply
+      ~SASDataFrame.apply_labels
       ~SASDataFrame.applymap
       ~SASDataFrame.as_blocks
       ~SASDataFrame.as_matrix
       ~SASDataFrame.asfreq
+      ~SASDataFrame.asof
       ~SASDataFrame.assign
       ~SASDataFrame.astype
       ~SASDataFrame.at_time
@@ -202,7 +204,6 @@ swat.dataframe.SASDataFrame
       ~SASDataFrame.to_stata
       ~SASDataFrame.to_string
       ~SASDataFrame.to_timestamp
-      ~SASDataFrame.to_wide
       ~SASDataFrame.to_xarray
       ~SASDataFrame.transpose
       ~SASDataFrame.truediv

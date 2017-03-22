@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>CASTable vs. DataFrame vs. SASDataFrame &mdash; SWAT 1.0.0 documentation</title>
+  <title>CASTable vs. DataFrame vs. SASDataFrame &mdash; SWAT 1.1.0 documentation</title>
   
 
   
@@ -32,7 +32,7 @@
   
 
   
-    <link rel="top" title="SWAT 1.0.0 documentation" href="index.html"/>
+    <link rel="top" title="SWAT 1.1.0 documentation" href="index.html"/>
         <link rel="next" title="Indexing and Data Selection" href="indexing.html"/>
         <link rel="prev" title="Loading Data" href="loading-data.html"/> 
 
@@ -63,7 +63,7 @@
             
             
               <div class="version">
-                1.0.0
+                1.1.0
               </div>
             
           
@@ -86,6 +86,7 @@
             
                 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="whatsnew.html">What&#8217;s New</a></li>
 <li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting Started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="workflows.html">Workflows</a></li>
 <li class="toctree-l1"><a class="reference internal" href="binary-vs-rest.html">Binary vs. REST</a></li>
@@ -152,7 +153,7 @@
             
   <div class="section" id="castable-vs-dataframe-vs-sasdataframe">
 <span id="tblvsdf"></span><h1>CASTable vs. DataFrame vs. SASDataFrame<a class="headerlink" href="#castable-vs-dataframe-vs-sasdataframe" title="Permalink to this headline">¶</a></h1>
-<p><code class="xref py py-class docutils literal"><span class="pre">CASTable</span></code> objects and DataFrame object (either <a class="reference external" href="http://pandas.pydata.org/pandas-docs/version/0.18.0/generated/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v0.18.0)"><code class="xref py py-class docutils literal"><span class="pre">pandas.DataFrame</span></code></a> or
+<p><code class="xref py py-class docutils literal"><span class="pre">CASTable</span></code> objects and DataFrame object (either <a class="reference external" href="http://pandas.pydata.org/pandas-docs/version/0.19.2/generated/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v0.19.2)"><code class="xref py py-class docutils literal"><span class="pre">pandas.DataFrame</span></code></a> or
 <code class="xref py py-class docutils literal"><span class="pre">SASDataFrame</span></code>) act very similar in many ways, but they are extremely different
 constructs.  <code class="xref py py-class docutils literal"><span class="pre">CASTable</span></code> objects do not contain actual data.  They are simply
 a client-side view of the data in a CAS table on a CAS server.  DataFrames and
@@ -163,7 +164,7 @@ contains &#8220;DataFrame&#8221; (i.e., DataFrame or SASDataFrame), the data is 
 type of the object contains &#8220;Table&#8221; or &#8220;Column&#8221; (i.e., CASTable or CASColumn), it is
 a client-side view of the data in a CAS table on the server.</p>
 <p>Even though they are very different architectures, <code class="xref py py-class docutils literal"><span class="pre">CASTable</span></code> objects support
-much of the <a class="reference external" href="http://pandas.pydata.org/pandas-docs/version/0.18.0/generated/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v0.18.0)"><code class="xref py py-class docutils literal"><span class="pre">pandas.DataFrame</span></code></a> API.  However, since CAS tables can contain
+much of the <a class="reference external" href="http://pandas.pydata.org/pandas-docs/version/0.19.2/generated/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v0.19.2)"><code class="xref py py-class docutils literal"><span class="pre">pandas.DataFrame</span></code></a> API.  However, since CAS tables can contain
 enormous amounts of data that wouldn&#8217;t fit into the memory of a single machine, there
 are some differences in the way the APIs work.  The basic rules to remember
 about <code class="xref py py-class docutils literal"><span class="pre">CASTable</span></code> data access are as follows.</p>
@@ -230,7 +231,7 @@ you can upload a DataFrame to a CAS table using the <code class="xref py py-meth
 using the <code class="xref py py-meth docutils literal"><span class="pre">CASTable.to_frame()</span></code> method, however, you do need to be careful.
 It will attempt to pull all of the data down regardless of size.</p>
 <p><code class="xref py py-class docutils literal"><span class="pre">CASColumn</span></code> objects work much in the same was as <code class="xref py py-class docutils literal"><span class="pre">CASTable</span></code> objects
-except that they operate on a single column of data like a <a class="reference external" href="http://pandas.pydata.org/pandas-docs/version/0.18.0/generated/pandas.Series.html#pandas.Series" title="(in pandas v0.18.0)"><code class="xref py py-class docutils literal"><span class="pre">pandas.Series</span></code></a>.</p>
+except that they operate on a single column of data like a <a class="reference external" href="http://pandas.pydata.org/pandas-docs/version/0.19.2/generated/pandas.Series.html#pandas.Series" title="(in pandas v0.19.2)"><code class="xref py py-class docutils literal"><span class="pre">pandas.Series</span></code></a>.</p>
 <table border="1" class="docutils">
 <colgroup>
 <col width="40%" />
@@ -256,8 +257,8 @@ except that they operate on a single column of data like a <a class="reference e
 </table>
 <div class="section" id="pandas-dataframe-vs-sasdataframe">
 <h2>Pandas DataFrame vs. SASDataFrame<a class="headerlink" href="#pandas-dataframe-vs-sasdataframe" title="Permalink to this headline">¶</a></h2>
-<p><code class="xref py py-class docutils literal"><span class="pre">SASDataFrame</span></code> is a subclass of <a class="reference external" href="http://pandas.pydata.org/pandas-docs/version/0.18.0/generated/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v0.18.0)"><code class="xref py py-class docutils literal"><span class="pre">pandas.DataFrame</span></code></a>.  Therefore, anything
-you can do with a <a class="reference external" href="http://pandas.pydata.org/pandas-docs/version/0.18.0/generated/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v0.18.0)"><code class="xref py py-class docutils literal"><span class="pre">pandas.DataFrame</span></code></a> will also work with <code class="xref py py-class docutils literal"><span class="pre">SASDataFrame</span></code>.
+<p><code class="xref py py-class docutils literal"><span class="pre">SASDataFrame</span></code> is a subclass of <a class="reference external" href="http://pandas.pydata.org/pandas-docs/version/0.19.2/generated/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v0.19.2)"><code class="xref py py-class docutils literal"><span class="pre">pandas.DataFrame</span></code></a>.  Therefore, anything
+you can do with a <a class="reference external" href="http://pandas.pydata.org/pandas-docs/version/0.19.2/generated/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v0.19.2)"><code class="xref py py-class docutils literal"><span class="pre">pandas.DataFrame</span></code></a> will also work with <code class="xref py py-class docutils literal"><span class="pre">SASDataFrame</span></code>.
 The only difference is that <code class="xref py py-class docutils literal"><span class="pre">SASDataFrame</span></code> objects contain extra metadata
 familiar to SAS users.  This includes a title, label, name, a dictionary of extended
 attributes for information such as By groups and system titles (<code class="docutils literal"><span class="pre">attrs</span></code>), and
@@ -310,7 +311,7 @@ the way that By group information in represented in the DataFrame.  See the
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'1.0.0',
+            VERSION:'1.1.0',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

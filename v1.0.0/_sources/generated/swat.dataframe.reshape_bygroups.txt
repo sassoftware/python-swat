@@ -1,0 +1,6 @@
+swat.dataframe.reshape_bygroups
+===============================
+
+.. currentmodule:: swat.dataframe
+
+.. autofunction:: reshape_bygroups

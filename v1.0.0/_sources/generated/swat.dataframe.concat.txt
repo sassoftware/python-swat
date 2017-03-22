@@ -1,0 +1,6 @@
+swat.dataframe.concat
+=====================
+
+.. currentmodule:: swat.dataframe
+
+.. autofunction:: concat

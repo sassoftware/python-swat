@@ -1,0 +1,6 @@
+swat.cas.results.CASResults.get_tables
+======================================
+
+.. currentmodule:: swat.cas.results
+
+.. automethod:: CASResults.get_tables

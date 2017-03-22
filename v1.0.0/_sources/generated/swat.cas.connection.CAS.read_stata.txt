@@ -1,0 +1,6 @@
+swat.cas.connection.CAS.read_stata
+==================================
+
+.. currentmodule:: swat.cas.connection
+
+.. automethod:: CAS.read_stata

@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>swat.cas.table.CASTable.from_dict &mdash; SWAT 1.0.0 documentation</title>
+  <title>swat.cas.table.CASTable.from_dict &mdash; SWAT 1.1.0 documentation</title>
   
 
   
@@ -32,7 +32,7 @@
   
 
   
-    <link rel="top" title="SWAT 1.0.0 documentation" href="../index.html"/>
+    <link rel="top" title="SWAT 1.1.0 documentation" href="../index.html"/>
         <link rel="up" title="API Reference" href="../api.html"/>
         <link rel="next" title="swat.cas.table.CASTable.from_items" href="swat.cas.table.CASTable.from_items.html"/>
         <link rel="prev" title="swat.cas.table.CASTable.from_csv" href="swat.cas.table.CASTable.from_csv.html"/> 
@@ -64,7 +64,7 @@
             
             
               <div class="version">
-                1.0.0
+                1.1.0
               </div>
             
           
@@ -87,6 +87,7 @@
             
                 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../whatsnew.html">What&#8217;s New</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../getting-started.html">Getting Started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../workflows.html">Workflows</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../binary-vs-rest.html">Binary vs. REST</a></li>
@@ -203,7 +204,7 @@
 <h1>swat.cas.table.CASTable.from_dict<a class="headerlink" href="#swat-cas-table-castable-from-dict" title="Permalink to this headline">¶</a></h1>
 <dl class="classmethod">
 <dt id="swat.cas.table.CASTable.from_dict">
-<em class="property">classmethod </em><code class="descclassname">CASTable.</code><code class="descname">from_dict</code><span class="sig-paren">(</span><em>connection</em>, <em>data</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#swat.cas.table.CASTable.from_dict" title="Permalink to this definition">¶</a></dt>
+<em class="property">classmethod </em><code class="descclassname">CASTable.</code><code class="descname">from_dict</code><span class="sig-paren">(</span><em>connection</em>, <em>data</em>, <em>casout=None</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#swat.cas.table.CASTable.from_dict" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create a CASTable from a dictionary</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -217,13 +218,34 @@
 <blockquote>
 <div><p>The dictionary containing the data.</p>
 </div></blockquote>
-<p><strong>*args</strong> : positional arguments</p>
+<p><strong>casout</strong> : string or <a class="reference internal" href="swat.cas.table.CASTable.html#swat.cas.table.CASTable" title="swat.cas.table.CASTable"><code class="xref py py-class docutils literal"><span class="pre">CASTable</span></code></a>, optional</p>
 <blockquote>
-<div><p>Positional arguments sent to <a class="reference external" href="http://pandas.pydata.org/pandas-docs/version/0.18.0/generated/pandas.DataFrame.from_dict.html#pandas.DataFrame.from_dict" title="(in pandas v0.18.0)"><code class="xref py py-meth docutils literal"><span class="pre">pandas.DataFrame.from_dict()</span></code></a>.</p>
+<div><dl class="docutils">
+<dt>The output table specification.  This includes the following parameters.</dt>
+<dd><dl class="first last docutils">
+<dt>name</dt>
+ <span class="classifier-delimiter">:</span> <span class="classifier">string, optional</span><dd><p class="first last">Name of the output CAS table.</p>
+</dd>
+<dt>caslib</dt>
+ <span class="classifier-delimiter">:</span> <span class="classifier">string, optional</span><dd><p class="first last">CASLib for the output CAS table.</p>
+</dd>
+<dt>label</dt>
+ <span class="classifier-delimiter">:</span> <span class="classifier">string, optional</span><dd><p class="first last">The label to apply to the output CAS table.</p>
+</dd>
+<dt>promote</dt>
+ <span class="classifier-delimiter">:</span> <span class="classifier">boolean, optional</span><dd><p class="first last">If True, the output CAS table will be visible in all sessions.</p>
+</dd>
+<dt>replace</dt>
+ <span class="classifier-delimiter">:</span> <span class="classifier">boolean, optional</span><dd><p class="first last">If True, the output CAS table will replace any existing CAS.
+table with the same name.</p>
+</dd>
+</dl>
+</dd>
+</dl>
 </div></blockquote>
 <p><strong>**kwargs</strong> : keyword arguments</p>
 <blockquote>
-<div><p>Keyword arguments sent to <a class="reference external" href="http://pandas.pydata.org/pandas-docs/version/0.18.0/generated/pandas.DataFrame.from_dict.html#pandas.DataFrame.from_dict" title="(in pandas v0.18.0)"><code class="xref py py-meth docutils literal"><span class="pre">pandas.DataFrame.from_dict()</span></code></a>.</p>
+<div><p>Keyword arguments sent to <a class="reference external" href="http://pandas.pydata.org/pandas-docs/version/0.19.2/generated/pandas.DataFrame.from_dict.html#pandas.DataFrame.from_dict" title="(in pandas v0.19.2)"><code class="xref py py-meth docutils literal"><span class="pre">pandas.DataFrame.from_dict()</span></code></a>.</p>
 </div></blockquote>
 </td>
 </tr>
@@ -234,7 +256,7 @@
 </table>
 <div class="admonition seealso">
 <p class="first admonition-title">See also</p>
-<p class="last"><a class="reference external" href="http://pandas.pydata.org/pandas-docs/version/0.18.0/generated/pandas.DataFrame.from_dict.html#pandas.DataFrame.from_dict" title="(in pandas v0.18.0)"><code class="xref py py-meth docutils literal"><span class="pre">pandas.DataFrame.from_dict()</span></code></a></p>
+<p class="last"><a class="reference external" href="http://pandas.pydata.org/pandas-docs/version/0.19.2/generated/pandas.DataFrame.from_dict.html#pandas.DataFrame.from_dict" title="(in pandas v0.19.2)"><code class="xref py py-meth docutils literal"><span class="pre">pandas.DataFrame.from_dict()</span></code></a></p>
 </div>
 </dd></dl>
 
@@ -281,7 +303,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../',
-            VERSION:'1.0.0',
+            VERSION:'1.1.0',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

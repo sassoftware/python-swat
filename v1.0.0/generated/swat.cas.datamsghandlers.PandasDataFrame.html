@@ -1,0 +1,328 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>swat.cas.datamsghandlers.PandasDataFrame &mdash; SWAT 1.0.0 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+
+  
+    <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+
+  
+    <link rel="top" title="SWAT 1.0.0 documentation" href="../index.html"/>
+        <link rel="up" title="API Reference" href="../api.html"/>
+        <link rel="next" title="swat.cas.datamsghandlers.SAS7BDAT" href="swat.cas.datamsghandlers.SAS7BDAT.html"/>
+        <link rel="prev" title="swat.cas.datamsghandlers.CASDataMsgHandler" href="swat.cas.datamsghandlers.CASDataMsgHandler.html"/> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> SWAT
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.0.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting-started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../workflows.html">Workflows</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../binary-vs-rest.html">Binary vs. REST</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../loading-data.html">Loading Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../table-vs-dataframe.html">CASTable vs. DataFrame vs. SASDataFrame</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../indexing.html">Indexing and Data Selection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../bygroups.html">Handling By Groups</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../sorting.html">Sorting</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../api.html">API Reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../api.html#cas">CAS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#casresults">CASResults</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#sasdataframe">SASDataFrame</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#sasformatter">SASFormatter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#castable">CASTable</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#cascolumn">CASColumn</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#castablegroupby">CASTableGroupBy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#casresponse">CASResponse</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../api.html#data-message-handlers">Data Message Handlers</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="swat.cas.datamsghandlers.CASDataMsgHandler.html">swat.cas.datamsghandlers.CASDataMsgHandler</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">swat.cas.datamsghandlers.PandasDataFrame</a></li>
+<li class="toctree-l3"><a class="reference internal" href="swat.cas.datamsghandlers.SAS7BDAT.html">swat.cas.datamsghandlers.SAS7BDAT</a></li>
+<li class="toctree-l3"><a class="reference internal" href="swat.cas.datamsghandlers.CSV.html">swat.cas.datamsghandlers.CSV</a></li>
+<li class="toctree-l3"><a class="reference internal" href="swat.cas.datamsghandlers.Text.html">swat.cas.datamsghandlers.Text</a></li>
+<li class="toctree-l3"><a class="reference internal" href="swat.cas.datamsghandlers.FWF.html">swat.cas.datamsghandlers.FWF</a></li>
+<li class="toctree-l3"><a class="reference internal" href="swat.cas.datamsghandlers.JSON.html">swat.cas.datamsghandlers.JSON</a></li>
+<li class="toctree-l3"><a class="reference internal" href="swat.cas.datamsghandlers.HTML.html">swat.cas.datamsghandlers.HTML</a></li>
+<li class="toctree-l3"><a class="reference internal" href="swat.cas.datamsghandlers.SQLTable.html">swat.cas.datamsghandlers.SQLTable</a></li>
+<li class="toctree-l3"><a class="reference internal" href="swat.cas.datamsghandlers.SQLQuery.html">swat.cas.datamsghandlers.SQLQuery</a></li>
+<li class="toctree-l3"><a class="reference internal" href="swat.cas.datamsghandlers.Excel.html">swat.cas.datamsghandlers.Excel</a></li>
+<li class="toctree-l3"><a class="reference internal" href="swat.cas.datamsghandlers.Clipboard.html">swat.cas.datamsghandlers.Clipboard</a></li>
+<li class="toctree-l3"><a class="reference internal" href="swat.cas.datamsghandlers.DBAPI.html">swat.cas.datamsghandlers.DBAPI</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#date-and-time-functions">Date and Time Functions</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../gotchas.html">Programming Gotchas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../troubleshooting.html">Troubleshooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../sas-tk.html">SAS TK</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../licenses.html">Licenses</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../index.html">SWAT</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+ 
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../index.html">Docs</a> &raquo;</li>
+      
+        <li><a href="../api.html">API Reference</a> &raquo;</li>
+      
+    <li>swat.cas.datamsghandlers.PandasDataFrame</li>
+    <li class="wy-breadcrumbs-aside">
+      
+          
+          <a href="../_sources/generated/swat.cas.datamsghandlers.PandasDataFrame.txt" rel="nofollow"> View page source</a>
+        
+      
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="swat-cas-datamsghandlers-pandasdataframe">
+<h1>swat.cas.datamsghandlers.PandasDataFrame<a class="headerlink" href="#swat-cas-datamsghandlers-pandasdataframe" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="swat.cas.datamsghandlers.PandasDataFrame">
+<em class="property">class </em><code class="descclassname">swat.cas.datamsghandlers.</code><code class="descname">PandasDataFrame</code><span class="sig-paren">(</span><em>data</em>, <em>nrecs=1000</em>, <em>dtype=None</em>, <em>labels=None</em>, <em>formats=None</em>, <em>transformers=None</em><span class="sig-paren">)</span><a class="headerlink" href="#swat.cas.datamsghandlers.PandasDataFrame" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="swat.cas.datamsghandlers.CASDataMsgHandler.html#swat.cas.datamsghandlers.CASDataMsgHandler" title="swat.cas.datamsghandlers.CASDataMsgHandler"><code class="xref py py-class docutils literal"><span class="pre">swat.cas.datamsghandlers.CASDataMsgHandler</span></code></a></p>
+<p>CAS data message handler for <a class="reference external" href="http://pandas.pydata.org/pandas-docs/version/0.18.0/generated/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v0.18.0)"><code class="xref py py-class docutils literal"><span class="pre">pandas.DataFrame</span></code></a> objects</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>data</strong> : <a class="reference external" href="http://pandas.pydata.org/pandas-docs/version/0.18.0/generated/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v0.18.0)"><code class="xref py py-class docutils literal"><span class="pre">pandas.DataFrame</span></code></a> object</p>
+<blockquote>
+<div><p>The data to be uploaded.</p>
+</div></blockquote>
+<p><strong>nrecs</strong> : int, optional</p>
+<blockquote>
+<div><p>The number of rows to allocate in the buffer.  This can be
+smaller than the number of totals rows since they are uploaded
+in batches <cite>nrecs</cite> long.</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#swat.cas.datamsghandlers.PandasDataFrame" title="swat.cas.datamsghandlers.PandasDataFrame"><code class="xref py py-class docutils literal"><span class="pre">PandasDataFrame</span></code></a> object</p>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last"><a class="reference external" href="http://pandas.pydata.org/pandas-docs/version/0.18.0/generated/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v0.18.0)"><code class="xref py py-class docutils literal"><span class="pre">pandas.DataFrame</span></code></a>, <a class="reference internal" href="swat.cas.datamsghandlers.CASDataMsgHandler.html#swat.cas.datamsghandlers.CASDataMsgHandler" title="swat.cas.datamsghandlers.CASDataMsgHandler"><code class="xref py py-class docutils literal"><span class="pre">CASDataMsgHandler</span></code></a></p>
+</div>
+<dl class="method">
+<dt id="swat.cas.datamsghandlers.PandasDataFrame.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>data</em>, <em>nrecs=1000</em>, <em>dtype=None</em>, <em>labels=None</em>, <em>formats=None</em>, <em>transformers=None</em><span class="sig-paren">)</span><a class="headerlink" href="#swat.cas.datamsghandlers.PandasDataFrame.__init__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<p class="rubric">Methods</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="#swat.cas.datamsghandlers.PandasDataFrame.__init__" title="swat.cas.datamsghandlers.PandasDataFrame.__init__"><code class="xref py py-obj docutils literal"><span class="pre">__init__</span></code></a>(data[,&nbsp;nrecs,&nbsp;dtype,&nbsp;labels,&nbsp;...])</td>
+<td></td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">finish</span></code>(connection)</td>
+<td>Finish the data sending operation</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">getone</span></code>(connection,&nbsp;**kwargs)</td>
+<td>Get a single response from the server</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">getrow</span></code>(row)</td>
+<td>Get a row of values from the data source</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">send</span></code>(connection,&nbsp;nrecs)</td>
+<td>Send the records to the connection</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">write</span></code>(row,&nbsp;values)</td>
+<td>Write the value to the row and column specified in the buffer</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Attributes</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">args</span></code></td>
+<td>Property that generates the CAS action parameters for CAS actions that use a data message handler.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="swat.cas.datamsghandlers.SAS7BDAT.html" class="btn btn-neutral float-right" title="swat.cas.datamsghandlers.SAS7BDAT" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="swat.cas.datamsghandlers.CASDataMsgHandler.html" class="btn btn-neutral" title="swat.cas.datamsghandlers.CASDataMsgHandler" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016 SAS Institute Inc. All Rights Reserved..
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'1.0.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

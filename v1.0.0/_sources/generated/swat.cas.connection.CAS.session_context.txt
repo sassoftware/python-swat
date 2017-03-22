@@ -1,0 +1,6 @@
+swat.cas.connection.CAS.session_context
+=======================================
+
+.. currentmodule:: swat.cas.connection
+
+.. automethod:: CAS.session_context

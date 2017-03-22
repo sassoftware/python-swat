@@ -1,0 +1,711 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Indexing and Data Selection &mdash; SWAT 1.0.0 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+    <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+
+  
+    <link rel="top" title="SWAT 1.0.0 documentation" href="index.html"/>
+        <link rel="next" title="Handling By Groups" href="bygroups.html"/>
+        <link rel="prev" title="CASTable vs. DataFrame vs. SASDataFrame" href="table-vs-dataframe.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> SWAT
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.0.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="workflows.html">Workflows</a></li>
+<li class="toctree-l1"><a class="reference internal" href="binary-vs-rest.html">Binary vs. REST</a></li>
+<li class="toctree-l1"><a class="reference internal" href="loading-data.html">Loading Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="table-vs-dataframe.html">CASTable vs. DataFrame vs. SASDataFrame</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Indexing and Data Selection</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#the-basics">The Basics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#selecting-by-name">Selecting by Name</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#selecting-by-position">Selecting by Position</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#mixing-names-and-position">Mixing Names and Position</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#selecting-a-cross-section">Selecting a Cross Section</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#boolean-indexing">Boolean Indexing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#the-query-method">The <code class="docutils literal"><span class="pre">query</span></code> Method</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="bygroups.html">Handling By Groups</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sorting.html">Sorting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gotchas.html">Programming Gotchas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="troubleshooting.html">Troubleshooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sas-tk.html">SAS TK</a></li>
+<li class="toctree-l1"><a class="reference internal" href="licenses.html">Licenses</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="index.html">SWAT</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+ 
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+      
+    <li>Indexing and Data Selection</li>
+    <li class="wy-breadcrumbs-aside">
+      
+          
+          <a href="_sources/indexing.txt" rel="nofollow"> View page source</a>
+        
+      
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="indexing-and-data-selection">
+<span id="indexing"></span><h1>Indexing and Data Selection<a class="headerlink" href="#indexing-and-data-selection" title="Permalink to this headline">¶</a></h1>
+<p>Indexing of <a class="reference internal" href="generated/swat.cas.table.CASTable.html#swat.cas.table.CASTable" title="swat.cas.table.CASTable"><code class="xref py py-class docutils literal"><span class="pre">CASTable</span></code></a> objects works much in the same way as they do
+in <a class="reference external" href="http://pandas.pydata.org/pandas-docs/version/0.18.0/generated/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v0.18.0)"><code class="xref py py-class docutils literal"><span class="pre">pandas.DataFrame</span></code></a> objects.  You can select one or more columns based on
+column names or indexes, and you can select slices of columns.  However, data
+selection does have some limitations.  CAS tables can be distributed across
+a grid of computers and they do not have a specified order.  Because of this,
+indexing based on a row index is not possible at this time.  However, it is
+possible to apply <cite>where</cite> clauses to a the table parameters to filter rows
+based on that.</p>
+<p>There are a few properties that allow indexing a <a class="reference internal" href="generated/swat.cas.table.CASTable.html#swat.cas.table.CASTable" title="swat.cas.table.CASTable"><code class="xref py py-class docutils literal"><span class="pre">CASTable</span></code></a> object in
+various ways.  These properties work just like they <a class="reference external" href="http://pandas.pydata.org/pandas-docs/version/0.18.0/generated/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v0.18.0)"><code class="xref py py-class docutils literal"><span class="pre">pandas.DataFrame</span></code></a>
+counterparts (with the limitations described above).</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="30%" />
+<col width="70%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Property / Method</th>
+<th class="head">Description</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>o[<cite>columns</cite>]</td>
+<td>Subset table based on column names</td>
+</tr>
+<tr class="row-odd"><td>o.loc[:, <cite>columns</cite>]</td>
+<td>Subset table based on column names</td>
+</tr>
+<tr class="row-even"><td>o.iloc[:, <cite>columns</cite>]</td>
+<td>Subset table based on column indexes</td>
+</tr>
+<tr class="row-odd"><td>o.ix[:, <cite>columns</cite>]</td>
+<td>Subset table based on mixed column names and indexes</td>
+</tr>
+<tr class="row-even"><td>o.xs(<cite>column</cite>, axis=1)</td>
+<td>Select a cross-section of the table</td>
+</tr>
+<tr class="row-odd"><td>o[<cite>boolean-column</cite>]</td>
+<td>Filter data rows based on boolean column values</td>
+</tr>
+<tr class="row-even"><td>o.query(&#8216;<cite>expr</cite>&#8216;)</td>
+<td>Apply a filter to the data values</td>
+</tr>
+</tbody>
+</table>
+<div class="section" id="the-basics">
+<h2>The Basics<a class="headerlink" href="#the-basics" title="Permalink to this headline">¶</a></h2>
+<p>Just as with <code class="xref py py-class docutils literal"><span class="pre">pandas.DataFrames</span></code>, <a class="reference internal" href="generated/swat.cas.table.CASTable.html#swat.cas.table.CASTable" title="swat.cas.table.CASTable"><code class="xref py py-class docutils literal"><span class="pre">CASTable</span></code></a> objects implement
+Python&#8217;s <code class="docutils literal"><span class="pre">__getitem__</span></code> method to allow indexing using <code class="docutils literal"><span class="pre">[</span> <span class="pre">]</span></code>.  This allows
+you to subset the columns that are visible in the table.</p>
+<div class="highlight-ipython"><div class="highlight"><pre><span></span><span class="gp">In [1]: </span><span class="n">tbl</span> <span class="o">=</span> <span class="n">conn</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;https://raw.githubusercontent.com/&#39;</span>
+<span class="gp">   ...: </span>                    <span class="s1">&#39;sassoftware/sas-viya-programming/master/data/cars.csv&#39;</span><span class="p">)</span>
+<span class="gp">   ...: </span>
+
+<span class="gp">In [2]: </span><span class="n">tbl</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+<span class="gh">Out[2]: </span><span class="go"></span>
+<span class="go">Selected Rows from Table _T_D355E163_7F184AD9A0C0</span>
+
+<span class="go">    Make           Model   Type Origin DriveTrain     MSRP  Invoice  \</span>
+<span class="go">0  Acura             MDX    SUV   Asia        All  36945.0  33337.0   </span>
+<span class="go">1  Acura  RSX Type S 2dr  Sedan   Asia      Front  23820.0  21761.0   </span>
+<span class="go">2  Acura         TSX 4dr  Sedan   Asia      Front  26990.0  24647.0   </span>
+<span class="go">3  Acura          TL 4dr  Sedan   Asia      Front  33195.0  30299.0   </span>
+<span class="go">4  Acura      3.5 RL 4dr  Sedan   Asia      Front  43755.0  39014.0   </span>
+
+<span class="go">   EngineSize  Cylinders  Horsepower  MPG_City  MPG_Highway  Weight  \</span>
+<span class="go">0         3.5        6.0       265.0      17.0         23.0  4451.0   </span>
+<span class="go">1         2.0        4.0       200.0      24.0         31.0  2778.0   </span>
+<span class="go">2         2.4        4.0       200.0      22.0         29.0  3230.0   </span>
+<span class="go">3         3.2        6.0       270.0      20.0         28.0  3575.0   </span>
+<span class="go">4         3.5        6.0       225.0      18.0         24.0  3880.0   </span>
+
+<span class="go">   Wheelbase  Length  </span>
+<span class="go">0      106.0   189.0  </span>
+<span class="go">1      101.0   172.0  </span>
+<span class="go">2      105.0   183.0  </span>
+<span class="go">3      108.0   186.0  </span>
+<span class="go">4      115.0   197.0  </span>
+</pre></div>
+</div>
+<p>Here we are selecting a single column from the table.  This will return a
+<a class="reference internal" href="generated/swat.cas.table.CASColumn.html#swat.cas.table.CASColumn" title="swat.cas.table.CASColumn"><code class="xref py py-class docutils literal"><span class="pre">CASColumn</span></code></a> object.</p>
+<div class="highlight-ipython"><div class="highlight"><pre><span></span><span class="gp">In [3]: </span><span class="n">tbl</span><span class="p">[</span><span class="s1">&#39;Make&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+<span class="gh">Out[3]: </span><span class="go"></span>
+<span class="go">0    Acura</span>
+<span class="go">1    Acura</span>
+<span class="go">2    Acura</span>
+<span class="go">3    Acura</span>
+<span class="go">4    Acura</span>
+<span class="go">Name: Make, dtype: object</span>
+</pre></div>
+</div>
+<p>Selecting multiple columns returns a new <a class="reference internal" href="generated/swat.cas.table.CASTable.html#swat.cas.table.CASTable" title="swat.cas.table.CASTable"><code class="xref py py-class docutils literal"><span class="pre">CASTable</span></code></a> object.</p>
+<div class="highlight-ipython"><div class="highlight"><pre><span></span><span class="gp">In [4]: </span><span class="n">tbl</span><span class="p">[[</span><span class="s1">&#39;Make&#39;</span><span class="p">,</span> <span class="s1">&#39;Model&#39;</span><span class="p">,</span> <span class="s1">&#39;Horsepower&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+<span class="gh">Out[4]: </span><span class="go"></span>
+<span class="go">Selected Rows from Table _T_D355E163_7F184AD9A0C0</span>
+
+<span class="go">    Make           Model  Horsepower</span>
+<span class="go">0  Acura             MDX       265.0</span>
+<span class="go">1  Acura  RSX Type S 2dr       200.0</span>
+<span class="go">2  Acura         TSX 4dr       200.0</span>
+<span class="go">3  Acura          TL 4dr       270.0</span>
+<span class="go">4  Acura      3.5 RL 4dr       225.0</span>
+</pre></div>
+</div>
+<p>You can also access individual columns using attribute syntax.</p>
+<div class="highlight-ipython"><div class="highlight"><pre><span></span><span class="gp">In [5]: </span><span class="n">tbl</span><span class="o">.</span><span class="n">Make</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+<span class="gh">Out[5]: </span><span class="go"></span>
+<span class="go">0    Acura</span>
+<span class="go">1    Acura</span>
+<span class="go">2    Acura</span>
+<span class="go">3    Acura</span>
+<span class="go">4    Acura</span>
+<span class="go">Name: Make, dtype: object</span>
+</pre></div>
+</div>
+<p>Caution should be used when using attribute syntax because it depends on the
+fact that there are no existing attributes, methods, or CAS actions with that
+same name on the <a class="reference internal" href="generated/swat.cas.table.CASTable.html#swat.cas.table.CASTable" title="swat.cas.table.CASTable"><code class="xref py py-class docutils literal"><span class="pre">CASTable</span></code></a>.  It also requires that the column name
+contains a valid Python identifier.  Since CAS actions can be added dynamically,
+attribute access should generally only be used in interactive programming.
+For programs that will be reused, it is safer to use the <code class="docutils literal"><span class="pre">[</span> <span class="pre">]</span></code> syntax.</p>
+</div>
+<div class="section" id="selecting-by-name">
+<h2>Selecting by Name<a class="headerlink" href="#selecting-by-name" title="Permalink to this headline">¶</a></h2>
+<p>The <code class="docutils literal"><span class="pre">loc</span></code> property is used to select columns based on the column names.
+Column names can be specified as a string, a list of strings, or a slice.
+If a string is given, a <a class="reference internal" href="generated/swat.cas.table.CASColumn.html#swat.cas.table.CASColumn" title="swat.cas.table.CASColumn"><code class="xref py py-class docutils literal"><span class="pre">CASColumn</span></code></a> is returned.  If a list of strings
+or a slice is specified, a <a class="reference internal" href="generated/swat.cas.table.CASTable.html#swat.cas.table.CASTable" title="swat.cas.table.CASTable"><code class="xref py py-class docutils literal"><span class="pre">CASTable</span></code></a> is returned.</p>
+<p>A single string selects a column.  Since row selection is not supported at
+this time, this is equivalent to <code class="docutils literal"><span class="pre">tbl.loc['Make']</span></code>.</p>
+<div class="highlight-ipython"><div class="highlight"><pre><span></span><span class="gp">In [6]: </span><span class="n">tbl</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s1">&#39;Make&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+<span class="gh">Out[6]: </span><span class="go"></span>
+<span class="go">0    Acura</span>
+<span class="go">1    Acura</span>
+<span class="go">2    Acura</span>
+<span class="go">3    Acura</span>
+<span class="go">4    Acura</span>
+<span class="go">Name: Make, dtype: object</span>
+</pre></div>
+</div>
+<p>Using a list of strings selects those columns and returns a new <a class="reference internal" href="generated/swat.cas.table.CASTable.html#swat.cas.table.CASTable" title="swat.cas.table.CASTable"><code class="xref py py-class docutils literal"><span class="pre">CASTable</span></code></a>
+object. Again, this is equivalent to <code class="docutils literal"><span class="pre">tbl[['Make',</span> <span class="pre">'Model']]</span></code>.</p>
+<div class="highlight-ipython"><div class="highlight"><pre><span></span><span class="gp">In [7]: </span><span class="n">tbl</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="p">[</span><span class="s1">&#39;Make&#39;</span><span class="p">,</span> <span class="s1">&#39;Model&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+<span class="gh">Out[7]: </span><span class="go"></span>
+<span class="go">Selected Rows from Table _T_D355E163_7F184AD9A0C0</span>
+
+<span class="go">    Make           Model</span>
+<span class="go">0  Acura             MDX</span>
+<span class="go">1  Acura  RSX Type S 2dr</span>
+<span class="go">2  Acura         TSX 4dr</span>
+<span class="go">3  Acura          TL 4dr</span>
+<span class="go">4  Acura      3.5 RL 4dr</span>
+</pre></div>
+</div>
+<p>Slicing using column names allows you to select a range of columns.</p>
+<div class="highlight-ipython"><div class="highlight"><pre><span></span><span class="gp">In [8]: </span><span class="n">tbl</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s1">&#39;Model&#39;</span><span class="p">:</span><span class="s1">&#39;Invoice&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+<span class="gh">Out[8]: </span><span class="go"></span>
+<span class="go">Selected Rows from Table _T_D355E163_7F184AD9A0C0</span>
+
+<span class="go">            Model   Type Origin DriveTrain     MSRP  Invoice</span>
+<span class="go">0             MDX    SUV   Asia        All  36945.0  33337.0</span>
+<span class="go">1  RSX Type S 2dr  Sedan   Asia      Front  23820.0  21761.0</span>
+<span class="go">2         TSX 4dr  Sedan   Asia      Front  26990.0  24647.0</span>
+<span class="go">3          TL 4dr  Sedan   Asia      Front  33195.0  30299.0</span>
+<span class="go">4      3.5 RL 4dr  Sedan   Asia      Front  43755.0  39014.0</span>
+</pre></div>
+</div>
+<p>You can even specify a step size.</p>
+<div class="highlight-ipython"><div class="highlight"><pre><span></span><span class="gp">In [9]: </span><span class="n">tbl</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s1">&#39;Model&#39;</span><span class="p">:</span><span class="s1">&#39;Invoice&#39;</span><span class="p">:</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+<span class="gh">Out[9]: </span><span class="go"></span>
+<span class="go">Selected Rows from Table _T_D355E163_7F184AD9A0C0</span>
+
+<span class="go">            Model Origin     MSRP</span>
+<span class="go">0             MDX   Asia  36945.0</span>
+<span class="go">1  RSX Type S 2dr   Asia  23820.0</span>
+<span class="go">2         TSX 4dr   Asia  26990.0</span>
+<span class="go">3          TL 4dr   Asia  33195.0</span>
+<span class="go">4      3.5 RL 4dr   Asia  43755.0</span>
+</pre></div>
+</div>
+<p>Note that when using columns names in slices, both endpoints are included
+in the slice.  This is not the same behavior for numeric indexes, but is
+consistent with the way that slicing works in <a class="reference external" href="http://pandas.pydata.org/pandas-docs/version/0.18.0/generated/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v0.18.0)"><code class="xref py py-class docutils literal"><span class="pre">pandas.DataFrame</span></code></a>
+objects.</p>
+</div>
+<div class="section" id="selecting-by-position">
+<h2>Selecting by Position<a class="headerlink" href="#selecting-by-position" title="Permalink to this headline">¶</a></h2>
+<p>The <code class="docutils literal"><span class="pre">iloc</span></code> property is used to select columns based on column indices.
+Just like with <code class="docutils literal"><span class="pre">loc</span></code>, the column indices can be specified as a single
+integer, a list of integers, or a slice.</p>
+<div class="highlight-ipython"><div class="highlight"><pre><span></span><span class="gp">In [10]: </span><span class="n">tbl</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+<span class="gh">Out[10]: </span><span class="go"></span>
+<span class="go">0               MDX</span>
+<span class="go">1    RSX Type S 2dr</span>
+<span class="go">2           TSX 4dr</span>
+<span class="go">3            TL 4dr</span>
+<span class="go">4        3.5 RL 4dr</span>
+<span class="go">Name: Model, dtype: object</span>
+</pre></div>
+</div>
+<p>Using a list of integers returns a new <a class="reference internal" href="generated/swat.cas.table.CASTable.html#swat.cas.table.CASTable" title="swat.cas.table.CASTable"><code class="xref py py-class docutils literal"><span class="pre">CASTable</span></code></a> object.</p>
+<div class="highlight-ipython"><div class="highlight"><pre><span></span><span class="gp">In [11]: </span><span class="n">tbl</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">3</span><span class="p">]]</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+<span class="gh">Out[11]: </span><span class="go"></span>
+<span class="go">Selected Rows from Table _T_D355E163_7F184AD9A0C0</span>
+
+<span class="go">            Model     MSRP Origin</span>
+<span class="go">0             MDX  36945.0   Asia</span>
+<span class="go">1  RSX Type S 2dr  23820.0   Asia</span>
+<span class="go">2         TSX 4dr  26990.0   Asia</span>
+<span class="go">3          TL 4dr  33195.0   Asia</span>
+<span class="go">4      3.5 RL 4dr  43755.0   Asia</span>
+</pre></div>
+</div>
+<p>Of course, ranges work here as well, with or without a step size.</p>
+<div class="highlight-ipython"><div class="highlight"><pre><span></span><span class="gp">In [12]: </span><span class="n">tbl</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">:</span><span class="mi">6</span><span class="p">]</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+<span class="gh">Out[12]: </span><span class="go"></span>
+<span class="go">Selected Rows from Table _T_D355E163_7F184AD9A0C0</span>
+
+<span class="go">    Type Origin DriveTrain     MSRP</span>
+<span class="go">0    SUV   Asia        All  36945.0</span>
+<span class="go">1  Sedan   Asia      Front  23820.0</span>
+<span class="go">2  Sedan   Asia      Front  26990.0</span>
+<span class="go">3  Sedan   Asia      Front  33195.0</span>
+<span class="go">4  Sedan   Asia      Front  43755.0</span>
+</pre></div>
+</div>
+<div class="highlight-ipython"><div class="highlight"><pre><span></span><span class="gp">In [13]: </span><span class="n">tbl</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,</span> <span class="mi">6</span><span class="p">:</span><span class="mi">2</span><span class="p">:</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+<span class="gh">Out[13]: </span><span class="go"></span>
+<span class="go">Selected Rows from Table _T_D355E163_7F184AD9A0C0</span>
+
+<span class="go">    Make           Model   Type Origin DriveTrain     MSRP  Invoice  \</span>
+<span class="go">0  Acura             MDX    SUV   Asia        All  36945.0  33337.0   </span>
+<span class="go">1  Acura  RSX Type S 2dr  Sedan   Asia      Front  23820.0  21761.0   </span>
+<span class="go">2  Acura         TSX 4dr  Sedan   Asia      Front  26990.0  24647.0   </span>
+<span class="go">3  Acura          TL 4dr  Sedan   Asia      Front  33195.0  30299.0   </span>
+<span class="go">4  Acura      3.5 RL 4dr  Sedan   Asia      Front  43755.0  39014.0   </span>
+
+<span class="go">   EngineSize  Cylinders  Horsepower  MPG_City  MPG_Highway  Weight  \</span>
+<span class="go">0         3.5        6.0       265.0      17.0         23.0  4451.0   </span>
+<span class="go">1         2.0        4.0       200.0      24.0         31.0  2778.0   </span>
+<span class="go">2         2.4        4.0       200.0      22.0         29.0  3230.0   </span>
+<span class="go">3         3.2        6.0       270.0      20.0         28.0  3575.0   </span>
+<span class="go">4         3.5        6.0       225.0      18.0         24.0  3880.0   </span>
+
+<span class="go">   Wheelbase  Length  </span>
+<span class="go">0      106.0   189.0  </span>
+<span class="go">1      101.0   172.0  </span>
+<span class="go">2      105.0   183.0  </span>
+<span class="go">3      108.0   186.0  </span>
+<span class="go">4      115.0   197.0  </span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="mixing-names-and-position">
+<h2>Mixing Names and Position<a class="headerlink" href="#mixing-names-and-position" title="Permalink to this headline">¶</a></h2>
+<p>The <code class="docutils literal"><span class="pre">ix</span></code> property works just like the <code class="docutils literal"><span class="pre">loc</span></code> and <code class="docutils literal"><span class="pre">iloc</span></code> properties
+except that it takes a mix of column names and indexes.</p>
+<div class="highlight-ipython"><div class="highlight"><pre><span></span><span class="gp">In [14]: </span><span class="n">tbl</span><span class="o">.</span><span class="n">ix</span><span class="p">[:,</span> <span class="s1">&#39;Model&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+<span class="gh">Out[14]: </span><span class="go"></span>
+<span class="go">0               MDX</span>
+<span class="go">1    RSX Type S 2dr</span>
+<span class="go">2           TSX 4dr</span>
+<span class="go">3            TL 4dr</span>
+<span class="go">4        3.5 RL 4dr</span>
+<span class="go">Name: Model, dtype: object</span>
+
+<span class="gp">In [15]: </span><span class="n">tbl</span><span class="o">.</span><span class="n">ix</span><span class="p">[:,</span> <span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+<span class="go">                                                                                                                                         Out[15]: </span>
+<span class="go">0    Asia</span>
+<span class="go">1    Asia</span>
+<span class="go">2    Asia</span>
+<span class="go">3    Asia</span>
+<span class="go">4    Asia</span>
+<span class="go">Name: Origin, dtype: object</span>
+</pre></div>
+</div>
+<div class="highlight-ipython"><div class="highlight"><pre><span></span><span class="gp">In [16]: </span><span class="n">tbl</span><span class="o">.</span><span class="n">ix</span><span class="p">[:,</span> <span class="p">[</span><span class="s1">&#39;Model&#39;</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">3</span><span class="p">]]</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+<span class="gh">Out[16]: </span><span class="go"></span>
+<span class="go">Selected Rows from Table _T_D355E163_7F184AD9A0C0</span>
+
+<span class="go">            Model DriveTrain Origin</span>
+<span class="go">0             MDX        All   Asia</span>
+<span class="go">1  RSX Type S 2dr      Front   Asia</span>
+<span class="go">2         TSX 4dr      Front   Asia</span>
+<span class="go">3          TL 4dr      Front   Asia</span>
+<span class="go">4      3.5 RL 4dr      Front   Asia</span>
+</pre></div>
+</div>
+<div class="highlight-ipython"><div class="highlight"><pre><span></span><span class="gp">In [17]: </span><span class="n">tbl</span><span class="o">.</span><span class="n">ix</span><span class="p">[:,</span> <span class="s1">&#39;Model&#39;</span><span class="p">:</span><span class="mi">6</span><span class="p">:</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+<span class="gh">Out[17]: </span><span class="go"></span>
+<span class="go">Selected Rows from Table _T_D355E163_7F184AD9A0C0</span>
+
+<span class="go">            Model Origin     MSRP</span>
+<span class="go">0             MDX   Asia  36945.0</span>
+<span class="go">1  RSX Type S 2dr   Asia  23820.0</span>
+<span class="go">2         TSX 4dr   Asia  26990.0</span>
+<span class="go">3          TL 4dr   Asia  33195.0</span>
+<span class="go">4      3.5 RL 4dr   Asia  43755.0</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="selecting-a-cross-section">
+<h2>Selecting a Cross Section<a class="headerlink" href="#selecting-a-cross-section" title="Permalink to this headline">¶</a></h2>
+<p>The <code class="docutils literal"><span class="pre">xs</span></code> method currently only supports column selection (i.e., axis=1).
+It is primarily here for future development.</p>
+<div class="highlight-ipython"><div class="highlight"><pre><span></span><span class="gp">In [18]: </span><span class="n">tbl</span><span class="o">.</span><span class="n">xs</span><span class="p">(</span><span class="s1">&#39;Model&#39;</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+<span class="gh">Out[18]: </span><span class="go"></span>
+<span class="go">0               MDX</span>
+<span class="go">1    RSX Type S 2dr</span>
+<span class="go">2           TSX 4dr</span>
+<span class="go">3            TL 4dr</span>
+<span class="go">4        3.5 RL 4dr</span>
+<span class="go">Name: Model, dtype: object</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="boolean-indexing">
+<h2>Boolean Indexing<a class="headerlink" href="#boolean-indexing" title="Permalink to this headline">¶</a></h2>
+<p>It is possible to use a <a class="reference internal" href="generated/swat.cas.table.CASColumn.html#swat.cas.table.CASColumn" title="swat.cas.table.CASColumn"><code class="xref py py-class docutils literal"><span class="pre">CASColumn</span></code></a> as a way to select rows in a
+CAS table.  The <a class="reference internal" href="generated/swat.cas.table.CASColumn.html#swat.cas.table.CASColumn" title="swat.cas.table.CASColumn"><code class="xref py py-class docutils literal"><span class="pre">CASColumn</span></code></a> should contain values that are valid
+booleans to CAS (typically integer values where 0 is <cite>false</cite> and non-zero
+is <cite>true</cite>).</p>
+<p>Here is a basic example that selects all cars with an MSRP value over 80,000.</p>
+<div class="highlight-ipython"><div class="highlight"><pre><span></span><span class="gp">In [19]: </span><span class="n">tbl</span><span class="p">[</span><span class="n">tbl</span><span class="o">.</span><span class="n">MSRP</span> <span class="o">&gt;</span> <span class="mi">80000</span><span class="p">]</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+<span class="gh">Out[19]: </span><span class="go"></span>
+<span class="go">Selected Rows from Table _T_D355E163_7F184AD9A0C0</span>
+
+<span class="go">     Make                         Model    Type  Origin DriveTrain     MSRP  \</span>
+<span class="go">0   Acura        NSX coupe 2dr manual S  Sports    Asia       Rear  89765.0   </span>
+<span class="go">1    Audi                      RS 6 4dr  Sports  Europe      Front  84600.0   </span>
+<span class="go">2   Dodge  Viper SRT-10 convertible 2dr  Sports     USA       Rear  81795.0   </span>
+<span class="go">3  Jaguar                 XKR coupe 2dr  Sports  Europe       Rear  81995.0   </span>
+<span class="go">4  Jaguar           XKR convertible 2dr  Sports  Europe       Rear  86995.0   </span>
+
+<span class="go">   Invoice  EngineSize  Cylinders  Horsepower  MPG_City  MPG_Highway  Weight  \</span>
+<span class="go">0  79978.0         3.2        6.0       290.0      17.0         24.0  3153.0   </span>
+<span class="go">1  76417.0         4.2        8.0       450.0      15.0         22.0  4024.0   </span>
+<span class="go">2  74451.0         8.3       10.0       500.0      12.0         20.0  3410.0   </span>
+<span class="go">3  74676.0         4.2        8.0       390.0      16.0         23.0  3865.0   </span>
+<span class="go">4  79226.0         4.2        8.0       390.0      16.0         23.0  4042.0   </span>
+
+<span class="go">   Wheelbase  Length  </span>
+<span class="go">0      100.0   174.0  </span>
+<span class="go">1      109.0   191.0  </span>
+<span class="go">2       99.0   176.0  </span>
+<span class="go">3      102.0   187.0  </span>
+<span class="go">4      102.0   187.0  </span>
+</pre></div>
+</div>
+<p>Conditions can be combined with <code class="docutils literal"><span class="pre">|</span></code> for <cite>or</cite>, <code class="docutils literal"><span class="pre">&amp;</span></code> for <cite>and</cite>, and <code class="docutils literal"><span class="pre">~</span></code>
+for <cite>not</cite>.  However, due to the order of precedence in Python, you must put
+your comparisons operations in parentheses before combining them with
+these operators.</p>
+<div class="highlight-ipython"><div class="highlight"><pre><span></span><span class="gp">In [20]: </span><span class="n">tbl</span><span class="p">[(</span><span class="n">tbl</span><span class="o">.</span><span class="n">MSRP</span> <span class="o">&gt;</span> <span class="mi">80000</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">tbl</span><span class="o">.</span><span class="n">Horsepower</span> <span class="o">&gt;</span> <span class="mi">400</span><span class="p">)]</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+<span class="gh">Out[20]: </span><span class="go"></span>
+<span class="go">Selected Rows from Table _T_D355E163_7F184AD9A0C0</span>
+
+<span class="go">            Make                         Model    Type  Origin DriveTrain  \</span>
+<span class="go">0           Audi                      RS 6 4dr  Sports  Europe      Front   </span>
+<span class="go">1          Dodge  Viper SRT-10 convertible 2dr  Sports     USA       Rear   </span>
+<span class="go">2  Mercedes-Benz                     CL600 2dr   Sedan  Europe       Rear   </span>
+<span class="go">3  Mercedes-Benz                  SL55 AMG 2dr  Sports  Europe       Rear   </span>
+<span class="go">4  Mercedes-Benz         SL600 convertible 2dr  Sports  Europe       Rear   </span>
+
+<span class="go">       MSRP   Invoice  EngineSize  Cylinders  Horsepower  MPG_City  \</span>
+<span class="go">0   84600.0   76417.0         4.2        8.0       450.0      15.0   </span>
+<span class="go">1   81795.0   74451.0         8.3       10.0       500.0      12.0   </span>
+<span class="go">2  128420.0  119600.0         5.5       12.0       493.0      13.0   </span>
+<span class="go">3  121770.0  113388.0         5.5        8.0       493.0      14.0   </span>
+<span class="go">4  126670.0  117854.0         5.5       12.0       493.0      13.0   </span>
+
+<span class="go">   MPG_Highway  Weight  Wheelbase  Length  </span>
+<span class="go">0         22.0  4024.0      109.0   191.0  </span>
+<span class="go">1         20.0  3410.0       99.0   176.0  </span>
+<span class="go">2         19.0  4473.0      114.0   196.0  </span>
+<span class="go">3         21.0  4235.0      101.0   179.0  </span>
+<span class="go">4         19.0  4429.0      101.0   179.0  </span>
+</pre></div>
+</div>
+<p>Since each mask of a <a class="reference internal" href="generated/swat.cas.table.CASTable.html#swat.cas.table.CASTable" title="swat.cas.table.CASTable"><code class="xref py py-class docutils literal"><span class="pre">CASTable</span></code></a> object returns a new <a class="reference internal" href="generated/swat.cas.table.CASTable.html#swat.cas.table.CASTable" title="swat.cas.table.CASTable"><code class="xref py py-class docutils literal"><span class="pre">CASTable</span></code></a>
+object, you can split operations across multiple steps.</p>
+<div class="highlight-ipython"><div class="highlight"><pre><span></span><span class="gp">In [21]: </span><span class="n">expensive</span> <span class="o">=</span> <span class="n">tbl</span><span class="p">[</span><span class="n">tbl</span><span class="o">.</span><span class="n">MSRP</span> <span class="o">&gt;</span> <span class="mi">80000</span><span class="p">]</span>
+
+<span class="gp">In [22]: </span><span class="n">expensive</span><span class="p">[</span><span class="n">expensive</span><span class="o">.</span><span class="n">Horsepower</span> <span class="o">&gt;</span> <span class="mi">400</span><span class="p">]</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+<span class="gh">Out[22]: </span><span class="go"></span>
+<span class="go">Selected Rows from Table _T_D355E163_7F184AD9A0C0</span>
+
+<span class="go">            Make                         Model    Type  Origin DriveTrain  \</span>
+<span class="go">0           Audi                      RS 6 4dr  Sports  Europe      Front   </span>
+<span class="go">1          Dodge  Viper SRT-10 convertible 2dr  Sports     USA       Rear   </span>
+<span class="go">2  Mercedes-Benz                     CL600 2dr   Sedan  Europe       Rear   </span>
+<span class="go">3  Mercedes-Benz                  SL55 AMG 2dr  Sports  Europe       Rear   </span>
+<span class="go">4  Mercedes-Benz         SL600 convertible 2dr  Sports  Europe       Rear   </span>
+
+<span class="go">       MSRP   Invoice  EngineSize  Cylinders  Horsepower  MPG_City  \</span>
+<span class="go">0   84600.0   76417.0         4.2        8.0       450.0      15.0   </span>
+<span class="go">1   81795.0   74451.0         8.3       10.0       500.0      12.0   </span>
+<span class="go">2  128420.0  119600.0         5.5       12.0       493.0      13.0   </span>
+<span class="go">3  121770.0  113388.0         5.5        8.0       493.0      14.0   </span>
+<span class="go">4  126670.0  117854.0         5.5       12.0       493.0      13.0   </span>
+
+<span class="go">   MPG_Highway  Weight  Wheelbase  Length  </span>
+<span class="go">0         22.0  4024.0      109.0   191.0  </span>
+<span class="go">1         20.0  3410.0       99.0   176.0  </span>
+<span class="go">2         19.0  4473.0      114.0   196.0  </span>
+<span class="go">3         21.0  4235.0      101.0   179.0  </span>
+<span class="go">4         19.0  4429.0      101.0   179.0  </span>
+</pre></div>
+</div>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">You can only use columns from within the same CAS table in boolean
+operations.  If you want to combine operations across tables, you
+should create a view that contains all of the data, then use
+the filtering features outlined above on that view.</p>
+</div>
+</div>
+<div class="section" id="the-query-method">
+<h2>The <code class="docutils literal"><span class="pre">query</span></code> Method<a class="headerlink" href="#the-query-method" title="Permalink to this headline">¶</a></h2>
+<p>Rather than using the boolean data selection described above, you can
+write a CAS <cite>where</cite> expression and apply it to a <a class="reference internal" href="generated/swat.cas.table.CASTable.html#swat.cas.table.CASTable" title="swat.cas.table.CASTable"><code class="xref py py-class docutils literal"><span class="pre">CASTable</span></code></a> object
+directly using the <a class="reference internal" href="generated/swat.cas.table.CASTable.query.html#swat.cas.table.CASTable.query" title="swat.cas.table.CASTable.query"><code class="xref py py-meth docutils literal"><span class="pre">CASTable.query()</span></code></a> method.  This can often result
+in more readable code when using longer expressions.</p>
+<div class="highlight-ipython"><div class="highlight"><pre><span></span><span class="gp">In [23]: </span><span class="n">tbl</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="s1">&#39;MSRP &gt; 80000 and Horsepower &gt; 400&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+<span class="gh">Out[23]: </span><span class="go"></span>
+<span class="go">Selected Rows from Table _T_D355E163_7F184AD9A0C0</span>
+
+<span class="go">            Make                         Model    Type  Origin DriveTrain  \</span>
+<span class="go">0           Audi                      RS 6 4dr  Sports  Europe      Front   </span>
+<span class="go">1          Dodge  Viper SRT-10 convertible 2dr  Sports     USA       Rear   </span>
+<span class="go">2  Mercedes-Benz                     CL600 2dr   Sedan  Europe       Rear   </span>
+<span class="go">3  Mercedes-Benz                  SL55 AMG 2dr  Sports  Europe       Rear   </span>
+<span class="go">4  Mercedes-Benz         SL600 convertible 2dr  Sports  Europe       Rear   </span>
+
+<span class="go">       MSRP   Invoice  EngineSize  Cylinders  Horsepower  MPG_City  \</span>
+<span class="go">0   84600.0   76417.0         4.2        8.0       450.0      15.0   </span>
+<span class="go">1   81795.0   74451.0         8.3       10.0       500.0      12.0   </span>
+<span class="go">2  128420.0  119600.0         5.5       12.0       493.0      13.0   </span>
+<span class="go">3  121770.0  113388.0         5.5        8.0       493.0      14.0   </span>
+<span class="go">4  126670.0  117854.0         5.5       12.0       493.0      13.0   </span>
+
+<span class="go">   MPG_Highway  Weight  Wheelbase  Length  </span>
+<span class="go">0         22.0  4024.0      109.0   191.0  </span>
+<span class="go">1         20.0  3410.0       99.0   176.0  </span>
+<span class="go">2         19.0  4473.0      114.0   196.0  </span>
+<span class="go">3         21.0  4235.0      101.0   179.0  </span>
+<span class="go">4         19.0  4429.0      101.0   179.0  </span>
+</pre></div>
+</div>
+<p>Of course, queries can be combined across multiple steps as well.</p>
+<div class="highlight-ipython"><div class="highlight"><pre><span></span><span class="gp">In [24]: </span><span class="n">expensive</span> <span class="o">=</span> <span class="n">tbl</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="s1">&#39;MSRP &gt; 80000&#39;</span><span class="p">)</span>
+
+<span class="gp">In [25]: </span><span class="n">expensive</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="s1">&#39;Horsepower &gt; 400&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+<span class="gh">Out[25]: </span><span class="go"></span>
+<span class="go">Selected Rows from Table _T_D355E163_7F184AD9A0C0</span>
+
+<span class="go">            Make                         Model    Type  Origin DriveTrain  \</span>
+<span class="go">0           Audi                      RS 6 4dr  Sports  Europe      Front   </span>
+<span class="go">1          Dodge  Viper SRT-10 convertible 2dr  Sports     USA       Rear   </span>
+<span class="go">2  Mercedes-Benz                     CL600 2dr   Sedan  Europe       Rear   </span>
+<span class="go">3  Mercedes-Benz                  SL55 AMG 2dr  Sports  Europe       Rear   </span>
+<span class="go">4  Mercedes-Benz         SL600 convertible 2dr  Sports  Europe       Rear   </span>
+
+<span class="go">       MSRP   Invoice  EngineSize  Cylinders  Horsepower  MPG_City  \</span>
+<span class="go">0   84600.0   76417.0         4.2        8.0       450.0      15.0   </span>
+<span class="go">1   81795.0   74451.0         8.3       10.0       500.0      12.0   </span>
+<span class="go">2  128420.0  119600.0         5.5       12.0       493.0      13.0   </span>
+<span class="go">3  121770.0  113388.0         5.5        8.0       493.0      14.0   </span>
+<span class="go">4  126670.0  117854.0         5.5       12.0       493.0      13.0   </span>
+
+<span class="go">   MPG_Highway  Weight  Wheelbase  Length  </span>
+<span class="go">0         22.0  4024.0      109.0   191.0  </span>
+<span class="go">1         20.0  3410.0       99.0   176.0  </span>
+<span class="go">2         19.0  4473.0      114.0   196.0  </span>
+<span class="go">3         21.0  4235.0      101.0   179.0  </span>
+<span class="go">4         19.0  4429.0      101.0   179.0  </span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="bygroups.html" class="btn btn-neutral float-right" title="Handling By Groups" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="table-vs-dataframe.html" class="btn btn-neutral" title="CASTable vs. DataFrame vs. SASDataFrame" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016 SAS Institute Inc. All Rights Reserved..
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'1.0.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

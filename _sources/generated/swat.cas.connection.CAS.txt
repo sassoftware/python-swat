@@ -49,6 +49,7 @@ swat.cas.connection.CAS
       ~CAS.read_table
       ~CAS.retrieve
       ~CAS.session_context
+      ~CAS.terminate
       ~CAS.upload
       ~CAS.upload_file
       ~CAS.upload_frame

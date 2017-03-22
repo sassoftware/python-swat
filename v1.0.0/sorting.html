@@ -1,0 +1,386 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Sorting &mdash; SWAT 1.0.0 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+    <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+
+  
+    <link rel="top" title="SWAT 1.0.0 documentation" href="index.html"/>
+        <link rel="next" title="API Reference" href="api.html"/>
+        <link rel="prev" title="Handling By Groups" href="bygroups.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> SWAT
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.0.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="workflows.html">Workflows</a></li>
+<li class="toctree-l1"><a class="reference internal" href="binary-vs-rest.html">Binary vs. REST</a></li>
+<li class="toctree-l1"><a class="reference internal" href="loading-data.html">Loading Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="table-vs-dataframe.html">CASTable vs. DataFrame vs. SASDataFrame</a></li>
+<li class="toctree-l1"><a class="reference internal" href="indexing.html">Indexing and Data Selection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bygroups.html">Handling By Groups</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Sorting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gotchas.html">Programming Gotchas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="troubleshooting.html">Troubleshooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sas-tk.html">SAS TK</a></li>
+<li class="toctree-l1"><a class="reference internal" href="licenses.html">Licenses</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="index.html">SWAT</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+ 
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+      
+    <li>Sorting</li>
+    <li class="wy-breadcrumbs-aside">
+      
+          
+          <a href="_sources/sorting.txt" rel="nofollow"> View page source</a>
+        
+      
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="sorting">
+<h1>Sorting<a class="headerlink" href="#sorting" title="Permalink to this headline">¶</a></h1>
+<p>Since data in CAS can be spread across many machines and may even be redistributed
+depending on events that occur, the data is not stored in an ordered form.
+In general, when using statistical actions, this doesn&#8217;t make much difference
+since the CAS actions doing the work will handle the data regardless of the
+order that it is in.  However, when you are bringing a table of data back to
+the client from CAS using the <code class="docutils literal"><span class="pre">fetch</span></code> action, you may want to have it come
+back in a sorted form.</p>
+<div class="highlight-ipython"><div class="highlight"><pre><span></span><span class="gp">In [1]: </span><span class="n">conn</span> <span class="o">=</span> <span class="n">swat</span><span class="o">.</span><span class="n">CAS</span><span class="p">(</span><span class="n">host</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="n">username</span><span class="p">,</span> <span class="n">password</span><span class="p">)</span>
+
+<span class="gp">In [2]: </span><span class="n">tbl</span> <span class="o">=</span> <span class="n">conn</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;https://raw.githubusercontent.com/&#39;</span>
+<span class="gp">   ...: </span>                    <span class="s1">&#39;sassoftware/sas-viya-programming/master/data/cars.csv&#39;</span><span class="p">)</span>
+<span class="gp">   ...: </span>
+
+<span class="gp">In [3]: </span><span class="n">tbl</span><span class="o">.</span><span class="n">fetch</span><span class="p">(</span><span class="n">to</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+<span class="gh">Out[3]: </span><span class="go"></span>
+<span class="go">[Fetch]</span>
+
+<span class="go"> Selected Rows from Table _T_D355EE4C_7FE19B37F0C0</span>
+<span class="go"> </span>
+<span class="go">     Make           Model   Type Origin DriveTrain     MSRP  Invoice  \</span>
+<span class="go"> 0  Acura             MDX    SUV   Asia        All  36945.0  33337.0   </span>
+<span class="go"> 1  Acura  RSX Type S 2dr  Sedan   Asia      Front  23820.0  21761.0   </span>
+<span class="go"> 2  Acura         TSX 4dr  Sedan   Asia      Front  26990.0  24647.0   </span>
+<span class="go"> 3  Acura          TL 4dr  Sedan   Asia      Front  33195.0  30299.0   </span>
+<span class="go"> 4  Acura      3.5 RL 4dr  Sedan   Asia      Front  43755.0  39014.0   </span>
+<span class="go"> </span>
+<span class="go">    EngineSize  Cylinders  Horsepower  MPG_City  MPG_Highway  Weight  \</span>
+<span class="go"> 0         3.5        6.0       265.0      17.0         23.0  4451.0   </span>
+<span class="go"> 1         2.0        4.0       200.0      24.0         31.0  2778.0   </span>
+<span class="go"> 2         2.4        4.0       200.0      22.0         29.0  3230.0   </span>
+<span class="go"> 3         3.2        6.0       270.0      20.0         28.0  3575.0   </span>
+<span class="go"> 4         3.5        6.0       225.0      18.0         24.0  3880.0   </span>
+<span class="go"> </span>
+<span class="go">    Wheelbase  Length  </span>
+<span class="go"> 0      106.0   189.0  </span>
+<span class="go"> 1      101.0   172.0  </span>
+<span class="go"> 2      105.0   183.0  </span>
+<span class="go"> 3      108.0   186.0  </span>
+<span class="go"> 4      115.0   197.0  </span>
+
+<span class="go">+ Elapsed: 0.00368s, user: 0.003s, mem: 1.65mb</span>
+
+<span class="gp">In [4]: </span><span class="n">tbl</span><span class="o">.</span><span class="n">fetch</span><span class="p">(</span><span class="n">to</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">sortby</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;MSRP&#39;</span><span class="p">])</span>
+<span class="go">                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           Out[4]: </span>
+<span class="go">[Fetch]</span>
+
+<span class="go"> Selected Rows from Table _T_D355EE4C_7FE19B37F0C0</span>
+<span class="go"> </span>
+<span class="go">       Make             Model   Type Origin DriveTrain     MSRP  Invoice  \</span>
+<span class="go"> 0      Kia    Rio 4dr manual  Sedan   Asia      Front  10280.0   9875.0   </span>
+<span class="go"> 1  Hyundai  Accent 2dr hatch  Sedan   Asia      Front  10539.0  10107.0   </span>
+<span class="go"> 2   Toyota   Echo 2dr manual  Sedan   Asia      Front  10760.0  10144.0   </span>
+<span class="go"> 3   Saturn          Ion1 4dr  Sedan    USA      Front  10995.0  10319.0   </span>
+<span class="go"> 4      Kia      Rio 4dr auto  Sedan   Asia      Front  11155.0  10705.0   </span>
+<span class="go"> </span>
+<span class="go">    EngineSize  Cylinders  Horsepower  MPG_City  MPG_Highway  Weight  \</span>
+<span class="go"> 0         1.6        4.0       104.0      26.0         33.0  2403.0   </span>
+<span class="go"> 1         1.6        4.0       103.0      29.0         33.0  2255.0   </span>
+<span class="go"> 2         1.5        4.0       108.0      35.0         43.0  2035.0   </span>
+<span class="go"> 3         2.2        4.0       140.0      26.0         35.0  2692.0   </span>
+<span class="go"> 4         1.6        4.0       104.0      25.0         32.0  2458.0   </span>
+<span class="go"> </span>
+<span class="go">    Wheelbase  Length  </span>
+<span class="go"> 0       95.0   167.0  </span>
+<span class="go"> 1       96.0   167.0  </span>
+<span class="go"> 2       93.0   163.0  </span>
+<span class="go"> 3      103.0   185.0  </span>
+<span class="go"> 4       95.0   167.0  </span>
+
+<span class="go">+ Elapsed: 0.0126s, user: 0.008s, sys: 0.004s, mem: 6.2mb</span>
+</pre></div>
+</div>
+<p>Of course, it is possible to set the direction of the sorting as well.</p>
+<div class="highlight-ipython"><div class="highlight"><pre><span></span><span class="gp">In [5]: </span><span class="n">tbl</span><span class="o">.</span><span class="n">fetch</span><span class="p">(</span><span class="n">to</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">sortby</span><span class="o">=</span><span class="p">[{</span><span class="s1">&#39;name&#39;</span><span class="p">:</span><span class="s1">&#39;MSRP&#39;</span><span class="p">,</span> <span class="s1">&#39;order&#39;</span><span class="p">:</span><span class="s1">&#39;descending&#39;</span><span class="p">}])</span>
+<span class="gh">Out[5]: </span><span class="go"></span>
+<span class="go">[Fetch]</span>
+
+<span class="go"> Selected Rows from Table _T_D355EE4C_7FE19B37F0C0</span>
+<span class="go"> </span>
+<span class="go">             Make                  Model    Type  Origin DriveTrain      MSRP  \</span>
+<span class="go"> 0        Porsche            911 GT2 2dr  Sports  Europe       Rear  192465.0   </span>
+<span class="go"> 1  Mercedes-Benz              CL600 2dr   Sedan  Europe       Rear  128420.0   </span>
+<span class="go"> 2  Mercedes-Benz  SL600 convertible 2dr  Sports  Europe       Rear  126670.0   </span>
+<span class="go"> 3  Mercedes-Benz           SL55 AMG 2dr  Sports  Europe       Rear  121770.0   </span>
+<span class="go"> 4  Mercedes-Benz              CL500 2dr   Sedan  Europe       Rear   94820.0   </span>
+<span class="go"> </span>
+<span class="go">     Invoice  EngineSize  Cylinders  Horsepower  MPG_City  MPG_Highway  Weight  \</span>
+<span class="go"> 0  173560.0         3.6        6.0       477.0      17.0         24.0  3131.0   </span>
+<span class="go"> 1  119600.0         5.5       12.0       493.0      13.0         19.0  4473.0   </span>
+<span class="go"> 2  117854.0         5.5       12.0       493.0      13.0         19.0  4429.0   </span>
+<span class="go"> 3  113388.0         5.5        8.0       493.0      14.0         21.0  4235.0   </span>
+<span class="go"> 4   88324.0         5.0        8.0       302.0      16.0         24.0  4085.0   </span>
+<span class="go"> </span>
+<span class="go">    Wheelbase  Length  </span>
+<span class="go"> 0       93.0   175.0  </span>
+<span class="go"> 1      114.0   196.0  </span>
+<span class="go"> 2      101.0   179.0  </span>
+<span class="go"> 3      101.0   179.0  </span>
+<span class="go"> 4      114.0   196.0  </span>
+
+<span class="go">+ Elapsed: 0.0102s, user: 0.006s, sys: 0.004s, mem: 6.19mb</span>
+</pre></div>
+</div>
+<p>If you are using the <a class="reference external" href="http://pandas.pydata.org/pandas-docs/version/0.18.0/generated/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v0.18.0)"><code class="xref py py-class docutils literal"><span class="pre">pandas.DataFrame</span></code></a> style API for <code class="xref py py-class docutils literal"><span class="pre">CASTable</span></code>,
+you can also use the <code class="xref py py-meth docutils literal"><span class="pre">sort_values()</span></code> method on <code class="xref py py-class docutils literal"><span class="pre">CASTable</span></code> objects.</p>
+<div class="highlight-ipython"><div class="highlight"><pre><span></span><span class="gp">In [6]: </span><span class="n">sorttbl</span> <span class="o">=</span> <span class="n">tbl</span><span class="o">.</span><span class="n">sort_values</span><span class="p">([</span><span class="s1">&#39;MSRP&#39;</span><span class="p">])</span>
+
+<span class="gp">In [7]: </span><span class="n">sorttbl</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+<span class="gh">Out[7]: </span><span class="go"></span>
+<span class="go">Selected Rows from Table _T_D355EE4C_7FE19B37F0C0</span>
+
+<span class="go">      Make             Model   Type Origin DriveTrain     MSRP  Invoice  \</span>
+<span class="go">0      Kia    Rio 4dr manual  Sedan   Asia      Front  10280.0   9875.0   </span>
+<span class="go">1  Hyundai  Accent 2dr hatch  Sedan   Asia      Front  10539.0  10107.0   </span>
+<span class="go">2   Toyota   Echo 2dr manual  Sedan   Asia      Front  10760.0  10144.0   </span>
+<span class="go">3   Saturn          Ion1 4dr  Sedan    USA      Front  10995.0  10319.0   </span>
+<span class="go">4      Kia      Rio 4dr auto  Sedan   Asia      Front  11155.0  10705.0   </span>
+
+<span class="go">   EngineSize  Cylinders  Horsepower  MPG_City  MPG_Highway  Weight  \</span>
+<span class="go">0         1.6        4.0       104.0      26.0         33.0  2403.0   </span>
+<span class="go">1         1.6        4.0       103.0      29.0         33.0  2255.0   </span>
+<span class="go">2         1.5        4.0       108.0      35.0         43.0  2035.0   </span>
+<span class="go">3         2.2        4.0       140.0      26.0         35.0  2692.0   </span>
+<span class="go">4         1.6        4.0       104.0      25.0         32.0  2458.0   </span>
+
+<span class="go">   Wheelbase  Length  </span>
+<span class="go">0       95.0   167.0  </span>
+<span class="go">1       96.0   167.0  </span>
+<span class="go">2       93.0   163.0  </span>
+<span class="go">3      103.0   185.0  </span>
+<span class="go">4       95.0   167.0  </span>
+
+<span class="gp">In [8]: </span><span class="n">sorttbl</span> <span class="o">=</span> <span class="n">tbl</span><span class="o">.</span><span class="n">sort_values</span><span class="p">([</span><span class="s1">&#39;MSRP&#39;</span><span class="p">],</span> <span class="n">ascending</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+
+<span class="gp">In [9]: </span><span class="n">sorttbl</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+<span class="gh">Out[9]: </span><span class="go"></span>
+<span class="go">Selected Rows from Table _T_D355EE4C_7FE19B37F0C0</span>
+
+<span class="go">            Make                  Model    Type  Origin DriveTrain      MSRP  \</span>
+<span class="go">0        Porsche            911 GT2 2dr  Sports  Europe       Rear  192465.0   </span>
+<span class="go">1  Mercedes-Benz              CL600 2dr   Sedan  Europe       Rear  128420.0   </span>
+<span class="go">2  Mercedes-Benz  SL600 convertible 2dr  Sports  Europe       Rear  126670.0   </span>
+<span class="go">3  Mercedes-Benz           SL55 AMG 2dr  Sports  Europe       Rear  121770.0   </span>
+<span class="go">4  Mercedes-Benz              CL500 2dr   Sedan  Europe       Rear   94820.0   </span>
+
+<span class="go">    Invoice  EngineSize  Cylinders  Horsepower  MPG_City  MPG_Highway  Weight  \</span>
+<span class="go">0  173560.0         3.6        6.0       477.0      17.0         24.0  3131.0   </span>
+<span class="go">1  119600.0         5.5       12.0       493.0      13.0         19.0  4473.0   </span>
+<span class="go">2  117854.0         5.5       12.0       493.0      13.0         19.0  4429.0   </span>
+<span class="go">3  113388.0         5.5        8.0       493.0      14.0         21.0  4235.0   </span>
+<span class="go">4   88324.0         5.0        8.0       302.0      16.0         24.0  4085.0   </span>
+
+<span class="go">   Wheelbase  Length  </span>
+<span class="go">0       93.0   175.0  </span>
+<span class="go">1      114.0   196.0  </span>
+<span class="go">2      101.0   179.0  </span>
+<span class="go">3      101.0   179.0  </span>
+<span class="go">4      114.0   196.0  </span>
+</pre></div>
+</div>
+<p>As previously mentioned, this doesn&#8217;t affect anything in the table on the
+CAS server itself, it merely stores away the sort keys and applies them
+when data is fetched (either through <code class="docutils literal"><span class="pre">fetch</span></code> directly, or any method that
+calls <code class="docutils literal"><span class="pre">fetch</span></code> in the background).</p>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="api.html" class="btn btn-neutral float-right" title="API Reference" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="bygroups.html" class="btn btn-neutral" title="Handling By Groups" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016 SAS Institute Inc. All Rights Reserved..
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'1.0.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

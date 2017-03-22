@@ -43,7 +43,9 @@ swat.cas.table.CASColumn
       ~CASColumn.describe
       ~CASColumn.div
       ~CASColumn.drop
+      ~CASColumn.dropna
       ~CASColumn.eq
+      ~CASColumn.fillna
       ~CASColumn.floordiv
       ~CASColumn.from_csv
       ~CASColumn.from_dict
@@ -102,6 +104,7 @@ swat.cas.table.CASColumn
       ~CASColumn.query
       ~CASColumn.radd
       ~CASColumn.rdiv
+      ~CASColumn.replace
       ~CASColumn.retrieve
       ~CASColumn.rfloordiv
       ~CASColumn.rmod

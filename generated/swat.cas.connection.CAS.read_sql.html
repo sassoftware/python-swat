@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>swat.CAS.read_sql &mdash; SWAT 1.0.0 documentation</title>
+  <title>swat.CAS.read_sql &mdash; SWAT 1.1.0 documentation</title>
   
 
   
@@ -32,7 +32,7 @@
   
 
   
-    <link rel="top" title="SWAT 1.0.0 documentation" href="../index.html"/>
+    <link rel="top" title="SWAT 1.1.0 documentation" href="../index.html"/>
         <link rel="up" title="API Reference" href="../api.html"/>
         <link rel="next" title="swat.CAS.read_gbq" href="swat.cas.connection.CAS.read_gbq.html"/>
         <link rel="prev" title="swat.CAS.read_sql_query" href="swat.cas.connection.CAS.read_sql_query.html"/> 
@@ -64,7 +64,7 @@
             
             
               <div class="version">
-                1.0.0
+                1.1.0
               </div>
             
           
@@ -87,6 +87,7 @@
             
                 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../whatsnew.html">What&#8217;s New</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../getting-started.html">Getting Started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../workflows.html">Workflows</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../binary-vs-rest.html">Binary vs. REST</a></li>
@@ -177,10 +178,10 @@
 <h1>swat.CAS.read_sql<a class="headerlink" href="#swat-cas-connection-cas-read-sql" title="Permalink to this headline">¶</a></h1>
 <dl class="method">
 <dt id="swat.CAS.read_sql">
-<code class="descclassname">CAS.</code><code class="descname">read_sql</code><span class="sig-paren">(</span><em>sql</em>, <em>con</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#swat.CAS.read_sql" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">CAS.</code><code class="descname">read_sql</code><span class="sig-paren">(</span><em>sql</em>, <em>con</em>, <em>casout=None</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#swat.CAS.read_sql" title="Permalink to this definition">¶</a></dt>
 <dd><p>Read SQL query or database table into a CAS table</p>
-<p>This method calls <a class="reference external" href="http://pandas.pydata.org/pandas-docs/version/0.18.0/generated/pandas.read_sql.html#pandas.read_sql" title="(in pandas v0.18.0)"><code class="xref py py-func docutils literal"><span class="pre">pandas.read_sql()</span></code></a> with the
-given arguments, then uploads the resulting <a class="reference external" href="http://pandas.pydata.org/pandas-docs/version/0.18.0/generated/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v0.18.0)"><code class="xref py py-class docutils literal"><span class="pre">pandas.DataFrame</span></code></a>
+<p>This method calls <a class="reference external" href="http://pandas.pydata.org/pandas-docs/version/0.19.2/generated/pandas.read_sql.html#pandas.read_sql" title="(in pandas v0.19.2)"><code class="xref py py-func docutils literal"><span class="pre">pandas.read_sql()</span></code></a> with the
+given arguments, then uploads the resulting <a class="reference external" href="http://pandas.pydata.org/pandas-docs/version/0.19.2/generated/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v0.19.2)"><code class="xref py py-class docutils literal"><span class="pre">pandas.DataFrame</span></code></a>
 to a CAS table.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -221,7 +222,7 @@ table with the same name.</p>
 </div></blockquote>
 <p><strong>**kwargs</strong> : any, optional</p>
 <blockquote>
-<div><p>Keyword arguments to <a class="reference external" href="http://pandas.pydata.org/pandas-docs/version/0.18.0/generated/pandas.read_sql.html#pandas.read_sql" title="(in pandas v0.18.0)"><code class="xref py py-func docutils literal"><span class="pre">pandas.read_sql()</span></code></a>.</p>
+<div><p>Keyword arguments to <a class="reference external" href="http://pandas.pydata.org/pandas-docs/version/0.19.2/generated/pandas.read_sql.html#pandas.read_sql" title="(in pandas v0.19.2)"><code class="xref py py-func docutils literal"><span class="pre">pandas.read_sql()</span></code></a>.</p>
 </div></blockquote>
 </td>
 </tr>
@@ -232,11 +233,11 @@ table with the same name.</p>
 </table>
 <div class="admonition seealso">
 <p class="first admonition-title">See also</p>
-<p class="last"><a class="reference external" href="http://pandas.pydata.org/pandas-docs/version/0.18.0/generated/pandas.read_sql.html#pandas.read_sql" title="(in pandas v0.18.0)"><code class="xref py py-func docutils literal"><span class="pre">pandas.read_sql()</span></code></a>, <a class="reference internal" href="swat.cas.connection.CAS.read_sql_table.html#swat.CAS.read_sql_table" title="swat.CAS.read_sql_table"><code class="xref py py-meth docutils literal"><span class="pre">read_sql_table()</span></code></a>, <a class="reference internal" href="swat.cas.connection.CAS.read_sql_query.html#swat.CAS.read_sql_query" title="swat.CAS.read_sql_query"><code class="xref py py-meth docutils literal"><span class="pre">read_sql_query()</span></code></a></p>
+<p class="last"><a class="reference external" href="http://pandas.pydata.org/pandas-docs/version/0.19.2/generated/pandas.read_sql.html#pandas.read_sql" title="(in pandas v0.19.2)"><code class="xref py py-func docutils literal"><span class="pre">pandas.read_sql()</span></code></a>, <a class="reference internal" href="swat.cas.connection.CAS.read_sql_table.html#swat.CAS.read_sql_table" title="swat.CAS.read_sql_table"><code class="xref py py-meth docutils literal"><span class="pre">read_sql_table()</span></code></a>, <a class="reference internal" href="swat.cas.connection.CAS.read_sql_query.html#swat.CAS.read_sql_query" title="swat.CAS.read_sql_query"><code class="xref py py-meth docutils literal"><span class="pre">read_sql_query()</span></code></a></p>
 </div>
 <p class="rubric">Notes</p>
 <p>The data from the database will be pulled to the client machine
-in the form of a <a class="reference external" href="http://pandas.pydata.org/pandas-docs/version/0.18.0/generated/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v0.18.0)"><code class="xref py py-class docutils literal"><span class="pre">pandas.DataFrame</span></code></a> then uploaded to CAS.
+in the form of a <a class="reference external" href="http://pandas.pydata.org/pandas-docs/version/0.19.2/generated/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v0.19.2)"><code class="xref py py-class docutils literal"><span class="pre">pandas.DataFrame</span></code></a> then uploaded to CAS.
 If you are moving large amounts of data, you may want to use
 a direct database connecter from CAS.</p>
 <p class="rubric">Examples</p>
@@ -290,7 +291,7 @@ a direct database connecter from CAS.</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../',
-            VERSION:'1.0.0',
+            VERSION:'1.1.0',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

@@ -34,6 +34,8 @@ swat.cas.table.CASTable
       ~CASTable.del_params
       ~CASTable.describe
       ~CASTable.drop
+      ~CASTable.dropna
+      ~CASTable.fillna
       ~CASTable.from_csv
       ~CASTable.from_dict
       ~CASTable.from_items
@@ -76,6 +78,7 @@ swat.cas.table.CASTable
       ~CASTable.probt
       ~CASTable.quantile
       ~CASTable.query
+      ~CASTable.replace
       ~CASTable.retrieve
       ~CASTable.select_dtypes
       ~CASTable.set_action_params

@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>swat.CAS &mdash; SWAT 1.0.0 documentation</title>
+  <title>swat.CAS &mdash; SWAT 1.1.0 documentation</title>
   
 
   
@@ -32,7 +32,7 @@
   
 
   
-    <link rel="top" title="SWAT 1.0.0 documentation" href="../index.html"/>
+    <link rel="top" title="SWAT 1.1.0 documentation" href="../index.html"/>
         <link rel="up" title="API Reference" href="../api.html"/>
         <link rel="next" title="swat.CAS.close" href="swat.cas.connection.CAS.close.html"/>
         <link rel="prev" title="API Reference" href="../api.html"/> 
@@ -64,7 +64,7 @@
             
             
               <div class="version">
-                1.0.0
+                1.1.0
               </div>
             
           
@@ -87,6 +87,7 @@
             
                 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../whatsnew.html">What&#8217;s New</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../getting-started.html">Getting Started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../workflows.html">Workflows</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../binary-vs-rest.html">Binary vs. REST</a></li>
@@ -176,7 +177,7 @@
 <dl class="class">
 <dt id="swat.CAS">
 <em class="property">class </em><code class="descclassname">swat.cas.connection.</code><code class="descname">CAS</code><span class="sig-paren">(</span><em>hostname=None</em>, <em>port=None</em>, <em>username=None</em>, <em>password=None</em>, <em>session=None</em>, <em>locale=None</em>, <em>nworkers=None</em>, <em>name=None</em>, <em>authinfo=None</em>, <em>protocol=None</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#swat.CAS" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3.5/library/functions.html#object" title="(in Python v3.5)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/library/functions.html#object" title="(in Python v2.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
 <p>Create a connection to a CAS server.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -344,55 +345,55 @@ parameter.</p>
 <tr class="row-odd"><td><a class="reference internal" href="swat.cas.connection.CAS.invoke.html#swat.CAS.invoke" title="swat.CAS.invoke"><code class="xref py py-obj docutils literal"><span class="pre">invoke</span></code></a>(_name_,&nbsp;**kwargs)</td>
 <td>Call an action on the server</td>
 </tr>
-<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">json_normalize</span></code>(data,&nbsp;**kwargs)</td>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">json_normalize</span></code>(data[,&nbsp;casout])</td>
 <td>&#8220;Normalize&#8221; semi-structured JSON data into a flat table and upload to a CAS table</td>
 </tr>
 <tr class="row-odd"><td><a class="reference internal" href="swat.cas.connection.CAS.load_path.html#swat.CAS.load_path" title="swat.CAS.load_path"><code class="xref py py-obj docutils literal"><span class="pre">load_path</span></code></a>([path,&nbsp;readahead,&nbsp;importoptions,&nbsp;...])</td>
 <td>Load a path from a CASLib</td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="swat.cas.connection.CAS.read_clipboard.html#swat.CAS.read_clipboard" title="swat.CAS.read_clipboard"><code class="xref py py-obj docutils literal"><span class="pre">read_clipboard</span></code></a>(*args,&nbsp;**kwargs)</td>
+<tr class="row-even"><td><a class="reference internal" href="swat.cas.connection.CAS.read_clipboard.html#swat.CAS.read_clipboard" title="swat.CAS.read_clipboard"><code class="xref py py-obj docutils literal"><span class="pre">read_clipboard</span></code></a>([casout])</td>
 <td>Read text from clipboard and pass to <a class="reference internal" href="swat.cas.connection.CAS.read_table.html#swat.CAS.read_table" title="swat.CAS.read_table"><code class="xref py py-meth docutils literal"><span class="pre">read_table()</span></code></a></td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="swat.cas.connection.CAS.read_csv.html#swat.CAS.read_csv" title="swat.CAS.read_csv"><code class="xref py py-obj docutils literal"><span class="pre">read_csv</span></code></a>(filepath_or_buffer,&nbsp;**kwargs)</td>
+<tr class="row-odd"><td><a class="reference internal" href="swat.cas.connection.CAS.read_csv.html#swat.CAS.read_csv" title="swat.CAS.read_csv"><code class="xref py py-obj docutils literal"><span class="pre">read_csv</span></code></a>(filepath_or_buffer[,&nbsp;casout])</td>
 <td>Read CSV file into a CAS table</td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="swat.cas.connection.CAS.read_excel.html#swat.CAS.read_excel" title="swat.CAS.read_excel"><code class="xref py py-obj docutils literal"><span class="pre">read_excel</span></code></a>(io,&nbsp;**kwargs)</td>
+<tr class="row-even"><td><a class="reference internal" href="swat.cas.connection.CAS.read_excel.html#swat.CAS.read_excel" title="swat.CAS.read_excel"><code class="xref py py-obj docutils literal"><span class="pre">read_excel</span></code></a>(io[,&nbsp;casout])</td>
 <td>Read an Excel table into a CAS table</td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="swat.cas.connection.CAS.read_fwf.html#swat.CAS.read_fwf" title="swat.CAS.read_fwf"><code class="xref py py-obj docutils literal"><span class="pre">read_fwf</span></code></a>(filepath_or_buffer,&nbsp;**kwargs)</td>
+<tr class="row-odd"><td><a class="reference internal" href="swat.cas.connection.CAS.read_fwf.html#swat.CAS.read_fwf" title="swat.CAS.read_fwf"><code class="xref py py-obj docutils literal"><span class="pre">read_fwf</span></code></a>(filepath_or_buffer[,&nbsp;casout])</td>
 <td>Read a table of fixed-width formatted lines into a CAS table</td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="swat.cas.connection.CAS.read_gbq.html#swat.CAS.read_gbq" title="swat.CAS.read_gbq"><code class="xref py py-obj docutils literal"><span class="pre">read_gbq</span></code></a>(query,&nbsp;**kwargs)</td>
+<tr class="row-even"><td><a class="reference internal" href="swat.cas.connection.CAS.read_gbq.html#swat.CAS.read_gbq" title="swat.CAS.read_gbq"><code class="xref py py-obj docutils literal"><span class="pre">read_gbq</span></code></a>(query[,&nbsp;casout])</td>
 <td>Load data from a Google BigQuery into a CAS table</td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="swat.cas.connection.CAS.read_hdf.html#swat.CAS.read_hdf" title="swat.CAS.read_hdf"><code class="xref py py-obj docutils literal"><span class="pre">read_hdf</span></code></a>(path_or_buf,&nbsp;**kwargs)</td>
+<tr class="row-odd"><td><a class="reference internal" href="swat.cas.connection.CAS.read_hdf.html#swat.CAS.read_hdf" title="swat.CAS.read_hdf"><code class="xref py py-obj docutils literal"><span class="pre">read_hdf</span></code></a>(path_or_buf[,&nbsp;casout])</td>
 <td>Read from the HDF store and create a CAS table</td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="swat.cas.connection.CAS.read_html.html#swat.CAS.read_html" title="swat.CAS.read_html"><code class="xref py py-obj docutils literal"><span class="pre">read_html</span></code></a>(io,&nbsp;**kwargs)</td>
+<tr class="row-even"><td><a class="reference internal" href="swat.cas.connection.CAS.read_html.html#swat.CAS.read_html" title="swat.CAS.read_html"><code class="xref py py-obj docutils literal"><span class="pre">read_html</span></code></a>(io[,&nbsp;casout])</td>
 <td>Read HTML tables into a list of CASTable objects</td>
 </tr>
-<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">read_json</span></code>([path_or_buf])</td>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">read_json</span></code>([path_or_buf,&nbsp;casout])</td>
 <td>Read a JSON string into a CAS table</td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="swat.cas.connection.CAS.read_pickle.html#swat.CAS.read_pickle" title="swat.CAS.read_pickle"><code class="xref py py-obj docutils literal"><span class="pre">read_pickle</span></code></a>(path,&nbsp;**kwargs)</td>
+<tr class="row-even"><td><a class="reference internal" href="swat.cas.connection.CAS.read_pickle.html#swat.CAS.read_pickle" title="swat.CAS.read_pickle"><code class="xref py py-obj docutils literal"><span class="pre">read_pickle</span></code></a>(path[,&nbsp;casout])</td>
 <td>Load pickled pandas object from the specified path</td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="swat.cas.connection.CAS.read_sas.html#swat.CAS.read_sas" title="swat.CAS.read_sas"><code class="xref py py-obj docutils literal"><span class="pre">read_sas</span></code></a>(filepath_or_buffer,&nbsp;**kwargs)</td>
+<tr class="row-odd"><td><a class="reference internal" href="swat.cas.connection.CAS.read_sas.html#swat.CAS.read_sas" title="swat.CAS.read_sas"><code class="xref py py-obj docutils literal"><span class="pre">read_sas</span></code></a>(filepath_or_buffer[,&nbsp;casout])</td>
 <td>Read SAS files stored as XPORT or SAS7BDAT into a CAS table</td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="swat.cas.connection.CAS.read_sql.html#swat.CAS.read_sql" title="swat.CAS.read_sql"><code class="xref py py-obj docutils literal"><span class="pre">read_sql</span></code></a>(sql,&nbsp;con,&nbsp;**kwargs)</td>
+<tr class="row-even"><td><a class="reference internal" href="swat.cas.connection.CAS.read_sql.html#swat.CAS.read_sql" title="swat.CAS.read_sql"><code class="xref py py-obj docutils literal"><span class="pre">read_sql</span></code></a>(sql,&nbsp;con[,&nbsp;casout])</td>
 <td>Read SQL query or database table into a CAS table</td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="swat.cas.connection.CAS.read_sql_query.html#swat.CAS.read_sql_query" title="swat.CAS.read_sql_query"><code class="xref py py-obj docutils literal"><span class="pre">read_sql_query</span></code></a>(sql,&nbsp;con,&nbsp;**kwargs)</td>
+<tr class="row-odd"><td><a class="reference internal" href="swat.cas.connection.CAS.read_sql_query.html#swat.CAS.read_sql_query" title="swat.CAS.read_sql_query"><code class="xref py py-obj docutils literal"><span class="pre">read_sql_query</span></code></a>(sql,&nbsp;con[,&nbsp;casout])</td>
 <td>Read SQL query table into a CAS table</td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="swat.cas.connection.CAS.read_sql_table.html#swat.CAS.read_sql_table" title="swat.CAS.read_sql_table"><code class="xref py py-obj docutils literal"><span class="pre">read_sql_table</span></code></a>(table_name,&nbsp;con,&nbsp;**kwargs)</td>
+<tr class="row-even"><td><a class="reference internal" href="swat.cas.connection.CAS.read_sql_table.html#swat.CAS.read_sql_table" title="swat.CAS.read_sql_table"><code class="xref py py-obj docutils literal"><span class="pre">read_sql_table</span></code></a>(table_name,&nbsp;con[,&nbsp;casout])</td>
 <td>Read SQL database table into a CAS table</td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="swat.cas.connection.CAS.read_stata.html#swat.CAS.read_stata" title="swat.CAS.read_stata"><code class="xref py py-obj docutils literal"><span class="pre">read_stata</span></code></a>(filepath_or_buffer,&nbsp;**kwargs)</td>
+<tr class="row-odd"><td><a class="reference internal" href="swat.cas.connection.CAS.read_stata.html#swat.CAS.read_stata" title="swat.CAS.read_stata"><code class="xref py py-obj docutils literal"><span class="pre">read_stata</span></code></a>(filepath_or_buffer[,&nbsp;casout])</td>
 <td>Read Stata file into a CAS table</td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="swat.cas.connection.CAS.read_table.html#swat.CAS.read_table" title="swat.CAS.read_table"><code class="xref py py-obj docutils literal"><span class="pre">read_table</span></code></a>(filepath_or_buffer,&nbsp;**kwargs)</td>
+<tr class="row-even"><td><a class="reference internal" href="swat.cas.connection.CAS.read_table.html#swat.CAS.read_table" title="swat.CAS.read_table"><code class="xref py py-obj docutils literal"><span class="pre">read_table</span></code></a>(filepath_or_buffer[,&nbsp;casout])</td>
 <td>Read general delimited file into a CAS table</td>
 </tr>
 <tr class="row-odd"><td><a class="reference internal" href="swat.cas.connection.CAS.retrieve.html#swat.CAS.retrieve" title="swat.CAS.retrieve"><code class="xref py py-obj docutils literal"><span class="pre">retrieve</span></code></a>(_name_,&nbsp;**kwargs)</td>
@@ -401,13 +402,16 @@ parameter.</p>
 <tr class="row-even"><td><a class="reference internal" href="swat.cas.connection.CAS.session_context.html#swat.CAS.session_context" title="swat.CAS.session_context"><code class="xref py py-obj docutils literal"><span class="pre">session_context</span></code></a>(*args,&nbsp;**kwargs)</td>
 <td>Create a context of session options</td>
 </tr>
-<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">upload</span></code>(data[,&nbsp;importoptions,&nbsp;casout])</td>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">terminate</span></code>()</td>
+<td>End the session and close the CAS connection</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">upload</span></code>(data[,&nbsp;importoptions,&nbsp;casout])</td>
 <td>Upload data from a local file into a CAS table</td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="swat.cas.connection.CAS.upload_file.html#swat.CAS.upload_file" title="swat.CAS.upload_file"><code class="xref py py-obj docutils literal"><span class="pre">upload_file</span></code></a>(data[,&nbsp;importoptions,&nbsp;casout])</td>
+<tr class="row-odd"><td><a class="reference internal" href="swat.cas.connection.CAS.upload_file.html#swat.CAS.upload_file" title="swat.CAS.upload_file"><code class="xref py py-obj docutils literal"><span class="pre">upload_file</span></code></a>(data[,&nbsp;importoptions,&nbsp;casout])</td>
 <td>Upload a client-side data file to CAS and parse it into a CAS table</td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="swat.cas.connection.CAS.upload_frame.html#swat.CAS.upload_frame" title="swat.CAS.upload_frame"><code class="xref py py-obj docutils literal"><span class="pre">upload_frame</span></code></a>(data[,&nbsp;importoptions,&nbsp;casout])</td>
+<tr class="row-even"><td><a class="reference internal" href="swat.cas.connection.CAS.upload_frame.html#swat.CAS.upload_frame" title="swat.CAS.upload_frame"><code class="xref py py-obj docutils literal"><span class="pre">upload_frame</span></code></a>(data[,&nbsp;importoptions,&nbsp;casout])</td>
 <td>Upload a client-side data file to CAS and parse it into a CAS table</td>
 </tr>
 </tbody>
@@ -472,7 +476,7 @@ parameter.</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../',
-            VERSION:'1.0.0',
+            VERSION:'1.1.0',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

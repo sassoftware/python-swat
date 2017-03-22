@@ -1,0 +1,864 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Handling By Groups &mdash; SWAT 1.0.0 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+    <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+
+  
+    <link rel="top" title="SWAT 1.0.0 documentation" href="index.html"/>
+        <link rel="next" title="Sorting" href="sorting.html"/>
+        <link rel="prev" title="Indexing and Data Selection" href="indexing.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> SWAT
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.0.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="workflows.html">Workflows</a></li>
+<li class="toctree-l1"><a class="reference internal" href="binary-vs-rest.html">Binary vs. REST</a></li>
+<li class="toctree-l1"><a class="reference internal" href="loading-data.html">Loading Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="table-vs-dataframe.html">CASTable vs. DataFrame vs. SASDataFrame</a></li>
+<li class="toctree-l1"><a class="reference internal" href="indexing.html">Indexing and Data Selection</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Handling By Groups</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#selecting-tables-by-name-across-by-groups">Selecting Tables by Name Across By Groups</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#concatenating-by-group-tables">Concatenating By Group Tables</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#selecting-a-specific-by-group">Selecting a Specific By Group</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#multiple-sets-of-by-groups">Multiple Sets of By Groups</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="sorting.html">Sorting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gotchas.html">Programming Gotchas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="troubleshooting.html">Troubleshooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sas-tk.html">SAS TK</a></li>
+<li class="toctree-l1"><a class="reference internal" href="licenses.html">Licenses</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="index.html">SWAT</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+ 
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+      
+    <li>Handling By Groups</li>
+    <li class="wy-breadcrumbs-aside">
+      
+          
+          <a href="_sources/bygroups.txt" rel="nofollow"> View page source</a>
+        
+      
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="handling-by-groups">
+<span id="bygroups"></span><h1>Handling By Groups<a class="headerlink" href="#handling-by-groups" title="Permalink to this headline">¶</a></h1>
+<p>If By groups are specified when running a CAS action, the result are returned
+with the following behaviors.</p>
+<ol class="arabic simple">
+<li>A result key named &#8216;ByGroupInfo&#8217; is returned with all of the By group
+variable values.</li>
+<li>Each By group table is returned in a separate result key with a prefix of
+&#8216;ByGroup#.&#8217;.</li>
+</ol>
+<p>These behaviors can help when you have a large number of By groups and you
+want to process them as they arrive at the client rather than trying to hold
+the entire set of results in memory.  However, when your result sets are
+smaller, you may want to combine all of the By group tables into a single
+<a class="reference external" href="http://pandas.pydata.org/pandas-docs/version/0.18.0/generated/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v0.18.0)"><code class="xref py py-class docutils literal"><span class="pre">pandas.DataFrame</span></code></a>.  To help in these situations, the <a class="reference internal" href="generated/swat.cas.results.CASResults.html#swat.cas.results.CASResults" title="swat.cas.results.CASResults"><code class="xref py py-class docutils literal"><span class="pre">CASResults</span></code></a>
+class defines some helper methods for you.</p>
+<p>Here is what it looks like to run a standard <code class="docutils literal"><span class="pre">summary</span></code> action, and a <code class="docutils literal"><span class="pre">summary</span></code>
+action with a By group specified.  We will use this output to demonstrate the
+By group processing methods.</p>
+<div class="highlight-ipython"><div class="highlight"><pre><span></span><span class="gp">In [1]: </span><span class="n">tbl</span> <span class="o">=</span> <span class="n">tbl</span><span class="p">[[</span><span class="s1">&#39;MSRP&#39;</span><span class="p">,</span> <span class="s1">&#39;Horsepower&#39;</span><span class="p">]]</span>
+
+<span class="gp">In [2]: </span><span class="n">tbl</span><span class="o">.</span><span class="n">summary</span><span class="p">(</span><span class="n">subset</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Min&#39;</span><span class="p">,</span> <span class="s1">&#39;Max&#39;</span><span class="p">])</span>
+<span class="gh">Out[2]: </span><span class="go"></span>
+<span class="go">[Summary]</span>
+
+<span class="go"> Descriptive Statistics for _T_D355AA4C_7FA6D68650C0</span>
+<span class="go"> </span>
+<span class="go">        Column      Min       Max</span>
+<span class="go"> 0        MSRP  10280.0  192465.0</span>
+<span class="go"> 1  Horsepower     73.0     500.0</span>
+
+<span class="go">+ Elapsed: 0.0221s, user: 0.02s, sys: 0.005s, mem: 1.74mb</span>
+
+<span class="gp">In [3]: </span><span class="n">tbl</span><span class="o">.</span><span class="n">groupby</span><span class="p">([</span><span class="s1">&#39;Origin&#39;</span><span class="p">,</span> <span class="s1">&#39;Cylinders&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">summary</span><span class="p">(</span><span class="n">subset</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Min&#39;</span><span class="p">,</span> <span class="s1">&#39;Max&#39;</span><span class="p">])</span>
+<span class="go">                                                                                                                                                                                                                                            Out[3]: </span>
+<span class="go">[ByGroupInfo]</span>
+
+<span class="go"> ByGroupInfo</span>
+<span class="go"> </span>
+<span class="go">     Origin Origin_f  Cylinders   Cylinders_f               _key_</span>
+<span class="go"> 0     Asia     Asia        NaN             .  Asia             .</span>
+<span class="go"> 1     Asia     Asia        3.0             3  Asia             3</span>
+<span class="go"> 2     Asia     Asia        4.0             4  Asia             4</span>
+<span class="go"> 3     Asia     Asia        6.0             6  Asia             6</span>
+<span class="go"> 4     Asia     Asia        8.0             8  Asia             8</span>
+<span class="go"> 5   Europe   Europe        4.0             4  Europe           4</span>
+<span class="go"> 6   Europe   Europe        5.0             5  Europe           5</span>
+<span class="go"> 7   Europe   Europe        6.0             6  Europe           6</span>
+<span class="go"> 8   Europe   Europe        8.0             8  Europe           8</span>
+<span class="go"> 9   Europe   Europe       12.0            12  Europe          12</span>
+<span class="go"> 10     USA      USA        4.0             4  USA              4</span>
+<span class="go"> 11     USA      USA        6.0             6  USA              6</span>
+<span class="go"> 12     USA      USA        8.0             8  USA              8</span>
+<span class="go"> 13     USA      USA       10.0            10  USA             10</span>
+
+<span class="go">[ByGroup1.Summary]</span>
+
+<span class="go"> Descriptive Statistics for _T_D355AA4C_7FA6D68650C0</span>
+<span class="go"> </span>
+<span class="go">                       Column      Min      Max</span>
+<span class="go"> Origin Cylinders                              </span>
+<span class="go"> Asia   .                MSRP  25700.0  27200.0</span>
+<span class="go">        .          Horsepower    197.0    238.0</span>
+
+<span class="go">[ByGroup2.Summary]</span>
+
+<span class="go"> Descriptive Statistics for _T_D355AA4C_7FA6D68650C0</span>
+<span class="go"> </span>
+<span class="go">                       Column      Min      Max</span>
+<span class="go"> Origin Cylinders                              </span>
+<span class="go"> Asia   3                MSRP  19110.0  19110.0</span>
+<span class="go">        3          Horsepower     73.0     73.0</span>
+
+<span class="go">[ByGroup3.Summary]</span>
+
+<span class="go"> Descriptive Statistics for _T_D355AA4C_7FA6D68650C0</span>
+<span class="go"> </span>
+<span class="go">                       Column      Min      Max</span>
+<span class="go"> Origin Cylinders                              </span>
+<span class="go"> Asia   4                MSRP  10280.0  33260.0</span>
+<span class="go">        4          Horsepower     93.0    300.0</span>
+
+<span class="go">[ByGroup4.Summary]</span>
+
+<span class="go"> Descriptive Statistics for _T_D355AA4C_7FA6D68650C0</span>
+<span class="go"> </span>
+<span class="go">                       Column      Min      Max</span>
+<span class="go"> Origin Cylinders                              </span>
+<span class="go"> Asia   6                MSRP  16495.0  89765.0</span>
+<span class="go">        6          Horsepower    155.0    290.0</span>
+
+<span class="go">[ByGroup5.Summary]</span>
+
+<span class="go"> Descriptive Statistics for _T_D355AA4C_7FA6D68650C0</span>
+<span class="go"> </span>
+<span class="go">                       Column      Min      Max</span>
+<span class="go"> Origin Cylinders                              </span>
+<span class="go"> Asia   8                MSRP  26650.0  64800.0</span>
+<span class="go">        8          Horsepower    235.0    340.0</span>
+
+<span class="go">[ByGroup6.Summary]</span>
+
+<span class="go"> Descriptive Statistics for _T_D355AA4C_7FA6D68650C0</span>
+<span class="go"> </span>
+<span class="go">                       Column      Min      Max</span>
+<span class="go"> Origin Cylinders                              </span>
+<span class="go"> Europe 4                MSRP  16999.0  43175.0</span>
+<span class="go">        4          Horsepower    100.0    250.0</span>
+
+<span class="go">[ByGroup7.Summary]</span>
+
+<span class="go"> Descriptive Statistics for _T_D355AA4C_7FA6D68650C0</span>
+<span class="go"> </span>
+<span class="go">                       Column      Min      Max</span>
+<span class="go"> Origin Cylinders                              </span>
+<span class="go"> Europe 5                MSRP  31745.0  42565.0</span>
+<span class="go">        5          Horsepower    194.0    300.0</span>
+
+<span class="go">[ByGroup8.Summary]</span>
+
+<span class="go"> Descriptive Statistics for _T_D355AA4C_7FA6D68650C0</span>
+<span class="go"> </span>
+<span class="go">                       Column      Min       Max</span>
+<span class="go"> Origin Cylinders                               </span>
+<span class="go"> Europe 6                MSRP  23785.0  192465.0</span>
+<span class="go">        6          Horsepower    168.0     477.0</span>
+
+<span class="go">[ByGroup9.Summary]</span>
+
+<span class="go"> Descriptive Statistics for _T_D355AA4C_7FA6D68650C0</span>
+<span class="go"> </span>
+<span class="go">                       Column      Min       Max</span>
+<span class="go"> Origin Cylinders                               </span>
+<span class="go"> Europe 8                MSRP  39235.0  121770.0</span>
+<span class="go">        8          Horsepower    217.0     493.0</span>
+
+<span class="go">[ByGroup10.Summary]</span>
+
+<span class="go"> Descriptive Statistics for _T_D355AA4C_7FA6D68650C0</span>
+<span class="go"> </span>
+<span class="go">                       Column      Min       Max</span>
+<span class="go"> Origin Cylinders                               </span>
+<span class="go"> Europe 12               MSRP  75000.0  128420.0</span>
+<span class="go">        12         Horsepower    420.0     493.0</span>
+
+<span class="go">[ByGroup11.Summary]</span>
+
+<span class="go"> Descriptive Statistics for _T_D355AA4C_7FA6D68650C0</span>
+<span class="go"> </span>
+<span class="go">                       Column      Min      Max</span>
+<span class="go"> Origin Cylinders                              </span>
+<span class="go"> USA    4                MSRP  10995.0  25955.0</span>
+<span class="go">        4          Horsepower    103.0    220.0</span>
+
+<span class="go">[ByGroup12.Summary]</span>
+
+<span class="go"> Descriptive Statistics for _T_D355AA4C_7FA6D68650C0</span>
+<span class="go"> </span>
+<span class="go">                       Column      Min      Max</span>
+<span class="go"> Origin Cylinders                              </span>
+<span class="go"> USA    6                MSRP  17630.0  40720.0</span>
+<span class="go">        6          Horsepower    155.0    275.0</span>
+
+<span class="go">[ByGroup13.Summary]</span>
+
+<span class="go"> Descriptive Statistics for _T_D355AA4C_7FA6D68650C0</span>
+<span class="go"> </span>
+<span class="go">                       Column      Min      Max</span>
+<span class="go"> Origin Cylinders                              </span>
+<span class="go"> USA    8                MSRP  22010.0  76200.0</span>
+<span class="go">        8          Horsepower    224.0    350.0</span>
+
+<span class="go">[ByGroup14.Summary]</span>
+
+<span class="go"> Descriptive Statistics for _T_D355AA4C_7FA6D68650C0</span>
+<span class="go"> </span>
+<span class="go">                       Column      Min      Max</span>
+<span class="go"> Origin Cylinders                              </span>
+<span class="go"> USA    10               MSRP  41475.0  81795.0</span>
+<span class="go">        10         Horsepower    310.0    500.0</span>
+
+<span class="go">+ Elapsed: 0.0115s, user: 0.005s, sys: 0.008s, mem: 1.76mb</span>
+</pre></div>
+</div>
+<div class="section" id="selecting-tables-by-name-across-by-groups">
+<h2>Selecting Tables by Name Across By Groups<a class="headerlink" href="#selecting-tables-by-name-across-by-groups" title="Permalink to this headline">¶</a></h2>
+<p>The <a class="reference internal" href="generated/swat.cas.results.CASResults.get_tables.html#swat.cas.results.CASResults.get_tables" title="swat.cas.results.CASResults.get_tables"><code class="xref py py-meth docutils literal"><span class="pre">CASResults.get_tables()</span></code></a> method will return all tables with a given
+name across By groups in a list.  If the results do not contain By groups,
+the single table with that name will be returned in a list.  This makes it
+possible to use <a class="reference internal" href="generated/swat.cas.results.CASResults.get_tables.html#swat.cas.results.CASResults.get_tables" title="swat.cas.results.CASResults.get_tables"><code class="xref py py-meth docutils literal"><span class="pre">CASResults.get_tables()</span></code></a> the same way whether By
+group variables are specified or not.</p>
+<div class="highlight-ipython"><div class="highlight"><pre><span></span><span class="gp">In [4]: </span><span class="n">tbl</span><span class="o">.</span><span class="n">summary</span><span class="p">(</span><span class="n">subset</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Min&#39;</span><span class="p">,</span> <span class="s1">&#39;Max&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">get_tables</span><span class="p">(</span><span class="s1">&#39;Summary&#39;</span><span class="p">)</span>
+<span class="gh">Out[4]: </span><span class="go"></span>
+<span class="go">[Descriptive Statistics for _T_D355AA4C_7FA6D68650C0</span>
+<span class="go"> </span>
+<span class="go">        Column      Min       Max</span>
+<span class="go"> 0        MSRP  10280.0  192465.0</span>
+<span class="go"> 1  Horsepower     73.0     500.0]</span>
+
+<span class="gp">In [5]: </span><span class="n">tbl</span><span class="o">.</span><span class="n">groupby</span><span class="p">([</span><span class="s1">&#39;Origin&#39;</span><span class="p">,</span> <span class="s1">&#39;Cylinders&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">summary</span><span class="p">(</span><span class="n">subset</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Min&#39;</span><span class="p">,</span> <span class="s1">&#39;Max&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">get_tables</span><span class="p">(</span><span class="s1">&#39;Summary&#39;</span><span class="p">)</span>
+<span class="go">                                                                                                                                                                       Out[5]: </span>
+<span class="go">[Descriptive Statistics for _T_D355AA4C_7FA6D68650C0</span>
+<span class="go"> </span>
+<span class="go">                       Column      Min      Max</span>
+<span class="go"> Origin Cylinders                              </span>
+<span class="go"> Asia   .                MSRP  25700.0  27200.0</span>
+<span class="go">        .          Horsepower    197.0    238.0,</span>
+<span class="go"> Descriptive Statistics for _T_D355AA4C_7FA6D68650C0</span>
+<span class="go"> </span>
+<span class="go">                       Column      Min      Max</span>
+<span class="go"> Origin Cylinders                              </span>
+<span class="go"> Asia   3                MSRP  19110.0  19110.0</span>
+<span class="go">        3          Horsepower     73.0     73.0,</span>
+<span class="go"> Descriptive Statistics for _T_D355AA4C_7FA6D68650C0</span>
+<span class="go"> </span>
+<span class="go">                       Column      Min      Max</span>
+<span class="go"> Origin Cylinders                              </span>
+<span class="go"> Asia   4                MSRP  10280.0  33260.0</span>
+<span class="go">        4          Horsepower     93.0    300.0,</span>
+<span class="go"> Descriptive Statistics for _T_D355AA4C_7FA6D68650C0</span>
+<span class="go"> </span>
+<span class="go">                       Column      Min      Max</span>
+<span class="go"> Origin Cylinders                              </span>
+<span class="go"> Asia   6                MSRP  16495.0  89765.0</span>
+<span class="go">        6          Horsepower    155.0    290.0,</span>
+<span class="go"> Descriptive Statistics for _T_D355AA4C_7FA6D68650C0</span>
+<span class="go"> </span>
+<span class="go">                       Column      Min      Max</span>
+<span class="go"> Origin Cylinders                              </span>
+<span class="go"> Asia   8                MSRP  26650.0  64800.0</span>
+<span class="go">        8          Horsepower    235.0    340.0,</span>
+<span class="go"> Descriptive Statistics for _T_D355AA4C_7FA6D68650C0</span>
+<span class="go"> </span>
+<span class="go">                       Column      Min      Max</span>
+<span class="go"> Origin Cylinders                              </span>
+<span class="go"> Europe 4                MSRP  16999.0  43175.0</span>
+<span class="go">        4          Horsepower    100.0    250.0,</span>
+<span class="go"> Descriptive Statistics for _T_D355AA4C_7FA6D68650C0</span>
+<span class="go"> </span>
+<span class="go">                       Column      Min      Max</span>
+<span class="go"> Origin Cylinders                              </span>
+<span class="go"> Europe 5                MSRP  31745.0  42565.0</span>
+<span class="go">        5          Horsepower    194.0    300.0,</span>
+<span class="go"> Descriptive Statistics for _T_D355AA4C_7FA6D68650C0</span>
+<span class="go"> </span>
+<span class="go">                       Column      Min       Max</span>
+<span class="go"> Origin Cylinders                               </span>
+<span class="go"> Europe 6                MSRP  23785.0  192465.0</span>
+<span class="go">        6          Horsepower    168.0     477.0,</span>
+<span class="go"> Descriptive Statistics for _T_D355AA4C_7FA6D68650C0</span>
+<span class="go"> </span>
+<span class="go">                       Column      Min       Max</span>
+<span class="go"> Origin Cylinders                               </span>
+<span class="go"> Europe 8                MSRP  39235.0  121770.0</span>
+<span class="go">        8          Horsepower    217.0     493.0,</span>
+<span class="go"> Descriptive Statistics for _T_D355AA4C_7FA6D68650C0</span>
+<span class="go"> </span>
+<span class="go">                       Column      Min       Max</span>
+<span class="go"> Origin Cylinders                               </span>
+<span class="go"> Europe 12               MSRP  75000.0  128420.0</span>
+<span class="go">        12         Horsepower    420.0     493.0,</span>
+<span class="go"> Descriptive Statistics for _T_D355AA4C_7FA6D68650C0</span>
+<span class="go"> </span>
+<span class="go">                       Column      Min      Max</span>
+<span class="go"> Origin Cylinders                              </span>
+<span class="go"> USA    4                MSRP  10995.0  25955.0</span>
+<span class="go">        4          Horsepower    103.0    220.0,</span>
+<span class="go"> Descriptive Statistics for _T_D355AA4C_7FA6D68650C0</span>
+<span class="go"> </span>
+<span class="go">                       Column      Min      Max</span>
+<span class="go"> Origin Cylinders                              </span>
+<span class="go"> USA    6                MSRP  17630.0  40720.0</span>
+<span class="go">        6          Horsepower    155.0    275.0,</span>
+<span class="go"> Descriptive Statistics for _T_D355AA4C_7FA6D68650C0</span>
+<span class="go"> </span>
+<span class="go">                       Column      Min      Max</span>
+<span class="go"> Origin Cylinders                              </span>
+<span class="go"> USA    8                MSRP  22010.0  76200.0</span>
+<span class="go">        8          Horsepower    224.0    350.0,</span>
+<span class="go"> Descriptive Statistics for _T_D355AA4C_7FA6D68650C0</span>
+<span class="go"> </span>
+<span class="go">                       Column      Min      Max</span>
+<span class="go"> Origin Cylinders                              </span>
+<span class="go"> USA    10               MSRP  41475.0  81795.0</span>
+<span class="go">        10         Horsepower    310.0    500.0]</span>
+</pre></div>
+</div>
+<p>The reason that the table name is required is that many CAS actions can
+have multiple tables with different names in each By group.</p>
+</div>
+<div class="section" id="concatenating-by-group-tables">
+<h2>Concatenating By Group Tables<a class="headerlink" href="#concatenating-by-group-tables" title="Permalink to this headline">¶</a></h2>
+<p>While you can use the <a class="reference internal" href="generated/swat.cas.results.CASResults.get_tables.html#swat.cas.results.CASResults.get_tables" title="swat.cas.results.CASResults.get_tables"><code class="xref py py-meth docutils literal"><span class="pre">CASResults.get_tables()</span></code></a> method to retrieve tables
+of a specified name then use the <code class="xref py py-func docutils literal"><span class="pre">concat()</span></code> function to concatenate them
+together, there is also a <a class="reference internal" href="generated/swat.cas.results.CASResults.concat_bygroups.html#swat.cas.results.CASResults.concat_bygroups" title="swat.cas.results.CASResults.concat_bygroups"><code class="xref py py-meth docutils literal"><span class="pre">CASResults.concat_bygroups()</span></code></a> method that you can
+use.  This method will concatenate all tables with the same name across all
+By groups and set the concatenated table under the table&#8217;s key.</p>
+<div class="highlight-ipython"><div class="highlight"><pre><span></span><span class="gp">In [6]: </span><span class="n">tbl</span><span class="o">.</span><span class="n">groupby</span><span class="p">([</span><span class="s1">&#39;Origin&#39;</span><span class="p">,</span> <span class="s1">&#39;Cylinders&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">summary</span><span class="p">(</span><span class="n">subset</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Min&#39;</span><span class="p">,</span> <span class="s1">&#39;Max&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">concat_bygroups</span><span class="p">()</span>
+<span class="gh">Out[6]: </span><span class="go"></span>
+<span class="go">[Summary]</span>
+
+<span class="go"> Descriptive Statistics for _T_D355AA4C_7FA6D68650C0</span>
+<span class="go"> </span>
+<span class="go">                       Column      Min       Max</span>
+<span class="go"> Origin Cylinders                               </span>
+<span class="go"> Asia   .                MSRP  25700.0   27200.0</span>
+<span class="go">        .          Horsepower    197.0     238.0</span>
+<span class="go">        3                MSRP  19110.0   19110.0</span>
+<span class="go">        3          Horsepower     73.0      73.0</span>
+<span class="go">        4                MSRP  10280.0   33260.0</span>
+<span class="go">        4          Horsepower     93.0     300.0</span>
+<span class="go">        6                MSRP  16495.0   89765.0</span>
+<span class="go">        6          Horsepower    155.0     290.0</span>
+<span class="go">        8                MSRP  26650.0   64800.0</span>
+<span class="go">        8          Horsepower    235.0     340.0</span>
+<span class="go"> Europe 4                MSRP  16999.0   43175.0</span>
+<span class="go">        4          Horsepower    100.0     250.0</span>
+<span class="go">        5                MSRP  31745.0   42565.0</span>
+<span class="go">        5          Horsepower    194.0     300.0</span>
+<span class="go">        6                MSRP  23785.0  192465.0</span>
+<span class="go">        6          Horsepower    168.0     477.0</span>
+<span class="go">        8                MSRP  39235.0  121770.0</span>
+<span class="go">        8          Horsepower    217.0     493.0</span>
+<span class="go">        12               MSRP  75000.0  128420.0</span>
+<span class="go">        12         Horsepower    420.0     493.0</span>
+<span class="go"> USA    4                MSRP  10995.0   25955.0</span>
+<span class="go">        4          Horsepower    103.0     220.0</span>
+<span class="go">        6                MSRP  17630.0   40720.0</span>
+<span class="go">        6          Horsepower    155.0     275.0</span>
+<span class="go">        8                MSRP  22010.0   76200.0</span>
+<span class="go">        8          Horsepower    224.0     350.0</span>
+<span class="go">        10               MSRP  41475.0   81795.0</span>
+<span class="go">        10         Horsepower    310.0     500.0</span>
+</pre></div>
+</div>
+<p>By default, this method returns a new <a class="reference internal" href="generated/swat.cas.results.CASResults.html#swat.cas.results.CASResults" title="swat.cas.results.CASResults"><code class="xref py py-class docutils literal"><span class="pre">CASResults</span></code></a> object with the
+concatenated tables.  If you want to modify the <a class="reference internal" href="generated/swat.cas.results.CASResults.html#swat.cas.results.CASResults" title="swat.cas.results.CASResults"><code class="xref py py-class docutils literal"><span class="pre">CASResults</span></code></a> object
+in place, you can add a <code class="docutils literal"><span class="pre">inplace=True</span></code> option.</p>
+</div>
+<div class="section" id="selecting-a-specific-by-group">
+<h2>Selecting a Specific By Group<a class="headerlink" href="#selecting-a-specific-by-group" title="Permalink to this headline">¶</a></h2>
+<p>In addition to selecting tables by name, you can also select a specific
+By group in the result by specifying the By variable values.  This is
+done with the <a class="reference internal" href="generated/swat.cas.results.CASResults.get_group.html#swat.cas.results.CASResults.get_group" title="swat.cas.results.CASResults.get_group"><code class="xref py py-meth docutils literal"><span class="pre">CASResults.get_group()</span></code></a> method.</p>
+<div class="highlight-ipython"><div class="highlight"><pre><span></span><span class="gp">In [7]: </span><span class="n">tbl</span><span class="o">.</span><span class="n">groupby</span><span class="p">([</span><span class="s1">&#39;Origin&#39;</span><span class="p">,</span> <span class="s1">&#39;Cylinders&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">summary</span><span class="p">(</span><span class="n">subset</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Min&#39;</span><span class="p">,</span> <span class="s1">&#39;Max&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">get_group</span><span class="p">([</span><span class="s1">&#39;Asia&#39;</span><span class="p">,</span> <span class="mi">4</span><span class="p">])</span>
+<span class="gh">Out[7]: </span><span class="go"></span>
+<span class="go">[Summary]</span>
+
+<span class="go"> Descriptive Statistics for _T_D355AA4C_7FA6D68650C0</span>
+<span class="go"> </span>
+<span class="go">                       Column      Min      Max</span>
+<span class="go"> Origin Cylinders                              </span>
+<span class="go"> Asia   4                MSRP  10280.0  33260.0</span>
+<span class="go">        4          Horsepower     93.0    300.0</span>
+</pre></div>
+</div>
+<p>The values given for the By group variable values can be either the raw
+value or the formatted value.</p>
+<p>You can also specify the grouping variables as keyword arguments.</p>
+<div class="highlight-ipython"><div class="highlight"><pre><span></span><span class="gp">In [8]: </span><span class="n">tbl</span><span class="o">.</span><span class="n">groupby</span><span class="p">([</span><span class="s1">&#39;Origin&#39;</span><span class="p">,</span> <span class="s1">&#39;Cylinders&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">summary</span><span class="p">(</span><span class="n">subset</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Min&#39;</span><span class="p">,</span> <span class="s1">&#39;Max&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">get_group</span><span class="p">(</span><span class="n">Origin</span><span class="o">=</span><span class="s1">&#39;Asia&#39;</span><span class="p">,</span> <span class="n">Cylinders</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+<span class="gh">Out[8]: </span><span class="go"></span>
+<span class="go">[Summary]</span>
+
+<span class="go"> Descriptive Statistics for _T_D355AA4C_7FA6D68650C0</span>
+<span class="go"> </span>
+<span class="go">                       Column      Min      Max</span>
+<span class="go"> Origin Cylinders                              </span>
+<span class="go"> Asia   4                MSRP  10280.0  33260.0</span>
+<span class="go">        4          Horsepower     93.0    300.0</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="multiple-sets-of-by-groups">
+<h2>Multiple Sets of By Groups<a class="headerlink" href="#multiple-sets-of-by-groups" title="Permalink to this headline">¶</a></h2>
+<p>Some CAS actions like <code class="docutils literal"><span class="pre">simple.mdsummary</span></code> allow you to specify multiple By group sets.  In cases
+like this, the keys for each By group set are prefixed with &#8220;<cite>ByGroupSet#.</cite>&#8221;.  To select a By group
+set, you can use the <a class="reference internal" href="generated/swat.cas.results.CASResults.get_set.html#swat.cas.results.CASResults.get_set" title="swat.cas.results.CASResults.get_set"><code class="xref py py-meth docutils literal"><span class="pre">CASResults.get_set()</span></code></a> method.  This takes a numeric index indicating which
+By group set to select.  The return value is a new <a class="reference internal" href="generated/swat.cas.results.CASResults.html#swat.cas.results.CASResults" title="swat.cas.results.CASResults"><code class="xref py py-class docutils literal"><span class="pre">CASResults</span></code></a> object that contains just
+the selected By group set.  You can then use the methods above to select tables or concatenate
+tables together.</p>
+<div class="highlight-ipython"><div class="highlight"><pre><span></span><span class="gp">In [9]: </span><span class="n">tbl</span><span class="o">.</span><span class="n">mdsummary</span><span class="p">(</span><span class="n">sets</span><span class="o">=</span><span class="p">[</span><span class="nb">dict</span><span class="p">(</span><span class="n">groupby</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;Origin&quot;</span><span class="p">]),</span>
+<span class="gp">   ...: </span>                    <span class="nb">dict</span><span class="p">(</span><span class="n">groupby</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;Cylinders&quot;</span><span class="p">])])</span>
+<span class="gp">   ...: </span>
+<span class="gh">Out[9]: </span><span class="go"></span>
+<span class="go">[ByGroupSet1.ByGroupInfo]</span>
+
+<span class="go"> ByGroupSet1.ByGroupInfo</span>
+<span class="go"> </span>
+<span class="go">    Origin Origin_f   _key_</span>
+<span class="go"> 0    Asia     Asia    Asia</span>
+<span class="go"> 1  Europe   Europe  Europe</span>
+<span class="go"> 2     USA      USA     USA</span>
+
+<span class="go">[ByGroupSet1.ByGroup1.MDSummary]</span>
+
+<span class="go"> Descriptive Statistics for _T_D355AA4C_7FA6D68650C0</span>
+<span class="go"> </span>
+<span class="go">             Column      Min      Max      N  NMiss          Mean        Sum  \</span>
+<span class="go"> Origin                                                                        </span>
+<span class="go"> Asia          MSRP  10280.0  89765.0  158.0    0.0  24741.322785  3909129.0   </span>
+<span class="go"> Asia    Horsepower     73.0    340.0  158.0    0.0    190.702532    30131.0   </span>
+<span class="go"> </span>
+<span class="go">                  Std      StdErr           Var           USS           CSS  \</span>
+<span class="go"> Origin                                                                       </span>
+<span class="go"> Asia    11321.069675  900.655944  1.281666e+08  1.168392e+11  2.012216e+10   </span>
+<span class="go"> Asia       59.392627    4.725024  3.527484e+03  6.299873e+06  5.538150e+05   </span>
+<span class="go"> </span>
+<span class="go">                CV     TValue         ProbT  </span>
+<span class="go"> Origin                                      </span>
+<span class="go"> Asia    45.757738  27.470338  7.525437e-62  </span>
+<span class="go"> Asia    31.144121  40.360121  8.503586e-85  </span>
+
+<span class="go">[ByGroupSet1.ByGroup2.MDSummary]</span>
+
+<span class="go"> Descriptive Statistics for _T_D355AA4C_7FA6D68650C0</span>
+<span class="go"> </span>
+<span class="go">             Column      Min       Max      N  NMiss          Mean        Sum  \</span>
+<span class="go"> Origin                                                                         </span>
+<span class="go"> Europe        MSRP  16999.0  192465.0  123.0    0.0  48349.796748  5947025.0   </span>
+<span class="go"> Europe  Horsepower    100.0     493.0  123.0    0.0    251.894309    30983.0   </span>
+<span class="go"> </span>
+<span class="go">                  Std       StdErr           Var           USS           CSS  \</span>
+<span class="go"> Origin                                                                        </span>
+<span class="go"> Europe  25318.600464  2282.901323  6.410315e+08  3.657433e+11  7.820585e+10   </span>
+<span class="go"> Europe     80.738884     7.279980  6.518767e+03  8.599731e+06  7.952896e+05   </span>
+<span class="go"> </span>
+<span class="go">                CV     TValue         ProbT  </span>
+<span class="go"> Origin                                      </span>
+<span class="go"> Europe  52.365474  21.179101  1.104072e-42  </span>
+<span class="go"> Europe  32.052683  34.600962  6.412879e-65  </span>
+
+<span class="go">[ByGroupSet1.ByGroup3.MDSummary]</span>
+
+<span class="go"> Descriptive Statistics for _T_D355AA4C_7FA6D68650C0</span>
+<span class="go"> </span>
+<span class="go">             Column      Min      Max      N  NMiss          Mean        Sum  \</span>
+<span class="go"> Origin                                                                        </span>
+<span class="go"> USA           MSRP  10995.0  81795.0  147.0    0.0  28377.442177  4171484.0   </span>
+<span class="go"> USA     Horsepower    103.0    500.0  147.0    0.0    212.823129    31285.0   </span>
+<span class="go"> </span>
+<span class="go">                  Std      StdErr           Var           USS           CSS  \</span>
+<span class="go"> Origin                                                                       </span>
+<span class="go"> USA     11711.982506  965.988036  1.371705e+08  1.384029e+11  2.002690e+10   </span>
+<span class="go"> USA        63.748618    5.257897  4.063886e+03  7.251499e+06  5.933274e+05   </span>
+<span class="go"> </span>
+<span class="go">                CV     TValue         ProbT  </span>
+<span class="go"> Origin                                      </span>
+<span class="go"> USA     41.272157  29.376598  3.686853e-63  </span>
+<span class="go"> USA     29.953802  40.476851  2.996113e-81  </span>
+
+<span class="go">[ByGroupSet2.ByGroupInfo]</span>
+
+<span class="go"> ByGroupSet2.ByGroupInfo</span>
+<span class="go"> </span>
+<span class="go">    Cylinders   Cylinders_f         _key_</span>
+<span class="go"> 0        NaN             .             .</span>
+<span class="go"> 1        3.0             3             3</span>
+<span class="go"> 2        4.0             4             4</span>
+<span class="go"> 3        5.0             5             5</span>
+<span class="go"> 4        6.0             6             6</span>
+<span class="go"> 5        8.0             8             8</span>
+<span class="go"> 6       10.0            10            10</span>
+<span class="go"> 7       12.0            12            12</span>
+
+<span class="go">[ByGroupSet2.ByGroup1.MDSummary]</span>
+
+<span class="go"> Descriptive Statistics for _T_D355AA4C_7FA6D68650C0</span>
+<span class="go"> </span>
+<span class="go">                Column      Min      Max    N  NMiss     Mean      Sum  \</span>
+<span class="go"> Cylinders                                                               </span>
+<span class="go"> .                MSRP  25700.0  27200.0  2.0    0.0  26450.0  52900.0   </span>
+<span class="go"> .          Horsepower    197.0    238.0  2.0    0.0    217.5    435.0   </span>
+<span class="go"> </span>
+<span class="go">                    Std  StdErr        Var           USS        CSS         CV  \</span>
+<span class="go"> Cylinders                                                                       </span>
+<span class="go"> .          1060.660172   750.0  1125000.0  1.400330e+09  1125000.0   4.010057   </span>
+<span class="go"> .            28.991378    20.5      840.5  9.545300e+04      840.5  13.329369   </span>
+<span class="go"> </span>
+<span class="go">               TValue     ProbT  </span>
+<span class="go"> Cylinders                       </span>
+<span class="go"> .          35.266667  0.018047  </span>
+<span class="go"> .          10.609756  0.059827  </span>
+
+<span class="go">[ByGroupSet2.ByGroup2.MDSummary]</span>
+
+<span class="go"> Descriptive Statistics for _T_D355AA4C_7FA6D68650C0</span>
+<span class="go"> </span>
+<span class="go">                Column      Min      Max    N  NMiss     Mean      Sum  Std  \</span>
+<span class="go"> Cylinders                                                                    </span>
+<span class="go"> 3                MSRP  19110.0  19110.0  1.0    0.0  19110.0  19110.0  NaN   </span>
+<span class="go"> 3          Horsepower     73.0     73.0  1.0    0.0     73.0     73.0  NaN   </span>
+<span class="go"> </span>
+<span class="go">            StdErr  Var          USS  CSS  CV  TValue  ProbT  </span>
+<span class="go"> Cylinders                                                    </span>
+<span class="go"> 3             NaN  NaN  365192100.0  0.0 NaN     NaN    NaN  </span>
+<span class="go"> 3             NaN  NaN       5329.0  0.0 NaN     NaN    NaN  </span>
+
+<span class="go">[ByGroupSet2.ByGroup3.MDSummary]</span>
+
+<span class="go"> Descriptive Statistics for _T_D355AA4C_7FA6D68650C0</span>
+<span class="go"> </span>
+<span class="go">                Column      Min      Max      N  NMiss          Mean  \</span>
+<span class="go"> Cylinders                                                             </span>
+<span class="go"> 4                MSRP  10280.0  43175.0  136.0    0.0  19747.500000   </span>
+<span class="go"> 4          Horsepower     93.0    300.0  136.0    0.0    150.514706   </span>
+<span class="go"> </span>
+<span class="go">                  Sum          Std      StdErr           Var           USS  \</span>
+<span class="go"> Cylinders                                                                   </span>
+<span class="go"> 4          2685660.0  7070.833747  606.318992  4.999669e+07  5.978462e+10   </span>
+<span class="go"> 4            20470.0    36.387826    3.120230  1.324074e+03  3.259786e+06   </span>
+<span class="go"> </span>
+<span class="go">                     CSS         CV     TValue         ProbT  </span>
+<span class="go"> Cylinders                                                    </span>
+<span class="go"> 4          6.749553e+09  35.806222  32.569489  8.276602e-66  </span>
+<span class="go"> 4          1.787500e+05  24.175595  48.238332  5.424646e-87  </span>
+
+<span class="go">[ByGroupSet2.ByGroup4.MDSummary]</span>
+
+<span class="go"> Descriptive Statistics for _T_D355AA4C_7FA6D68650C0</span>
+<span class="go"> </span>
+<span class="go">                Column      Min      Max    N  NMiss          Mean       Sum  \</span>
+<span class="go"> Cylinders                                                                     </span>
+<span class="go"> 5                MSRP  31745.0  42565.0  7.0    0.0  37187.142857  260310.0   </span>
+<span class="go"> 5          Horsepower    194.0    300.0  7.0    0.0    228.000000    1596.0   </span>
+<span class="go"> </span>
+<span class="go">                    Std       StdErr           Var           USS           CSS  \</span>
+<span class="go"> Cylinders                                                                       </span>
+<span class="go"> 5          3656.733352  1382.115294  1.337170e+07  9.760415e+09  8.023019e+07   </span>
+<span class="go"> 5            37.986840    14.357676  1.443000e+03  3.725460e+05  8.658000e+03   </span>
+<span class="go"> </span>
+<span class="go">                   CV     TValue         ProbT  </span>
+<span class="go"> Cylinders                                      </span>
+<span class="go"> 5           9.833327  26.905963  1.741013e-07  </span>
+<span class="go"> 5          16.660895  15.880007  3.957170e-06  </span>
+
+<span class="go">[ByGroupSet2.ByGroup5.MDSummary]</span>
+
+<span class="go"> Descriptive Statistics for _T_D355AA4C_7FA6D68650C0</span>
+<span class="go"> </span>
+<span class="go">                Column      Min       Max      N  NMiss          Mean  \</span>
+<span class="go"> Cylinders                                                              </span>
+<span class="go"> 6                MSRP  16495.0  192465.0  190.0    0.0  32124.415789   </span>
+<span class="go"> 6          Horsepower    155.0     477.0  190.0    0.0    218.952632   </span>
+<span class="go"> </span>
+<span class="go">                  Sum           Std       StdErr           Var           USS  \</span>
+<span class="go"> Cylinders                                                                     </span>
+<span class="go"> 6          6103639.0  16092.708870  1167.487809  2.589753e+08  2.450222e+11   </span>
+<span class="go"> 6            41601.0     41.434628     3.005984  1.716828e+03  9.433129e+06   </span>
+<span class="go"> </span>
+<span class="go">                     CSS         CV     TValue          ProbT  </span>
+<span class="go"> Cylinders                                                     </span>
+<span class="go"> 6          4.894633e+10  50.094946  27.515847   5.123923e-68  </span>
+<span class="go"> 6          3.244806e+05  18.924015  72.838924  2.971778e-140  </span>
+
+<span class="go">[ByGroupSet2.ByGroup6.MDSummary]</span>
+
+<span class="go"> Descriptive Statistics for _T_D355AA4C_7FA6D68650C0</span>
+<span class="go"> </span>
+<span class="go">                Column      Min       Max     N  NMiss          Mean  \</span>
+<span class="go"> Cylinders                                                             </span>
+<span class="go"> 8                MSRP  22010.0  121770.0  87.0    0.0  51179.988506   </span>
+<span class="go"> 8          Horsepower    217.0     493.0  87.0    0.0    298.942529   </span>
+<span class="go"> </span>
+<span class="go">                  Sum           Std       StdErr           Var           USS  \</span>
+<span class="go"> Cylinders                                                                     </span>
+<span class="go"> 8          4452659.0  18737.189898  2008.837616  3.510823e+08  2.580801e+11   </span>
+<span class="go"> 8            26008.0     48.388533     5.187795  2.341450e+03  7.976262e+06   </span>
+<span class="go"> </span>
+<span class="go">                     CSS         CV     TValue         ProbT  </span>
+<span class="go"> Cylinders                                                    </span>
+<span class="go"> 8          3.019308e+10  36.610383  25.477414  7.769015e-42  </span>
+<span class="go"> 8          2.013647e+05  16.186567  57.624195  1.709083e-70  </span>
+
+<span class="go">[ByGroupSet2.ByGroup7.MDSummary]</span>
+
+<span class="go"> Descriptive Statistics for _T_D355AA4C_7FA6D68650C0</span>
+<span class="go"> </span>
+<span class="go">                Column      Min      Max    N  NMiss     Mean       Sum  \</span>
+<span class="go"> Cylinders                                                                </span>
+<span class="go"> 10               MSRP  41475.0  81795.0  2.0    0.0  61635.0  123270.0   </span>
+<span class="go"> 10         Horsepower    310.0    500.0  2.0    0.0    405.0     810.0   </span>
+<span class="go"> </span>
+<span class="go">                     Std   StdErr          Var           USS          CSS  \</span>
+<span class="go"> Cylinders                                                                  </span>
+<span class="go"> 10         28510.545417  20160.0  812851200.0  8.410598e+09  812851200.0   </span>
+<span class="go"> 10           134.350288     95.0      18050.0  3.461000e+05      18050.0   </span>
+<span class="go"> </span>
+<span class="go">                   CV    TValue     ProbT  </span>
+<span class="go"> Cylinders                                 </span>
+<span class="go"> 10         46.257071  3.057292  0.201247  </span>
+<span class="go"> 10         33.172911  4.263158  0.146679  </span>
+
+<span class="go">[ByGroupSet2.ByGroup8.MDSummary]</span>
+
+<span class="go"> Descriptive Statistics for _T_D355AA4C_7FA6D68650C0</span>
+<span class="go"> </span>
+<span class="go">                Column      Min       Max    N  NMiss           Mean       Sum  \</span>
+<span class="go"> Cylinders                                                                       </span>
+<span class="go"> 12               MSRP  75000.0  128420.0  3.0    0.0  110030.000000  330090.0   </span>
+<span class="go"> 12         Horsepower    420.0     493.0  3.0    0.0     468.666667    1406.0   </span>
+<span class="go"> </span>
+<span class="go">                     Std        StdErr           Var           USS  \</span>
+<span class="go"> Cylinders                                                           </span>
+<span class="go"> 12         30349.485992  17522.283907  9.210913e+08  3.816199e+10   </span>
+<span class="go"> 12            42.146570     24.333333  1.776333e+03  6.624980e+05   </span>
+<span class="go"> </span>
+<span class="go">                     CSS         CV     TValue     ProbT  </span>
+<span class="go"> Cylinders                                                </span>
+<span class="go"> 12         1.842183e+09  27.582919   6.279433  0.024435  </span>
+<span class="go"> 12         3.552667e+03   8.992867  19.260274  0.002685  </span>
+
+<span class="go">+ Elapsed: 0.0109s, user: 0.008s, sys: 0.005s, mem: 3.48mb</span>
+
+<span class="gp">In [10]: </span><span class="n">tbl</span><span class="o">.</span><span class="n">mdsummary</span><span class="p">(</span><span class="n">sets</span><span class="o">=</span><span class="p">[</span><span class="nb">dict</span><span class="p">(</span><span class="n">groupby</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;Origin&quot;</span><span class="p">]),</span>
+<span class="gp">   ....: </span>                    <span class="nb">dict</span><span class="p">(</span><span class="n">groupby</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;Cylinders&quot;</span><span class="p">])])</span><span class="o">.</span><span class="n">get_set</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">get_group</span><span class="p">(</span><span class="s1">&#39;Asia&#39;</span><span class="p">)</span>
+<span class="gp">   ....: </span>
+<span class="go">                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    Out[10]: </span>
+<span class="go">[MDSummary]</span>
+
+<span class="go"> Descriptive Statistics for _T_D355AA4C_7FA6D68650C0</span>
+<span class="go"> </span>
+<span class="go">             Column      Min      Max      N  NMiss          Mean        Sum  \</span>
+<span class="go"> Origin                                                                        </span>
+<span class="go"> Asia          MSRP  10280.0  89765.0  158.0    0.0  24741.322785  3909129.0   </span>
+<span class="go"> Asia    Horsepower     73.0    340.0  158.0    0.0    190.702532    30131.0   </span>
+<span class="go"> </span>
+<span class="go">                  Std      StdErr           Var           USS           CSS  \</span>
+<span class="go"> Origin                                                                       </span>
+<span class="go"> Asia    11321.069675  900.655944  1.281666e+08  1.168392e+11  2.012216e+10   </span>
+<span class="go"> Asia       59.392627    4.725024  3.527484e+03  6.299873e+06  5.538150e+05   </span>
+<span class="go"> </span>
+<span class="go">                CV     TValue         ProbT  </span>
+<span class="go"> Origin                                      </span>
+<span class="go"> Asia    45.757738  27.470338  7.525437e-62  </span>
+<span class="go"> Asia    31.144121  40.360121  8.503586e-85  </span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="sorting.html" class="btn btn-neutral float-right" title="Sorting" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="indexing.html" class="btn btn-neutral" title="Indexing and Data Selection" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016 SAS Institute Inc. All Rights Reserved..
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'1.0.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

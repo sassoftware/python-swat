@@ -1,0 +1,6 @@
+swat.cas.table.CASTable.uss
+===========================
+
+.. currentmodule:: swat.cas.table
+
+.. automethod:: CASTable.uss

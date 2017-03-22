@@ -1,0 +1,6 @@
+swat.cas.table.CASTable.values
+==============================
+
+.. currentmodule:: swat.cas.table
+
+.. autoattribute:: CASTable.values

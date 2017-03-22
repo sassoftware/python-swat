@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>swat.SASDataFrame &mdash; SWAT 1.0.0 documentation</title>
+  <title>swat.SASDataFrame &mdash; SWAT 1.1.0 documentation</title>
   
 
   
@@ -32,7 +32,7 @@
   
 
   
-    <link rel="top" title="SWAT 1.0.0 documentation" href="../index.html"/>
+    <link rel="top" title="SWAT 1.1.0 documentation" href="../index.html"/>
         <link rel="up" title="API Reference" href="../api.html"/>
         <link rel="next" title="swat.dataframe.SASColumnSpec" href="swat.dataframe.SASColumnSpec.html"/>
         <link rel="prev" title="swat.cas.results.CASResults.concat_bygroups" href="swat.cas.results.CASResults.concat_bygroups.html"/> 
@@ -64,7 +64,7 @@
             
             
               <div class="version">
-                1.0.0
+                1.1.0
               </div>
             
           
@@ -87,6 +87,7 @@
             
                 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../whatsnew.html">What&#8217;s New</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../getting-started.html">Getting Started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../workflows.html">Workflows</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../binary-vs-rest.html">Binary vs. REST</a></li>
@@ -181,15 +182,15 @@
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>data</strong> : <code class="xref py py-func docutils literal"><span class="pre">numpy.ndarray()</span></code> or dict or <a class="reference external" href="http://pandas.pydata.org/pandas-docs/version/0.18.0/generated/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v0.18.0)"><code class="xref py py-class docutils literal"><span class="pre">pandas.DataFrame</span></code></a></p>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>data</strong> : <code class="xref py py-func docutils literal"><span class="pre">numpy.ndarray()</span></code> or dict or <a class="reference external" href="http://pandas.pydata.org/pandas-docs/version/0.19.2/generated/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v0.19.2)"><code class="xref py py-class docutils literal"><span class="pre">pandas.DataFrame</span></code></a></p>
 <blockquote>
-<div><p>Dict can contain <a class="reference external" href="http://pandas.pydata.org/pandas-docs/version/0.18.0/generated/pandas.Series.html#pandas.Series" title="(in pandas v0.18.0)"><code class="xref py py-class docutils literal"><span class="pre">pandas.Series</span></code></a>, arrays, constants, or list-like objects.</p>
+<div><p>Dict can contain <a class="reference external" href="http://pandas.pydata.org/pandas-docs/version/0.19.2/generated/pandas.Series.html#pandas.Series" title="(in pandas v0.19.2)"><code class="xref py py-class docutils literal"><span class="pre">pandas.Series</span></code></a>, arrays, constants, or list-like objects.</p>
 </div></blockquote>
-<p><strong>index</strong> : <a class="reference external" href="http://pandas.pydata.org/pandas-docs/version/0.18.0/generated/pandas.Index.html#pandas.Index" title="(in pandas v0.18.0)"><code class="xref py py-class docutils literal"><span class="pre">pandas.Index</span></code></a> or list, optional</p>
+<p><strong>index</strong> : <a class="reference external" href="http://pandas.pydata.org/pandas-docs/version/0.19.2/generated/pandas.Index.html#pandas.Index" title="(in pandas v0.19.2)"><code class="xref py py-class docutils literal"><span class="pre">pandas.Index</span></code></a> or list, optional</p>
 <blockquote>
 <div><p>Index to use for resulting frame.</p>
 </div></blockquote>
-<p><strong>columns</strong> : <a class="reference external" href="http://pandas.pydata.org/pandas-docs/version/0.18.0/generated/pandas.Index.html#pandas.Index" title="(in pandas v0.18.0)"><code class="xref py py-class docutils literal"><span class="pre">pandas.Index</span></code></a> or list, optional</p>
+<p><strong>columns</strong> : <a class="reference external" href="http://pandas.pydata.org/pandas-docs/version/0.19.2/generated/pandas.Index.html#pandas.Index" title="(in pandas v0.19.2)"><code class="xref py py-class docutils literal"><span class="pre">pandas.Index</span></code></a> or list, optional</p>
 <blockquote>
 <div><p>Column labels to use for resulting frame.</p>
 </div></blockquote>
@@ -234,7 +235,7 @@
 </table>
 <div class="admonition seealso">
 <p class="first admonition-title">See also</p>
-<p class="last"><a class="reference external" href="http://pandas.pydata.org/pandas-docs/version/0.18.0/generated/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v0.18.0)"><code class="xref py py-class docutils literal"><span class="pre">pandas.DataFrame</span></code></a></p>
+<p class="last"><a class="reference external" href="http://pandas.pydata.org/pandas-docs/version/0.19.2/generated/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v0.19.2)"><code class="xref py py-class docutils literal"><span class="pre">pandas.DataFrame</span></code></a></p>
 </div>
 <p class="rubric">Attributes</p>
 <table border="1" class="docutils">
@@ -305,17 +306,23 @@
 <tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">apply</span></code>(func[,&nbsp;axis,&nbsp;broadcast,&nbsp;raw,&nbsp;reduce,&nbsp;args])</td>
 <td>Applies function along input axis of DataFrame.</td>
 </tr>
-<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">applymap</span></code>(func)</td>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">apply_labels</span></code>(**kwargs)</td>
+<td>Rename columns using the label value</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">applymap</span></code>(func)</td>
 <td>Apply a function to a DataFrame that is intended to operate elementwise, i.e.</td>
 </tr>
-<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">as_blocks</span></code>([copy])</td>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">as_blocks</span></code>([copy])</td>
 <td>Convert the frame to a dict of dtype -&gt; Constructor Types that each has a homogeneous dtype.</td>
 </tr>
-<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">as_matrix</span></code>([columns])</td>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">as_matrix</span></code>([columns])</td>
 <td>Convert the frame to its Numpy-array representation.</td>
 </tr>
-<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">asfreq</span></code>(freq[,&nbsp;method,&nbsp;how,&nbsp;normalize])</td>
-<td>Convert all TimeSeries inside to specified frequency using DateOffset objects.</td>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">asfreq</span></code>(freq[,&nbsp;method,&nbsp;how,&nbsp;normalize])</td>
+<td>Convert TimeSeries to specified frequency.</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">asof</span></code>(where[,&nbsp;subset])</td>
+<td>The last row without any NaN is taken (or the last row without</td>
 </tr>
 <tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">assign</span></code>(**kwargs)</td>
 <td>Assign new columns to a DataFrame, returning a new object (a copy) with all the original columns in addition to the new ones.</td>
@@ -338,7 +345,7 @@
 <tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">boxplot</span></code>([column,&nbsp;by,&nbsp;ax,&nbsp;fontsize,&nbsp;rot,&nbsp;...])</td>
 <td>Make a box plot from DataFrame column optionally grouped by some columns or</td>
 </tr>
-<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">clip</span></code>([lower,&nbsp;upper,&nbsp;out,&nbsp;axis])</td>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">clip</span></code>([lower,&nbsp;upper,&nbsp;axis])</td>
 <td>Trim values at input threshold(s).</td>
 </tr>
 <tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">clip_lower</span></code>(threshold[,&nbsp;axis])</td>
@@ -369,7 +376,7 @@
 <td>Deprecated.</td>
 </tr>
 <tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">copy</span></code>([deep])</td>
-<td>Make a copy of this object</td>
+<td>Make a copy of this objects data.</td>
 </tr>
 <tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">corr</span></code>([method,&nbsp;min_periods])</td>
 <td>Compute pairwise correlation of columns, excluding NA/null values</td>
@@ -383,16 +390,16 @@
 <tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">cov</span></code>([min_periods])</td>
 <td>Compute pairwise covariance of columns, excluding NA/null values</td>
 </tr>
-<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">cummax</span></code>([axis,&nbsp;dtype,&nbsp;out,&nbsp;skipna])</td>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">cummax</span></code>([axis,&nbsp;skipna])</td>
 <td>Return cumulative max over requested axis.</td>
 </tr>
-<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">cummin</span></code>([axis,&nbsp;dtype,&nbsp;out,&nbsp;skipna])</td>
-<td>Return cumulative min over requested axis.</td>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">cummin</span></code>([axis,&nbsp;skipna])</td>
+<td>Return cumulative minimum over requested axis.</td>
 </tr>
-<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">cumprod</span></code>([axis,&nbsp;dtype,&nbsp;out,&nbsp;skipna])</td>
-<td>Return cumulative prod over requested axis.</td>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">cumprod</span></code>([axis,&nbsp;skipna])</td>
+<td>Return cumulative product over requested axis.</td>
 </tr>
-<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">cumsum</span></code>([axis,&nbsp;dtype,&nbsp;out,&nbsp;skipna])</td>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">cumsum</span></code>([axis,&nbsp;skipna])</td>
 <td>Return cumulative sum over requested axis.</td>
 </tr>
 <tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">describe</span></code>([percentiles,&nbsp;include,&nbsp;exclude])</td>
@@ -444,7 +451,7 @@
 <td>Fill NA/NaN values using the specified method</td>
 </tr>
 <tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">filter</span></code>([items,&nbsp;like,&nbsp;regex,&nbsp;axis])</td>
-<td>Restrict the info axis to set of items or wildcard</td>
+<td>Subset rows or columns of dataframe according to labels in the specified index.</td>
 </tr>
 <tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">first</span></code>(offset)</td>
 <td>Convenience method for subsetting initial periods of time series data based on a date offset.</td>
@@ -456,7 +463,7 @@
 <td>Integer division of dataframe and other, element-wise (binary operator <cite>floordiv</cite>).</td>
 </tr>
 <tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">from_csv</span></code>(path[,&nbsp;header,&nbsp;sep,&nbsp;index_col,&nbsp;...])</td>
-<td>Read CSV file (DISCOURAGED, please use <a class="reference external" href="http://pandas.pydata.org/pandas-docs/version/0.18.0/generated/pandas.read_csv.html#pandas.read_csv" title="(in pandas v0.18.0)"><code class="xref py py-func docutils literal"><span class="pre">pandas.read_csv()</span></code></a> instead).</td>
+<td>Read CSV file (DISCOURAGED, please use <a class="reference external" href="http://pandas.pydata.org/pandas-docs/version/0.19.2/generated/pandas.read_csv.html#pandas.read_csv" title="(in pandas v0.19.2)"><code class="xref py py-func docutils literal"><span class="pre">pandas.read_csv()</span></code></a> instead).</td>
 </tr>
 <tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">from_dict</span></code>(data[,&nbsp;orient,&nbsp;dtype])</td>
 <td>Construct DataFrame from dict of array-like or dicts</td>
@@ -678,7 +685,7 @@
 <td>Replace values given in &#8216;to_replace&#8217; with &#8216;value&#8217;.</td>
 </tr>
 <tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">resample</span></code>(rule[,&nbsp;how,&nbsp;axis,&nbsp;fill_method,&nbsp;...])</td>
-<td>Convenience method for frequency conversion and resampling of regular time-series data.</td>
+<td>Convenience method for frequency conversion and resampling of time series.</td>
 </tr>
 <tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">reset_index</span></code>([level,&nbsp;drop,&nbsp;inplace,&nbsp;...])</td>
 <td>For DataFrame with multi-level index, return new DataFrame with labeling information in the columns under the index names, defaulting to &#8216;level_0&#8217;, &#8216;level_1&#8217;, etc.</td>
@@ -696,9 +703,9 @@
 <td>Multiplication of dataframe and other, element-wise (binary operator <cite>rmul</cite>).</td>
 </tr>
 <tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">rolling</span></code>(window[,&nbsp;min_periods,&nbsp;freq,&nbsp;center,&nbsp;...])</td>
-<td>Provides rolling transformations.</td>
+<td>Provides rolling window calculcations.</td>
 </tr>
-<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">round</span></code>([decimals,&nbsp;out])</td>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">round</span></code>([decimals])</td>
 <td>Round a DataFrame to a variable number of decimal places.</td>
 </tr>
 <tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">rpow</span></code>(other[,&nbsp;axis,&nbsp;level,&nbsp;fill_value])</td>
@@ -752,7 +759,7 @@
 <tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">sortlevel</span></code>([level,&nbsp;axis,&nbsp;ascending,&nbsp;inplace,&nbsp;...])</td>
 <td>Sort multilevel index by chosen axis and primary level.</td>
 </tr>
-<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">squeeze</span></code>()</td>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">squeeze</span></code>(**kwargs)</td>
 <td>Squeeze length 1 dimensions.</td>
 </tr>
 <tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">stack</span></code>([level,&nbsp;dropna])</td>
@@ -773,7 +780,7 @@
 <tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">swapaxes</span></code>(axis1,&nbsp;axis2[,&nbsp;copy])</td>
 <td>Interchange axes and swap values axes appropriately</td>
 </tr>
-<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">swaplevel</span></code>(i,&nbsp;j[,&nbsp;axis])</td>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">swaplevel</span></code>([i,&nbsp;j,&nbsp;axis])</td>
 <td>Swap levels i and j in a MultiIndex on a particular axis</td>
 </tr>
 <tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">tail</span></code>([n])</td>
@@ -801,15 +808,15 @@
 <td>Write a DataFrame to a Google BigQuery table.</td>
 </tr>
 <tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">to_hdf</span></code>(path_or_buf,&nbsp;key,&nbsp;**kwargs)</td>
-<td>Activate the HDFStore.</td>
+<td>Write the contained data to an HDF5 file using HDFStore.</td>
 </tr>
-<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">to_html</span></code>([buf,&nbsp;columns,&nbsp;col_space,&nbsp;colSpace,&nbsp;...])</td>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">to_html</span></code>([buf,&nbsp;columns,&nbsp;col_space,&nbsp;header,&nbsp;...])</td>
 <td>Render a DataFrame as an HTML table.</td>
 </tr>
 <tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">to_json</span></code>([path_or_buf,&nbsp;orient,&nbsp;date_format,&nbsp;...])</td>
 <td>Convert the object to a JSON string.</td>
 </tr>
-<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">to_latex</span></code>([buf,&nbsp;columns,&nbsp;col_space,&nbsp;...])</td>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">to_latex</span></code>([buf,&nbsp;columns,&nbsp;col_space,&nbsp;header,&nbsp;...])</td>
 <td>Render a DataFrame to a tabular environment table.</td>
 </tr>
 <tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">to_msgpack</span></code>([path_or_buf,&nbsp;encoding])</td>
@@ -842,43 +849,40 @@
 <tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">to_timestamp</span></code>([freq,&nbsp;how,&nbsp;axis,&nbsp;copy])</td>
 <td>Cast to DatetimeIndex of timestamps, at <em>beginning</em> of period</td>
 </tr>
-<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">to_wide</span></code>(*args,&nbsp;**kwargs)</td>
-<td></td>
-</tr>
-<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">to_xarray</span></code>()</td>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">to_xarray</span></code>()</td>
 <td>Return an xarray object from the pandas object.</td>
 </tr>
-<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">transpose</span></code>()</td>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">transpose</span></code>(*args,&nbsp;**kwargs)</td>
 <td>Transpose index and columns</td>
 </tr>
-<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">truediv</span></code>(other[,&nbsp;axis,&nbsp;level,&nbsp;fill_value])</td>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">truediv</span></code>(other[,&nbsp;axis,&nbsp;level,&nbsp;fill_value])</td>
 <td>Floating division of dataframe and other, element-wise (binary operator <cite>truediv</cite>).</td>
 </tr>
-<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">truncate</span></code>([before,&nbsp;after,&nbsp;axis,&nbsp;copy])</td>
-<td>Truncates a sorted NDFrame before and/or after some particular dates.</td>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">truncate</span></code>([before,&nbsp;after,&nbsp;axis,&nbsp;copy])</td>
+<td>Truncates a sorted NDFrame before and/or after some particular index value.</td>
 </tr>
-<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">tshift</span></code>([periods,&nbsp;freq,&nbsp;axis])</td>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">tshift</span></code>([periods,&nbsp;freq,&nbsp;axis])</td>
 <td>Shift the time index, using the index&#8217;s frequency if available.</td>
 </tr>
-<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">tz_convert</span></code>(tz[,&nbsp;axis,&nbsp;level,&nbsp;copy])</td>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">tz_convert</span></code>(tz[,&nbsp;axis,&nbsp;level,&nbsp;copy])</td>
 <td>Convert tz-aware axis to target time zone.</td>
 </tr>
-<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">tz_localize</span></code>(tz[,&nbsp;axis,&nbsp;level,&nbsp;copy,&nbsp;ambiguous])</td>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">tz_localize</span></code>(tz[,&nbsp;axis,&nbsp;level,&nbsp;copy,&nbsp;ambiguous])</td>
 <td>Localize tz-naive TimeSeries to target time zone.</td>
 </tr>
-<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">unstack</span></code>([level,&nbsp;fill_value])</td>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">unstack</span></code>([level,&nbsp;fill_value])</td>
 <td>Pivot a level of the (necessarily hierarchical) index labels, returning a DataFrame having a new level of column labels whose inner-most level consists of the pivoted index labels.</td>
 </tr>
-<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">update</span></code>(other[,&nbsp;join,&nbsp;overwrite,&nbsp;...])</td>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">update</span></code>(other[,&nbsp;join,&nbsp;overwrite,&nbsp;...])</td>
 <td>Modify DataFrame in place using non-NA values from passed DataFrame.</td>
 </tr>
-<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">var</span></code>([axis,&nbsp;skipna,&nbsp;level,&nbsp;ddof,&nbsp;numeric_only])</td>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">var</span></code>([axis,&nbsp;skipna,&nbsp;level,&nbsp;ddof,&nbsp;numeric_only])</td>
 <td>Return unbiased variance over requested axis.</td>
 </tr>
-<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">where</span></code>(cond[,&nbsp;other,&nbsp;inplace,&nbsp;axis,&nbsp;level,&nbsp;...])</td>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">where</span></code>(cond[,&nbsp;other,&nbsp;inplace,&nbsp;axis,&nbsp;level,&nbsp;...])</td>
 <td>Return an object of same shape as self and whose corresponding entries are from self where cond is True and otherwise are from other.</td>
 </tr>
-<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">xs</span></code>(key[,&nbsp;axis,&nbsp;level,&nbsp;copy,&nbsp;drop_level])</td>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">xs</span></code>(key[,&nbsp;axis,&nbsp;level,&nbsp;drop_level])</td>
 <td>Returns a cross-section (row(s) or column(s)) from the Series/DataFrame.</td>
 </tr>
 </tbody>
@@ -988,7 +992,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../',
-            VERSION:'1.0.0',
+            VERSION:'1.1.0',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

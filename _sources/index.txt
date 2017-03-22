@@ -44,6 +44,7 @@ to the best of both worlds.
    :maxdepth: 3
 
    install
+   whatsnew
    getting-started
    workflows
    binary-vs-rest

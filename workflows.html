@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Workflows &mdash; SWAT 1.0.0 documentation</title>
+  <title>Workflows &mdash; SWAT 1.1.0 documentation</title>
   
 
   
@@ -32,7 +32,7 @@
   
 
   
-    <link rel="top" title="SWAT 1.0.0 documentation" href="index.html"/>
+    <link rel="top" title="SWAT 1.1.0 documentation" href="index.html"/>
         <link rel="next" title="Binary vs. REST" href="binary-vs-rest.html"/>
         <link rel="prev" title="Getting Started" href="getting-started.html"/> 
 
@@ -63,7 +63,7 @@
             
             
               <div class="version">
-                1.0.0
+                1.1.0
               </div>
             
           
@@ -86,6 +86,7 @@
             
                 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="whatsnew.html">What&#8217;s New</a></li>
 <li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting Started</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Workflows</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#the-easy-way">The Easy Way</a></li>
@@ -175,8 +176,8 @@ object, the <code class="docutils literal"><span class="pre">table=</span></code
 automatically with that table object before it is sent to the CAS server.</p>
 <p>Here is a simple example.  We are reading a CSV file using the <code class="xref py py-meth docutils literal"><span class="pre">CAS.read_csv()</span></code>
 method.  This loads the CSV data into a CAS table and returns a <code class="xref py py-class docutils literal"><span class="pre">CASTable</span></code>
-object.  You can then use many of the standard <a class="reference external" href="http://pandas.pydata.org/pandas-docs/version/0.18.0/generated/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v0.18.0)"><code class="xref py py-class docutils literal"><span class="pre">pandas.DataFrame</span></code></a> methods
-such as <a class="reference external" href="http://pandas.pydata.org/pandas-docs/version/0.18.0/generated/pandas.DataFrame.head.html#pandas.DataFrame.head" title="(in pandas v0.18.0)"><code class="xref py py-meth docutils literal"><span class="pre">pandas.DataFrame.head()</span></code></a> to interact with the CAS table on the server.</p>
+object.  You can then use many of the standard <a class="reference external" href="http://pandas.pydata.org/pandas-docs/version/0.19.2/generated/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v0.19.2)"><code class="xref py py-class docutils literal"><span class="pre">pandas.DataFrame</span></code></a> methods
+such as <a class="reference external" href="http://pandas.pydata.org/pandas-docs/version/0.19.2/generated/pandas.DataFrame.head.html#pandas.DataFrame.head" title="(in pandas v0.19.2)"><code class="xref py py-meth docutils literal"><span class="pre">pandas.DataFrame.head()</span></code></a> to interact with the CAS table on the server.</p>
 <div class="highlight-ipython"><div class="highlight"><pre><span></span><span class="gp">In [1]: </span><span class="kn">import</span> <span class="nn">swat</span>
 
 <span class="gp">In [2]: </span><span class="n">conn</span> <span class="o">=</span> <span class="n">swat</span><span class="o">.</span><span class="n">CAS</span><span class="p">(</span><span class="n">host</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="n">userid</span><span class="p">,</span> <span class="n">password</span><span class="p">)</span>
@@ -187,7 +188,7 @@ such as <a class="reference external" href="http://pandas.pydata.org/pandas-docs
 
 <span class="gp">In [4]: </span><span class="n">tbl</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
 <span class="gh">Out[4]: </span><span class="go"></span>
-<span class="go">Selected Rows from Table _T_D355F1FC_7F037A6500C0</span>
+<span class="go">Selected Rows from Table _T_O7R6LUHH_OHXMDJU7_K4DMD2J7FT</span>
 
 <span class="go">    Make           Model   Type Origin DriveTrain     MSRP  Invoice  \</span>
 <span class="go">0  Acura             MDX    SUV   Asia        All  36945.0  33337.0   </span>
@@ -218,7 +219,7 @@ pass in the table argument, or you can call the CAS action directly on the
 <span class="gh">Out[5]: </span><span class="go"></span>
 <span class="go">[Summary]</span>
 
-<span class="go"> Descriptive Statistics for _T_D355F1FC_7F037A6500C0</span>
+<span class="go"> Descriptive Statistics for _T_O7R6LUHH_OHXMDJU7_K4DMD2J7FT</span>
 <span class="go"> </span>
 <span class="go">         Column      Min       Max      N  NMiss          Mean         Sum  \</span>
 <span class="go"> 0         MSRP  10280.0  192465.0  428.0    0.0  32774.855140  14027638.0   </span>
@@ -256,13 +257,13 @@ pass in the table argument, or you can call the CAS action directly on the
 <span class="go"> 8   7.685150  269.196577   0.000000e+00  </span>
 <span class="go"> 9   7.704349  268.525733   0.000000e+00  </span>
 
-<span class="go">+ Elapsed: 0.0225s, user: 0.02s, sys: 0.005s, mem: 1.74mb</span>
+<span class="go">+ Elapsed: 0.0258s, user: 0.023s, sys: 0.006s, mem: 1.75mb</span>
 
 <span class="gp">In [6]: </span><span class="n">tbl</span><span class="o">.</span><span class="n">summary</span><span class="p">()</span>
-<span class="go">                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           Out[6]: </span>
+<span class="go">                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   Out[6]: </span>
 <span class="go">[Summary]</span>
 
-<span class="go"> Descriptive Statistics for _T_D355F1FC_7F037A6500C0</span>
+<span class="go"> Descriptive Statistics for _T_O7R6LUHH_OHXMDJU7_K4DMD2J7FT</span>
 <span class="go"> </span>
 <span class="go">         Column      Min       Max      N  NMiss          Mean         Sum  \</span>
 <span class="go"> 0         MSRP  10280.0  192465.0  428.0    0.0  32774.855140  14027638.0   </span>
@@ -300,7 +301,7 @@ pass in the table argument, or you can call the CAS action directly on the
 <span class="go"> 8   7.685150  269.196577   0.000000e+00  </span>
 <span class="go"> 9   7.704349  268.525733   0.000000e+00  </span>
 
-<span class="go">+ Elapsed: 0.00512s, user: 0.004s, sys: 0.003s, mem: 1.74mb</span>
+<span class="go">+ Elapsed: 0.00621s, user: 0.006s, sys: 0.003s, mem: 1.75mb</span>
 
 <span class="gp">In [7]: </span><span class="n">conn</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 </pre></div>
@@ -342,7 +343,7 @@ on the next call.</p>
 
 <span class="gp">In [11]: </span><span class="n">tbl</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
 <span class="gh">Out[11]: </span><span class="go"></span>
-<span class="go">Selected Rows from Table _T_D355F5A9_7F571F3DA0C0</span>
+<span class="go">Selected Rows from Table _T_GA5XWPOY_GYIC6GEV_U5XPIGG6D4</span>
 
 <span class="go">    Make           Model   Type Origin DriveTrain     MSRP  Invoice  \</span>
 <span class="go">0  Acura             MDX    SUV   Asia        All  36945.0  33337.0   </span>
@@ -371,7 +372,7 @@ on the next call.</p>
 <span class="gp">   ....: </span>
 
 <span class="gp">In [13]: </span><span class="n">tbl</span><span class="o">.</span><span class="n">summary</span><span class="p">(</span><span class="n">resultfunc</span><span class="o">=</span><span class="n">result_cb</span><span class="p">)</span>
-<span class="go">&gt;&gt;&gt; RESULT Summary Descriptive Statistics for _T_D355F5A9_7F571F3DA0C0</span>
+<span class="go">&gt;&gt;&gt; RESULT Summary Descriptive Statistics for _T_GA5XWPOY_GYIC6GEV_U5XPIGG6D4</span>
 
 <span class="go">        Column      Min       Max      N  NMiss          Mean         Sum  \</span>
 <span class="go">0         MSRP  10280.0  192465.0  428.0    0.0  32774.855140  14027638.0   </span>
@@ -416,7 +417,7 @@ on the next call.</p>
 <span class="gp">   ....: </span>
 
 <span class="gp">In [15]: </span><span class="n">tbl</span><span class="o">.</span><span class="n">summary</span><span class="p">(</span><span class="n">responsefunc</span><span class="o">=</span><span class="n">response_cb</span><span class="p">)</span>
-<span class="go">&gt;&gt;&gt; RESPONSE Summary Descriptive Statistics for _T_D355F5A9_7F571F3DA0C0</span>
+<span class="go">&gt;&gt;&gt; RESPONSE Summary Descriptive Statistics for _T_GA5XWPOY_GYIC6GEV_U5XPIGG6D4</span>
 
 <span class="go">        Column      Min       Max      N  NMiss          Mean         Sum  \</span>
 <span class="go">0         MSRP  10280.0  192465.0  428.0    0.0  32774.855140  14027638.0   </span>
@@ -467,9 +468,9 @@ response callback is called.  It will not call both.</p>
 For most cases, you can use the callback form to handle any size of data coming
 back from the CAS server.  However, in that mode, you can only run one action
 at a time.  If you want to run simultaneous actions and handle the responses
-as they come back from either connection, you need to use the <code class="xref py py-meth docutils literal"><span class="pre">CAS.inovke()</span></code>
+as they come back from either connection, you need to use the <code class="xref py py-meth docutils literal"><span class="pre">CAS.invoke()</span></code>
 method.</p>
-<p>The <code class="xref py py-meth docutils literal"><span class="pre">CAS.inovke()</span></code> method calls a CAS action, but doesn&#8217;t automatically retrieve
+<p>The <code class="xref py py-meth docutils literal"><span class="pre">CAS.invoke()</span></code> method calls a CAS action, but doesn&#8217;t automatically retrieve
 the responses.  You must iterate over the connection object to get the responses.
 To iterate over the responses for multiple connections, you can use the
 <code class="xref py py-func docutils literal"><span class="pre">getnext()</span></code> function.  Using this technique, you can take advantage of
@@ -487,7 +488,7 @@ thread on the client.</p>
 
 <span class="gp">In [21]: </span><span class="n">tbl1</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
 <span class="gh">Out[21]: </span><span class="go"></span>
-<span class="go">Selected Rows from Table _T_D355FA19_7F8CD42200C0</span>
+<span class="go">Selected Rows from Table _T_QODKJSM2_QXTBYW3D_WRP73T5JWG</span>
 
 <span class="go">      Name Sex  Age  Height  Weight</span>
 <span class="go">0   Alfred   M   14    69.0   112.5</span>
@@ -502,7 +503,7 @@ thread on the client.</p>
 
 <span class="gp">In [23]: </span><span class="n">tbl2</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
 <span class="gh">Out[23]: </span><span class="go"></span>
-<span class="go">Selected Rows from Table _T_D355FB7D_7F2148BA60C0</span>
+<span class="go">Selected Rows from Table _T_2D5Q7PCQ_NMKUET2A_DIUG2ZSZTG</span>
 
 <span class="go">    Make           Model   Type Origin DriveTrain     MSRP  Invoice  \</span>
 <span class="go">0  Acura             MDX    SUV   Asia        All  36945.0  33337.0   </span>
@@ -536,7 +537,7 @@ one and retrieve the responses from both connections.</p>
 <span class="gp">   ....: </span>    <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">resp</span><span class="p">:</span>
 <span class="gp">   ....: </span>        <span class="k">print</span><span class="p">(</span><span class="s1">&#39;&gt;&gt;&gt; RESULT&#39;</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
 <span class="gp">   ....: </span>
-<span class="go">&gt;&gt;&gt; RESULT Summary Descriptive Statistics for _T_D355FA19_7F8CD42200C0</span>
+<span class="go">&gt;&gt;&gt; RESULT Summary Descriptive Statistics for _T_QODKJSM2_QXTBYW3D_WRP73T5JWG</span>
 
 <span class="go">   Column   Min    Max     N  NMiss        Mean     Sum        Std    StdErr  \</span>
 <span class="go">0     Age  11.0   16.0  19.0    0.0   13.315789   253.0   1.492672  0.342442   </span>
@@ -547,7 +548,7 @@ one and retrieve the responses from both connections.</p>
 <span class="go">0    2.228070    3409.00    40.105263  11.209791  38.884748  8.049260e-19  </span>
 <span class="go">1   26.286901   74304.92   473.164211   8.224791  52.997076  3.202374e-21  </span>
 <span class="go">2  518.652047  199435.75  9335.736842  22.767942  19.144897  2.045197e-13  </span>
-<span class="go">&gt;&gt;&gt; RESULT Summary Descriptive Statistics for _T_D355FB7D_7F2148BA60C0</span>
+<span class="go">&gt;&gt;&gt; RESULT Summary Descriptive Statistics for _T_2D5Q7PCQ_NMKUET2A_DIUG2ZSZTG</span>
 
 <span class="go">        Column      Min       Max      N  NMiss          Mean         Sum  \</span>
 <span class="go">0         MSRP  10280.0  192465.0  428.0    0.0  32774.855140  14027638.0   </span>
@@ -636,7 +637,7 @@ one and retrieve the responses from both connections.</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'1.0.0',
+            VERSION:'1.1.0',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

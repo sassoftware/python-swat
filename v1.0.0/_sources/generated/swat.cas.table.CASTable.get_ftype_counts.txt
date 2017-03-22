@@ -1,0 +1,6 @@
+swat.cas.table.CASTable.get_ftype_counts
+========================================
+
+.. currentmodule:: swat.cas.table
+
+.. automethod:: CASTable.get_ftype_counts

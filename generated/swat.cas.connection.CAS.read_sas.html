@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>swat.CAS.read_sas &mdash; SWAT 1.0.0 documentation</title>
+  <title>swat.CAS.read_sas &mdash; SWAT 1.1.0 documentation</title>
   
 
   
@@ -32,7 +32,7 @@
   
 
   
-    <link rel="top" title="SWAT 1.0.0 documentation" href="../index.html"/>
+    <link rel="top" title="SWAT 1.1.0 documentation" href="../index.html"/>
         <link rel="up" title="API Reference" href="../api.html"/>
         <link rel="next" title="swat.CAS.read_sql_table" href="swat.cas.connection.CAS.read_sql_table.html"/>
         <link rel="prev" title="swat.CAS.read_hdf" href="swat.cas.connection.CAS.read_hdf.html"/> 
@@ -64,7 +64,7 @@
             
             
               <div class="version">
-                1.0.0
+                1.1.0
               </div>
             
           
@@ -87,6 +87,7 @@
             
                 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../whatsnew.html">What&#8217;s New</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../getting-started.html">Getting Started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../workflows.html">Workflows</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../binary-vs-rest.html">Binary vs. REST</a></li>
@@ -177,10 +178,10 @@
 <h1>swat.CAS.read_sas<a class="headerlink" href="#swat-cas-connection-cas-read-sas" title="Permalink to this headline">¶</a></h1>
 <dl class="method">
 <dt id="swat.CAS.read_sas">
-<code class="descclassname">CAS.</code><code class="descname">read_sas</code><span class="sig-paren">(</span><em>filepath_or_buffer</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#swat.CAS.read_sas" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">CAS.</code><code class="descname">read_sas</code><span class="sig-paren">(</span><em>filepath_or_buffer</em>, <em>casout=None</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#swat.CAS.read_sas" title="Permalink to this definition">¶</a></dt>
 <dd><p>Read SAS files stored as XPORT or SAS7BDAT into a CAS table</p>
-<p>This method calls <a class="reference external" href="http://pandas.pydata.org/pandas-docs/version/0.18.0/generated/pandas.read_sas.html#pandas.read_sas" title="(in pandas v0.18.0)"><code class="xref py py-func docutils literal"><span class="pre">pandas.read_sas()</span></code></a> with the
-given arguments, then uploads the resulting <a class="reference external" href="http://pandas.pydata.org/pandas-docs/version/0.18.0/generated/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v0.18.0)"><code class="xref py py-class docutils literal"><span class="pre">pandas.DataFrame</span></code></a>
+<p>This method calls <a class="reference external" href="http://pandas.pydata.org/pandas-docs/version/0.19.2/generated/pandas.read_sas.html#pandas.read_sas" title="(in pandas v0.19.2)"><code class="xref py py-func docutils literal"><span class="pre">pandas.read_sas()</span></code></a> with the
+given arguments, then uploads the resulting <a class="reference external" href="http://pandas.pydata.org/pandas-docs/version/0.19.2/generated/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v0.19.2)"><code class="xref py py-class docutils literal"><span class="pre">pandas.DataFrame</span></code></a>
 to a CAS table.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -217,7 +218,7 @@ table with the same name.</p>
 </div></blockquote>
 <p><strong>**kwargs</strong> : any, optional</p>
 <blockquote>
-<div><p>Keyword arguments to <a class="reference external" href="http://pandas.pydata.org/pandas-docs/version/0.18.0/generated/pandas.read_sas.html#pandas.read_sas" title="(in pandas v0.18.0)"><code class="xref py py-func docutils literal"><span class="pre">pandas.read_sas()</span></code></a>.</p>
+<div><p>Keyword arguments to <a class="reference external" href="http://pandas.pydata.org/pandas-docs/version/0.19.2/generated/pandas.read_sas.html#pandas.read_sas" title="(in pandas v0.19.2)"><code class="xref py py-func docutils literal"><span class="pre">pandas.read_sas()</span></code></a>.</p>
 </div></blockquote>
 </td>
 </tr>
@@ -228,7 +229,7 @@ table with the same name.</p>
 </table>
 <div class="admonition seealso">
 <p class="first admonition-title">See also</p>
-<p class="last"><a class="reference external" href="http://pandas.pydata.org/pandas-docs/version/0.18.0/generated/pandas.read_sas.html#pandas.read_sas" title="(in pandas v0.18.0)"><code class="xref py py-func docutils literal"><span class="pre">pandas.read_sas()</span></code></a>, <a class="reference internal" href="swat.cas.connection.CAS.upload_file.html#swat.CAS.upload_file" title="swat.CAS.upload_file"><code class="xref py py-meth docutils literal"><span class="pre">upload_file()</span></code></a></p>
+<p class="last"><a class="reference external" href="http://pandas.pydata.org/pandas-docs/version/0.19.2/generated/pandas.read_sas.html#pandas.read_sas" title="(in pandas v0.19.2)"><code class="xref py py-func docutils literal"><span class="pre">pandas.read_sas()</span></code></a>, <a class="reference internal" href="swat.cas.connection.CAS.upload_file.html#swat.CAS.upload_file" title="swat.CAS.upload_file"><code class="xref py py-meth docutils literal"><span class="pre">upload_file()</span></code></a></p>
 </div>
 <p class="rubric">Examples</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">conn</span> <span class="o">=</span> <span class="n">swat</span><span class="o">.</span><span class="n">CAS</span><span class="p">()</span>
@@ -281,7 +282,7 @@ table with the same name.</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../',
-            VERSION:'1.0.0',
+            VERSION:'1.1.0',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true
