@@ -59,6 +59,7 @@ class TestCASTable(tm.TestCase):
         swat.options.cas.trace_actions = False
         swat.options.cas.trace_ui_actions = False
         swat.options.interactive_mode = False
+        swat.options.int64_missing = -999999
 
         self.s = swat.CAS(HOST, PORT, USER, PASSWD, protocol=PROTOCOL)
 

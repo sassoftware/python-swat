@@ -52,6 +52,7 @@ class TestDataMsgHandlers(tm.TestCase):
         swat.reset_option()
         swat.options.cas.print_messages = False
         swat.options.interactive_mode = False
+        swat.options.int64_missing = -999999
 
         self.s = swat.CAS(HOST, PORT, USER, PASSWD, protocol=PROTOCOL)
 
@@ -104,7 +105,7 @@ class TestDataMsgHandlers(tm.TestCase):
 
         self.assertEqual(len(data), 15)
         self.assertEqual(data.ix[:,'Column'].tolist(), 'Make,Model,Type,Origin,DriveTrain,MSRP,Invoice,EngineSize,Cylinders,Horsepower,MPG_City,MPG_Highway,Weight,Wheelbase,Length'.split(','))
-        self.assertEqual(data.ix[:,'Type'].tolist(), (['varchar'] * 5) + (['double'] * 10))
+        self.assertEqual(data.ix[:,'Type'].tolist(), ['varchar', 'varchar', 'varchar', 'varchar', 'varchar', 'int64', 'int64', 'double', 'int64', 'int64', 'int64', 'int64', 'int64', 'int64', 'int64'])
 
         self.assertTablesEqual(cars, self.s.CASTable('cars', caslib=srcLib), sortby=SORT_KEYS)
 

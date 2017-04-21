@@ -28,6 +28,7 @@ import re
 import datetime
 import numpy as np
 import pandas as pd
+import warnings
 from .utils.datetime import (str2cas_timestamp, str2cas_datetime, str2cas_date,
                              str2cas_time, str2sas_timestamp, str2sas_datetime,
                              str2sas_date, str2sas_time, cas2python_timestamp,
@@ -40,6 +41,7 @@ from .utils.datetime import (str2cas_timestamp, str2cas_datetime, str2cas_date,
                              python2sas_date, python2sas_time, python2cas_timestamp,
                              python2cas_datetime, python2cas_date, python2cas_time)
 from .. import clib
+from ..config import get_option
 from ..clib import errorcheck
 from ..exceptions import SWATError
 from ..utils.compat import a2n, text_types, binary_types, int32, int64, float64
@@ -333,6 +335,13 @@ class CASDataMsgHandler(object):
                     errorcheck(self._sw_databuffer.setString(row, offset, a2n('')),
                                self._sw_databuffer)
             elif vrtype == 'NUMERIC' and vtype in ['INT32', 'DATE']:
+                if pd.isnull(value):
+                    value = get_option('cas.%s_missing' % vtype.lower())
+                    warnings.warn(("Missing value found in 32-bit integer-based column '%s'.\n" %
+                                   v['name']) +
+                                  ("Substituting cas.%s_missing option value (%s)." %
+                                   (vtype.lower(), value)),
+                                  RuntimeWarning)
                 if length > 4:
                     for i in range(int64(length / 4)):
                         errorcheck(self._sw_databuffer.setInt32(row, offset + (i * 4),
@@ -343,6 +352,13 @@ class CASDataMsgHandler(object):
                                                             int32(transformer(value))),
                                self._sw_databuffer)
             elif vrtype == 'NUMERIC' and vtype in ['INT64', 'DATETIME', 'TIME']:
+                if pd.isnull(value):
+                    value = get_option('cas.%s_missing' % vtype.lower())
+                    warnings.warn(("Missing value found in 64-bit integer-based column '%s'.\n"
+                                   % v['name']) +
+                                  ("Substituting cas.%s_missing option value (%s)." %
+                                   (vtype.lower(), value)),
+                                  RuntimeWarning)
                 if length > 8:
                     for i in range(int64(length / 8)):
                         errorcheck(self._sw_databuffer.setInt64(row, offset + (i * 8),

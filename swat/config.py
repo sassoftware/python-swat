@@ -137,6 +137,25 @@ register_option('cas.exception_on_severity', 'int or None', check_severity, None
                 'on errors.')
 
 #
+# Integer missing value substitutions
+#
+
+register_option('cas.int64_missing', 'int', check_int, -2**(64-1),
+                'Sets substitution value for int64 missing values.')
+
+register_option('cas.int32_missing', 'int', check_int, -2**(32-1),
+                'Sets substitution value for int32 missing values.')
+
+register_option('cas.date_missing', 'int', check_int, -2**(32-1),
+                'Sets substitution value for date missing values.')
+
+register_option('cas.time_missing', 'int', check_int, -2**(64-1),
+                'Sets substitution value for time missing values.')
+
+register_option('cas.datetime_missing', 'int', check_int, -2**(64-1),
+                'Sets substitution value for datetime missing values.')
+
+#
 # Tabular data options
 #
 
