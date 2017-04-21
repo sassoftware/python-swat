@@ -67,11 +67,19 @@ class TestByGroups(tm.TestCase):
         self.assertNotEqual(self.tablename, None)
         self.table = r['casTable']
 
-    def get_cars_df(self):
+    def get_cars_df(self, all_doubles=True):
         import swat.tests as st
+
         cars_csv = os.path.join(os.path.dirname(st.__file__), 'datasources', 'cars.csv')
+
         df = pd.read_csv(cars_csv)
         df['Model'] = ' ' + df['Model']
+
+        if all_doubles:
+           for name in ['MSRP', 'Invoice', 'EngineSize', 'Cylinders', 'Horsepower',
+                        'MPG_City', 'MPG_Highway', 'Weight', 'Wheelbase', 'Length']:
+               df[name] = df[name].astype(float)
+
         return df
 
     def tearDown(self):

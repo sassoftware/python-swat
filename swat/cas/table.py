@@ -4926,14 +4926,15 @@ class CASTable(ParamManager, ActionParamManager):
         :class:`CASTable`
 
         '''
-        from swat.cas.datamsghandlers import PandasDataFrame
+        use_addtable = kwargs.pop('use_addtable', False) 
         table, kwargs = connection._get_table_args(**kwargs)
         dframe = getattr(pd.DataFrame, 'from_' + name)(data, **kwargs)
-        if connection._protocol.startswith('http'):
+        if not use_addtable or connection._protocol.startswith('http'):
             if 'table' in table:
                 table['name'] = table.pop('table')
             return connection.upload_frame(dframe, casout=table and table or None)
 #                      importoptions=connection._importoptions_from_dframe(dframe)
+        from swat.cas.datamsghandlers import PandasDataFrame
         dmh = PandasDataFrame(dframe)
         table.update(dmh.args.addtable)
         return connection.retrieve('table.addtable', **table)['casTable']

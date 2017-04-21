@@ -1989,10 +1989,11 @@ class CAS(object):
 
         '''
         import pandas as pd
+        use_addtable = kwargs.pop('use_addtable', False) 
         table, kwargs = self._get_table_args(**kwargs)
         dframe = getattr(pd, _method_)(*args, **kwargs)
         # REST doesn't support table.addtable
-        if self._protocol.startswith('http'):
+        if not use_addtable or self._protocol.startswith('http'):
             if 'table' in table:
                 table['name'] = table.pop('table')
             return self.upload_frame(dframe, casout=table and table or None)
@@ -2098,9 +2099,10 @@ class CAS(object):
         :class:`CASTable`
 
         '''
+        use_addtable = kwargs.pop('use_addtable', False)
         table, kwargs = self._get_table_args(casout=casout, **kwargs)
         # REST doesn't support table.addtable
-        if self._protocol.startswith('http'):
+        if not use_addtable or self._protocol.startswith('http'):
             import pandas as pd
             dframe = pd.read_table(filepath_or_buffer, **kwargs)
             if 'table' in table:
@@ -2159,9 +2161,10 @@ class CAS(object):
         :class:`CASTable`
 
         '''
+        use_addtable = kwargs.pop('use_addtable', False)
         table, kwargs = self._get_table_args(casout=casout, **kwargs)
         # REST doesn't support table.addtable
-        if self._protocol.startswith('http'):
+        if not use_addtable or self._protocol.startswith('http'):
             import pandas as pd
             dframe = pd.read_csv(filepath_or_buffer, **kwargs)
             if 'table' in table:
@@ -2220,9 +2223,10 @@ class CAS(object):
         :class:`CASTable`
 
         '''
+        use_addtable = kwargs.pop('use_addtable', False)
         table, kwargs = self._get_table_args(casout=casout, **kwargs)
         # REST doesn't support table.addtable
-        if self._protocol.startswith('http'):
+        if not use_addtable or self._protocol.startswith('http'):
             import pandas as pd
             dframe = pd.read_fwf(filepath_or_buffer, **kwargs)
             if 'table' in table:
@@ -2449,13 +2453,13 @@ class CAS(object):
         '''
         import pandas as pd
         from swat import datamsghandlers as dmh
-        kwargs = kwargs.copy()
+        use_addtable = kwargs.pop('use_addtable', False) 
         out = []
         table, kwargs = self._get_table_args(casout=casout, **kwargs)
         for i, dframe in enumerate(pd.read_html(io, **kwargs)):
             if i and table.get('table'):
                 table['table'] += str(i)
-            if self._protocol.startswith('http'):
+            if not use_addtable or self._protocol.startswith('http'):
                 out.append(self.upload_frame(dframe, casout=table and table or None))
 #                                            importoptions=self._importoptions_from_dframe(dframe)
             else:

@@ -77,13 +77,18 @@ class TestCASTable(tm.TestCase):
         self.assertNotEqual(self.tablename, None)
         self.table = r['casTable']
 
-    def get_cars_df(self, casout=None):
+    def get_cars_df(self, casout=None, all_doubles=True):
         import swat.tests as st
 
         myFile = os.path.join(os.path.dirname(st.__file__), 'datasources', 'cars.csv')
 
         df = pd.read_csv(myFile)
         df['Model'] = ' ' + df['Model']
+
+        if all_doubles:
+           for name in ['MSRP', 'Invoice', 'EngineSize', 'Cylinders', 'Horsepower',
+                        'MPG_City', 'MPG_Highway', 'Weight', 'Wheelbase', 'Length']:
+               df[name] = df[name].astype(float)
 
         return df
 
@@ -2998,10 +3003,7 @@ class TestCASTable(tm.TestCase):
 
     @unittest.skipIf(int(pd.__version__.split('.')[1]) <= 16, 'Need newer version of Pandas')
     def test_read_pickle(self):
-#       if self.s._protocol in ['http', 'https']:
-#           tm.TestCase.skipTest(self, 'REST does not support data messages')
-
-        df = self.get_cars_df()
+        df = self.get_cars_df(all_doubles=False)
 
         import pickle
         import tempfile
@@ -3011,17 +3013,25 @@ class TestCASTable(tm.TestCase):
 
         df.to_pickle(tmp.name)
 
-        df2 = pd.read_pickle(tmp.name).sort_values(SORT_KEYS)
-        tbl = self.s.read_pickle(tmp.name).sort_values(SORT_KEYS)
+        df2 = pd.read_pickle(tmp.name)
+        tbl = self.s.read_pickle(tmp.name)
 
         self.assertTablesEqual(df2, tbl, sortby=SORT_KEYS)
+        self.assertEqual(set(tbl.dtypes.unique()), set(['double', 'varchar']))
+
+        # Force addtable
+        tbl = self.s.read_pickle(tmp.name, use_addtable=True)
+
+        self.assertTablesEqual(df, tbl, sortby=SORT_KEYS)
+
+        if self.s._protocol in ['http', 'https']:
+           self.assertEqual(set(tbl.dtypes.unique()), set(['double', 'varchar']))
+        else:
+           self.assertEqual(set(tbl.dtypes.unique()), set(['double', 'int64', 'varchar']))
 
         os.remove(tmp.name)
 
     def test_read_table(self):
-#       if self.s._protocol in ['http', 'https']:
-#           tm.TestCase.skipTest(self, 'REST does not support data messages')
-
         import swat.tests as st
 
         myFile = os.path.join(os.path.dirname(st.__file__), 'datasources', 'cars.tsv')
@@ -3030,11 +3040,19 @@ class TestCASTable(tm.TestCase):
         tbl = self.s.read_table(myFile)
 
         self.assertTablesEqual(df, tbl, sortby=SORT_KEYS)
+        self.assertEqual(set(tbl.dtypes.unique()), set(['double', 'varchar']))
+
+        # Force addtable
+        tbl = self.s.read_table(myFile, use_addtable=True)
+
+        self.assertTablesEqual(df, tbl, sortby=SORT_KEYS)
+
+        if self.s._protocol in ['http', 'https']:
+           self.assertEqual(set(tbl.dtypes.unique()), set(['double', 'varchar']))
+        else:
+           self.assertEqual(set(tbl.dtypes.unique()), set(['double', 'int64', 'varchar']))
 
     def test_read_csv(self):
-#       if self.s._protocol in ['http', 'https']:
-#           tm.TestCase.skipTest(self, 'REST does not support data messages')
-
         import swat.tests as st
 
         myFile = os.path.join(os.path.dirname(st.__file__), 'datasources', 'cars.csv')
@@ -3043,11 +3061,19 @@ class TestCASTable(tm.TestCase):
         tbl = self.s.read_csv(myFile)
 
         self.assertTablesEqual(df, tbl, sortby=SORT_KEYS)
+        self.assertEqual(set(tbl.dtypes.unique()), set(['double', 'varchar']))
+
+        # Force addtable
+        tbl = self.s.read_csv(myFile, use_addtable=True)
+
+        self.assertTablesEqual(df, tbl, sortby=SORT_KEYS)
+
+        if self.s._protocol in ['http', 'https']:
+           self.assertEqual(set(tbl.dtypes.unique()), set(['double', 'varchar']))
+        else:
+           self.assertEqual(set(tbl.dtypes.unique()), set(['double', 'int64', 'varchar']))
 
     def test_read_fwf(self):
-#       if self.s._protocol in ['http', 'https']:
-#           tm.TestCase.skipTest(self, 'REST does not support data messages')
-
         import swat.tests as st
 
         myFile = os.path.join(os.path.dirname(st.__file__), 'datasources', 'cars.fwf')
@@ -3056,6 +3082,17 @@ class TestCASTable(tm.TestCase):
         tbl = self.s.read_fwf(myFile)
 
         self.assertTablesEqual(df, tbl, sortby=SORT_KEYS)
+        self.assertEqual(set(tbl.dtypes.unique()), set(['double', 'varchar']))
+
+        # Force addtable
+        tbl = self.s.read_fwf(myFile, use_addtable=True)
+
+        self.assertTablesEqual(df, tbl, sortby=SORT_KEYS)
+
+        if self.s._protocol in ['http', 'https']:
+           self.assertEqual(set(tbl.dtypes.unique()), set(['double', 'varchar']))
+        else:
+           self.assertEqual(set(tbl.dtypes.unique()), set(['double', 'int64', 'varchar']))
 
 #   def test_read_clipboard(self):
 #       ???
@@ -3072,6 +3109,17 @@ class TestCASTable(tm.TestCase):
         tbl = self.s.read_excel(myFile)
 
         self.assertTablesEqual(df, tbl, sortby=SORT_KEYS)
+        self.assertEqual(set(tbl.dtypes.unique()), set(['double', 'varchar']))
+
+        # Force addtable
+        tbl = self.s.read_excel(myFile, use_addtable=True)
+
+        self.assertTablesEqual(df, tbl, sortby=SORT_KEYS)
+
+        if self.s._protocol in ['http', 'https']:
+           self.assertEqual(set(tbl.dtypes.unique()), set(['double', 'varchar']))
+        else:
+           self.assertEqual(set(tbl.dtypes.unique()), set(['double', 'int64', 'varchar']))
 
 #   @unittest.skip('Freezes on addtable')
 #   def test_read_json(self):
@@ -3094,9 +3142,6 @@ class TestCASTable(tm.TestCase):
 
     @unittest.skipIf(int(pd.__version__.split('.')[1]) <= 16, 'Need newer version of Pandas')
     def test_read_html(self):
-#       if self.s._protocol in ['http', 'https']:
-#           tm.TestCase.skipTest(self, 'REST does not support data messages')
-
         import swat.tests as st
 
         myFile = os.path.join(os.path.dirname(st.__file__), 'datasources', 'cars.html')
@@ -3105,12 +3150,20 @@ class TestCASTable(tm.TestCase):
         tbl = self.s.read_html(myFile)[0]
 
         self.assertTablesEqual(df, tbl, sortby=SORT_KEYS)
+        self.assertEqual(set(tbl.dtypes.unique()), set(['double', 'varchar']))
+
+        # Force addtable
+        tbl = self.s.read_html(myFile, use_addtable=True)[0]
+
+        self.assertTablesEqual(df, tbl, sortby=SORT_KEYS)
+
+        if self.s._protocol in ['http', 'https']:
+           self.assertEqual(set(tbl.dtypes.unique()), set(['double', 'varchar']))
+        else:
+           self.assertEqual(set(tbl.dtypes.unique()), set(['double', 'int64', 'varchar']))
 
     def test_read_hdf(self):
-#       if self.s._protocol in ['http', 'https']:
-#           tm.TestCase.skipTest(self, 'REST does not support data messages')
-
-        df = self.get_cars_df()
+        df = self.get_cars_df(all_doubles=False)
 
         import tempfile
 
@@ -3126,14 +3179,22 @@ class TestCASTable(tm.TestCase):
         tbl = self.s.read_hdf(tmp.name, key='cars')
 
         self.assertTablesEqual(df2, tbl, sortby=SORT_KEYS)
+        self.assertEqual(set(tbl.dtypes.unique()), set(['double', 'varchar']))
+
+        # Force addtable
+        tbl = self.s.read_hdf(tmp.name, use_addtable=True)
+
+        self.assertTablesEqual(df, tbl, sortby=SORT_KEYS)
+
+        if self.s._protocol in ['http', 'https']:
+           self.assertEqual(set(tbl.dtypes.unique()), set(['double', 'varchar']))
+        else:
+           self.assertEqual(set(tbl.dtypes.unique()), set(['double', 'int64', 'varchar']))
 
         os.remove(tmp.name)
 
 # TODO: Getting an error about only XPORT is supported.
 #   def test_read_sas(self):
-#       if self.s._protocol in ['http', 'https']:
-#           tm.TestCase.skipTest(self, 'REST does not support data messages')
-
 #       myFile = 'calcmilk.sas7bdat'
 #       cwd, filename = os.path.split(os.path.abspath(__file__))
 #       if cwd != None:
@@ -3161,7 +3222,7 @@ class TestCASTable(tm.TestCase):
         except ImportError:
             tm.TestCase.skipTest(self, 'Need xarray installed')
 
-        df = self.get_cars_df().sort_values(['Make'])
+        df = self.get_cars_df(all_doubles=False).sort_values(['Make'])
         tbl = self.table
 
         dfx = df['Make'].to_xarray()
@@ -3170,7 +3231,7 @@ class TestCASTable(tm.TestCase):
         self.assertEqual(list(dfx.values)[:200], list(tblx.values)[:200])
 
     def test_column_to_hdf(self):
-        df = self.get_cars_df()
+        df = self.get_cars_df(all_doubles=False)
         tbl = self.table
 
         import tempfile
@@ -3192,7 +3253,7 @@ class TestCASTable(tm.TestCase):
         os.remove(tmp.name)
 
     def test_column_to_json(self):
-        df = self.get_cars_df()
+        df = self.get_cars_df(all_doubles=False)
         tbl = self.table
 
         dfj = df['Make'].to_json()
@@ -3202,7 +3263,7 @@ class TestCASTable(tm.TestCase):
 
     @unittest.skipIf(int(pd.__version__.split('.')[1]) <= 17, 'Need newer version of Pandas')
     def test_column_to_string(self):
-        df = self.get_cars_df()
+        df = self.get_cars_df(all_doubles=False)
         tbl = self.table
 
         dfs = df['Make'].to_string(index=False)
@@ -3211,20 +3272,29 @@ class TestCASTable(tm.TestCase):
         self.assertEqual(sorted(dfs.split('\n')), sorted(tbls.split('\n')))
 
     def test_column_from_csv(self):
-#       if self.s._protocol in ['http', 'https']:
-#           tm.TestCase.skipTest(self, 'REST does not support data messages')
-
         import swat.tests as st
 
         myFile = os.path.join(os.path.dirname(st.__file__), 'datasources', 'iicc.csv')
 
-        series = self.get_cars_df()['Make']
+        series = self.get_cars_df(all_doubles=False)['Make']
         column = self.table['Make']
 
         s2 = series.from_csv(myFile, header=0, index_col=None)
         c2 = column.from_csv(self.s, myFile, header=0, index_col=None)
 
         self.assertColsEqual(s2, c2, sort=True)
+        self.assertEqual(c2.dtype, 'double')
+
+        # Force addtable
+        s2 = series.from_csv(myFile, header=0, index_col=None)
+        c2 = column.from_csv(self.s, myFile, header=0, index_col=None, use_addtable=True)
+
+        self.assertColsEqual(s2, c2, sort=True)
+
+        if self.s._protocol in ['http', 'https']:
+           self.assertEqual(c2.dtype, 'double')
+        else:
+           self.assertEqual(c2.dtype, 'int64')
 
     def test_query(self):
         df = self.get_cars_df()
@@ -3393,9 +3463,6 @@ class TestCASTable(tm.TestCase):
         self.assertColsEqual(df.datetime.dt.days_in_month, tbl.datetime.dt.days_in_month)
 
     def test_from_csv(self):
-#       if self.s._protocol in ['http', 'https']:
-#           tm.TestCase.skipTest(self, 'REST does not support data messages')
-
         df = self.get_cars_df()
 
         import tempfile
@@ -3410,13 +3477,23 @@ class TestCASTable(tm.TestCase):
 
         self.assertEqual(len(df2), len(tbl))
         self.assertTablesEqual(df2, tbl, sortby=SORT_KEYS)
+        self.assertTrue(set(tbl.dtypes.unique()), set(['double', 'varchar']))
+
+        # Force addtable
+        df2 = df.from_csv(tmp.name, index_col=None)
+        tbl = self.table.from_csv(self.s, tmp.name, index_col=None, use_addtable=True)
+
+        self.assertEqual(len(df2), len(tbl))
+        self.assertTablesEqual(df2, tbl, sortby=SORT_KEYS)
+
+        if self.s._protocol in ['http', 'https']:
+           self.assertTrue(set(tbl.dtypes.unique()), set(['double', 'varchar']))
+        else:
+           self.assertTrue(set(tbl.dtypes.unique()), set(['double', 'int64', 'varchar']))
 
         os.remove(tmp.name)
 
     def test_from_dict(self):
-#       if self.s._protocol in ['http', 'https']:
-#           tm.TestCase.skipTest(self, 'REST does not support data messages')
-
         df = self.get_cars_df()
         dfdict = df.to_dict()
 
@@ -3424,13 +3501,22 @@ class TestCASTable(tm.TestCase):
         tbl = self.table.from_dict(self.s, dfdict)
 
         self.assertEqual(len(df2), len(tbl))
-        columns = ['Make', 'Model', 'MSRP', 'Invoice', 'Horsepower']
-        self.assertTablesEqual(df2[columns], tbl[columns], sortby=['MSRP', 'Horsepower'])
+        self.assertTablesEqual(df2, tbl, sortby=SORT_KEYS)
+        self.assertTrue(set(tbl.dtypes.unique()), set(['double', 'varchar']))
+
+        # Force addtable
+        df2 = df.from_dict(dfdict)
+        tbl = self.table.from_dict(self.s, dfdict, use_addtable=True)
+
+        self.assertEqual(len(df2), len(tbl))
+        self.assertTablesEqual(df2, tbl, sortby=SORT_KEYS)
+
+        if self.s._protocol in ['http', 'https']:
+           self.assertTrue(set(tbl.dtypes.unique()), set(['double', 'varchar']))
+        else:
+           self.assertTrue(set(tbl.dtypes.unique()), set(['double', 'int64', 'varchar']))
 
     def test_from_items(self):
-#       if self.s._protocol in ['http', 'https']:
-#           tm.TestCase.skipTest(self, 'REST does not support data messages')
-
         df = self.get_cars_df()
         dfitems = tuple(df.to_dict().items())
 
@@ -3438,13 +3524,22 @@ class TestCASTable(tm.TestCase):
         tbl = self.table.from_items(self.s, dfitems)
 
         self.assertEqual(len(df2), len(tbl))
-        columns = ['Make', 'Model', 'MSRP', 'Invoice', 'Horsepower']
-        self.assertTablesEqual(df2[columns], tbl[columns], sortby=['MSRP', 'Horsepower'])
+        self.assertTablesEqual(df2, tbl, sortby=SORT_KEYS)
+        self.assertTrue(set(tbl.dtypes.unique()), set(['double', 'varchar']))
+
+        # Force addtable
+        df2 = df.from_items(dfitems)
+        tbl = self.table.from_items(self.s, dfitems, use_addtable=True)
+
+        self.assertEqual(len(df2), len(tbl))
+        self.assertTablesEqual(df2, tbl, sortby=SORT_KEYS)
+
+        if self.s._protocol in ['http', 'https']:
+           self.assertTrue(set(tbl.dtypes.unique()), set(['double', 'varchar']))
+        else:
+           self.assertTrue(set(tbl.dtypes.unique()), set(['double', 'int64', 'varchar']))
 
     def test_from_records(self):
-#       if self.s._protocol in ['http', 'https']:
-#           tm.TestCase.skipTest(self, 'REST does not support data messages')
-
         df = self.get_cars_df()
         dfrec = df.to_records()
 
@@ -3453,6 +3548,18 @@ class TestCASTable(tm.TestCase):
 
         self.assertEqual(len(df2), len(tbl))
         self.assertTablesEqual(df2, tbl, sortby=SORT_KEYS)
+
+        # Force addtable
+        df2 = df.from_records(dfrec)
+        tbl = self.table.from_records(self.s, dfrec, use_addtable=True)
+
+        self.assertEqual(len(df2), len(tbl))
+        self.assertTablesEqual(df2, tbl, sortby=SORT_KEYS)
+
+        if self.s._protocol in ['http', 'https']:
+           self.assertTrue(set(tbl.dtypes.unique()), set(['double', 'varchar']))
+        else:
+           self.assertTrue(set(tbl.dtypes.unique()), set(['double', 'int64', 'varchar']))
 
     def test_info(self):
         df = self.get_cars_df()
@@ -3634,8 +3741,8 @@ class TestCASTable(tm.TestCase):
         self.assertEqual(dfltx[:1000], tblltx[:1000])
 
     def test_to_stata(self):
-        df = self.get_cars_df().sort_values(SORT_KEYS)
-        tbl = self.table.sort_values(SORT_KEYS)
+        df = self.get_cars_df()
+        tbl = self.table
 
         import tempfile
 
@@ -3650,15 +3757,14 @@ class TestCASTable(tm.TestCase):
                    'Horsepower', 'MPG_City', 'MPG_Highway', 'Weight',
                    'Wheelbase', 'Length']]
 
-        self.assertEqual(df.head(100).to_csv(index=False),
-                         df2.head(100).to_csv(index=False))
+        self.assertTablesEqual(df, df2)
 
         os.remove(tmp.name)
 
     def test_to_msgpack(self):
-        df = self.get_cars_df().sort_values(SORT_KEYS)
+        df = self.get_cars_df()
         df.index = range(len(df))
-        tbl = self.table.sort_values(SORT_KEYS)
+        tbl = self.table
 
         import tempfile
 
@@ -3669,8 +3775,7 @@ class TestCASTable(tm.TestCase):
 
         df2 = pd.read_msgpack(tmp.name)
 
-        self.assertEqual(df.head(100).to_csv(index=False),
-                         df2.head(100).to_csv(index=False))
+        self.assertTablesEqual(tbl, df2, sortby=SORT_KEYS)
 
         os.remove(tmp.name)
 
@@ -3678,8 +3783,8 @@ class TestCASTable(tm.TestCase):
         df = self.get_cars_df().sort_values(SORT_KEYS)
         tbl = self.table.sort_values(SORT_KEYS)
 
-        tblrec = list(tbl.to_records(index=False))
-        dfrec = list(df.to_records(index=False))
+        tblrec = [list(x) for x in list(tbl.to_records(index=False))]
+        dfrec = [list(x) for x in list(df.to_records(index=False))]
 
         self.assertEqual(dfrec[:90], tblrec[:90])
 
