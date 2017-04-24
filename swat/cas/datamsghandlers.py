@@ -336,10 +336,10 @@ class CASDataMsgHandler(object):
                                self._sw_databuffer)
             elif vrtype == 'NUMERIC' and vtype in ['INT32', 'DATE']:
                 if pd.isnull(value):
-                    value = get_option('cas.%s_missing' % vtype.lower())
+                    value = get_option('cas.missing.%s' % vtype.lower())
                     warnings.warn(("Missing value found in 32-bit integer-based column '%s'.\n" %
                                    v['name']) +
-                                  ("Substituting cas.%s_missing option value (%s)." %
+                                  ("Substituting cas.missing.%s option value (%s)." %
                                    (vtype.lower(), value)),
                                   RuntimeWarning)
                 if length > 4:
@@ -353,10 +353,10 @@ class CASDataMsgHandler(object):
                                self._sw_databuffer)
             elif vrtype == 'NUMERIC' and vtype in ['INT64', 'DATETIME', 'TIME']:
                 if pd.isnull(value):
-                    value = get_option('cas.%s_missing' % vtype.lower())
+                    value = get_option('cas.missing.%s' % vtype.lower())
                     warnings.warn(("Missing value found in 64-bit integer-based column '%s'.\n"
                                    % v['name']) +
-                                  ("Substituting cas.%s_missing option value (%s)." %
+                                  ("Substituting cas.missing.%s option value (%s)." %
                                    (vtype.lower(), value)),
                                   RuntimeWarning)
                 if length > 8:

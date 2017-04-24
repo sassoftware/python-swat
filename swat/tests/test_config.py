@@ -245,12 +245,10 @@ class TestConfig(tm.TestCase):
 
     def test_suboptions(self):
         self.assertEqual(list(sorted(get_suboptions('cas').keys())), 
-                         ['dataset', 'date_missing', 'datetime_missing', 
-                          'exception_on_severity', 'hostname',
-                          'int32_missing', 'int64_missing',
+                         ['dataset', 'exception_on_severity',
+                          'hostname', 'missing',
                           'port', 'print_messages', 'protocol',
-                          'time_missing', 'trace_actions',
-                          'trace_ui_actions'])
+                          'trace_actions', 'trace_ui_actions'])
 
         with self.assertRaises(SWATOptionError):
             get_suboptions('cas.foo')

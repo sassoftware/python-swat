@@ -52,7 +52,7 @@ class TestDataMsgHandlers(tm.TestCase):
         swat.reset_option()
         swat.options.cas.print_messages = False
         swat.options.interactive_mode = False
-        swat.options.int64_missing = -999999
+        swat.options.cas.missing.int64 = -999999
 
         self.s = swat.CAS(HOST, PORT, USER, PASSWD, protocol=PROTOCOL)
 
