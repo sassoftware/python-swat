@@ -4052,6 +4052,10 @@ class CASTable(ParamManager, ActionParamManager):
         if n is not None:
             numrows = self._numrows
             frac = float(n) / self._numrows
+            if frac <= 0:
+                raise RuntimeError('Sample percentage will return no samples.')
+            if frac >= 1:
+                return self._retrieve('table.partition')['casTable']
 
         return self._sample(sample_pct=frac, sample_seed=random_state,
                             stratify_by=stratify_by)
