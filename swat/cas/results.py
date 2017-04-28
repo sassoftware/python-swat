@@ -30,6 +30,7 @@ import pprint
 import re
 import six
 from ..dataframe import SASDataFrame, concat
+from ..notebook.zeppelin import show as z_show
 from ..utils.compat import OrderedDict
 from ..utils.xdict import xadict
 
@@ -37,6 +38,43 @@ from ..utils.xdict import xadict
 @six.python_2_unicode_compatible
 class RendererMixin(object):
     ''' Mixin for rendering dictionaries of results '''
+
+    def _z_show_(self, **kwargs):
+        ''' Display Zeppelin notebook rendering '''
+        i = 0
+        for key, value in six.iteritems(self):
+            if i == 0:
+                print('%%html <div class="cas-results-key"><b>&#167; %s</b></div>' % key)
+            else:
+                print('%%html <div class="cas-results-key"><b><hr/>&#167; %s</b></div>' % key)
+
+            print('')
+
+            if hasattr(value, '_z_show_'):
+                value._z_show_(**kwargs)
+            else:
+                z_show(value, **kwargs)
+
+            print('')
+            i = i + 1
+
+        if getattr(self, 'performance'):
+            stats = []
+            if getattr(self.performance, 'elapsed_time'):
+                stats.append('<span class="cas-elapsed">elapsed %.3gs</span>' %
+                             self.performance.elapsed_time)
+            if getattr(self.performance, 'cpu_user_time'):
+                stats.append('<span class="cas-user">user %.3gs</span>' %
+                             self.performance.cpu_user_time)
+            if getattr(self.performance, 'cpu_system_time'):
+                stats.append('<span class="cas-sys">sys %.3gs</span>' %
+                             self.performance.cpu_system_time)
+            if getattr(self.performance, 'memory'):
+                stats.append('<span class="cas-memory">mem %.3gMB</span>' %
+                             (self.performance.memory / 1048576.0))
+            if stats:
+                print('%%html <p class="cas-results-performance"><small>%s</small></p>' %
+                              ' &#183; '.join(stats))
 
     def _repr_html_(self):
         '''
