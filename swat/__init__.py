@@ -86,4 +86,4 @@ from .exceptions import SWATError, SWATOptionError, SWATCASActionError
 # SAS Formatter
 from .formatter import SASFormatter
 
-__version__ = '1.1.0'
+__version__ = '1.1.0-dev'
