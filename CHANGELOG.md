@@ -1,6 +1,11 @@
 
 # Change Log
 
+## 1.2.0 - 2017-05-02
+
+- Use `upload` action rather than `addtable` for `read_*` methods.
+- Add basic Zeppelin notebook support (`from swat.notebook.zeppelin import show`)
+
 ## 1.1.0 - 2017-03-21
 
 - Add support for Python 3.6 (Linux extension)

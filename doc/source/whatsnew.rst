@@ -9,6 +9,12 @@ What's New
 
 This document outlines features and improvements from each release.
 
+v1.2.0 (May 2, 2017)
+====================
+
+- Use ``upload`` action rather than ``addtable`` for ``read_*`` methods.
+- Add basic Zeppelin notebook support (``from swat.notebook.zeppelin import show``)
+
 v1.1.0 (March 21, 2017)
 =======================
 
