@@ -1,0 +1,6 @@
+swat.cas.table.CASTable.min
+===========================
+
+.. currentmodule:: swat.cas.table
+
+.. automethod:: CASTable.min

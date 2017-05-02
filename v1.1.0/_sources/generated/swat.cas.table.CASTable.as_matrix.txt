@@ -1,0 +1,6 @@
+swat.cas.table.CASTable.as_matrix
+=================================
+
+.. currentmodule:: swat.cas.table
+
+.. automethod:: CASTable.as_matrix

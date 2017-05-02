@@ -1,0 +1,6 @@
+swat.cas.table.CASTableGroupBy.value_counts
+===========================================
+
+.. currentmodule:: swat.cas.table
+
+.. automethod:: CASTableGroupBy.value_counts

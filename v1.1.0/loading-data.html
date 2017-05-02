@@ -1,0 +1,508 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Loading Data &mdash; SWAT 1.1.0 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+    <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+
+  
+    <link rel="top" title="SWAT 1.1.0 documentation" href="index.html"/>
+        <link rel="next" title="CASTable vs. DataFrame vs. SASDataFrame" href="table-vs-dataframe.html"/>
+        <link rel="prev" title="Binary vs. REST" href="binary-vs-rest.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> SWAT
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.1.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="whatsnew.html">What&#8217;s New</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="workflows.html">Workflows</a></li>
+<li class="toctree-l1"><a class="reference internal" href="binary-vs-rest.html">Binary vs. REST</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Loading Data</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#client-side-data-files-and-sources">Client-Side Data Files and Sources</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#using-client-side-parsers">Using Client-Side Parsers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#parsing-client-side-data-on-the-server">Parsing Client-Side Data on the Server</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#creating-custom-data-loaders">Creating Custom Data Loaders</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#server-side-data-files-and-sources">Server-Side Data Files and Sources</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#using-server-side-parsers">Using Server-Side Parsers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#loading-data-from-other-sources">Loading Data from Other Sources</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="table-vs-dataframe.html">CASTable vs. DataFrame vs. SASDataFrame</a></li>
+<li class="toctree-l1"><a class="reference internal" href="indexing.html">Indexing and Data Selection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bygroups.html">Handling By Groups</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sorting.html">Sorting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gotchas.html">Programming Gotchas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="troubleshooting.html">Troubleshooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sas-tk.html">SAS TK</a></li>
+<li class="toctree-l1"><a class="reference internal" href="licenses.html">Licenses</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="index.html">SWAT</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+ 
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+      
+    <li>Loading Data</li>
+    <li class="wy-breadcrumbs-aside">
+      
+          
+          <a href="_sources/loading-data.txt" rel="nofollow"> View page source</a>
+        
+      
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="loading-data">
+<h1>Loading Data<a class="headerlink" href="#loading-data" title="Permalink to this headline">¶</a></h1>
+<p>There are various ways of loading data into CAS.  They range from parsing client-side
+files from various formats into <a class="reference external" href="http://pandas.pydata.org/pandas-docs/version/0.19.2/generated/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v0.19.2)"><code class="xref py py-class docutils literal"><span class="pre">pandas.DataFrame</span></code></a> objects to loading large data
+files that are stored on the server.  Which method you choose depends on your needs
+and how large the data is.  For small data sets or data that you want to use a custom
+parser for, you can use client-side data.  For large data sets, you would use
+server-side data files.</p>
+<div class="section" id="client-side-data-files-and-sources">
+<h2>Client-Side Data Files and Sources<a class="headerlink" href="#client-side-data-files-and-sources" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="using-client-side-parsers">
+<h3>Using Client-Side Parsers<a class="headerlink" href="#using-client-side-parsers" title="Permalink to this headline">¶</a></h3>
+<p>The easiest way to get data into CAS is using the data loading methods on the
+<code class="xref py py-class docutils literal"><span class="pre">CAS</span></code> object that parallel data reading operations in the <a class="reference external" href="http://pandas.pydata.org/pandas-docs/version/0.19.2/index.html#module-pandas" title="(in pandas v0.19.2)"><code class="xref py py-mod docutils literal"><span class="pre">pandas</span></code></a>
+module.  This includes <a class="reference external" href="http://pandas.pydata.org/pandas-docs/version/0.19.2/generated/pandas.read_csv.html#pandas.read_csv" title="(in pandas v0.19.2)"><code class="xref py py-func docutils literal"><span class="pre">pandas.read_csv()</span></code></a>, <a class="reference external" href="http://pandas.pydata.org/pandas-docs/version/0.19.2/generated/pandas.read_table.html#pandas.read_table" title="(in pandas v0.19.2)"><code class="xref py py-func docutils literal"><span class="pre">pandas.read_table()</span></code></a>,
+<a class="reference external" href="http://pandas.pydata.org/pandas-docs/version/0.19.2/generated/pandas.read_excel.html#pandas.read_excel" title="(in pandas v0.19.2)"><code class="xref py py-func docutils literal"><span class="pre">pandas.read_excel()</span></code></a>, etc.  The same methods exist on <code class="xref py py-class docutils literal"><span class="pre">CAS</span></code> objects
+as well and, in fact, use the Pandas functions in the background to do the parsing.
+The only difference is that the result of the method is a <code class="xref py py-class docutils literal"><span class="pre">CASTable</span></code> object
+rather than a <a class="reference external" href="http://pandas.pydata.org/pandas-docs/version/0.19.2/generated/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v0.19.2)"><code class="xref py py-class docutils literal"><span class="pre">pandas.DataFrame</span></code></a>.  Let&#8217;s look at an example.</p>
+<p>In this example, we are pointing to a URL that references CSV data.  You could
+just as easily point to a local file.  Just keep in mind that when using a URL,
+the data is downloaded from wherever it is to the client machine for parsing
+before it is uploaded to CAS.</p>
+<div class="highlight-ipython"><div class="highlight"><pre><span></span><span class="gp">In [1]: </span><span class="n">conn</span> <span class="o">=</span> <span class="n">swat</span><span class="o">.</span><span class="n">CAS</span><span class="p">(</span><span class="n">host</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="n">username</span><span class="p">,</span> <span class="n">password</span><span class="p">)</span>
+
+<span class="gp">In [2]: </span><span class="n">cars</span> <span class="o">=</span> <span class="n">conn</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;https://raw.githubusercontent.com/&#39;</span>
+<span class="gp">   ...: </span>                     <span class="s1">&#39;sassoftware/sas-viya-programming/master/data/cars.csv&#39;</span><span class="p">)</span>
+<span class="gp">   ...: </span>
+
+<span class="gp">In [3]: </span><span class="n">cars</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+<span class="gh">Out[3]: </span><span class="go"></span>
+<span class="go">Selected Rows from Table _T_S6HTRHOS_H2IIU4I3_4IGGZ2NCB4</span>
+
+<span class="go">    Make           Model   Type Origin DriveTrain     MSRP  Invoice  \</span>
+<span class="go">0  Acura             MDX    SUV   Asia        All  36945.0  33337.0   </span>
+<span class="go">1  Acura  RSX Type S 2dr  Sedan   Asia      Front  23820.0  21761.0   </span>
+<span class="go">2  Acura         TSX 4dr  Sedan   Asia      Front  26990.0  24647.0   </span>
+<span class="go">3  Acura          TL 4dr  Sedan   Asia      Front  33195.0  30299.0   </span>
+<span class="go">4  Acura      3.5 RL 4dr  Sedan   Asia      Front  43755.0  39014.0   </span>
+
+<span class="go">   EngineSize  Cylinders  Horsepower  MPG_City  MPG_Highway  Weight  \</span>
+<span class="go">0         3.5        6.0       265.0      17.0         23.0  4451.0   </span>
+<span class="go">1         2.0        4.0       200.0      24.0         31.0  2778.0   </span>
+<span class="go">2         2.4        4.0       200.0      22.0         29.0  3230.0   </span>
+<span class="go">3         3.2        6.0       270.0      20.0         28.0  3575.0   </span>
+<span class="go">4         3.5        6.0       225.0      18.0         24.0  3880.0   </span>
+
+<span class="go">   Wheelbase  Length  </span>
+<span class="go">0      106.0   189.0  </span>
+<span class="go">1      101.0   172.0  </span>
+<span class="go">2      105.0   183.0  </span>
+<span class="go">3      108.0   186.0  </span>
+<span class="go">4      115.0   197.0  </span>
+</pre></div>
+</div>
+<p>If all went well, you should now have the cars data set in your CAS session.</p>
+<p>As we mentioned earlier, these methods on the <code class="xref py py-class docutils literal"><span class="pre">CAS</span></code> object use the Pandas
+functions under-the-covers to do the parsing.  This means that you can also use
+all of the Pandas parsing options.</p>
+<div class="highlight-ipython"><div class="highlight"><pre><span></span><span class="gp">In [4]: </span><span class="n">cars</span> <span class="o">=</span> <span class="n">conn</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;https://raw.githubusercontent.com/&#39;</span>
+<span class="gp">   ...: </span>                     <span class="s1">&#39;sassoftware/sas-viya-programming/master/data/cars.csv&#39;</span><span class="p">,</span>
+<span class="gp">   ...: </span>                     <span class="n">usecols</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> <span class="n">names</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;A&#39;</span><span class="p">,</span> <span class="s1">&#39;B&#39;</span><span class="p">,</span> <span class="s1">&#39;C&#39;</span><span class="p">,</span> <span class="s1">&#39;D&#39;</span><span class="p">],</span> <span class="n">skiprows</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="gp">   ...: </span>
+
+<span class="gp">In [5]: </span><span class="n">cars</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+<span class="gh">Out[5]: </span><span class="go"></span>
+<span class="go">Selected Rows from Table _T_HI7QTM3X_YGSR2KIE_7A5B6QQMUT</span>
+
+<span class="go">       A               B      C     D</span>
+<span class="go">0  Acura             MDX    SUV  Asia</span>
+<span class="go">1  Acura  RSX Type S 2dr  Sedan  Asia</span>
+<span class="go">2  Acura         TSX 4dr  Sedan  Asia</span>
+<span class="go">3  Acura          TL 4dr  Sedan  Asia</span>
+<span class="go">4  Acura      3.5 RL 4dr  Sedan  Asia</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Loading data from the client-side will be slower than loading data
+files from the server.  Client-side data loading is intended for
+smaller data sets.</p>
+</div>
+</div>
+<div class="section" id="parsing-client-side-data-on-the-server">
+<h3>Parsing Client-Side Data on the Server<a class="headerlink" href="#parsing-client-side-data-on-the-server" title="Permalink to this headline">¶</a></h3>
+<p>If you don&#8217;t need the full power of Pandas&#8217; parsers, you may be better off uploading
+the file to CAS and parse it there.  This offers some advantages as well.  The server
+parsers will likely be faster than a client-side parser (especially in MPP mode where
+parsing of some file types can happen in parallel).  Doing server-side parsing is also
+more efficient since it doesn&#8217;t require the data to be converted to Python objects
+before creating the data buffer to be sent to the server.</p>
+<p>The <code class="xref py py-meth docutils literal"><span class="pre">CAS.upload_file()</span></code> method uploads a data file as-is to CAS and invokes the
+<code class="docutils literal"><span class="pre">table.loadtable</span></code> action in the background to parse it.  Let&#8217;s use the same data
+file as the previous examples, but let the server do the parsing.  Just as before,
+if a URL is specified, it must be downloaded to the client then uploaded CAS.</p>
+<div class="highlight-ipython"><div class="highlight"><pre><span></span><span class="gp">In [6]: </span><span class="n">cars</span> <span class="o">=</span> <span class="n">conn</span><span class="o">.</span><span class="n">upload_file</span><span class="p">(</span><span class="s1">&#39;https://raw.githubusercontent.com/&#39;</span>
+<span class="gp">   ...: </span>                        <span class="s1">&#39;sassoftware/sas-viya-programming/master/data/cars.csv&#39;</span><span class="p">)</span>
+<span class="gp">   ...: </span>
+<span class="go">NOTE: Cloud Analytic Services made the uploaded file available as table CARS in caslib CASUSER(kesmit).</span>
+<span class="go">NOTE: The table CARS has been created in caslib CASUSER(kesmit) from binary data uploaded to Cloud Analytic Services.</span>
+
+<span class="gp">In [7]: </span><span class="n">cars</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+<span class="go">                                                                                                                                                                                                                              Out[7]: </span>
+<span class="go">Selected Rows from Table CARS</span>
+
+<span class="go">    Make           Model   Type Origin DriveTrain     MSRP  Invoice  \</span>
+<span class="go">0  Acura             MDX    SUV   Asia        All  36945.0  33337.0   </span>
+<span class="go">1  Acura  RSX Type S 2dr  Sedan   Asia      Front  23820.0  21761.0   </span>
+<span class="go">2  Acura         TSX 4dr  Sedan   Asia      Front  26990.0  24647.0   </span>
+<span class="go">3  Acura          TL 4dr  Sedan   Asia      Front  33195.0  30299.0   </span>
+<span class="go">4  Acura      3.5 RL 4dr  Sedan   Asia      Front  43755.0  39014.0   </span>
+
+<span class="go">   EngineSize  Cylinders  Horsepower  MPG_City  MPG_Highway  Weight  \</span>
+<span class="go">0         3.5        6.0       265.0      17.0         23.0  4451.0   </span>
+<span class="go">1         2.0        4.0       200.0      24.0         31.0  2778.0   </span>
+<span class="go">2         2.4        4.0       200.0      22.0         29.0  3230.0   </span>
+<span class="go">3         3.2        6.0       270.0      20.0         28.0  3575.0   </span>
+<span class="go">4         3.5        6.0       225.0      18.0         24.0  3880.0   </span>
+
+<span class="go">   Wheelbase  Length  </span>
+<span class="go">0      106.0   189.0  </span>
+<span class="go">1      101.0   172.0  </span>
+<span class="go">2      105.0   183.0  </span>
+<span class="go">3      108.0   186.0  </span>
+<span class="go">4      115.0   197.0  </span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Loading data from the client-side will be slower than loading data
+files from the server.  Client-side data loading is intended for
+smaller data sets.</p>
+</div>
+</div>
+<div class="section" id="creating-custom-data-loaders">
+<h3>Creating Custom Data Loaders<a class="headerlink" href="#creating-custom-data-loaders" title="Permalink to this headline">¶</a></h3>
+<p>In addition to the pre-configured data loaders described above, it&#8217;s possible to write
+custom data loaders that can upload data to a CAS table from any type of file or stream
+of data that Python can handle.  These are called &#8220;data message handlers&#8221; and are implemented
+in the <code class="xref py py-class docutils literal"><span class="pre">CASDataMsgHandler</span></code> class.  The <code class="xref py py-class docutils literal"><span class="pre">CASDataMsgHandler</span></code> class can not be
+used directly, but is the base class for all data message handlers classes.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Data message handlers are not supported in the REST interface.</p>
+</div>
+<p>To implement your own data message handler, you only need to implement two things in
+the subclass.</p>
+<ol class="arabic simple">
+<li>The variable definitions required in the <code class="docutils literal"><span class="pre">vars=</span></code> parameter of the <code class="docutils literal"><span class="pre">table.addtable</span></code> CAS action.</li>
+<li>The <code class="xref py py-meth docutils literal"><span class="pre">getrow()</span></code> method to return each row of data.</li>
+</ol>
+<p>The variable definitions should be stored in the <code class="xref py py-attr docutils literal"><span class="pre">vars</span></code> attribute of the subclass.
+The <code class="xref py py-meth docutils literal"><span class="pre">getrow()</span></code> method returns a row of values (as defined by <code class="xref py py-attr docutils literal"><span class="pre">vars</span></code>) for each requested
+row index.  When there is not more data to return, <code class="docutils literal"><span class="pre">None</span></code> should be returned.</p>
+<p>How you generate the <code class="xref py py-attr docutils literal"><span class="pre">vars</span></code> attribute is really dependent on your situation.  It can be
+inferred from a sample of the data or simply hard-coded.  We&#8217;ll do a simple example using hard-coded
+variable definitions below.</p>
+<div class="highlight-ipython"><div class="highlight"><pre><span></span><span class="gp">In [8]: </span><span class="kn">import</span> <span class="nn">swat.cas.datamsghandlers</span> <span class="kn">as</span> <span class="nn">dmh</span>
+
+<span class="gp">In [9]: </span><span class="k">class</span> <span class="nc">MyDMH</span><span class="p">(</span><span class="n">dmh</span><span class="o">.</span><span class="n">CASDataMsgHandler</span><span class="p">):</span>
+<span class="gp">   ...: </span>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+<span class="gp">   ...: </span>        <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">data</span>
+<span class="gp">   ...: </span>        <span class="nb">vars</span> <span class="o">=</span> <span class="p">[</span>
+<span class="gp">   ...: </span>            <span class="nb">dict</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;Name&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;varchar&#39;</span><span class="p">),</span>
+<span class="gp">   ...: </span>            <span class="nb">dict</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;Age&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;int32&#39;</span><span class="p">),</span>
+<span class="gp">   ...: </span>            <span class="nb">dict</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;Height&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;double&#39;</span><span class="p">),</span>
+<span class="gp">   ...: </span>            <span class="nb">dict</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;Weight&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;double&#39;</span><span class="p">),</span>
+<span class="gp">   ...: </span>        <span class="p">]</span>
+<span class="gp">   ...: </span>        <span class="n">dmh</span><span class="o">.</span><span class="n">CASDataMsgHandler</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">vars</span><span class="p">)</span>
+<span class="gp">   ...: </span>    <span class="k">def</span> <span class="nf">getrow</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
+<span class="gp">   ...: </span>        <span class="k">try</span><span class="p">:</span>
+<span class="gp">   ...: </span>            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+<span class="gp">   ...: </span>        <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+<span class="gp">   ...: </span>            <span class="k">pass</span>
+<span class="gp">   ...: </span>
+
+<span class="gp">In [10]: </span><span class="n">mydmh</span> <span class="o">=</span> <span class="n">MyDMH</span><span class="p">([</span>
+<span class="gp">   ....: </span>    <span class="p">[</span><span class="s1">&#39;Alfred&#39;</span><span class="p">,</span> <span class="mi">13</span><span class="p">,</span> <span class="mi">69</span><span class="p">,</span> <span class="mf">112.5</span><span class="p">],</span>
+<span class="gp">   ....: </span>    <span class="p">[</span><span class="s1">&#39;Judy&#39;</span><span class="p">,</span> <span class="mi">14</span><span class="p">,</span> <span class="mf">64.3</span><span class="p">,</span> <span class="mi">90</span><span class="p">],</span>
+<span class="gp">   ....: </span>    <span class="p">[</span><span class="s1">&#39;Robert&#39;</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mf">64.8</span><span class="p">,</span> <span class="mi">128</span><span class="p">]</span>
+<span class="gp">   ....: </span><span class="p">])</span>
+<span class="gp">   ....: </span>
+</pre></div>
+</div>
+<p>The <code class="docutils literal"><span class="pre">table.addtable</span></code> CAS action call below uses a Python shortcut to pass a dictionary as keyword
+parameters.  If you print <code class="docutils literal"><span class="pre">**mydmh.arg.addtable</span></code>, you&#8217;ll see the parameters that are
+getting passed to <code class="docutils literal"><span class="pre">table.addtable</span></code>.  You don&#8217;t have to use this shortcut mode; you could
+construct the variable definitions and pass them in manually.  However, you still need
+to pass the data message handler instance to the <code class="docutils literal"><span class="pre">datamsghandler=</span></code> argument.</p>
+<div class="highlight-ipython"><div class="highlight"><pre><span></span><span class="gp">In [11]: </span><span class="n">out</span> <span class="o">=</span> <span class="n">conn</span><span class="o">.</span><span class="n">addtable</span><span class="p">(</span><span class="n">table</span><span class="o">=</span><span class="s1">&#39;Students&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">mydmh</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">addtable</span><span class="p">)</span>
+
+<span class="gp">In [12]: </span><span class="n">students</span> <span class="o">=</span> <span class="n">out</span><span class="o">.</span><span class="n">casTable</span>
+
+<span class="gp">In [13]: </span><span class="n">students</span><span class="o">.</span><span class="n">columninfo</span><span class="p">()</span>
+<span class="gh">Out[13]: </span><span class="go"></span>
+<span class="go">[ColumnInfo]</span>
+
+<span class="go">    Column  ID     Type  RawLength  FormattedLength  NFL  NFD</span>
+<span class="go"> 0    Name   1  varchar          6                6    0    0</span>
+<span class="go"> 1     Age   2    int32          4               12    0    0</span>
+<span class="go"> 2  Height   3   double          8               12    0    0</span>
+<span class="go"> 3  Weight   4   double          8               12    0    0</span>
+
+<span class="go">+ Elapsed: 0.00054s, mem: 0.163mb</span>
+
+<span class="gp">In [14]: </span><span class="n">students</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+<span class="go">                                                                                                                                                                                                                                                                                                                                                                                 Out[14]: </span>
+<span class="go">Selected Rows from Table STUDENTS</span>
+
+<span class="go">     Name  Age  Height  Weight</span>
+<span class="go">0  Alfred   13    69.0   112.5</span>
+<span class="go">1    Judy   14    64.3    90.0</span>
+<span class="go">2  Robert   12    64.8   128.0</span>
+</pre></div>
+</div>
+<p>While this example uses an explicit list of data and passes that to the data message handler
+class to index into, it doesn&#8217;t have to be done this way.  In fact, there is a <code class="xref py py-class docutils literal"><span class="pre">DBAPI</span></code>
+data message handler in the <code class="xref py py-mod docutils literal"><span class="pre">swat.cas.datamsghandlers</span></code> module that takes a Python database
+connection that queries for the data that is returned by <code class="xref py py-meth docutils literal"><span class="pre">getrow()</span></code>.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Loading data from the client-side will be slower than loading data
+files from the server.  Client-side data loading is intended for
+smaller data sets.</p>
+</div>
+</div>
+</div>
+<div class="section" id="server-side-data-files-and-sources">
+<h2>Server-Side Data Files and Sources<a class="headerlink" href="#server-side-data-files-and-sources" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="using-server-side-parsers">
+<h3>Using Server-Side Parsers<a class="headerlink" href="#using-server-side-parsers" title="Permalink to this headline">¶</a></h3>
+<p>If you have data files on the server, you can load them directly from the CASLib that
+they are in.  Paths to files in a CASLib are always relative paths.  This is the
+recommended method for large data files.</p>
+<div class="highlight-ipython"><div class="highlight"><pre><span></span><span class="gp">In [15]: </span><span class="n">cars</span> <span class="o">=</span> <span class="n">conn</span><span class="o">.</span><span class="n">load_path</span><span class="p">(</span><span class="s1">&#39;data/cars.csv&#39;</span><span class="p">,</span> <span class="n">caslib</span><span class="o">=</span><span class="s1">&#39;casuser&#39;</span><span class="p">)</span>
+
+<span class="gp">In [16]: </span><span class="n">cars</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+<span class="gh">Out[16]: </span><span class="go"></span>
+<span class="go">Selected Rows from Table DATA.CARS</span>
+
+<span class="go">    Make           Model   Type Origin DriveTrain     MSRP  Invoice  \</span>
+<span class="go">0  Acura             MDX    SUV   Asia        All  36945.0  33337.0   </span>
+<span class="go">1  Acura  RSX Type S 2dr  Sedan   Asia      Front  23820.0  21761.0   </span>
+<span class="go">2  Acura         TSX 4dr  Sedan   Asia      Front  26990.0  24647.0   </span>
+<span class="go">3  Acura          TL 4dr  Sedan   Asia      Front  33195.0  30299.0   </span>
+<span class="go">4  Acura      3.5 RL 4dr  Sedan   Asia      Front  43755.0  39014.0   </span>
+
+<span class="go">   EngineSize  Cylinders  Horsepower  MPG_City  MPG_Highway  Weight  \</span>
+<span class="go">0         3.5        6.0       265.0      17.0         23.0  4451.0   </span>
+<span class="go">1         2.0        4.0       200.0      24.0         31.0  2778.0   </span>
+<span class="go">2         2.4        4.0       200.0      22.0         29.0  3230.0   </span>
+<span class="go">3         3.2        6.0       270.0      20.0         28.0  3575.0   </span>
+<span class="go">4         3.5        6.0       225.0      18.0         24.0  3880.0   </span>
+
+<span class="go">   Wheelbase  Length  </span>
+<span class="go">0      106.0   189.0  </span>
+<span class="go">1      101.0   172.0  </span>
+<span class="go">2      105.0   183.0  </span>
+<span class="go">3      108.0   186.0  </span>
+<span class="go">4      115.0   197.0  </span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="loading-data-from-other-sources">
+<h3>Loading Data from Other Sources<a class="headerlink" href="#loading-data-from-other-sources" title="Permalink to this headline">¶</a></h3>
+<p>In addition to files, CAS has many other data loaders available to connect to sources
+such as databases.  These other data sources require you to configure a CASLib that can
+connect and retrieve the data as a CAS table.  For these other data sources, you would
+still use the <code class="xref py py-class docutils literal"><span class="pre">CAS.load_path</span></code> method, but rather than specifying a file
+path, you would specify the name of a resource in that data loader (such as a database
+table).  This topic is beyond the scope of this document, but we are pointing it out
+in case you require this type of data access.</p>
+</div>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="table-vs-dataframe.html" class="btn btn-neutral float-right" title="CASTable vs. DataFrame vs. SASDataFrame" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="binary-vs-rest.html" class="btn btn-neutral" title="Binary vs. REST" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016 SAS Institute Inc. All Rights Reserved..
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'1.1.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

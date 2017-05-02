@@ -1,0 +1,202 @@
+swat.cas.table.CASColumn
+========================
+
+.. currentmodule:: swat.cas.table
+
+.. autoclass:: CASColumn
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~CASColumn.__init__
+      ~CASColumn.abs
+      ~CASColumn.add
+      ~CASColumn.all
+      ~CASColumn.any
+      ~CASColumn.append_columns
+      ~CASColumn.append_computed_columns
+      ~CASColumn.append_computedvars
+      ~CASColumn.append_computedvarsprogram
+      ~CASColumn.append_groupby
+      ~CASColumn.append_orderby
+      ~CASColumn.append_where
+      ~CASColumn.as_matrix
+      ~CASColumn.between
+      ~CASColumn.boxplot
+      ~CASColumn.clip
+      ~CASColumn.clip_lower
+      ~CASColumn.clip_upper
+      ~CASColumn.copy
+      ~CASColumn.corr
+      ~CASColumn.count
+      ~CASColumn.css
+      ~CASColumn.cv
+      ~CASColumn.datastep
+      ~CASColumn.del_action_params
+      ~CASColumn.del_param
+      ~CASColumn.del_params
+      ~CASColumn.describe
+      ~CASColumn.div
+      ~CASColumn.drop
+      ~CASColumn.dropna
+      ~CASColumn.eq
+      ~CASColumn.fillna
+      ~CASColumn.floordiv
+      ~CASColumn.from_csv
+      ~CASColumn.from_dict
+      ~CASColumn.from_items
+      ~CASColumn.from_records
+      ~CASColumn.ge
+      ~CASColumn.get
+      ~CASColumn.get_action_names
+      ~CASColumn.get_action_params
+      ~CASColumn.get_actionset_names
+      ~CASColumn.get_connection
+      ~CASColumn.get_dtype_counts
+      ~CASColumn.get_fetch_params
+      ~CASColumn.get_ftype_counts
+      ~CASColumn.get_groupby_vars
+      ~CASColumn.get_inputs_param
+      ~CASColumn.get_param
+      ~CASColumn.get_params
+      ~CASColumn.get_value
+      ~CASColumn.groupby
+      ~CASColumn.gt
+      ~CASColumn.has_groupby_vars
+      ~CASColumn.has_param
+      ~CASColumn.has_params
+      ~CASColumn.head
+      ~CASColumn.hist
+      ~CASColumn.info
+      ~CASColumn.invoke
+      ~CASColumn.isin
+      ~CASColumn.isnull
+      ~CASColumn.iteritems
+      ~CASColumn.iterrows
+      ~CASColumn.itertuples
+      ~CASColumn.le
+      ~CASColumn.lookup
+      ~CASColumn.lt
+      ~CASColumn.max
+      ~CASColumn.mean
+      ~CASColumn.median
+      ~CASColumn.min
+      ~CASColumn.mod
+      ~CASColumn.mode
+      ~CASColumn.mul
+      ~CASColumn.ne
+      ~CASColumn.next
+      ~CASColumn.nlargest
+      ~CASColumn.nmiss
+      ~CASColumn.notnull
+      ~CASColumn.nsmallest
+      ~CASColumn.nth
+      ~CASColumn.nunique
+      ~CASColumn.pop
+      ~CASColumn.pow
+      ~CASColumn.probt
+      ~CASColumn.quantile
+      ~CASColumn.query
+      ~CASColumn.radd
+      ~CASColumn.rdiv
+      ~CASColumn.replace
+      ~CASColumn.retrieve
+      ~CASColumn.rfloordiv
+      ~CASColumn.rmod
+      ~CASColumn.rmul
+      ~CASColumn.round
+      ~CASColumn.rpow
+      ~CASColumn.rsub
+      ~CASColumn.rtruediv
+      ~CASColumn.select_dtypes
+      ~CASColumn.set_action_params
+      ~CASColumn.set_connection
+      ~CASColumn.set_param
+      ~CASColumn.set_params
+      ~CASColumn.slice
+      ~CASColumn.sort
+      ~CASColumn.sort_values
+      ~CASColumn.std
+      ~CASColumn.stderr
+      ~CASColumn.sub
+      ~CASColumn.sum
+      ~CASColumn.tail
+      ~CASColumn.to_clipboard
+      ~CASColumn.to_csv
+      ~CASColumn.to_dense
+      ~CASColumn.to_dict
+      ~CASColumn.to_excel
+      ~CASColumn.to_frame
+      ~CASColumn.to_gbq
+      ~CASColumn.to_hdf
+      ~CASColumn.to_html
+      ~CASColumn.to_json
+      ~CASColumn.to_latex
+      ~CASColumn.to_msgpack
+      ~CASColumn.to_outtable
+      ~CASColumn.to_outtable_params
+      ~CASColumn.to_params
+      ~CASColumn.to_pickle
+      ~CASColumn.to_records
+      ~CASColumn.to_series
+      ~CASColumn.to_sparse
+      ~CASColumn.to_sql
+      ~CASColumn.to_stata
+      ~CASColumn.to_string
+      ~CASColumn.to_table
+      ~CASColumn.to_table_name
+      ~CASColumn.to_table_params
+      ~CASColumn.to_view
+      ~CASColumn.to_xarray
+      ~CASColumn.tolist
+      ~CASColumn.truediv
+      ~CASColumn.tvalue
+      ~CASColumn.unique
+      ~CASColumn.uss
+      ~CASColumn.value_counts
+      ~CASColumn.var
+      ~CASColumn.xs
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~CASColumn.all_params
+      ~CASColumn.at
+      ~CASColumn.axes
+      ~CASColumn.columns
+      ~CASColumn.dt
+      ~CASColumn.dtype
+      ~CASColumn.dtypes
+      ~CASColumn.ftype
+      ~CASColumn.ftypes
+      ~CASColumn.getdoc
+      ~CASColumn.iat
+      ~CASColumn.iloc
+      ~CASColumn.index
+      ~CASColumn.is_unique
+      ~CASColumn.itemsize
+      ~CASColumn.ix
+      ~CASColumn.loc
+      ~CASColumn.name
+      ~CASColumn.ndim
+      ~CASColumn.outtable_params
+      ~CASColumn.param_names
+      ~CASColumn.plot
+      ~CASColumn.sas
+      ~CASColumn.shape
+      ~CASColumn.size
+      ~CASColumn.str
+      ~CASColumn.table_params
+      ~CASColumn.values
+   
+   

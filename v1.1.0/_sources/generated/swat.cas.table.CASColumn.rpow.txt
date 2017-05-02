@@ -1,0 +1,6 @@
+swat.cas.table.CASColumn.rpow
+=============================
+
+.. currentmodule:: swat.cas.table
+
+.. automethod:: CASColumn.rpow

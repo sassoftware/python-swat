@@ -1,0 +1,6 @@
+swat.cas.table.CASTable.ftypes
+==============================
+
+.. currentmodule:: swat.cas.table
+
+.. autoattribute:: CASTable.ftypes

@@ -1,0 +1,419 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>swat.cas.table.CASTableGroupBy &mdash; SWAT 1.1.0 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+
+  
+    <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+
+  
+    <link rel="top" title="SWAT 1.1.0 documentation" href="../index.html"/>
+        <link rel="up" title="API Reference" href="../api.html"/>
+        <link rel="next" title="swat.cas.table.CASTableGroupBy.__iter__" href="swat.cas.table.CASTableGroupBy.__iter__.html"/>
+        <link rel="prev" title="swat.cas.table.CASColumn.sas.trigamma" href="swat.cas.table.SASColumnMethods.trigamma.html"/> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> SWAT
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.1.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../whatsnew.html">What&#8217;s New</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting-started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../workflows.html">Workflows</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../binary-vs-rest.html">Binary vs. REST</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../loading-data.html">Loading Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../table-vs-dataframe.html">CASTable vs. DataFrame vs. SASDataFrame</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../indexing.html">Indexing and Data Selection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../bygroups.html">Handling By Groups</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../sorting.html">Sorting</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../api.html">API Reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../api.html#cas">CAS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#casresults">CASResults</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#sasdataframe">SASDataFrame</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#sasformatter">SASFormatter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#castable">CASTable</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#cascolumn">CASColumn</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../api.html#castablegroupby">CASTableGroupBy</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="../api.html#id10">Constructor</a><ul class="current">
+<li class="toctree-l4 current"><a class="current reference internal" href="#">swat.cas.table.CASTableGroupBy</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../api.html#indexing-and-iteration">Indexing and Iteration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../api.html#conversion">Conversion</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../api.html#computations-descriptive-statistics">Computations / Descriptive Statistics</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#casresponse">CASResponse</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#data-message-handlers">Data Message Handlers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#date-and-time-functions">Date and Time Functions</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../gotchas.html">Programming Gotchas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../troubleshooting.html">Troubleshooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../sas-tk.html">SAS TK</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../licenses.html">Licenses</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../index.html">SWAT</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+ 
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../index.html">Docs</a> &raquo;</li>
+      
+        <li><a href="../api.html">API Reference</a> &raquo;</li>
+      
+    <li>swat.cas.table.CASTableGroupBy</li>
+    <li class="wy-breadcrumbs-aside">
+      
+          
+          <a href="../_sources/generated/swat.cas.table.CASTableGroupBy.txt" rel="nofollow"> View page source</a>
+        
+      
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="swat-cas-table-castablegroupby">
+<h1>swat.cas.table.CASTableGroupBy<a class="headerlink" href="#swat-cas-table-castablegroupby" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="swat.cas.table.CASTableGroupBy">
+<em class="property">class </em><code class="descclassname">swat.cas.table.</code><code class="descname">CASTableGroupBy</code><span class="sig-paren">(</span><em>table</em>, <em>by</em>, <em>axis=0</em>, <em>level=None</em>, <em>as_index=True</em>, <em>sort=True</em>, <em>group_keys=True</em>, <em>squeeze=False</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#swat.cas.table.CASTableGroupBy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/library/functions.html#object" title="(in Python v2.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<p>Group CASTable / CASColumn objects by specified values</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>table</strong> : CASTable or CASColumn</p>
+<blockquote>
+<div><p>The CASTable / CASColumn to group.</p>
+</div></blockquote>
+<p><strong>by</strong> : string or list-of-strings</p>
+<blockquote>
+<div><p>The column name(s) that specify the group values.</p>
+</div></blockquote>
+<p><strong>axis</strong> : int, optional</p>
+<blockquote>
+<div><p>Unsupported.</p>
+</div></blockquote>
+<p><strong>level</strong> : int or level-name, optional</p>
+<blockquote>
+<div><p>Unsupported.</p>
+</div></blockquote>
+<p><strong>as_index</strong> : boolean, optional</p>
+<blockquote>
+<div><p>If True, the group labels become the index in the output.</p>
+</div></blockquote>
+<p><strong>sort</strong> : boolean, optional</p>
+<blockquote>
+<div><p>If True, the output is sorted by the group keys.</p>
+</div></blockquote>
+<p><strong>group_keys</strong> : boolean, optional</p>
+<blockquote>
+<div><p>Unsupported.</p>
+</div></blockquote>
+<p><strong>squeeze</strong> : boolean, optional</p>
+<blockquote>
+<div><p>Unsupported.</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#swat.cas.table.CASTableGroupBy" title="swat.cas.table.CASTableGroupBy"><code class="xref py py-class docutils literal"><span class="pre">CASTableGroupBy</span></code></a></p>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="swat.cas.table.CASTableGroupBy.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>table</em>, <em>by</em>, <em>axis=0</em>, <em>level=None</em>, <em>as_index=True</em>, <em>sort=True</em>, <em>group_keys=True</em>, <em>squeeze=False</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#swat.cas.table.CASTableGroupBy.__init__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<p class="rubric">Methods</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="#swat.cas.table.CASTableGroupBy.__init__" title="swat.cas.table.CASTableGroupBy.__init__"><code class="xref py py-obj docutils literal"><span class="pre">__init__</span></code></a>(table,&nbsp;by[,&nbsp;axis,&nbsp;level,&nbsp;as_index,&nbsp;...])</td>
+<td></td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="swat.cas.table.CASTableGroupBy.css.html#swat.cas.table.CASTableGroupBy.css" title="swat.cas.table.CASTableGroupBy.css"><code class="xref py py-obj docutils literal"><span class="pre">css</span></code></a>(*args,&nbsp;**kwargs)</td>
+<td>Get css using groups</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="swat.cas.table.CASTableGroupBy.cv.html#swat.cas.table.CASTableGroupBy.cv" title="swat.cas.table.CASTableGroupBy.cv"><code class="xref py py-obj docutils literal"><span class="pre">cv</span></code></a>(*args,&nbsp;**kwargs)</td>
+<td>Get cv using groups</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="swat.cas.table.CASTableGroupBy.describe.html#swat.cas.table.CASTableGroupBy.describe" title="swat.cas.table.CASTableGroupBy.describe"><code class="xref py py-obj docutils literal"><span class="pre">describe</span></code></a>(*args,&nbsp;**kwargs)</td>
+<td>Get basic statistics using groups</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="swat.cas.table.CASTableGroupBy.get_group.html#swat.cas.table.CASTableGroupBy.get_group" title="swat.cas.table.CASTableGroupBy.get_group"><code class="xref py py-obj docutils literal"><span class="pre">get_group</span></code></a>(name[,&nbsp;obj])</td>
+<td>Construct a CASTable / CASColumn with the given group key</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">get_groupby_vars</span></code>()</td>
+<td>Get groupby variables from table</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="swat.cas.table.CASTableGroupBy.head.html#swat.cas.table.CASTableGroupBy.head" title="swat.cas.table.CASTableGroupBy.head"><code class="xref py py-obj docutils literal"><span class="pre">head</span></code></a>(*args,&nbsp;**kwargs)</td>
+<td>Retrieve first values of each group</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="swat.cas.table.CASTableGroupBy.max.html#swat.cas.table.CASTableGroupBy.max" title="swat.cas.table.CASTableGroupBy.max"><code class="xref py py-obj docutils literal"><span class="pre">max</span></code></a>(*args,&nbsp;**kwargs)</td>
+<td>Get maximum values using groups</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="swat.cas.table.CASTableGroupBy.mean.html#swat.cas.table.CASTableGroupBy.mean" title="swat.cas.table.CASTableGroupBy.mean"><code class="xref py py-obj docutils literal"><span class="pre">mean</span></code></a>(*args,&nbsp;**kwargs)</td>
+<td>Get mean values using groups</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="swat.cas.table.CASTableGroupBy.median.html#swat.cas.table.CASTableGroupBy.median" title="swat.cas.table.CASTableGroupBy.median"><code class="xref py py-obj docutils literal"><span class="pre">median</span></code></a>(*args,&nbsp;**kwargs)</td>
+<td>Get median values using groups</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="swat.cas.table.CASTableGroupBy.min.html#swat.cas.table.CASTableGroupBy.min" title="swat.cas.table.CASTableGroupBy.min"><code class="xref py py-obj docutils literal"><span class="pre">min</span></code></a>(*args,&nbsp;**kwargs)</td>
+<td>Get minimum values using groups</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="swat.cas.table.CASTableGroupBy.mode.html#swat.cas.table.CASTableGroupBy.mode" title="swat.cas.table.CASTableGroupBy.mode"><code class="xref py py-obj docutils literal"><span class="pre">mode</span></code></a>(*args,&nbsp;**kwargs)</td>
+<td>Get mode values using groups</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="swat.cas.table.CASTableGroupBy.nlargest.html#swat.cas.table.CASTableGroupBy.nlargest" title="swat.cas.table.CASTableGroupBy.nlargest"><code class="xref py py-obj docutils literal"><span class="pre">nlargest</span></code></a>(*args,&nbsp;**kwargs)</td>
+<td>Return the <cite>n</cite> largest values ordered by <cite>columns</cite></td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="swat.cas.table.CASTableGroupBy.nmiss.html#swat.cas.table.CASTableGroupBy.nmiss" title="swat.cas.table.CASTableGroupBy.nmiss"><code class="xref py py-obj docutils literal"><span class="pre">nmiss</span></code></a>(*args,&nbsp;**kwargs)</td>
+<td>Get nmiss using groups</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="swat.cas.table.CASTableGroupBy.nsmallest.html#swat.cas.table.CASTableGroupBy.nsmallest" title="swat.cas.table.CASTableGroupBy.nsmallest"><code class="xref py py-obj docutils literal"><span class="pre">nsmallest</span></code></a>(*args,&nbsp;**kwargs)</td>
+<td>Return the <cite>n</cite> smallest values ordered by <cite>columns</cite></td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="swat.cas.table.CASTableGroupBy.nth.html#swat.cas.table.CASTableGroupBy.nth" title="swat.cas.table.CASTableGroupBy.nth"><code class="xref py py-obj docutils literal"><span class="pre">nth</span></code></a>(n[,&nbsp;dropna])</td>
+<td>Return the nth row from each group</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="swat.cas.table.CASTableGroupBy.nunique.html#swat.cas.table.CASTableGroupBy.nunique" title="swat.cas.table.CASTableGroupBy.nunique"><code class="xref py py-obj docutils literal"><span class="pre">nunique</span></code></a>(*args,&nbsp;**kwargs)</td>
+<td>Get number of unique values using groups</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="swat.cas.table.CASTableGroupBy.probt.html#swat.cas.table.CASTableGroupBy.probt" title="swat.cas.table.CASTableGroupBy.probt"><code class="xref py py-obj docutils literal"><span class="pre">probt</span></code></a>(*args,&nbsp;**kwargs)</td>
+<td>Get probt using groups</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="swat.cas.table.CASTableGroupBy.quantile.html#swat.cas.table.CASTableGroupBy.quantile" title="swat.cas.table.CASTableGroupBy.quantile"><code class="xref py py-obj docutils literal"><span class="pre">quantile</span></code></a>(*args,&nbsp;**kwargs)</td>
+<td>Get quantiles using groups</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="swat.cas.table.CASTableGroupBy.query.html#swat.cas.table.CASTableGroupBy.query" title="swat.cas.table.CASTableGroupBy.query"><code class="xref py py-obj docutils literal"><span class="pre">query</span></code></a>(*args,&nbsp;**kwargs)</td>
+<td>Query the table with a boolean expression</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">slice</span></code>(*args,&nbsp;**kwargs)</td>
+<td>Retrieve requested values of each group</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="swat.cas.table.CASTableGroupBy.std.html#swat.cas.table.CASTableGroupBy.std" title="swat.cas.table.CASTableGroupBy.std"><code class="xref py py-obj docutils literal"><span class="pre">std</span></code></a>(*args,&nbsp;**kwargs)</td>
+<td>Get std using groups</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="swat.cas.table.CASTableGroupBy.stderr.html#swat.cas.table.CASTableGroupBy.stderr" title="swat.cas.table.CASTableGroupBy.stderr"><code class="xref py py-obj docutils literal"><span class="pre">stderr</span></code></a>(*args,&nbsp;**kwargs)</td>
+<td>Get stderr using groups</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="swat.cas.table.CASTableGroupBy.sum.html#swat.cas.table.CASTableGroupBy.sum" title="swat.cas.table.CASTableGroupBy.sum"><code class="xref py py-obj docutils literal"><span class="pre">sum</span></code></a>(*args,&nbsp;**kwargs)</td>
+<td>Get sum using groups</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">tail</span></code>(*args,&nbsp;**kwargs)</td>
+<td>Retrieve last values of each group</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="swat.cas.table.CASTableGroupBy.to_frame.html#swat.cas.table.CASTableGroupBy.to_frame" title="swat.cas.table.CASTableGroupBy.to_frame"><code class="xref py py-obj docutils literal"><span class="pre">to_frame</span></code></a>(**kwargs)</td>
+<td>Retrieve all values into a DataFrame</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="swat.cas.table.CASTableGroupBy.to_series.html#swat.cas.table.CASTableGroupBy.to_series" title="swat.cas.table.CASTableGroupBy.to_series"><code class="xref py py-obj docutils literal"><span class="pre">to_series</span></code></a>([name])</td>
+<td>Retrieve all values into a Series</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="swat.cas.table.CASTableGroupBy.tvalue.html#swat.cas.table.CASTableGroupBy.tvalue" title="swat.cas.table.CASTableGroupBy.tvalue"><code class="xref py py-obj docutils literal"><span class="pre">tvalue</span></code></a>(*args,&nbsp;**kwargs)</td>
+<td>Get tvalue using groups</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="swat.cas.table.CASTableGroupBy.unique.html#swat.cas.table.CASTableGroupBy.unique" title="swat.cas.table.CASTableGroupBy.unique"><code class="xref py py-obj docutils literal"><span class="pre">unique</span></code></a>(*args,&nbsp;**kwargs)</td>
+<td>Get unique values using groups</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="swat.cas.table.CASTableGroupBy.uss.html#swat.cas.table.CASTableGroupBy.uss" title="swat.cas.table.CASTableGroupBy.uss"><code class="xref py py-obj docutils literal"><span class="pre">uss</span></code></a>(*args,&nbsp;**kwargs)</td>
+<td>Get uss using groups</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="swat.cas.table.CASTableGroupBy.value_counts.html#swat.cas.table.CASTableGroupBy.value_counts" title="swat.cas.table.CASTableGroupBy.value_counts"><code class="xref py py-obj docutils literal"><span class="pre">value_counts</span></code></a>(*args,&nbsp;**kwargs)</td>
+<td>Get value counts using groups</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="swat.cas.table.CASTableGroupBy.var.html#swat.cas.table.CASTableGroupBy.var" title="swat.cas.table.CASTableGroupBy.var"><code class="xref py py-obj docutils literal"><span class="pre">var</span></code></a>(*args,&nbsp;**kwargs)</td>
+<td>Get var using groups</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Attributes</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">plot</span></code></td>
+<td>Plot using groups</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="swat.cas.table.CASTableGroupBy.__iter__.html" class="btn btn-neutral float-right" title="swat.cas.table.CASTableGroupBy.__iter__" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="swat.cas.table.SASColumnMethods.trigamma.html" class="btn btn-neutral" title="swat.cas.table.CASColumn.sas.trigamma" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016 SAS Institute Inc. All Rights Reserved..
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'1.1.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

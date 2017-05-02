@@ -1,0 +1,341 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>CASTable vs. DataFrame vs. SASDataFrame &mdash; SWAT 1.1.0 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+    <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+
+  
+    <link rel="top" title="SWAT 1.1.0 documentation" href="index.html"/>
+        <link rel="next" title="Indexing and Data Selection" href="indexing.html"/>
+        <link rel="prev" title="Loading Data" href="loading-data.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> SWAT
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.1.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="whatsnew.html">What&#8217;s New</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="workflows.html">Workflows</a></li>
+<li class="toctree-l1"><a class="reference internal" href="binary-vs-rest.html">Binary vs. REST</a></li>
+<li class="toctree-l1"><a class="reference internal" href="loading-data.html">Loading Data</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">CASTable vs. DataFrame vs. SASDataFrame</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#pandas-dataframe-vs-sasdataframe">Pandas DataFrame vs. SASDataFrame</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="indexing.html">Indexing and Data Selection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bygroups.html">Handling By Groups</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sorting.html">Sorting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gotchas.html">Programming Gotchas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="troubleshooting.html">Troubleshooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sas-tk.html">SAS TK</a></li>
+<li class="toctree-l1"><a class="reference internal" href="licenses.html">Licenses</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="index.html">SWAT</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+ 
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+      
+    <li>CASTable vs. DataFrame vs. SASDataFrame</li>
+    <li class="wy-breadcrumbs-aside">
+      
+          
+          <a href="_sources/table-vs-dataframe.txt" rel="nofollow"> View page source</a>
+        
+      
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="castable-vs-dataframe-vs-sasdataframe">
+<span id="tblvsdf"></span><h1>CASTable vs. DataFrame vs. SASDataFrame<a class="headerlink" href="#castable-vs-dataframe-vs-sasdataframe" title="Permalink to this headline">¶</a></h1>
+<p><code class="xref py py-class docutils literal"><span class="pre">CASTable</span></code> objects and DataFrame object (either <a class="reference external" href="http://pandas.pydata.org/pandas-docs/version/0.19.2/generated/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v0.19.2)"><code class="xref py py-class docutils literal"><span class="pre">pandas.DataFrame</span></code></a> or
+<code class="xref py py-class docutils literal"><span class="pre">SASDataFrame</span></code>) act very similar in many ways, but they are extremely different
+constructs.  <code class="xref py py-class docutils literal"><span class="pre">CASTable</span></code> objects do not contain actual data.  They are simply
+a client-side view of the data in a CAS table on a CAS server.  DataFrames and
+SASDataFrames contain data in-memory on the client machine.</p>
+<p>Since these objects work very much the same way, it can be a little confusing when
+you start to work with them.  The rule to remember is that if the type of the object
+contains &#8220;DataFrame&#8221; (i.e., DataFrame or SASDataFrame), the data is local.  If the
+type of the object contains &#8220;Table&#8221; or &#8220;Column&#8221; (i.e., CASTable or CASColumn), it is
+a client-side view of the data in a CAS table on the server.</p>
+<p>Even though they are very different architectures, <code class="xref py py-class docutils literal"><span class="pre">CASTable</span></code> objects support
+much of the <a class="reference external" href="http://pandas.pydata.org/pandas-docs/version/0.19.2/generated/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v0.19.2)"><code class="xref py py-class docutils literal"><span class="pre">pandas.DataFrame</span></code></a> API.  However, since CAS tables can contain
+enormous amounts of data that wouldn&#8217;t fit into the memory of a single machine, there
+are some differences in the way the APIs work.  The basic rules to remember
+about <code class="xref py py-class docutils literal"><span class="pre">CASTable</span></code> data access are as follows.</p>
+<blockquote>
+<div><ul class="simple">
+<li>If a method returns observation-level data, it will be returned as a new
+<code class="xref py py-class docutils literal"><span class="pre">CASTable</span></code> object.</li>
+<li>If a method returns summarized data, it will return data as a <code class="xref py py-class docutils literal"><span class="pre">SASDataFrame</span></code>.</li>
+</ul>
+</div></blockquote>
+<p>In other words, if the method is going to return a new data set with potentially
+huge amounts of data, you will get a new <code class="xref py py-class docutils literal"><span class="pre">CASTable</span></code> object that is a view of that
+data.  If the method is going to compute a result of some analysis that is a summary
+of the data, you will get a local copy of that result in a <code class="xref py py-class docutils literal"><span class="pre">SASDataFrame</span></code>.
+Most actions allow you to specify a <code class="docutils literal"><span class="pre">casout=</span></code> parameter that allows you to send the
+summarized data to a table in the server as well.</p>
+<p>The methods and properties of <code class="xref py py-class docutils literal"><span class="pre">CASTable</span></code> objects that return a new <code class="xref py py-class docutils literal"><span class="pre">CASTable</span></code>
+object are <code class="docutils literal"><span class="pre">loc</span></code>, <code class="docutils literal"><span class="pre">iloc</span></code>, <code class="docutils literal"><span class="pre">ix</span></code>, <code class="docutils literal"><span class="pre">query</span></code>, <code class="docutils literal"><span class="pre">sort_values</span></code>, and <code class="docutils literal"><span class="pre">__getitem__</span></code>
+(i.e., <code class="docutils literal"><span class="pre">tbl[...]</span></code>).  The remaining methods will return results.
+A sampling of a number of methods common to both <code class="xref py py-class docutils literal"><span class="pre">CASTable</span></code> and
+DataFrame are shown below with the result type of that method.</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="39%" />
+<col width="32%" />
+<col width="29%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Method</th>
+<th class="head">CASTable</th>
+<th class="head">DataFrame</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>o.head()</td>
+<td>DataFrame</td>
+<td>DataFrame</td>
+</tr>
+<tr class="row-odd"><td>o.describe()</td>
+<td>DataFrame</td>
+<td>DataFrame</td>
+</tr>
+<tr class="row-even"><td>o[&#8216;col&#8217;]</td>
+<td>CASColumn</td>
+<td>Series</td>
+</tr>
+<tr class="row-odd"><td>o[[&#8216;col&#8217;]]</td>
+<td>CASTable</td>
+<td>DataFrame</td>
+</tr>
+<tr class="row-even"><td>o.summary()</td>
+<td>CASResults</td>
+<td>N/A</td>
+</tr>
+</tbody>
+</table>
+<p>In the table above, the <code class="xref py py-class docutils literal"><span class="pre">CASColumn</span></code> is a subclass of <code class="xref py py-class docutils literal"><span class="pre">CASTable</span></code>
+that only references a single column of the CAS table.</p>
+<p>The last entry in the table above is a call to a CAS action called <code class="docutils literal"><span class="pre">summary</span></code>.
+All CAS actions return a <code class="xref py py-class docutils literal"><span class="pre">CASResults</span></code> object (which is a subclass of
+Python&#8217;s ordered dictionary).  DataFrame&#8217;s can not call CAS actions, although
+you can upload a DataFrame to a CAS table using the <code class="xref py py-meth docutils literal"><span class="pre">CAS.upload()</span></code> method.</p>
+<p>It is possible to convert all of the data from a CAS table into a DataFrame by
+using the <code class="xref py py-meth docutils literal"><span class="pre">CASTable.to_frame()</span></code> method, however, you do need to be careful.
+It will attempt to pull all of the data down regardless of size.</p>
+<p><code class="xref py py-class docutils literal"><span class="pre">CASColumn</span></code> objects work much in the same was as <code class="xref py py-class docutils literal"><span class="pre">CASTable</span></code> objects
+except that they operate on a single column of data like a <a class="reference external" href="http://pandas.pydata.org/pandas-docs/version/0.19.2/generated/pandas.Series.html#pandas.Series" title="(in pandas v0.19.2)"><code class="xref py py-class docutils literal"><span class="pre">pandas.Series</span></code></a>.</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="40%" />
+<col width="30%" />
+<col width="30%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Method</th>
+<th class="head">CASColumn</th>
+<th class="head">Series</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>c.head()</td>
+<td>Series</td>
+<td>Series</td>
+</tr>
+<tr class="row-odd"><td>c[c.col &gt; 1]</td>
+<td>CASColumn</td>
+<td>Series</td>
+</tr>
+</tbody>
+</table>
+<div class="section" id="pandas-dataframe-vs-sasdataframe">
+<h2>Pandas DataFrame vs. SASDataFrame<a class="headerlink" href="#pandas-dataframe-vs-sasdataframe" title="Permalink to this headline">¶</a></h2>
+<p><code class="xref py py-class docutils literal"><span class="pre">SASDataFrame</span></code> is a subclass of <a class="reference external" href="http://pandas.pydata.org/pandas-docs/version/0.19.2/generated/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v0.19.2)"><code class="xref py py-class docutils literal"><span class="pre">pandas.DataFrame</span></code></a>.  Therefore, anything
+you can do with a <a class="reference external" href="http://pandas.pydata.org/pandas-docs/version/0.19.2/generated/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v0.19.2)"><code class="xref py py-class docutils literal"><span class="pre">pandas.DataFrame</span></code></a> will also work with <code class="xref py py-class docutils literal"><span class="pre">SASDataFrame</span></code>.
+The only difference is that <code class="xref py py-class docutils literal"><span class="pre">SASDataFrame</span></code> objects contain extra metadata
+familiar to SAS users.  This includes a title, label, name, a dictionary of extended
+attributes for information such as By groups and system titles (<code class="docutils literal"><span class="pre">attrs</span></code>), and
+a dictionary of column metadata (<code class="docutils literal"><span class="pre">colinfo</span></code>).</p>
+<p>Also, since SAS has both formatted and raw values for By groups, <code class="xref py py-class docutils literal"><span class="pre">SASDataFrame</span></code>
+objects also have a method called <code class="xref py py-meth docutils literal"><span class="pre">SASDataFrame.reshape_bygroups()</span></code> to change
+the way that By group information in represented in the DataFrame.  See the
+<a class="reference internal" href="bygroups.html#bygroups"><span class="std std-ref">By group documentation</span></a> for more information.</p>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="indexing.html" class="btn btn-neutral float-right" title="Indexing and Data Selection" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="loading-data.html" class="btn btn-neutral" title="Loading Data" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016 SAS Institute Inc. All Rights Reserved..
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'1.1.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

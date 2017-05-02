@@ -1,0 +1,6 @@
+swat.cas.table.DatetimeColumnMethods.minute
+===========================================
+
+.. currentmodule:: swat.cas.table
+
+.. autoattribute:: DatetimeColumnMethods.minute

@@ -1,0 +1,6 @@
+swat.cas.table.CASTable.__delattr__
+===================================
+
+.. currentmodule:: swat.cas.table
+
+.. automethod:: CASTable.__delattr__

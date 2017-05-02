@@ -1,0 +1,506 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>swat.CAS &mdash; SWAT 1.1.0 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+
+  
+    <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+
+  
+    <link rel="top" title="SWAT 1.1.0 documentation" href="../index.html"/>
+        <link rel="up" title="API Reference" href="../api.html"/>
+        <link rel="next" title="swat.CAS.close" href="swat.cas.connection.CAS.close.html"/>
+        <link rel="prev" title="API Reference" href="../api.html"/> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> SWAT
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.1.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../whatsnew.html">What&#8217;s New</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting-started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../workflows.html">Workflows</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../binary-vs-rest.html">Binary vs. REST</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../loading-data.html">Loading Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../table-vs-dataframe.html">CASTable vs. DataFrame vs. SASDataFrame</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../indexing.html">Indexing and Data Selection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../bygroups.html">Handling By Groups</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../sorting.html">Sorting</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../api.html">API Reference</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../api.html#cas">CAS</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="../api.html#constructor">Constructor</a><ul class="current">
+<li class="toctree-l4 current"><a class="current reference internal" href="#">swat.CAS</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../api.html#session-management">Session Management</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../api.html#reading-data">Reading Data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../api.html#running-actions">Running Actions</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#casresults">CASResults</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#sasdataframe">SASDataFrame</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#sasformatter">SASFormatter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#castable">CASTable</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#cascolumn">CASColumn</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#castablegroupby">CASTableGroupBy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#casresponse">CASResponse</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#data-message-handlers">Data Message Handlers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#date-and-time-functions">Date and Time Functions</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../gotchas.html">Programming Gotchas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../troubleshooting.html">Troubleshooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../sas-tk.html">SAS TK</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../licenses.html">Licenses</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../index.html">SWAT</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+ 
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../index.html">Docs</a> &raquo;</li>
+      
+        <li><a href="../api.html">API Reference</a> &raquo;</li>
+      
+    <li>swat.CAS</li>
+    <li class="wy-breadcrumbs-aside">
+      
+          
+          <a href="../_sources/generated/swat.CAS.txt" rel="nofollow"> View page source</a>
+        
+      
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="swat-cas-connection-cas">
+<h1>swat.CAS<a class="headerlink" href="#swat-cas-connection-cas" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="swat.CAS">
+<em class="property">class </em><code class="descclassname">swat.cas.connection.</code><code class="descname">CAS</code><span class="sig-paren">(</span><em>hostname=None</em>, <em>port=None</em>, <em>username=None</em>, <em>password=None</em>, <em>session=None</em>, <em>locale=None</em>, <em>nworkers=None</em>, <em>name=None</em>, <em>authinfo=None</em>, <em>protocol=None</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#swat.CAS" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/library/functions.html#object" title="(in Python v2.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<p>Create a connection to a CAS server.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>hostname</strong> : string or list-of-strings, optional</p>
+<blockquote>
+<div><p>Host to connect to.  If not specified, the value will come
+from the <code class="docutils literal"><span class="pre">cas.hostname</span></code> option or <code class="docutils literal"><span class="pre">CASHOST</span></code> environment variable.</p>
+</div></blockquote>
+<p><strong>port</strong> : int or long, optional</p>
+<blockquote>
+<div><p>Port number.  If not specified, the value will come from the
+<code class="docutils literal"><span class="pre">cas.port</span></code> option or <code class="docutils literal"><span class="pre">CASPORT</span></code> environment variable.</p>
+</div></blockquote>
+<p><strong>username</strong> : string, optional</p>
+<blockquote>
+<div><p>Name of user on CAS host.</p>
+</div></blockquote>
+<p><strong>password</strong> : string, optional</p>
+<blockquote>
+<div><p>Password of user on CAS host.</p>
+</div></blockquote>
+<p><strong>session</strong> : string, optional</p>
+<blockquote>
+<div><p>ID of existing session to reconnect to.</p>
+</div></blockquote>
+<p><strong>locale</strong> : string, optional</p>
+<blockquote>
+<div><p>Name of locale used for the session.</p>
+</div></blockquote>
+<p><strong>name</strong> : string, optional</p>
+<blockquote>
+<div><p>User-definable name for the session.</p>
+</div></blockquote>
+<p><strong>nworkers</strong> : int or long, optional</p>
+<blockquote>
+<div><p>Number of worker nodes to use.</p>
+</div></blockquote>
+<p><strong>authinfo</strong> : string or list-of-strings, optional</p>
+<blockquote>
+<div><p>The filename or list of filenames of authinfo/netrc files used
+for authentication.</p>
+</div></blockquote>
+<p><strong>protocol</strong> : string, optional</p>
+<blockquote>
+<div><p>The protocol to use for communicating with the server.
+This protocol must match the protocol spoken by the specified
+server port.  If not specified, the value will come from the
+<code class="docutils literal"><span class="pre">cas.protocol</span></code> option or <code class="docutils literal"><span class="pre">CASPROTOCOL</span></code> environment variable.</p>
+</div></blockquote>
+<p><strong>**kwargs</strong> : any, optional</p>
+<blockquote>
+<div><p>Arbitrary keyword arguments used for internal purposes only.</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><a class="reference internal" href="#swat.CAS" title="swat.CAS"><code class="xref py py-class docutils literal"><span class="pre">CAS</span></code></a> object</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body"><p class="first"><strong>IOError</strong></p>
+<blockquote class="last">
+<div><p>When a connection can not be established.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Examples</p>
+<p>To create a connection to a CAS host, you simply supply a hostname
+(or list of hostnames), a port number, and user credentials.  Here is
+an example specifying a single hostname, and username and password as
+strings.</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">conn</span> <span class="o">=</span> <span class="n">swat</span><span class="o">.</span><span class="n">CAS</span><span class="p">(</span><span class="s1">&#39;mycashost.com&#39;</span><span class="p">,</span> <span class="mi">12345</span><span class="p">,</span> <span class="s1">&#39;username&#39;</span><span class="p">,</span> <span class="s1">&#39;password&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>If you use an authinfo file and it is in your home directory, you don&#8217;t
+have to specify any username or password.  You can override the authinfo
+file location with the authinfo= parameter.  This form also works for
+Kerberos authentication.</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">conn</span> <span class="o">=</span> <span class="n">swat</span><span class="o">.</span><span class="n">CAS</span><span class="p">(</span><span class="s1">&#39;mycashost.com&#39;</span><span class="p">,</span> <span class="mi">12345</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>If you specify multiple hostnames, it will connect to the first available
+server in the list.</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">conn</span> <span class="o">=</span> <span class="n">swat</span><span class="o">.</span><span class="n">CAS</span><span class="p">([</span><span class="s1">&#39;mycashost1.com&#39;</span><span class="p">,</span> <span class="s1">&#39;mycashost2.com&#39;</span><span class="p">,</span> <span class="s1">&#39;mycashost3.com&#39;</span><span class="p">],</span>
+<span class="go">                    12345, &#39;username&#39;, &#39;password&#39;)</span>
+</pre></div>
+</div>
+<p>To connect to an existing CAS session, you specify the session identifier.</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">conn</span> <span class="o">=</span> <span class="n">swat</span><span class="o">.</span><span class="n">CAS</span><span class="p">(</span><span class="s1">&#39;mycashost.com&#39;</span><span class="p">,</span> <span class="mi">12345</span><span class="p">,</span>
+<span class="go">                    session=&#39;ABCDEF12-ABCD-EFG1-2345-ABCDEF123456&#39;)</span>
+</pre></div>
+</div>
+<p>If you wish to change the locale used on the server, you can use the
+locale= option.</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">conn</span> <span class="o">=</span> <span class="n">swat</span><span class="o">.</span><span class="n">CAS</span><span class="p">(</span><span class="s1">&#39;mycashost.com&#39;</span><span class="p">,</span> <span class="mi">12345</span><span class="p">,</span> <span class="n">locale</span><span class="o">=</span><span class="s1">&#39;es_US&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>To limit the number of worker nodes in a grid, you use the nworkers=
+parameter.</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">conn</span> <span class="o">=</span> <span class="n">swat</span><span class="o">.</span><span class="n">CAS</span><span class="p">(</span><span class="s1">&#39;mycashost.com&#39;</span><span class="p">,</span> <span class="mi">12345</span><span class="p">,</span> <span class="n">nworkers</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="method">
+<dt id="swat.CAS.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>hostname=None</em>, <em>port=None</em>, <em>username=None</em>, <em>password=None</em>, <em>session=None</em>, <em>locale=None</em>, <em>nworkers=None</em>, <em>name=None</em>, <em>authinfo=None</em>, <em>protocol=None</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#swat.CAS.__init__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<p class="rubric">Methods</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">CASTable</span></code>(name,&nbsp;**kwargs)</td>
+<td></td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">SASFormatter</span></code>()</td>
+<td>Create a SASFormatter instance</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#swat.CAS.__init__" title="swat.CAS.__init__"><code class="xref py py-obj docutils literal"><span class="pre">__init__</span></code></a>([hostname,&nbsp;port,&nbsp;username,&nbsp;...])</td>
+<td></td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">add_results_hook</span></code>(name,&nbsp;func)</td>
+<td>Add a post-processing function for results</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="swat.cas.connection.CAS.close.html#swat.CAS.close" title="swat.CAS.close"><code class="xref py py-obj docutils literal"><span class="pre">close</span></code></a>()</td>
+<td>Close the CAS connection</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="swat.cas.connection.CAS.copy.html#swat.CAS.copy" title="swat.CAS.copy"><code class="xref py py-obj docutils literal"><span class="pre">copy</span></code></a>()</td>
+<td>Create a copy of the connection</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">del_results_hook</span></code>(name,&nbsp;func)</td>
+<td>Delete a post-processing function for an action</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">del_results_hooks</span></code>(name)</td>
+<td>Delete all post-processing functions for an action</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="swat.cas.connection.CAS.fork.html#swat.CAS.fork" title="swat.CAS.fork"><code class="xref py py-obj docutils literal"><span class="pre">fork</span></code></a>([num])</td>
+<td>Create multiple copies of a connection</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">get_action</span></code>(name)</td>
+<td>Get the CAS action instance for the given action name</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">get_action_class</span></code>(name)</td>
+<td>Get the CAS action class for the given action name</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">get_action_names</span></code>()</td>
+<td>Return the list of action classes</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">get_actionset</span></code>(name)</td>
+<td>Get the CAS action set instance for the given action set name</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">get_actionset_names</span></code>()</td>
+<td>Return the list of actionset classes</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">has_action</span></code>(name)</td>
+<td>Does the given action name exist?</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">has_actionset</span></code>(name)</td>
+<td>Does the given actionset name exist?</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="swat.cas.connection.CAS.invoke.html#swat.CAS.invoke" title="swat.CAS.invoke"><code class="xref py py-obj docutils literal"><span class="pre">invoke</span></code></a>(_name_,&nbsp;**kwargs)</td>
+<td>Call an action on the server</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">json_normalize</span></code>(data[,&nbsp;casout])</td>
+<td>&#8220;Normalize&#8221; semi-structured JSON data into a flat table and upload to a CAS table</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="swat.cas.connection.CAS.load_path.html#swat.CAS.load_path" title="swat.CAS.load_path"><code class="xref py py-obj docutils literal"><span class="pre">load_path</span></code></a>([path,&nbsp;readahead,&nbsp;importoptions,&nbsp;...])</td>
+<td>Load a path from a CASLib</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="swat.cas.connection.CAS.read_clipboard.html#swat.CAS.read_clipboard" title="swat.CAS.read_clipboard"><code class="xref py py-obj docutils literal"><span class="pre">read_clipboard</span></code></a>([casout])</td>
+<td>Read text from clipboard and pass to <a class="reference internal" href="swat.cas.connection.CAS.read_table.html#swat.CAS.read_table" title="swat.CAS.read_table"><code class="xref py py-meth docutils literal"><span class="pre">read_table()</span></code></a></td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="swat.cas.connection.CAS.read_csv.html#swat.CAS.read_csv" title="swat.CAS.read_csv"><code class="xref py py-obj docutils literal"><span class="pre">read_csv</span></code></a>(filepath_or_buffer[,&nbsp;casout])</td>
+<td>Read CSV file into a CAS table</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="swat.cas.connection.CAS.read_excel.html#swat.CAS.read_excel" title="swat.CAS.read_excel"><code class="xref py py-obj docutils literal"><span class="pre">read_excel</span></code></a>(io[,&nbsp;casout])</td>
+<td>Read an Excel table into a CAS table</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="swat.cas.connection.CAS.read_fwf.html#swat.CAS.read_fwf" title="swat.CAS.read_fwf"><code class="xref py py-obj docutils literal"><span class="pre">read_fwf</span></code></a>(filepath_or_buffer[,&nbsp;casout])</td>
+<td>Read a table of fixed-width formatted lines into a CAS table</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="swat.cas.connection.CAS.read_gbq.html#swat.CAS.read_gbq" title="swat.CAS.read_gbq"><code class="xref py py-obj docutils literal"><span class="pre">read_gbq</span></code></a>(query[,&nbsp;casout])</td>
+<td>Load data from a Google BigQuery into a CAS table</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="swat.cas.connection.CAS.read_hdf.html#swat.CAS.read_hdf" title="swat.CAS.read_hdf"><code class="xref py py-obj docutils literal"><span class="pre">read_hdf</span></code></a>(path_or_buf[,&nbsp;casout])</td>
+<td>Read from the HDF store and create a CAS table</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="swat.cas.connection.CAS.read_html.html#swat.CAS.read_html" title="swat.CAS.read_html"><code class="xref py py-obj docutils literal"><span class="pre">read_html</span></code></a>(io[,&nbsp;casout])</td>
+<td>Read HTML tables into a list of CASTable objects</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">read_json</span></code>([path_or_buf,&nbsp;casout])</td>
+<td>Read a JSON string into a CAS table</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="swat.cas.connection.CAS.read_pickle.html#swat.CAS.read_pickle" title="swat.CAS.read_pickle"><code class="xref py py-obj docutils literal"><span class="pre">read_pickle</span></code></a>(path[,&nbsp;casout])</td>
+<td>Load pickled pandas object from the specified path</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="swat.cas.connection.CAS.read_sas.html#swat.CAS.read_sas" title="swat.CAS.read_sas"><code class="xref py py-obj docutils literal"><span class="pre">read_sas</span></code></a>(filepath_or_buffer[,&nbsp;casout])</td>
+<td>Read SAS files stored as XPORT or SAS7BDAT into a CAS table</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="swat.cas.connection.CAS.read_sql.html#swat.CAS.read_sql" title="swat.CAS.read_sql"><code class="xref py py-obj docutils literal"><span class="pre">read_sql</span></code></a>(sql,&nbsp;con[,&nbsp;casout])</td>
+<td>Read SQL query or database table into a CAS table</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="swat.cas.connection.CAS.read_sql_query.html#swat.CAS.read_sql_query" title="swat.CAS.read_sql_query"><code class="xref py py-obj docutils literal"><span class="pre">read_sql_query</span></code></a>(sql,&nbsp;con[,&nbsp;casout])</td>
+<td>Read SQL query table into a CAS table</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="swat.cas.connection.CAS.read_sql_table.html#swat.CAS.read_sql_table" title="swat.CAS.read_sql_table"><code class="xref py py-obj docutils literal"><span class="pre">read_sql_table</span></code></a>(table_name,&nbsp;con[,&nbsp;casout])</td>
+<td>Read SQL database table into a CAS table</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="swat.cas.connection.CAS.read_stata.html#swat.CAS.read_stata" title="swat.CAS.read_stata"><code class="xref py py-obj docutils literal"><span class="pre">read_stata</span></code></a>(filepath_or_buffer[,&nbsp;casout])</td>
+<td>Read Stata file into a CAS table</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="swat.cas.connection.CAS.read_table.html#swat.CAS.read_table" title="swat.CAS.read_table"><code class="xref py py-obj docutils literal"><span class="pre">read_table</span></code></a>(filepath_or_buffer[,&nbsp;casout])</td>
+<td>Read general delimited file into a CAS table</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="swat.cas.connection.CAS.retrieve.html#swat.CAS.retrieve" title="swat.CAS.retrieve"><code class="xref py py-obj docutils literal"><span class="pre">retrieve</span></code></a>(_name_,&nbsp;**kwargs)</td>
+<td>Call the action and aggregate the results</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="swat.cas.connection.CAS.session_context.html#swat.CAS.session_context" title="swat.CAS.session_context"><code class="xref py py-obj docutils literal"><span class="pre">session_context</span></code></a>(*args,&nbsp;**kwargs)</td>
+<td>Create a context of session options</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">terminate</span></code>()</td>
+<td>End the session and close the CAS connection</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">upload</span></code>(data[,&nbsp;importoptions,&nbsp;casout])</td>
+<td>Upload data from a local file into a CAS table</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="swat.cas.connection.CAS.upload_file.html#swat.CAS.upload_file" title="swat.CAS.upload_file"><code class="xref py py-obj docutils literal"><span class="pre">upload_file</span></code></a>(data[,&nbsp;importoptions,&nbsp;casout])</td>
+<td>Upload a client-side data file to CAS and parse it into a CAS table</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="swat.cas.connection.CAS.upload_frame.html#swat.CAS.upload_frame" title="swat.CAS.upload_frame"><code class="xref py py-obj docutils literal"><span class="pre">upload_frame</span></code></a>(data[,&nbsp;importoptions,&nbsp;casout])</td>
+<td>Upload a client-side data file to CAS and parse it into a CAS table</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Attributes</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">sessions</span></code></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">trait_names</span></code></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="swat.cas.connection.CAS.close.html" class="btn btn-neutral float-right" title="swat.CAS.close" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="../api.html" class="btn btn-neutral" title="API Reference" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016 SAS Institute Inc. All Rights Reserved..
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'1.1.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

@@ -1,0 +1,6 @@
+swat.cas.table.DatetimeColumnMethods.week
+=========================================
+
+.. currentmodule:: swat.cas.table
+
+.. autoattribute:: DatetimeColumnMethods.week

@@ -1,0 +1,6 @@
+swat.cas.connection.CAS.read_clipboard
+======================================
+
+.. currentmodule:: swat.cas.connection
+
+.. automethod:: CAS.read_clipboard
