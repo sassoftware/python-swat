@@ -23,6 +23,7 @@ CAS data message handlers
 
 from __future__ import print_function, division, absolute_import, unicode_literals
 
+import base64
 import copy
 import re
 import datetime
@@ -44,7 +45,7 @@ from .. import clib
 from ..config import get_option
 from ..clib import errorcheck
 from ..exceptions import SWATError
-from ..utils.compat import a2n, text_types, binary_types, int32, int64, float64
+from ..utils.compat import a2b, a2n, text_types, binary_types, int32, int64, float64
 from ..dataframe import SASDataFrame
 from ..utils import getsoptions
 from .connection import getone, CASRequest, CASResponse
@@ -326,14 +327,26 @@ class CASDataMsgHandler(object):
                                                                 datetime.time,
                                                                 datetime.datetime)):
                     value = python2cas_datetime(value)
-            if vrtype == 'CHAR' or vtype in ['VARCHAR', 'CHAR']:
-                if isinstance(value, binary_types) or isinstance(value, text_types):
-                    errorcheck(self._sw_databuffer.setString(row, offset,
-                                                             a2n(transformer(value))),
-                               self._sw_databuffer)
+            if vrtype == 'CHAR' or vtype in ['VARCHAR', 'CHAR', 'BINARY', 'VARBINARY']:
+                if vtype in ['BINARY', 'VARBINARY'] and \
+                        hasattr(self._sw_databuffer, 'setBinaryFromBase64'):
+                    if isinstance(value, binary_types) or isinstance(value, text_types):
+                        errorcheck(self._sw_databuffer.setBinaryFromBase64(row, offset,
+                                        a2n(base64.b64encode(a2b(transformer(value))))),
+                                   self._sw_databuffer)
+                    else:
+                        errorcheck(self._sw_databuffer.setBinaryFromBase64(row,
+                                                                           offset,
+                                                                           a2n('')),
+                                   self._sw_databuffer)
                 else:
-                    errorcheck(self._sw_databuffer.setString(row, offset, a2n('')),
-                               self._sw_databuffer)
+                    if isinstance(value, binary_types) or isinstance(value, text_types):
+                        errorcheck(self._sw_databuffer.setString(row, offset,
+                                                                 a2n(transformer(value))),
+                                   self._sw_databuffer)
+                    else:
+                        errorcheck(self._sw_databuffer.setString(row, offset, a2n('')),
+                                   self._sw_databuffer)
             elif vrtype == 'NUMERIC' and vtype in ['INT32', 'DATE']:
                 if pd.isnull(value):
                     value = get_option('cas.missing.%s' % vtype.lower())
