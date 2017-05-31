@@ -188,7 +188,7 @@ def query_authinfo(host, user=None, protocol=None, path=None):
         line = ' '.join(lines)
 
         # Parse out definitions and look for matches
-        defs = [x for x in re.split(r'(host|machine|default)\s*', line) if x.strip()]
+        defs = [x for x in re.split(r'\b(host|machine|default)\b\s*', line) if x.strip()]
 
         for name, value in _chunker(defs, 2):
             if name in ['host', 'machine']:

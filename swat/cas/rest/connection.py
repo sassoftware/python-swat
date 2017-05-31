@@ -184,10 +184,10 @@ class REST_CASConnection(object):
         if password and password.startswith('authinfo={'):
             authinfo = password[11:-2]
             authinfo = authinfo.split('}{')
-            authinfo = query_authinfo(host=hostname, user=username,
-                                      protocol=port, path=authinfo)
+            authinfo = query_authinfo(host=self._hostname, user=username,
+                                      protocol=self._port, path=authinfo)
         elif not password:
-            authinfo = query_authinfo(host=hostname, user=username, protocol=port)
+            authinfo = query_authinfo(host=self._hostname, user=username, protocol=self._port)
 
         if authinfo is not None:
             hostname = authinfo.get('host', hostname)
