@@ -373,7 +373,7 @@ class REST_CASConnection(object):
         try:
             res = self._req_sess.put(
                       urllib.parse.urljoin(self._baseurl,
-                                           'cas/sessions/%s/actions/upload' %
+                                           'cas/sessions/%s/actions/table.upload' %
                                            self._session), data=data)
             res = res.text
         except Exception as exc:
