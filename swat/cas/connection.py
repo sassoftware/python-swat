@@ -982,9 +982,8 @@ class CAS(object):
                 inputs = tbl.get_inputs_param()
                 kwargs[key] = tbl.to_table_params()
                 if not uses_inputs:
-                    if inputs:
-                        if 'vars' not in kwargs:
-                            kwargs[key]['vars'] = inputs
+                    if inputs and 'vars' not in kwargs:
+                        kwargs[key]['vars'] = inputs
                     inputs = None
 
         # Apply input variables
@@ -1636,17 +1635,15 @@ class CAS(object):
         name = name.lower()
 
         # Check cache for actionset and action classes
-        if atype in [None, 'actionset']:
-            if name in self._actionset_classes and \
-                    self._actionset_classes[name] is not None:
-                return self._actionset_classes[name]()
+        if atype in [None, 'actionset'] and name in self._actionset_classes \
+            and self._actionset_classes[name] is not None:
+            return self._actionset_classes[name]()
 
-        if atype in [None, 'action']:
-            if name in self._action_classes and \
-                    self._action_classes[name] is not None:
-                if class_requested:
-                    return self._action_classes[name]
-                return self._action_classes[name]()
+        if atype in [None, 'action'] and name in self._action_classes and \
+            self._action_classes[name] is not None:
+            if class_requested:
+                return self._action_classes[name]
+            return self._action_classes[name]()
 
         # See if the action/action set exists
         asname, actname, asinfo = self._get_actionset_info(name.lower(), atype=atype)
@@ -1661,15 +1658,13 @@ class CAS(object):
             self._action_classes[asname.lower() + '.' + key] = value
 
         # Check cache for actionset and action classes
-        if atype in [None, 'actionset']:
-            if name in self._actionset_classes:
-                return self._actionset_classes[name]()
+        if atype in [None, 'actionset'] and name in self._actionset_classes:
+            return self._actionset_classes[name]()
 
-        if atype in [None, 'action']:
-            if name in self._action_classes:
-                if class_requested:
-                    return self._action_classes[name]
-                return self._action_classes[name]()
+        if atype in [None, 'action'] and name in self._action_classes:
+            if class_requested:
+                return self._action_classes[name]
+            return self._action_classes[name]()
 
         raise AttributeError(origname)
 

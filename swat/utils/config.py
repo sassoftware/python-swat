@@ -378,9 +378,8 @@ def check_int(value, minimum=None, maximum=None, exclusive_minimum=False,
             raise SWATOptionError('%s is equal to the exclusive maximum value of %s' %
                                   (out, maximum))
 
-    if multiple_of is not None:
-        if (out % int(multiple_of)) != 0:
-            raise SWATOptionError('%s is not a multiple of %s' % (out, multiple_of))
+    if multiple_of is not None and (out % int(multiple_of)) != 0:
+        raise SWATOptionError('%s is not a multiple of %s' % (out, multiple_of))
 
     return out
 
@@ -433,9 +432,8 @@ def check_float(value, minimum=None, maximum=None, exclusive_minimum=False,
             raise SWATOptionError('%s is equal to the exclusive maximum value of %s' %
                                   (out, maximum))
 
-    if multiple_of is not None:
-        if (out % int(multiple_of)) != 0:
-            raise SWATOptionError('%s is not a multiple of %s' % (out, multiple_of))
+    if multiple_of is not None and (out % int(multiple_of)) != 0:
+        raise SWATOptionError('%s is not a multiple of %s' % (out, multiple_of))
 
     return out
 
