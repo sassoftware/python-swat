@@ -84,7 +84,7 @@ def dict2kwargs(dct, fmt='dict(%s)', nestfmt='dict(%s)', ignore=None):
         elif isinstance(value, items_types):
             sublist = []
             for item in value:
-                if isinstance(item, dict) or isinstance(item, items_types):
+                if isinstance(item, (dict, items_types)):
                     sublist.append(dict2kwargs(item))
                 else:
                     sublist.append(repr(item))

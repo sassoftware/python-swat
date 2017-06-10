@@ -392,7 +392,7 @@ class SASDataFrame(pd.DataFrame):
                 return float64(obj)
             if isinstance(obj, int64_types):
                 return int64(obj)
-            if isinstance(obj, int32_types) or isinstance(obj, bool_types):
+            if isinstance(obj, (int32_types, bool_types)):
                 return int32(obj)
             if isinstance(obj, CASTable):
                 return str(obj)

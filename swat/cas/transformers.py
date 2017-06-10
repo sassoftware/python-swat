@@ -476,7 +476,7 @@ def py2cas(soptions, _sw_error, **kwargs):
            The next position in the list to set
 
         '''
-        if isinstance(key, binary_types) or isinstance(key, text_types):
+        if isinstance(key, (binary_types, text_types)):
             key = keywordify(a2n(key, 'utf-8'))
 
         if item is True or item is False:

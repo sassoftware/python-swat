@@ -761,7 +761,7 @@ class CAS(object):
                     else:
                         raise SWATError('%s is not a valid boolean value' % value)
                 elif typ == 'string':
-                    if isinstance(value, binary_types) or isinstance(value, text_types):
+                    if isinstance(value, (binary_types, text_types)):
                         errorcheck(self._sw_connection.setStringOption(name, a2n(value)),
                                    self._sw_connection)
                     else:
