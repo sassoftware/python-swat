@@ -754,7 +754,7 @@ class CAS(object):
                              self._sw_connection)
             try:
                 if typ == 'boolean':
-                    if value is True or value == 1 or value is False or value == 0:
+                    if value in [True, False, 1, 0]:
                         errorcheck(self._sw_connection.setBooleanOption(name,
                                                                         value and 1 or 0),
                                    self._sw_connection)

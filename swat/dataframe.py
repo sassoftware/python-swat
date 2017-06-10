@@ -901,7 +901,7 @@ class SASDataFrame(pd.DataFrame):
                 bylabel = attrs.get(bykey + 'Label')
                 sasfmt = attrs.get(bykey + 'Format')
                 sasfmtwidth = split_format(sasfmt).width
-                if bygroup_columns == 'both' or bygroup_columns == 'raw':
+                if bygroup_columns in ['both', 'raw']:
                     dframe = dframe.set_index(pd.Series(data=[byval] * len(dframe),
                                                         name=byname),
                                               append=appendlevels)
@@ -911,7 +911,7 @@ class SASDataFrame(pd.DataFrame):
                                                            width=sasfmtwidth)
                     bylevels += 1
                     appendlevels = True
-                if bygroup_columns == 'both' or bygroup_columns == 'formatted':
+                if bygroup_columns in ['both', 'formatted']:
                     if bygroup_columns == 'both':
                         byname = byname + bygroup_formatted_suffix
                     dframe = dframe.set_index(pd.Series(data=[byvalfmt] * len(dframe),
@@ -941,7 +941,7 @@ class SASDataFrame(pd.DataFrame):
                 bylabel = attrs.get(bykey + 'Label')
                 sasfmt = attrs.get(bykey + 'Format')
                 sasfmtwidth = split_format(sasfmt).width
-                if bygroup_columns == 'both' or bygroup_columns == 'raw':
+                if bygroup_columns in ['both', 'raw']:
                     if byname in allcolnames:
                         byname = byname + bygroup_collision_suffix
                     dframe[byname] = byval
@@ -950,7 +950,7 @@ class SASDataFrame(pd.DataFrame):
                                                            dtype=dtype_from_var(byval),
                                                            format=sasfmt,
                                                            width=sasfmtwidth)
-                if bygroup_columns == 'both' or bygroup_columns == 'formatted':
+                if bygroup_columns in ['both', 'formatted']:
                     if bygroup_columns == 'both':
                         byname = byname + bygroup_formatted_suffix
                     elif bygroup_columns == 'formatted' and byname in allcolnames:
