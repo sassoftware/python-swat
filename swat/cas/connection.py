@@ -33,7 +33,7 @@ import weakref
 from . import rest
 from .. import clib
 from .. import config as cf
-from ..exceptions import SWATError, SWATCASActionError
+from ..exceptions import SWATError, SWATCASActionError, SWATCASActionRetry
 from ..utils.config import subscribe, get_option
 from ..clib import errorcheck
 from ..utils.compat import (a2u, a2n, int32, int64, float64, text_types,
@@ -51,6 +51,7 @@ from .utils.params import ParamManager, ActionParamManager
 
 # pylint: disable=W0212
 
+RETRY_ACTION_CODE = 0x280034
 
 def _option_handler(key, value):
     ''' Handle option changes '''
@@ -1465,11 +1466,15 @@ class CAS(object):
             resultfunc = kwargs['resultfunc']
             kwargs.pop('resultfunc')
 
-        # Call the action and compile the results
-        signature = self._invoke_with_signature(a2n(_name_), **kwargs)
-
-        results = self._get_results(getnext(self, datamsghandler=datamsghandler),
-                                    responsefunc=responsefunc, resultfunc=resultfunc)
+        try:
+            # Call the action and compile the results
+            signature = self._invoke_with_signature(a2n(_name_), **kwargs)
+            results = self._get_results(getnext(self, datamsghandler=datamsghandler),
+                                        responsefunc=responsefunc, resultfunc=resultfunc)
+        except SWATCASActionRetry:
+            signature = self._invoke_with_signature(a2n(_name_), **kwargs)
+            results = self._get_results(getnext(self, datamsghandler=datamsghandler),
+                                        responsefunc=responsefunc, resultfunc=resultfunc)
 
         # Return raw data if a function was supplied
         if responsefunc is not None or resultfunc is not None:
@@ -1519,6 +1524,9 @@ class CAS(object):
 
         try:
             for response, conn in riter:
+
+                if response.disposition.status_code == RETRY_ACTION_CODE:
+                    raise SWATCASActionRetry(response.disposition.status)
 
                 if responsefunc is not None:
                     responsedata = responsefunc(response, conn, responsedata)

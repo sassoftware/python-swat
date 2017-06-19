@@ -63,3 +63,10 @@ class SWATCASActionError(SWATError):
         self.connection = connection
         self.results = results
         self.events = events
+
+
+class SWATCASActionRetry(SWATError):
+    '''
+    CAS action must be resubmitted
+
+    '''
