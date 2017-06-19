@@ -447,11 +447,10 @@ class CASResults(RendererMixin, OrderedDict):
 
         out = CASResults()
 
-        def set_bykey(attrs, bykey=None):
+        bykey = []
+        def set_bykey(attrs, bykey=bykey):
             ''' Locate By variable keys '''
-            if bykey is None:
-                bykey = []
-            else:
+            if bykey:
                 return bykey
             i = 1
             while True:
