@@ -224,7 +224,7 @@ class TestIMStat(tm.TestCase):
 
         for rowIdx, rowVal in enumerate(actual):                
             for colIdx, colVal in enumerate(rowVal):
-                if isinstance(colVal, str) or isinstance(colVal, unicode):
+                if isinstance(colVal, (str, unicode)):
                     self.assertEqual(colVal, expected[rowIdx][colIdx])
                 else:
                     self.assertAlmostEqual(colVal, expected[rowIdx][colIdx], places=2)                                 
