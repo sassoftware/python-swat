@@ -2926,7 +2926,7 @@ class CASTable(ParamManager, ActionParamManager):
 #   def cumsum(self, **kwargs):
 #       raise NotImplementedError
 
-    def _percentiles(self, percentiles=[25, 50, 75], format_labels=True):
+    def _percentiles(self, percentiles=None, format_labels=True):
         '''
         Return the requested percentile values
 
@@ -2940,6 +2940,9 @@ class CASTable(ParamManager, ActionParamManager):
         :class:`pandas.DataFrame`
 
         '''
+        if percentiles is None:
+            percentiles = [25, 50, 75]
+
         self._loadactionset('percentile')
 
         inputs = list(self.columns)
@@ -3254,8 +3257,8 @@ class CASTable(ParamManager, ActionParamManager):
         out.name = None
         return out
 
-    def _topk_values(self, stats=['unique', 'min', 'max'], axis=None, skipna=True,
-                     level=None, numeric_only=False, leave_index=False, **kwargs):
+    def _topk_values(self, stats=None, axis=None, skipna=True, level=None,
+                     numeric_only=False, leave_index=False, **kwargs):
         '''
         Compute min / max / unique value(s)
 
@@ -3269,6 +3272,9 @@ class CASTable(ParamManager, ActionParamManager):
         :class:`pandas.DataFrame`
 
         '''
+        if stats is None:
+            stats = ['unique', 'min', 'max']
+
         if numeric_only:
             inputs = self._get_dtypes(include='numeric')
         else:
@@ -4930,7 +4936,7 @@ class CASTable(ParamManager, ActionParamManager):
         :class:`CASTable`
 
         '''
-        use_addtable = kwargs.pop('use_addtable', False) 
+        use_addtable = kwargs.pop('use_addtable', False)
         table, kwargs = connection._get_table_args(**kwargs)
         dframe = getattr(pd.DataFrame, 'from_' + name)(data, **kwargs)
         if not use_addtable or connection._protocol.startswith('http'):
