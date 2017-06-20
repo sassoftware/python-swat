@@ -469,10 +469,11 @@ class CASResults(RendererMixin, OrderedDict):
             match = True
             i = 1
             for byname in set_bykey(attrs):
-                if kwargs and attrs['ByVar%sValue' % i] != kwargs[byname] and \
-                        attrs['ByVar%sValueFormatted' % i] != kwargs[byname]:
-                    match = False
-                    break
+                if kwargs:
+                    if attrs['ByVar%sValue' % i] != kwargs[byname] and \
+                            attrs['ByVar%sValueFormatted' % i] != kwargs[byname]:
+                        match = False
+                        break
                 elif name:
                     try:
                         if attrs['ByVar%sValue' % i] != name[i-1] and \
