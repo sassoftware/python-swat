@@ -3089,7 +3089,7 @@ class CASTable(ParamManager, ActionParamManager):
             percentiles = [25, 50, 75]
 
         if 50 not in percentiles:
-            percentiles = percentiles + [50]
+            percentiles.append(50)
 
         percentiles = _get_unique(sorted(percentiles))
 
