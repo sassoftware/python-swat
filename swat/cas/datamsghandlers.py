@@ -256,17 +256,16 @@ class CASDataMsgHandler(object):
                 res, conn = self.getone(connection)
                 if isinstance(res, CASRequest):
                     continue
-                elif isinstance(res, CASResponse):
-                    if res.disposition.severity <= 1:
-                        messages = list(res.messages)
-                        while isinstance(res, CASResponse):
-                            res, conn = self.getone(connection)
-                            messages += res.messages
-                            if res.disposition.severity > 1:
-                                res.messages = messages
-                                break
-                        if isinstance(res, CASRequest):
-                            continue
+                elif isinstance(res, CASResponse) and res.disposition.severity <= 1:
+                    messages = list(res.messages)
+                    while isinstance(res, CASResponse):
+                        res, conn = self.getone(connection)
+                        messages += res.messages
+                        if res.disposition.severity > 1:
+                            res.messages = messages
+                            break
+                    if isinstance(res, CASRequest):
+                        continue
             else:
                 break
 

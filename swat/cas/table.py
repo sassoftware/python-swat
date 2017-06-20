@@ -190,10 +190,9 @@ def _get_table_selection(table, args):
             raise IndexError('Row selection is not supported.')
 
         # tbl.x[1:12]
-        elif isinstance(rows, slice):
-            if rows.start is not None or rows.stop is not None or \
-                    rows.step is not None:
-                raise IndexError('Row selection is not supported.')
+        elif isinstance(rows, slice) and rows.start is not None or \
+            rows.stop is not None or rows.step is not None:
+            raise IndexError('Row selection is not supported.')
 
         # tbl.x[10]
         elif isinstance(rows, int_types):
@@ -386,9 +385,8 @@ class CASTablePlotter(object):
         if isinstance(y, six.string_types):
             y = [y]
 
-        if by is not None:
-            if isinstance(by, six.string_types):
-                by = [by]
+        if by is not None and isinstance(by, six.string_types):
+            by = [by]
         else:
             by = self._table.get_groupby_vars()
 
@@ -1298,9 +1296,8 @@ class CASTable(ParamManager, ActionParamManager):
         boolean
 
         '''
-        if isinstance(other, CASTable):
-            if self.params == other.params:
-                return True
+        if isinstance(other, CASTable) and self.params == other.params:
+            return True
         return False
 
     def __copy__(self):
@@ -1518,11 +1515,11 @@ class CASTable(ParamManager, ActionParamManager):
 
         conn = self.get_connection()
 
-        if '.' not in name:
-            if not(re.match(r'^[A-Z]', origname)) and conn.has_actionset(name):
-                asinst = conn.get_actionset(name)
-                asinst.default_params = {'__table__': self.copy()}
-                return asinst
+        if '.' not in name and not(re.match(r'^[A-Z]', origname)) and \
+            conn.has_actionset(name):
+            asinst = conn.get_actionset(name)
+            asinst.default_params = {'__table__': self.copy()}
+            return asinst
 
         if conn.has_action(name):
             actcls = conn.get_action_class(name)
@@ -4115,12 +4112,10 @@ class CASTable(ParamManager, ActionParamManager):
                             (else_str, _nlit(name)))
                 else_str = 'else '
 
-        elif how == 'all':
-            if all_dtypes_len == miss_dtypes_len:
-                for name, dtype in dtypes.items():
-                    code.append('missing(%s)' % _nlit(name))
-                code = '    if ( %s ) then delete;' % ' and \n'.join(code)
-
+        elif how == 'all' and all_dtypes_len == miss_dtypes_len:
+            for name, dtype in dtypes.items():
+                code.append('missing(%s)' % _nlit(name))
+            code = '    if ( %s ) then delete;' % ' and \n'.join(code)
         else:
             raise ValueError('Unknown value for parameter "how": %s' % how)
 
@@ -7293,9 +7288,9 @@ class CASColumn(CASTable):
             trim_other = ''
             if not re.match(r'^_\w+_[A-Za-z0-9]+_$', self.name):
                 trim_value = 'trim'
-            if isinstance(other, CASColumn):
-                if not re.match(r'^_\w+_[A-Za-z0-9]+_$', other.name):
-                    trim_other = 'trim'
+            if isinstance(other, CASColumn) and not \
+                re.match(r'^_\w+_[A-Za-z0-9]+_$', other.name):
+                trim_other = 'trim'
             return self._compute('add', '%s({value}) || %s({other})' %
                                  (trim_value, trim_other),
                                  other=other, add_length=True)
