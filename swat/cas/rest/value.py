@@ -23,6 +23,7 @@ Class for receiving values from a CAS response
 
 from __future__ import print_function, division, absolute_import, unicode_literals
 
+import base64
 from .table import REST_CASTable
 from ...utils.compat import (a2u, int32, int64, float64, text_types,
                              binary_types, int32_types, int64_types,
@@ -36,6 +37,8 @@ def _value2python(_value, soptions, errors, connection,
     if isinstance(_value, dict):
         if _value.get('_ctb'):
             return ctb2tabular(REST_CASTable(_value), soptions, connection)
+        elif sorted(_value.keys()) == ['data', 'length']:
+            return base64.b64decode(_value['data'])
 
         # Short circuit reflection data
         if 'actions' in _value and _value.get('actions', [{}])[0].get('params', False):
@@ -60,9 +63,6 @@ def _value2python(_value, soptions, errors, connection,
         return a2u(_value, 'utf-8')
 
     return _value
-
-#   elif vtype == 'blob':
-#       return b64decode(_value)
 
 #   elif vtype == 'date':
 #       return cas2python_date(_value)
