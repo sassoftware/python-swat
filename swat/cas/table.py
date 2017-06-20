@@ -1298,9 +1298,8 @@ class CASTable(ParamManager, ActionParamManager):
         boolean
 
         '''
-        if isinstance(other, CASTable):
-            if self.params == other.params:
-                return True
+        if isinstance(other, CASTable) and self.params == other.params:
+            return True
         return False
 
     def __copy__(self):
@@ -1518,11 +1517,11 @@ class CASTable(ParamManager, ActionParamManager):
 
         conn = self.get_connection()
 
-        if '.' not in name:
-            if not(re.match(r'^[A-Z]', origname)) and conn.has_actionset(name):
-                asinst = conn.get_actionset(name)
-                asinst.default_params = {'__table__': self.copy()}
-                return asinst
+        if '.' not in name and not(re.match(r'^[A-Z]', origname)) and \
+                conn.has_actionset(name):
+            asinst = conn.get_actionset(name)
+            asinst.default_params = {'__table__': self.copy()}
+            return asinst
 
         if conn.has_action(name):
             actcls = conn.get_action_class(name)
@@ -7293,9 +7292,9 @@ class CASColumn(CASTable):
             trim_other = ''
             if not re.match(r'^_\w+_[A-Za-z0-9]+_$', self.name):
                 trim_value = 'trim'
-            if isinstance(other, CASColumn):
-                if not re.match(r'^_\w+_[A-Za-z0-9]+_$', other.name):
-                    trim_other = 'trim'
+            if isinstance(other, CASColumn) and \
+                    not re.match(r'^_\w+_[A-Za-z0-9]+_$', other.name):
+                trim_other = 'trim'
             return self._compute('add', '%s({value}) || %s({other})' %
                                  (trim_value, trim_other),
                                  other=other, add_length=True)
