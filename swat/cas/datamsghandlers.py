@@ -330,7 +330,7 @@ class CASDataMsgHandler(object):
             if vrtype == 'CHAR' or vtype in ['VARCHAR', 'CHAR', 'BINARY', 'VARBINARY']:
                 if vtype in ['BINARY', 'VARBINARY'] and \
                         hasattr(self._sw_databuffer, 'setBinaryFromBase64'):
-                    if isinstance(value, binary_types) or isinstance(value, text_types):
+                    if isinstance(value, (binary_types, text_types)):
                         errorcheck(self._sw_databuffer.setBinaryFromBase64(row, offset,
                                         a2n(base64.b64encode(a2b(transformer(value))))),
                                    self._sw_databuffer)

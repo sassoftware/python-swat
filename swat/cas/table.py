@@ -226,13 +226,13 @@ def _get_table_selection(table, args):
             columns = None
             lowcolumns = None
             colstart, colstep, colend = cols.start, cols.step, cols.stop
-            if isinstance(colstart, text_types) or isinstance(colstart, binary_types):
+            if isinstance(colstart, (text_types, binary_types)):
                 if not columns:
                     columns = list(table.columns)
                     lowcolumns = [x.lower() for x in columns]
                 colstart = lowcolumns.index(colstart.lower())
                 use_names = True
-            if isinstance(colend, text_types) or isinstance(colend, binary_types):
+            if isinstance(colend, (text_types, binary_types)):
                 if not columns:
                     columns = list(table.columns)
                     lowcolumns = [x.lower() for x in columns]
@@ -260,7 +260,7 @@ def _get_table_selection(table, args):
                 outtype = 'column'
 
         # tbl.x[0, 'a']
-        elif isinstance(cols, text_types) or isinstance(cols, binary_types):
+        elif isinstance(cols, (text_types, binary_types)):
             cols = [cols]
             if outtype == 'row':
                 outtype = 'scalar'
@@ -1103,7 +1103,7 @@ class CASTable(ParamManager, ActionParamManager):
         for item in items:
             if not item:
                 continue
-            if isinstance(item, text_types) or isinstance(item, binary_types):
+            if isinstance(item, (text_types, binary_types)):
                 orderby.append(dict(name=item))
             elif isinstance(item, dict):
                 orderby.append(item)
@@ -1111,8 +1111,7 @@ class CASTable(ParamManager, ActionParamManager):
                 for subitem in item:
                     if not subitem:
                         continue
-                    if isinstance(subitem, text_types) or \
-                            isinstance(subitem, binary_types):
+                    if isinstance(subitem, (text_types, binary_types)):
                         orderby.append(dict(name=subitem))
                     else:
                         orderby.append(subitem)
@@ -2662,7 +2661,7 @@ class CASTable(ParamManager, ActionParamManager):
 
         if casout is None:
             casout = {'name': _gen_table_name()}
-        elif isinstance(casout, text_types) or isinstance(casout, binary_types):
+        elif isinstance(casout, (text_types, binary_types)):
             casout = {'name': casout}
 
         outdata = casout['name']
@@ -4288,9 +4287,8 @@ class CASTable(ParamManager, ActionParamManager):
             regex = True
 
         # to_replace is a string
-        if isinstance(to_replace, char_types) or isinstance(to_replace, regex_type):
-            if isinstance(value, char_types) or isinstance(value, num_types) or \
-                    isinstance(value, regex_type):
+        if isinstance(to_replace, (char_types, regex_type)):
+            if isinstance(value, (char_types, num_types, regex_type)):
                 repl.update(scalar_to_repl(to_replace, value))
             elif isinstance(value, dict):
                 repl.update(dict_to_repl(to_replace, value))
@@ -4300,8 +4298,7 @@ class CASTable(ParamManager, ActionParamManager):
 
         # to_replace is numeric
         elif isinstance(to_replace, num_types):
-            if isinstance(value, num_types) or isinstance(value, char_types) or \
-                    isinstance(value, regex_type):
+            if isinstance(value, (num_types, char_types, regex_type)):
                 repl.update(scalar_to_repl(to_replace, value))
             elif isinstance(value, dict):
                 repl.update(dict_to_repl(to_replace, value))
@@ -4310,9 +4307,9 @@ class CASTable(ParamManager, ActionParamManager):
                                 % type(value))
 
         # to_replace is a list
-        elif isinstance(to_replace, items_types) or isinstance(to_replace, pd.Series):
+        elif isinstance(to_replace, (items_types, pd.Series)):
             to_replace = list(to_replace)
-            if isinstance(value, items_types) or isinstance(value, pd.Series):
+            if isinstance(value, (items_types, pd.Series)):
                 repl.update(list_to_repl(to_replace, list(value)))
             else:
                 repl.update(list_to_repl(to_replace, [value] * len(to_replace)))
@@ -5642,7 +5639,7 @@ class CASTable(ParamManager, ActionParamManager):
             computedvarsprogram.append(cpgm)
             computedvarsprogram.append('%s = %s; ' % (key, cexpr))
 
-        elif isinstance(value, text_types) or isinstance(value, binary_types):
+        elif isinstance(value, (text_types, binary_types)):
             computedvarsprogram.append('%s = "%s"; ' % (key, _escape_string(value)))
 
         else:
@@ -7577,8 +7574,7 @@ class CASColumn(CASTable):
                 for item in value:
                     if eval_values and isinstance(item, (CASColumn, pd.Series)):
                         for subitem in item.unique().tolist():
-                            if isinstance(subitem, text_types) or \
-                                    isinstance(subitem, binary_types):
+                            if isinstance(subitem, (text_types, binary_types)):
                                 items.append('"%s"' % _escape_string(subitem))
                             else:
                                 items.append(str(subitem))
@@ -7587,8 +7583,7 @@ class CASColumn(CASTable):
                         computedvars.append(acomputedvars)
                         computedvarsprogram.append(acomputedvarsprogram)
                         items.append(aexpr)
-                    elif isinstance(item, text_types) or \
-                            isinstance(item, binary_types):
+                    elif isinstance(item, (text_types, binary_types)):
                         items.append('"%s"' % _escape_string(item))
                     else:
                         items.append(str(item))
@@ -7640,7 +7635,7 @@ class CASColumn(CASTable):
             right, rcomputedvars, rcomputedvarsprogram = right._to_expression()
             computedvars.append(rcomputedvars)
             computedvarsprogram.append(rcomputedvarsprogram)
-        elif isinstance(right, text_types) or isinstance(right, binary_types):
+        elif isinstance(right, (text_types, binary_types)):
             right = repr(right)
 
         opname = OPERATOR_NAMES.get(operator, operator)
@@ -8347,7 +8342,7 @@ class CASColumn(CASTable):
         if sort:
             if sort is True:
                 sortby = [dict(name=self.name)]
-            elif isinstance(sort, text_types) or isinstance(sort, binary_types):
+            elif isinstance(sort, (text_types, binary_types)):
                 sortby = [dict(name=self.name, order=sort)]
             else:
                 sortby = sort
@@ -8481,8 +8476,7 @@ class CASTableGroupBy(object):
             if pd.isnull(value):
                 grptbl.append_where('%s = .' % _nlit(key))
             else:
-                if isinstance(value, text_types) or \
-                        isinstance(value, binary_types):
+                if isinstance(value, (text_types, binary_types)):
                     value = '"%s"' % _escape_string(value)
                 else:
                     value = str(value)
