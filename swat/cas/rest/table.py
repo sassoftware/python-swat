@@ -25,6 +25,7 @@ from __future__ import print_function, division, absolute_import, unicode_litera
 
 import base64
 import numpy as np
+import pandas as pd
 from ..utils.datetime import cas2python_date, cas2python_time, cas2python_datetime
 from ...utils.compat import items_types, float64, int32, int64
 
@@ -285,11 +286,20 @@ class REST_CASTable(object):
                             outrow.append(base64.b64decode(item['data']+'=='))
                 # Check for datetime, date, time
                 elif dtype == 'datetime':
-                    outrow.append(cas2python_datetime(item))
+                    if item == -9223372036854775808:
+                        outrow.append(pd.NaT)
+                    else:
+                        outrow.append(cas2python_datetime(item))
                 elif dtype == 'date':
-                    outrow.append(cas2python_date(item))
+                    if item == -2147483648:
+                        outrow.append(pd.NaT)
+                    else:
+                        outrow.append(cas2python_date(item))
                 elif dtype == 'time':
-                    outrow.append(cas2python_time(item))
+                    if item == -9223372036854775808:
+                        outrow.append(pd.NaT)
+                    else:
+                        outrow.append(cas2python_time(item))
                 # Character
                 elif dtype in ['char', 'varchar']:
                     outrow.append(item.rstrip())

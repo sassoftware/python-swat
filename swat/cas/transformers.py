@@ -238,6 +238,7 @@ def ctb2tabular(_sw_table, soptions='', connection=None):
     dtypes = []
     colinfo = {}
     mimetypes = {}
+    intmiss = {}
     for i in range(ncolumns):
         col = SASColumnSpec.fromtable(_sw_table, i)
         if col.attrs.get('MIMEType'):
@@ -265,9 +266,11 @@ def ctb2tabular(_sw_table, soptions='', connection=None):
         elif dtype == 'int32':
             dtypes.append((col.name, 'i4'))
             colinfo[col.name] = col
+            intmiss[col.name] = {-2147483648: np.nan}
         elif dtype == 'int64':
             dtypes.append((col.name, 'i8'))
             colinfo[col.name] = col
+            intmiss[col.name] = {-9223372036854775808: np.nan}
         elif dtype in 'datetime':
             dtypes.append((col.name, 'O'))
             colinfo[col.name] = col
@@ -285,11 +288,13 @@ def ctb2tabular(_sw_table, soptions='', connection=None):
                 col = SASColumnSpec.fromtable(_sw_table, i, elem=elem)
                 dtypes.append((col.name, 'i4'))
                 colinfo[col.name] = col
+                intmiss[col.name] = {-2147483648: np.nan}
         elif dtype == 'int64-array':
             for elem in range(col.size[1]):
                 col = SASColumnSpec.fromtable(_sw_table, i, elem=elem)
                 dtypes.append((col.name, 'i8'))
                 colinfo[col.name] = col
+                intmiss[col.name] = {-9223372036854775808: np.nan}
         elif dtype == 'double-array':
             for elem in range(col.size[1]):
                 col = SASColumnSpec.fromtable(_sw_table, i, elem=elem)
@@ -315,6 +320,10 @@ def ctb2tabular(_sw_table, soptions='', connection=None):
 
     # Map column names back to unicode in pandas
     cdf.columns = [a2u(x[0], 'utf-8') for x in dtypes]
+
+    # Apply int missing values
+    if intmiss:
+        cdf = cdf.replace(to_replace=intmiss)
 
     # Apply mimetype transformations
     if mimetypes:
