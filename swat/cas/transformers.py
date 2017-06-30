@@ -399,7 +399,7 @@ CAS2PY = {
     'int64': lambda _sw_v, soptions, echk, conn: echk(_sw_v.getInt64(), _sw_v),
     'double': lambda _sw_v, soptions, echk, conn: echk(_sw_v.getDouble(), _sw_v),
     'blob': lambda _sw_v, soptions, echk, conn:
-        base64.b64decode(echk(_sw_v.getBlobBase64(), _sw_v)),
+        blob(base64.b64decode(echk(_sw_v.getBlobBase64(), _sw_v))),
     'string': lambda _sw_v, soptions, echk, conn:
         echk(a2u(_sw_v.getString(), 'utf-8'), _sw_v),
     'boolean': lambda _sw_v, soptions, echk, conn:

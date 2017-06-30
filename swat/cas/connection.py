@@ -1035,7 +1035,8 @@ class CAS(object):
                         param['value'] = kwargs[param['name']].replace('"', '\\u0022')
                     # TODO: This should only happen for binary inputs (i.e., never)
                     elif isinstance(kwargs[param['name']], binary_types):
-                        param['value'] = kwargs[param['name']].replace('"', '\\u0022')
+#                       param['value'] = kwargs[param['name']].replace('"', '\\u0022')
+                        pass
                     else:
                         param['value'] = kwargs[param['name']]
 
