@@ -497,8 +497,9 @@ class TestBasics(tm.TestCase):
         self.assertGreaterEqual(len(cfg), 3)
         self.assertEqual(cfg.columns[0], 'name')
         self.assertEqual(cfg.columns[1], 'description')
-        self.assertEqual(cfg.iloc[0].tolist(),
-                         ['setServOpt','sets a server option'])
+        item = cfg.iloc[0].tolist()
+        self.assertTrue(item == ['setServOpt','sets a server option'] or
+                        item == ['setServOpts','sets a server option'])
         self.assertEqual(cfg.iloc[1].tolist(),
                          ['getServOpt','displays the value of a server option'])
         self.assertEqual(cfg.iloc[2].tolist(),
@@ -506,8 +507,15 @@ class TestBasics(tm.TestCase):
         
         # List a hidden action 
         act = self.s.builtins.help(action='setServOpt', showHidden=True)
-        self.assertTrue(act is not None)
-        self.assertTrue(act['setServOpt'])
+        has_set_serv_opts = False
+        if not act:
+            act = self.s.builtins.help(action='setServOpts', showHidden=True)
+            self.assertTrue(act is not None)
+            self.assertTrue(act['setServOpts'])
+            has_set_serv_opts = True
+        else:
+            self.assertTrue(act is not None)
+            self.assertTrue(act['setServOpt'])
         
         # 03/09/2016: bosout: Didn't expect hidden action to be returned. Developers notified.
         # Comment out until we know what to expect.
@@ -526,12 +534,16 @@ class TestBasics(tm.TestCase):
         self.assertTrue(act['listServOpts'])         
         
         # See if we can set a hidden datafeeder option
-        with self.assertRaises(AttributeError):  
-            self.s.configuration.setServOpts(epdfsslusesni="NO")                         
+        if has_set_serv_opts:
+            out = self.s.configuration.setServOpts(epdfsslusesni="NO")
+            self.assertEqual( out.status, "Error parsing action parameters." )
+        else:
+            with self.assertRaises(AttributeError):
+                self.s.configuration.setServOpts(epdfsslusesni="NO")
         
         # See if we can get a hidden datafeeder option
         with self.assertRaises(AttributeError):
-            self.s.congiguration.getServOpts(name='epdfsslusesni')                  
+            self.s.configuration.getServOpts(name='epdfsslusesni')
         
         # See if hidden datafeeder options appear in the option list. 
         opts = self.s.configuration.listServOpts()

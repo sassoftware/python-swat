@@ -141,7 +141,6 @@ class TestConnection(tm.TestCase):
 
         self.assertTrue('builtins.loadactionset' in dirout)
         self.assertTrue('table.loadtable' in dirout)
-        self.assertTrue('index' not in dirout)
         self.assertTrue('elasticsearch.index' not in dirout)
         self.assertTrue('sandindex' not in dirout)
         self.assertTrue('elasticsearch.sandindex' not in dirout)
@@ -152,7 +151,6 @@ class TestConnection(tm.TestCase):
 
         self.assertTrue('builtins.loadactionset' in dirout)
         self.assertTrue('table.loadtable' in dirout)
-        self.assertTrue('index' in dirout)
         self.assertTrue('elasticsearch.index' in dirout)
         self.assertTrue('sandindex' in dirout)
         self.assertTrue('elasticsearch.sandindex' in dirout)

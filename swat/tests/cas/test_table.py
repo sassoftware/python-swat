@@ -173,7 +173,6 @@ class TestCASTable(tm.TestCase):
         self.assertTrue('sessionid' in dirout)
         self.assertTrue('session.sessionid' in dirout)
         self.assertTrue('elasticsearch' not in dirout)
-        self.assertTrue('index' not in dirout)
         self.assertTrue('elasticsearch.index' not in dirout)
         self.assertTrue('sandindex' not in dirout)
         self.assertTrue('elasticsearch.sandindex' not in dirout)
@@ -186,7 +185,6 @@ class TestCASTable(tm.TestCase):
         self.assertTrue('session.timeout' in dirout)
         self.assertTrue('sessionid' in dirout)
         self.assertTrue('session.sessionid' in dirout)
-        self.assertTrue('index' in dirout)
         self.assertTrue('elasticsearch.index' in dirout)
         self.assertTrue('sandindex' in dirout)
         self.assertTrue('elasticsearch.sandindex' in dirout)
@@ -2999,7 +2997,8 @@ class TestCASTable(tm.TestCase):
 
     def test_load_path(self):
         df = self.get_cars_df()
-        cars = self.s.load_path('datasources/cars_single.sashdat', caslib=self.srcLib)
+        cars = self.s.load_path('datasources/cars_single.sashdat', caslib=self.srcLib,
+                                casout=dict(replace=True))
         self.assertTablesEqual(df, cars)
 
     @unittest.skipIf(int(pd.__version__.split('.')[1]) <= 16, 'Need newer version of Pandas')

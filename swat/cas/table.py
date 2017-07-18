@@ -884,6 +884,8 @@ class CASTable(ParamManager, ActionParamManager):
             varlist = list(self.columns)
         if not isinstance(varlist, items_types):
             varlist = [varlist]
+        else:
+            varlist = list(varlist)
         for item in _flatten(items):
             if item:
                 varlist.append(item)
@@ -918,6 +920,8 @@ class CASTable(ParamManager, ActionParamManager):
             varlist = self.get_param('computedvars')
         if not isinstance(varlist, items_types):
             varlist = [varlist]
+        else:
+            varlist = list(varlist)
         for item in _flatten(items):
             if item:
                 varlist.append(item)
@@ -950,6 +954,8 @@ class CASTable(ParamManager, ActionParamManager):
         varlist = self.get_param('groupby', [])
         if not isinstance(varlist, items_types):
             varlist = [varlist]
+        else:
+            varlist = list(varlist)
         for item in _flatten(items):
             if item:
                 varlist.append(item)
@@ -984,6 +990,8 @@ class CASTable(ParamManager, ActionParamManager):
             code = self.get_param('computedvarsprogram')
         if not isinstance(code, items_types):
             code = [code]
+        else:
+            code = list(code)
         for item in _flatten(items):
             if item:
                 code.append(item)
@@ -1055,6 +1063,8 @@ class CASTable(ParamManager, ActionParamManager):
         code = self.get_param('where', [])
         if not isinstance(code, items_types):
             code = [code]
+        else:
+            code = list(code)
         for item in _flatten(items):
             if item:
                 code.append(item)
