@@ -2878,7 +2878,9 @@ class CASTable(ParamManager, ActionParamManager):
         out = tbl._retrieve('simple.correlation', simple=False)['Correlation']
         out.set_index('Variable', inplace=True)
         out.index.name = None
-        return out
+        # Newer versions of the CAS server return extra columns
+        # containing missing value information.
+        return out[tbl.columns]
 
 #   def corrwith(self, other, axis=None, drop=None):
 #       raise NotImplementedError
