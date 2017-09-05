@@ -461,6 +461,22 @@ def py2cas(soptions, _sw_error, **kwargs):
        CASValueList representation of Python object
 
     '''
+
+    def remove_unsupported(params):
+        ''' Remove any unsupported parameter types '''
+        for key in list(params.keys()):
+            if isinstance(params[key], dict_types):
+                remove_unsupported(params[key])
+            elif not isinstance(params[key], (binary_types, text_types, bool,
+                                              blob, int64_types, int32_types,
+                                              float64_types, items_types, ParamManager,
+                                              datetime.datetime, datetime.date,
+                                              datetime.time, type(nil))):
+                del params[key]
+
+    # In-place operation
+    remove_unsupported(kwargs)
+
     _sw_values = errorcheck(clib.SW_CASValueList(len(kwargs), a2n(soptions),
                                                  _sw_error), _sw_error)
 

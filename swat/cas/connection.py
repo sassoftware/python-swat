@@ -396,20 +396,24 @@ class CAS(object):
         # Try to detect the proper protocol
         if protocol == 'auto':
 
-            from six.moves import urllib
+            import socket
 
 #           for ptype in ['http', 'https']:
             for ptype in ['http']:
                 try:
-                    req = urllib.request.Request('%s://%s:%s/cas' %
-                                                 (ptype, hostname, port))
-                    with urllib.request.urlopen(req) as res:
-                        pass
-                except urllib.error.HTTPError as err:
-                    protocol = ptype
-                    break
+                    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                    sock.connect((hostname, port))
+                    sock.send(bytes('GET /cas HTTP/1.1\r\nHost: %s\r\nConnection: close\r\nUser-Agent: Python-SWAT\r\nCache-Control: no-cache\r\n\r\n' % hostname, 'utf8'))
+
+                    if sock.recv(4).decode('utf-8').lower() == 'http':
+                        protocol = ptype
+                        break
+
                 except Exception as err:
                     pass
+
+                finally:
+                    sock.close()
 
             if protocol == 'auto':
                 protocol = 'cas'
@@ -1993,7 +1997,7 @@ class CAS(object):
 
         '''
         import pandas as pd
-        use_addtable = kwargs.pop('use_addtable', False) 
+        use_addtable = kwargs.pop('use_addtable', False)
         table, kwargs = self._get_table_args(**kwargs)
         dframe = getattr(pd, _method_)(*args, **kwargs)
         # REST doesn't support table.addtable
@@ -2457,7 +2461,7 @@ class CAS(object):
         '''
         import pandas as pd
         from swat import datamsghandlers as dmh
-        use_addtable = kwargs.pop('use_addtable', False) 
+        use_addtable = kwargs.pop('use_addtable', False)
         out = []
         table, kwargs = self._get_table_args(casout=casout, **kwargs)
         for i, dframe in enumerate(pd.read_html(io, **kwargs)):

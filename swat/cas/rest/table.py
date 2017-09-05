@@ -24,6 +24,7 @@ Class for retrieving table values
 from __future__ import print_function, division, absolute_import, unicode_literals
 
 import base64
+import decimal
 import numpy as np
 import pandas as pd
 from ..utils.datetime import cas2python_date, cas2python_time, cas2python_datetime
@@ -286,17 +287,17 @@ class REST_CASTable(object):
                             outrow.append(base64.b64decode(item['data']+'=='))
                 # Check for datetime, date, time
                 elif dtype == 'datetime':
-                    if item == -9223372036854775808:
+                    if item < decimal.Decimal('-9223372036854775807.5'):
                         outrow.append(pd.NaT)
                     else:
                         outrow.append(cas2python_datetime(item))
                 elif dtype == 'date':
-                    if item == -2147483648:
+                    if item < decimal.Decimal('-2147483647.5'):
                         outrow.append(pd.NaT)
                     else:
                         outrow.append(cas2python_date(item))
                 elif dtype == 'time':
-                    if item == -9223372036854775808:
+                    if item < decimal.Decimal('-9223372036854775807.5'):
                         outrow.append(pd.NaT)
                     else:
                         outrow.append(cas2python_time(item))

@@ -3162,6 +3162,7 @@ class TestCASTable(tm.TestCase):
         else:
            self.assertEqual(set(tbl.dtypes.unique()), set(['double', 'int64', 'varchar']))
 
+    @unittest.skip('Need way to verify HDF installation')
     def test_read_hdf(self):
         df = self.get_cars_df(all_doubles=False)
 
@@ -3230,6 +3231,7 @@ class TestCASTable(tm.TestCase):
 
         self.assertEqual(list(dfx.values)[:200], list(tblx.values)[:200])
 
+    @unittest.skip('Need way to verify HDF installation')
     def test_column_to_hdf(self):
         df = self.get_cars_df(all_doubles=False)
         tbl = self.table
@@ -3642,6 +3644,7 @@ class TestCASTable(tm.TestCase):
 
         os.remove(tmp.name)
 
+    @unittest.skip('Need way to verify HDF installation')
     def test_to_hdf(self):
         df = self.get_cars_df()
         tbl = self.table
