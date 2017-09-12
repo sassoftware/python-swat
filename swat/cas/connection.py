@@ -403,7 +403,7 @@ class CAS(object):
                 try:
                     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                     sock.connect((hostname, port))
-                    sock.send(bytes('GET /cas HTTP/1.1\r\nHost: %s\r\nConnection: close\r\nUser-Agent: Python-SWAT\r\nCache-Control: no-cache\r\n\r\n' % hostname, 'utf8'))
+                    sock.send(('GET /cas HTTP/1.1\r\nHost: %s\r\nConnection: close\r\nUser-Agent: Python-SWAT\r\nCache-Control: no-cache\r\n\r\n' % hostname).encode('utf8'))
 
                     if sock.recv(4).decode('utf-8').lower() == 'http':
                         protocol = ptype
