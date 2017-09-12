@@ -3230,8 +3230,56 @@ class CASTable(ParamManager, ActionParamManager):
 #   def diff(self, periods=1, axis=0):
 #       raise NotImplementedError
 
-#   def eval(self, expr, **kwargs):
-#       raise NotImplementedError
+    def eval(self, expr, inplace=True, kwargs=None):
+        '''
+        Evaluate a CAS table expression
+
+        Parameters
+        ----------
+        expr : string
+            The expression to evaluate
+        inplace : bool, optional
+            If the expression contains an assignment and inplace=True,
+            add the column to the existing table.
+        kwargs : dict, optional
+            Not supported
+
+        Returns
+        -------
+        :class:`CASColumn`
+            If `expr` does not contain an assignment
+        None
+            If inplace=True and `expr` contains an assignment
+        :class:`CASTable`
+            If inplace=False and `expr` contains an assignment
+
+        '''
+        col = self.copy()
+
+        # Check for assignment
+        if re.match(r'^\s*\S+\s*=', expr):
+            colname = re.match(r'^\s*(\S+)\s*', expr).group(1)
+            expr = re.sub(r'^\s*\S+\s*=s*', r'', expr)
+            insert = True
+        else:
+            colname = '_eval_%s_' % self.get_connection()._gen_id()
+            insert = False
+
+        col.append_computed_columns(colname, '%s = %s; ' % (_nlit(colname),
+                                                            _escape_string(expr)))
+
+        col = col._to_column(colname)
+
+        # Insert or return
+        if insert:
+            if inplace:
+                self[colname] = col
+            else:
+                newtbl = self.copy()
+                newtbl[colname] = col
+                return newtbl
+        else:
+            return col
 
 #   def kurt(self, *args, **kwargs):
 #       raise NotImplementedError

@@ -4570,5 +4570,29 @@ class TestCASTable(tm.TestCase):
             df.plot.scatter('MSRP', 'Horsepower')
         )
 
+    def test_eval(self):
+        tbl = self.table
+        df = self.get_cars_df()
+
+        dfcol = df.eval('(MPG_City + MPG_Highway) / 2')
+        tblcol = tbl.eval('(MPG_City + MPG_Highway) / 2')
+        self.assertColsEqual(dfcol, tblcol)
+        self.assertEqual(list(df.columns), list(tbl.columns))
+
+        dfcol = df.eval('MPG_Avg = (MPG_City + MPG_Highway) / 2', inplace=True)
+        tblcol = tbl.eval('MPG_Avg = (MPG_City + MPG_Highway) / 2', inplace=True)
+        self.assertTrue(dfcol is None)
+        self.assertTrue(tblcol is None)
+        self.assertTablesEqual(df, tbl)
+
+        dfcol = df.eval('MPG_Avg = (MPG_City + MPG_Highway) / 2', inplace=False)
+        tblcol = tbl.eval('MPG_Avg = (MPG_City + MPG_Highway) / 2', inplace=False)
+        self.assertTrue(dfcol is not None)
+        self.assertTrue(tblcol is not None)
+        self.assertTrue(dfcol is not df)
+        self.assertTrue(tblcol is not tbl)
+        self.assertTablesEqual(dfcol, tblcol)
+
+
 if __name__ == '__main__':
     tm.runtests()
