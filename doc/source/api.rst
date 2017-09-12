@@ -296,6 +296,7 @@ Computations / Descriptive Stats
    CASTable.corr
    CASTable.count
    CASTable.describe
+   CASTable.eval
    CASTable.max
    CASTable.mean
    CASTable.median
