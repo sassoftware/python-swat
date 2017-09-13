@@ -9,6 +9,15 @@ What's New
 
 This document outlines features and improvements from each release.
 
+v1.2.1 (September 13, 2017)
+===========================
+
+- Better support for binary data in table uploads and parameters
+- Add integer missing value support
+- Allow list parameters to also be sets
+- Improve connection protocol detection
+- Add ``eval`` method to ``CASTable``
+
 v1.2.0 (May 2, 2017)
 ====================
 

@@ -1,6 +1,14 @@
 
 # Change Log
 
+## 1.2.1 - 2017-09-13
+
+- Better support for binary data in table uploads and parameters
+- Add integer missing value support
+- Allow list parameters to also be sets
+- Improve connection protocol detection
+- Add `eval` method to `CASTable`
+
 ## 1.2.0 - 2017-05-02
 
 - Use `upload` action rather than `addtable` for `read_*` methods.
