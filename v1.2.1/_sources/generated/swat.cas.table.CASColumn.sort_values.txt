@@ -1,0 +1,6 @@
+swat.cas.table.CASColumn.sort_values
+====================================
+
+.. currentmodule:: swat.cas.table
+
+.. automethod:: CASColumn.sort_values

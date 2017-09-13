@@ -1,0 +1,6 @@
+swat.cas.table.DatetimeColumnMethods.is_year_start
+==================================================
+
+.. currentmodule:: swat.cas.table
+
+.. autoattribute:: DatetimeColumnMethods.is_year_start

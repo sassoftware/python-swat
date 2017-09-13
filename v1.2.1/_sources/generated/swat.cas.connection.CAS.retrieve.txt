@@ -1,0 +1,6 @@
+swat.cas.connection.CAS.retrieve
+================================
+
+.. currentmodule:: swat.cas.connection
+
+.. automethod:: CAS.retrieve
