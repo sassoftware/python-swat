@@ -4405,170 +4405,231 @@ class TestCASTable(tm.TestCase):
         tbl = self.table
         df = self.get_cars_df()
 
-        self.assertPlotsEqual(tbl.hist()[0][0], df.hist()[0][0])
-        self.assertPlotsEqual(tbl.hist()[0][1], df.hist()[0][1])
-        self.assertPlotsEqual(tbl.hist()[0][2], df.hist()[0][2])
+        try:
+            self.assertPlotsEqual(tbl.hist()[0][0], df.hist()[0][0])
+            self.assertPlotsEqual(tbl.hist()[0][1], df.hist()[0][1])
+            self.assertPlotsEqual(tbl.hist()[0][2], df.hist()[0][2])
 
-        self.assertPlotsEqual(tbl.hist()[1][0], df.hist()[1][0])
-        self.assertPlotsEqual(tbl.hist()[1][1], df.hist()[1][1])
-        self.assertPlotsEqual(tbl.hist()[1][2], df.hist()[1][2])
+            self.assertPlotsEqual(tbl.hist()[1][0], df.hist()[1][0])
+            self.assertPlotsEqual(tbl.hist()[1][1], df.hist()[1][1])
+            self.assertPlotsEqual(tbl.hist()[1][2], df.hist()[1][2])
 
-        self.assertPlotsEqual(tbl.hist()[2][0], df.hist()[2][0])
-        self.assertPlotsEqual(tbl.hist()[2][1], df.hist()[2][1])
-        self.assertPlotsEqual(tbl.hist()[2][2], df.hist()[2][2])
+            self.assertPlotsEqual(tbl.hist()[2][0], df.hist()[2][0])
+            self.assertPlotsEqual(tbl.hist()[2][1], df.hist()[2][1])
+            self.assertPlotsEqual(tbl.hist()[2][2], df.hist()[2][2])
 
-        self.assertPlotsEqual(tbl.hist()[3][0], df.hist()[3][0])
-        self.assertPlotsEqual(tbl.hist()[3][1], df.hist()[3][1])
-        self.assertPlotsEqual(tbl.hist()[3][2], df.hist()[3][2])
+            self.assertPlotsEqual(tbl.hist()[3][0], df.hist()[3][0])
+            self.assertPlotsEqual(tbl.hist()[3][1], df.hist()[3][1])
+            self.assertPlotsEqual(tbl.hist()[3][2], df.hist()[3][2])
+
+        except ImportError as msg:
+            tm.TestCase.skipTest(self, '%s' % msg)
 
     def test_boxplot(self):
         tbl = self.table
         df = self.get_cars_df()
-        self.assertPlotsEqual(
-            tbl[['MSRP', 'Invoice']].boxplot(return_type='axes'),
-            df[['MSRP', 'Invoice']].boxplot(return_type='axes')
-        )
+
+        try:
+            self.assertPlotsEqual(
+                tbl[['MSRP', 'Invoice']].boxplot(return_type='axes'),
+                df[['MSRP', 'Invoice']].boxplot(return_type='axes')
+            )
+
+        except ImportError as msg:
+            tm.TestCase.skipTest(self, '%s' % msg)
 
     def test_plot(self):
         tbl = self.table
         df = self.get_cars_df()
 
-        # Basic plot
-        self.assertPlotsEqual(
-            tbl.sort_values(['MSRP', 'Invoice']).plot('Make', ['MSRP', 'Invoice']),
-            df.sort_values(['MSRP', 'Invoice']).plot('Make', ['MSRP', 'Invoice'])
-        )
+        try:
+            # Basic plot
+            self.assertPlotsEqual(
+                tbl.sort_values(['MSRP', 'Invoice']).plot('Make', ['MSRP', 'Invoice']),
+                df.sort_values(['MSRP', 'Invoice']).plot('Make', ['MSRP', 'Invoice'])
+            )
 
-        # Must reset index here because it uses that as X axis
-        self.assertPlotsEqual(
-            tbl.sort_values(['MSRP', 'Invoice']).plot(y=['MSRP', 'Invoice']),
-            df.sort_values(['MSRP', 'Invoice']).reset_index().plot(y=['MSRP', 'Invoice'])
-        )
+            # Must reset index here because it uses that as X axis
+            self.assertPlotsEqual(
+                tbl.sort_values(['MSRP', 'Invoice']).plot(y=['MSRP', 'Invoice']),
+                df.sort_values(['MSRP', 'Invoice']).reset_index().plot(y=['MSRP', 'Invoice'])
+            )
 
-        # Test kind= parameter
-        self.assertPlotsEqual(
-            tbl.sort_values(['MSRP', 'Invoice']).plot('MSRP', 'Invoice', 'scatter'),
-            df.sort_values(['MSRP', 'Invoice']).plot('MSRP', 'Invoice', 'scatter')
-        )
+            # Test kind= parameter
+            self.assertPlotsEqual(
+                tbl.sort_values(['MSRP', 'Invoice']).plot('MSRP', 'Invoice', 'scatter'),
+                df.sort_values(['MSRP', 'Invoice']).plot('MSRP', 'Invoice', 'scatter')
+            )
 
-        self.assertPlotsEqual(
-            tbl.sort_values(['MSRP', 'Invoice']).plot('MSRP', 'Invoice', kind='scatter'),
-            df.sort_values(['MSRP', 'Invoice']).plot('MSRP', 'Invoice', kind='scatter')
-        )
+            self.assertPlotsEqual(
+                tbl.sort_values(['MSRP', 'Invoice']).plot('MSRP', 'Invoice', kind='scatter'),
+                df.sort_values(['MSRP', 'Invoice']).plot('MSRP', 'Invoice', kind='scatter')
+            )
 
-        self.assertPlotsEqual(
-            tbl.sort_values(['MSRP', 'Invoice']).plot('Make', ['MSRP', 'Invoice'], kind='bar'),
-            df.sort_values(['MSRP', 'Invoice']).plot('Make', ['MSRP', 'Invoice'], kind='bar')
-        )
+            self.assertPlotsEqual(
+                tbl.sort_values(['MSRP', 'Invoice']).plot('Make', ['MSRP', 'Invoice'], kind='bar'),
+                df.sort_values(['MSRP', 'Invoice']).plot('Make', ['MSRP', 'Invoice'], kind='bar')
+            )
+
+        except ImportError as msg:
+            tm.TestCase.skipTest(self, '%s' % msg)
 
     def test_plot_sampling(self):
         tbl = self.table
 
-        self.assertPlotsEqual(
-            tbl.sort_values(['MSRP', 'Invoice'])\
-               .plot('MSRP', 'Invoice', sample_pct=0.05, sample_seed=123),
-            tbl._fetch(sample_pct=0.05, sample_seed=123)\
-               .sort_values(['MSRP', 'Invoice']).plot('MSRP', 'Invoice')
-        )
+        try:
+            self.assertPlotsEqual(
+                tbl.sort_values(['MSRP', 'Invoice'])\
+                   .plot('MSRP', 'Invoice', sample_pct=0.05, sample_seed=123),
+                tbl._fetch(sample_pct=0.05, sample_seed=123)\
+                   .sort_values(['MSRP', 'Invoice']).plot('MSRP', 'Invoice')
+            )
+
+        except ImportError as msg:
+            tm.TestCase.skipTest(self, '%s' % msg)
 
     def test_plot_area(self):
         tbl = self.table
         df = self.get_cars_df()
 
-        self.assertPlotsEqual(
-            tbl.sort_values(['MSRP', 'Invoice']).plot.area('Make', ['MSRP', 'Invoice']),
-            df.sort_values(['MSRP', 'Invoice']).plot.area('Make', ['MSRP', 'Invoice'])
-        )
+        try:
+            self.assertPlotsEqual(
+                tbl.sort_values(['MSRP', 'Invoice']).plot.area('Make', ['MSRP', 'Invoice']),
+                df.sort_values(['MSRP', 'Invoice']).plot.area('Make', ['MSRP', 'Invoice'])
+            )
+
+        except ImportError as msg:
+            tm.TestCase.skipTest(self, '%s' % msg)
 
     def test_plot_bar(self):
         tbl = self.table
         df = self.get_cars_df()
 
-        self.assertPlotsEqual(
-            tbl['Cylinders'].sort_values().plot.bar(),
-            df['Cylinders'].sort_values().plot.bar()
-        )
+        try:
+            self.assertPlotsEqual(
+                tbl['Cylinders'].sort_values().plot.bar(),
+                df['Cylinders'].sort_values().plot.bar()
+            )
+
+        except ImportError as msg:
+            tm.TestCase.skipTest(self, '%s' % msg)
 
     def test_plot_barh(self):
         tbl = self.table
         df = self.get_cars_df()
 
-        self.assertPlotsEqual(
-            tbl['Cylinders'].sort_values().plot.barh(),
-            df['Cylinders'].sort_values().plot.barh()
-        )
+        try:
+            self.assertPlotsEqual(
+                tbl['Cylinders'].sort_values().plot.barh(),
+                df['Cylinders'].sort_values().plot.barh()
+            )
+
+        except ImportError as msg:
+            tm.TestCase.skipTest(self, '%s' % msg)
 
     def test_plot_box(self):
         tbl = self.table
         df = self.get_cars_df()
 
-        self.assertPlotsEqual(
-            tbl[['MSRP', 'Invoice']].plot.box(),
-            df[['MSRP', 'Invoice']].plot.box()
-        )
+        try:
+            self.assertPlotsEqual(
+                tbl[['MSRP', 'Invoice']].plot.box(),
+                df[['MSRP', 'Invoice']].plot.box()
+            )
+
+        except ImportError as msg:
+            tm.TestCase.skipTest(self, '%s' % msg)
 
     def test_plot_density(self):
         tbl = self.table
         df = self.get_cars_df()
 
-        self.assertPlotsEqual(
-            tbl[['MSRP', 'Invoice']].plot.density(),
-            df[['MSRP', 'Invoice']].plot.density()
-        )
+        try:
+            self.assertPlotsEqual(
+                tbl[['MSRP', 'Invoice']].plot.density(),
+                df[['MSRP', 'Invoice']].plot.density()
+            )
+
+        except ImportError as msg:
+            tm.TestCase.skipTest(self, '%s' % msg)
 
     def test_plot_hexbin(self):
         tbl = self.table
         df = self.get_cars_df()
 
-        self.assertPlotsEqual(
-            tbl.plot.hexbin('MSRP', 'Horsepower'),
-            df.plot.hexbin('MSRP', 'Horsepower')
-        )
+        try:
+            self.assertPlotsEqual(
+                tbl.plot.hexbin('MSRP', 'Horsepower'),
+                df.plot.hexbin('MSRP', 'Horsepower')
+            )
+
+        except ImportError as msg:
+            tm.TestCase.skipTest(self, '%s' % msg)
 
     def test_plot_hist(self):
         tbl = self.table
         df = self.get_cars_df()
 
-        self.assertPlotsEqual(
-            tbl.plot.hist(),
-            df.plot.hist(),
-        )
+        try:
+            self.assertPlotsEqual(
+                tbl.plot.hist(),
+                df.plot.hist(),
+            )
+
+        except ImportError as msg:
+            tm.TestCase.skipTest(self, '%s' % msg)
 
     def test_plot_kde(self):
         tbl = self.table
         df = self.get_cars_df()
 
-        self.assertPlotsEqual(
-            tbl[['MSRP', 'Invoice']].plot.kde(),
-            df[['MSRP', 'Invoice']].plot.kde()
-        )
+        try:
+            self.assertPlotsEqual(
+                tbl[['MSRP', 'Invoice']].plot.kde(),
+                df[['MSRP', 'Invoice']].plot.kde()
+            )
+
+        except ImportError as msg:
+            tm.TestCase.skipTest(self, '%s' % msg)
 
     def test_plot_line(self):
         tbl = self.table
         df = self.get_cars_df()
 
-        self.assertPlotsEqual(
-            tbl.sort_values(['MSRP', 'Invoice']).plot.line('MSRP', 'Invoice'),
-            df.sort_values(['MSRP', 'Invoice']).plot.line('MSRP', 'Invoice')
-        )
+        try:
+            self.assertPlotsEqual(
+                tbl.sort_values(['MSRP', 'Invoice']).plot.line('MSRP', 'Invoice'),
+                df.sort_values(['MSRP', 'Invoice']).plot.line('MSRP', 'Invoice')
+            )
+
+        except ImportError as msg:
+            tm.TestCase.skipTest(self, '%s' % msg)
 
     def test_plot_pie(self):
         tbl = self.table
         df = self.get_cars_df()
 
-        self.assertPlotsEqual(
-            tbl['Cylinders'].sort_values().plot.pie(),
-            df['Cylinders'].sort_values().plot.pie()
-        )
+        try:
+            self.assertPlotsEqual(
+                tbl['Cylinders'].sort_values().plot.pie(),
+                df['Cylinders'].sort_values().plot.pie()
+            )
+
+        except ImportError as msg:
+            tm.TestCase.skipTest(self, '%s' % msg)
 
     def test_plot_scatter(self):
         tbl = self.table
         df = self.get_cars_df()
 
-        self.assertPlotsEqual(
-            tbl.plot.scatter('MSRP', 'Horsepower'),
-            df.plot.scatter('MSRP', 'Horsepower')
-        )
+        try:
+            self.assertPlotsEqual(
+                tbl.plot.scatter('MSRP', 'Horsepower'),
+                df.plot.scatter('MSRP', 'Horsepower')
+            )
+
+        except ImportError as msg:
+            tm.TestCase.skipTest(self, '%s' % msg)
 
     def test_eval(self):
         tbl = self.table
