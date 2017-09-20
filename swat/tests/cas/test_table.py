@@ -3103,6 +3103,27 @@ class TestCASTable(tm.TestCase):
         else:
            self.assertEqual(set(tbl.dtypes.unique()), set(['double', 'int64', 'varchar']))
 
+    def test_read_frame(self):
+        import swat.tests as st
+
+        myFile = os.path.join(os.path.dirname(st.__file__), 'datasources', 'cars.csv')
+
+        df = pd.read_csv(myFile)
+        tbl = self.s.read_frame(df)
+
+        self.assertTablesEqual(df, tbl, sortby=SORT_KEYS)
+        self.assertEqual(set(tbl.dtypes.unique()), set(['double', 'varchar']))
+
+        # Force addtable
+        tbl = self.s.read_frame(df, use_addtable=True)
+
+        self.assertTablesEqual(df, tbl, sortby=SORT_KEYS)
+
+        if self.s._protocol in ['http', 'https']:
+           self.assertEqual(set(tbl.dtypes.unique()), set(['double', 'varchar']))
+        else:
+           self.assertEqual(set(tbl.dtypes.unique()), set(['double', 'int64', 'varchar']))
+
     def test_read_fwf(self):
         import swat.tests as st
 

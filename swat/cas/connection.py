@@ -2183,6 +2183,64 @@ class CAS(object):
         table.update(dmh.CSV(filepath_or_buffer, **kwargs).args.addtable)
         return self.retrieve('table.addtable', **table).casTable
 
+    def read_frame(self, dframe, casout=None, **kwargs):
+        '''
+        Convert DataFrame to CAS table
+
+        Parameters
+        ----------
+        dframe : DataFrame
+            The DataFrame to read into CAS
+        casout : string or :class:`CASTable`, optional
+            The output table specification.  This includes the following parameters.
+                name : string, optional
+                    Name of the output CAS table.
+                caslib : string, optional
+                    CASLib for the output CAS table.
+                label : string, optional
+                    The label to apply to the output CAS table.
+                promote : boolean, optional
+                    If True, the output CAS table will be visible in all sessions.
+                replace : boolean, optional
+                    If True, the output CAS table will replace any existing CAS.
+                    table with the same name.
+
+        Notes
+        -----
+        When `use_addtable=False` (the default) is specified, this method
+        is equivalent to `upload_frame`.  If `use_addtable=True` is specified,
+        the `table.addtable` CAS action is used and the DataFrame does not
+        need to be written to disk first.  However, this mode can only be used
+        with the binary (not REST) protocol.
+
+        Examples
+        --------
+        >>> conn = swat.CAS()
+        >>> tbl = conn.read_frame(pd.DataFrame(np.random.randn(100, 4),
+        ...                       columns='ABCD'))
+        >>> print(tbl.head())
+
+        See Also
+        --------
+        :meth:`upload_frame`
+
+        Returns
+        -------
+        :class:`CASTable`
+
+        '''
+        use_addtable = kwargs.pop('use_addtable', False)
+        table, kwargs = self._get_table_args(casout=casout, **kwargs)
+        # REST doesn't support table.addtable
+        if not use_addtable or self._protocol.startswith('http'):
+            if 'table' in table:
+                table['name'] = table.pop('table')
+            return self.upload_frame(dframe, casout=table and table or None)
+#                                    importoptions=self._importoptions_from_dframe(dframe)
+        from swat import datamsghandlers as dmh
+        table.update(dmh.PandasDataFrame(dframe, **kwargs).args.addtable)
+        return self.retrieve('table.addtable', **table).casTable
+
     def read_fwf(self, filepath_or_buffer, casout=None, **kwargs):
         '''
         Read a table of fixed-width formatted lines into a CAS table
