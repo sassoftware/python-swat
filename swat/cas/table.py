@@ -44,6 +44,8 @@ from .utils.params import ParamManager, ActionParamManager
 
 patch_pandas_sort()
 
+pd_version = tuple([int(x) for x in pd.__version__.split('.')])
+
 OPERATOR_NAMES = {
     '+': 'add',
     '-': 'sub',
@@ -3032,6 +3034,39 @@ class CASTable(ParamManager, ActionParamManager):
 
         return out
 
+    def _get_all_stats(self):
+        '''
+        Determine all possible statistics for summary action
+
+        Returns
+        -------
+        list-of-strings
+            The names of the supported statistics
+
+        '''
+        categories = ['count', 'unique', 'top', 'freq', 'mean', 'std', 'min'] + \
+                     ['%d%%' % x for x in range(101)] + \
+                     ['max', 'nmiss', 'sum', 'stderr', 'var', 'uss'] + \
+                     ['cv', 'tvalue', 'probt', 'css', 'tstat']
+
+        labels = ['count', 'unique', 'mean', 'std', 'min', 'pct'] + \
+                 ['max', 'nmiss', 'sum', 'stderr', 'var', 'uss'] + \
+                 ['cv', 'tvalue', 'probt', 'css', 'tstat']
+
+        for param in self._retrieve('builtins.reflect',
+                                    action='simple.summary')[0]['actions'][0]['params']:
+            if param['name'].lower() == 'subset':
+                allowed_values = [x.lower() for x in param['allowedValues']
+                                  if x.lower() not in ['n', 't']]
+
+        for item in allowed_values:
+            if item not in labels:
+                labels.append(item)
+            if item not in categories:
+                categories.append(item)
+
+        return categories, labels
+
     def describe(self, percentiles=None, include=None, exclude=None, stats=None):
         '''
         Get descriptive statistics
@@ -3059,14 +3094,15 @@ class CASTable(ParamManager, ActionParamManager):
             ``percentiles=`` argument.  Character statistics include `count`,
             `unique`, `top`, and `freq`.  In addition, the following can be
             specified, `nmiss`, `sum`, `stderr`, `var`, `uss`, `cv`, `tvalue`,
-            and `probt`.  If `all` is specified, all relevant statistics
-            will be returned.
+            `probt`, `css`, `tstat`, `kurtosis`, and `skewness`.  If `all` is
+            specified, all relevant statistics will be returned.
 
         Returns
         -------
         :class:`pandas.DataFrame`
 
         '''
+        categories = None
         numrows = self._numrows
 
         # Auto-specify all numeric or all character
@@ -3147,10 +3183,7 @@ class CASTable(ParamManager, ActionParamManager):
                                            ['count', 'unique', 'top', 'freq'])
 
             elif stats == 'all':
-                labels = ['count', 'unique', 'mean', 'std', 'min', 'pct'] + \
-                         ['max', 'nmiss', 'sum', 'stderr', 'var', 'uss'] + \
-                         ['cv', 'tvalue', 'probt']
-
+                categories, labels = self._get_all_stats()
                 if has_character:
                     labels = _expand_items(labels, 'unique',
                                            ['unique', 'top', 'freq'])
@@ -3210,10 +3243,8 @@ class CASTable(ParamManager, ActionParamManager):
 
         out = out.loc[idx, columns]
 
-        categories = ['count', 'unique', 'top', 'freq', 'mean', 'std', 'min'] + \
-                     ['%d%%' % x for x in range(101)] + \
-                     ['max', 'nmiss', 'sum', 'stderr', 'var', 'uss'] + \
-                     ['cv', 'tvalue', 'probt']
+        if not categories:
+            categories, labels = self._get_all_stats()
 
         # This is done so that the row labels will come out in category-sorted order.
         tmpname = str(uuid.uuid4())
@@ -3948,6 +3979,34 @@ class CASTable(ParamManager, ActionParamManager):
 
         '''
         return self._get_summary_stat('probt')
+
+    def skewness(self):
+        '''
+        Return the skewness of the values of each column
+
+        Returns
+        -------
+        :class:`pandas.Series`
+            If no By groups are specified.
+        :class:`pandas.DataFrame`
+            If By groups are specified.
+
+        '''
+        return self._get_summary_stat('skewness')
+
+    def kurtosis(self):
+        '''
+        Return the kurtosis of the values of each column
+
+        Returns
+        -------
+        :class:`pandas.Series`
+            If no By groups are specified.
+        :class:`pandas.DataFrame`
+            If By groups are specified.
+
+        '''
+        return self._get_summary_stat('kurtosis')
 
     # Reindexing / Selection / Label manipulation
 
@@ -8360,6 +8419,42 @@ class CASColumn(CASTable):
         '''
         return self._get_summary_stat('probt')
 
+    def skewness(self):
+        '''
+        Return skewness
+
+        See Also
+        --------
+        :meth:`CASTable.skewness`
+
+        Returns
+        -------
+        float
+            If no By groups are specified.
+        :class:`pandas.Series`
+            If By groups are specified.
+
+        '''
+        return self._get_summary_stat('skewness')
+
+    def kurtosis(self):
+        '''
+        Return kurtosis
+
+        See Also
+        --------
+        :meth:`CASTable.kurtosis`
+
+        Returns
+        -------
+        float
+            If no By groups are specified.
+        :class:`pandas.Series`
+            If By groups are specified.
+
+        '''
+        return self._get_summary_stat('kurtosis')
+
     # Serialization / IO / Conversion
 
     @classmethod
@@ -8933,6 +9028,34 @@ class CASTableGroupBy(object):
             return self._table.probt(*args, **kwargs)
         return self._table.probt(*args, **kwargs).reset_index(self.get_groupby_vars())
 
+    def skewness(self, *args, **kwargs):
+        '''
+        Get skewness using groups
+
+        See Also
+        --------
+        :class:`CASTable.skewness`
+        :class:`CASColumn.skewness`
+
+        '''
+        if self._as_index:
+            return self._table.skewness(*args, **kwargs)
+        return self._table.skewness(*args, **kwargs).reset_index(self.get_groupby_vars())
+
+    def kurtosis(self, *args, **kwargs):
+        '''
+        Get kurtosis using groups
+
+        See Also
+        --------
+        :class:`CASTable.kurtosis`
+        :class:`CASColumn.kurtosis`
+
+        '''
+        if self._as_index:
+            return self._table.kurtosis(*args, **kwargs)
+        return self._table.kurtosis(*args, **kwargs).reset_index(self.get_groupby_vars())
+
     def describe(self, *args, **kwargs):
         '''
         Get basic statistics using groups
@@ -8943,13 +9066,18 @@ class CASTableGroupBy(object):
         :class:`CASColumn.describe`
 
         '''
-        if self._as_index:
-            return self._table.describe(*args, **kwargs)
         out = self._table.describe(*args, **kwargs)
-        if isinstance(out, pd.Series):
+
+        if self._as_index:
+            if pd_version >= (0, 20, 0):
+                out = out.unstack(level=-1)
+            return out
+
+        if isinstance(out, pd.Series) or pd_version >= (0, 20, 0):
             out = out.unstack(level=-1)
             # Prevent CategoricalIndex from causing problems
             out.columns = list(out.columns)
+
         return out.reset_index(self.get_groupby_vars())
 
     def nlargest(self, *args, **kwargs):

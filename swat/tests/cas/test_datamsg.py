@@ -294,7 +294,11 @@ class TestDataMsgHandlers(tm.TestCase):
         self.assertEqual(hp.FormattedLength, hpinfo.width)
 
     def test_sas7bdat(self):       
-        import sas7bdat
+        try:
+            import sas7bdat
+        except ImportError:
+            tm.TestCase.skipTest(self, 'sas7bdat package is not available')
+
         import swat.tests as st
 
         myFile = os.path.join(os.path.dirname(st.__file__), 'datasources', 'cars.sas7bdat')

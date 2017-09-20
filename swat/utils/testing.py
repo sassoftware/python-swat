@@ -66,7 +66,7 @@ class TestCase(unittest.TestCase):
                 row[i] = nan
         return row
 
-    def assertTablesEqual(self, a, b, fillna=-999999, sortby=None):
+    def assertTablesEqual(self, a, b, fillna=-999999, sortby=None, precision=None):
         ''' Compare DataFrames / CASTables '''
         if hasattr(a, 'to_frame'):
             a = a.to_frame()
@@ -78,11 +78,14 @@ class TestCase(unittest.TestCase):
         self.assertEqual(list(a.columns), list(b.columns))
         a = a.fillna(value=fillna)
         b = b.fillna(value=fillna)
+        if precision is not None:
+            a = a.round(decimals=precision)
+            b = b.round(decimals=precision)
         for lista, listb in zip(list(a.to_records(index=False)),
                                 list(b.to_records(index=False))):
             self.assertEqual(list(lista), list(listb))
 
-    def assertColsEqual(self, a, b, fillna=-999999, sort=False):
+    def assertColsEqual(self, a, b, fillna=-999999, sort=False, precision=None):
         ''' Compare Series / CASColumns '''
         if hasattr(a, 'to_series'):
             a = a.to_series()
@@ -90,6 +93,9 @@ class TestCase(unittest.TestCase):
             b = b.to_series()
         a = a.fillna(value=fillna)
         b = b.fillna(value=fillna)
+        if precision is not None:
+            a = a.round(decimals=precision)
+            b = b.round(decimals=precision)
         if sort:
             a = list(sorted(a.tolist()))
             b = list(sorted(b.tolist()))

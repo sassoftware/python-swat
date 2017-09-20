@@ -100,16 +100,22 @@ class TestCASResults(tm.TestCase):
 
         label = 'Descriptive Statistics for DATASOURCES.CARS_SINGLE'
         headers = [x.string for x in htbl.thead.find_all('th')]
-        self.assertEqual(headers, 
-             [None, 'Column', 'Min', 'Max', 'N', 'NMiss', 'Mean', 'Sum',
-             'Std', 'StdErr', 'Var', 'USS', 'CSS', 'CV', 'TValue', 'ProbT'])
+        if 'Skewness' in headers:
+            self.assertEqual(headers, 
+                 [None, 'Column', 'Min', 'Max', 'N', 'NMiss', 'Mean', 'Sum',
+                 'Std', 'StdErr', 'Var', 'USS', 'CSS', 'CV', 'TValue', 'ProbT',
+                 'Skewness', 'Kurtosis'])
+        else:
+            self.assertEqual(headers, 
+                 [None, 'Column', 'Min', 'Max', 'N', 'NMiss', 'Mean', 'Sum',
+                 'Std', 'StdErr', 'Var', 'USS', 'CSS', 'CV', 'TValue', 'ProbT'])
 
         caption = [x.string for x in htbl.find_all('caption')]
         index = [x.string for x in htbl.tbody.find_all('th')]
         data = [x.string for x in htbl.tbody.find_all('td')]
         self.assertEqual(len(caption), 1)
         self.assertEqual(len(index), 10)
-        self.assertEqual(len(data), 150)
+        self.assertTrue(len(data) >= 150)
 
         pd.set_option('display.notebook.repr_html', False)
         html = out._repr_html_()

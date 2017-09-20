@@ -108,7 +108,7 @@ class TestIMStat(tm.TestCase):
         self.assertEqual(tbl.label, "Descriptive Statistics for " + self.tablename)
         self.assertEqual(tbl.title, "Descriptive Statistics for " + self.tablename)
         self.assertEqual(len(tbl), 10)
-        self.assertEqual(len(tbl.columns), 15)
+        self.assertTrue(len(tbl.columns) >= 15)
 
         self.assertEqual(cols[0], 'Column')
         self.assertIn(colinfo['Column'].dtype, ['char', 'varchar'])
@@ -224,10 +224,11 @@ class TestIMStat(tm.TestCase):
 
         for rowIdx, rowVal in enumerate(actual):                
             for colIdx, colVal in enumerate(rowVal):
-                if isinstance(colVal, (str, unicode)):
-                    self.assertEqual(colVal, expected[rowIdx][colIdx])
-                else:
-                    self.assertAlmostEqual(colVal, expected[rowIdx][colIdx], places=2)                                 
+                if len(expected[rowIdx]) > colIdx:
+                    if isinstance(colVal, (str, unicode)):
+                        self.assertEqual(colVal, expected[rowIdx][colIdx])
+                    else:
+                        self.assertAlmostEqual(colVal, expected[rowIdx][colIdx], places=2)                                 
     def test_crosstab(self):     
         r = self.s.crosstab( table={'caslib':self.srcLib, 'name':self.tablename}, row='Make', col='Cylinders' )
         self.assertEqual( r.status, None )  

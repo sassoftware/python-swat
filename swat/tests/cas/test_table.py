@@ -40,6 +40,8 @@ from swat.utils.compat import patch_pandas_sort
 
 patch_pandas_sort()
 
+pd_version = tuple([int(x) for x in pd.__version__.split('.')])
+
 # Pick sort keys that will match across SAS and Pandas sorting orders
 SORT_KEYS = ['Origin', 'MSRP', 'Horsepower', 'Model']
 
@@ -1104,16 +1106,30 @@ class TestCASTable(tm.TestCase):
         self.assertEqual(desc.index.tolist(), ['count', 'unique'])
 
         desc = self.table.describe(stats='all')
-        self.assertEqual(desc.index.tolist(),
-            ['count', 'unique', 'mean', 'std', 'min', '25%', '50%', '75%'] +
-            ['max', 'nmiss', 'sum', 'stderr', 'var', 'uss'] +
-            ['cv', 'tvalue', 'probt'])
+        labels = desc.index.tolist()
+        if 'skewness' in labels:
+            self.assertEqual(labels,
+                ['count', 'unique', 'mean', 'std', 'min', '25%', '50%', '75%'] +
+                ['max', 'nmiss', 'sum', 'stderr', 'var', 'uss'] +
+                ['cv', 'tvalue', 'probt', 'css', 'tstat', 'kurtosis', 'skewness'])
+        else:
+            self.assertEqual(labels,
+                ['count', 'unique', 'mean', 'std', 'min', '25%', '50%', '75%'] +
+                ['max', 'nmiss', 'sum', 'stderr', 'var', 'uss'] +
+                ['cv', 'tvalue', 'probt', 'css', 'tstat'])
 
         desc = self.table.describe(include='all', stats='all')
-        self.assertEqual(desc.index.tolist(),
-            ['count', 'unique', 'top', 'freq', 'mean', 'std', 'min', '25%', '50%', '75%'] +
-            ['max', 'nmiss', 'sum', 'stderr', 'var', 'uss'] +
-            ['cv', 'tvalue', 'probt'])
+        labels = desc.index.tolist()
+        if 'skewness' in labels:
+            self.assertEqual(labels,
+                ['count', 'unique', 'top', 'freq', 'mean', 'std', 'min', '25%', '50%', '75%'] +
+                ['max', 'nmiss', 'sum', 'stderr', 'var', 'uss'] +
+                ['cv', 'tvalue', 'probt', 'css', 'tstat', 'kurtosis', 'skewness'])
+        else:
+            self.assertEqual(labels,
+                ['count', 'unique', 'top', 'freq', 'mean', 'std', 'min', '25%', '50%', '75%'] +
+                ['max', 'nmiss', 'sum', 'stderr', 'var', 'uss'] +
+                ['cv', 'tvalue', 'probt', 'css', 'tstat'])
 
         # Test all character data
         chardf = df.ix[:, ['Make', 'Model', 'Type', 'Origin']]
@@ -1152,10 +1168,15 @@ class TestCASTable(tm.TestCase):
         self.assertEqual(tbldesc.index.tolist()[:50], dfdesc.index.tolist()[:50])
         self.assertEqual(set(tbldesc.columns.tolist()), set(dfdesc.columns.tolist()))
 
-        tbllist = tbldesc['MPG_City'].tolist()[:50]
-        dflist = dfdesc['MPG_City'].tolist()[:50]
-        for i in range(50):
-            self.assertAlmostEqual(tbllist[i], dflist[i], 2)
+        tbllist = tbldesc['MPG_City']
+        dflist = dfdesc['MPG_City']
+        if isinstance(dflist, pd.Series):
+            tbllist = tbllist.tolist()[:50]
+            dflist = dflist.tolist()[:50]
+            for i in range(50):
+                self.assertAlmostEqual(tbllist[i], dflist[i], 2)
+        else:
+            self.assertTablesEqual(tbldesc['MPG_City'], dfdesc['MPG_City'], precision=6)
 
     @unittest.skipIf(int(pd.__version__.split('.')[1]) < 16, 'Need newer version of Pandas')
     def test_max(self):
@@ -1318,10 +1339,13 @@ class TestCASTable(tm.TestCase):
         tblgrp = tbl.groupby(['Make', 'Cylinders'])
 
         # TODO: Pandas mode sets columns with all unique values to NaN
-        self.assertEqual(dfgrp.get_group(('Acura', 6.0)).mode()[['Type', 'Origin',
-                             'EngineSize', 'MPG_City']].to_csv(index=False),
-                         tblgrp.mode().loc[('Acura', 6.0), ['Type', 'Origin',
-                             'EngineSize', 'MPG_City']].dropna(how='all').to_csv(index=False))
+        self.assertEqual(re.sub(r'^,+$',
+                                dfgrp.get_group(('Acura', 6.0)).mode()[['Type', 'Origin',
+                                                 'EngineSize', 'MPG_City']].to_csv(index=False),
+                                r'', re.M),
+                         re.sub(r'^,+$',
+                                tblgrp.mode().loc[('Acura', 6.0), ['Type', 'Origin',
+                                                   'EngineSize', 'MPG_City']].dropna(how='all').to_csv(index=False), r'', re.M))
 
         dfgrp = df[['Make', 'Type']].groupby(['Make'])
         tblgrp = tbl[['Make', 'Type']].groupby(['Make'])
@@ -1633,8 +1657,13 @@ class TestCASTable(tm.TestCase):
 
     def test__summary(self):
         summ = self.table._summary()
-        self.assertEqual(list(summ.index), ['min', 'max', 'count', 'nmiss', 'mean', 'sum', 'std',
-                                            'stderr', 'var', 'uss', 'css', 'cv', 'tvalue', 'probt'])
+        if len(summ.index) == 14:
+            self.assertEqual(list(summ.index), ['min', 'max', 'count', 'nmiss', 'mean', 'sum', 'std',
+                                                'stderr', 'var', 'uss', 'css', 'cv', 'tvalue', 'probt'])
+        else:
+            self.assertEqual(list(summ.index), ['min', 'max', 'count', 'nmiss', 'mean', 'sum', 'std',
+                                                'stderr', 'var', 'uss', 'css', 'cv', 'tvalue', 'probt',
+                                                'skewness', 'kurtosis'])
         self.assertEqual(len(summ.columns), 10)
 
     def test_disconnected(self):
@@ -2124,7 +2153,8 @@ class TestCASTable(tm.TestCase):
         self.assertTablesEqual(df[['Make', 'MSRP']], tbl[['Make', 'MSRP']], sortby=None)
 
         # Column indexes
-        self.assertTablesEqual(df[[2, 5, 6]], tbl[[2, 5, 6]], sortby=None)
+        if pd_version < (0, 20, 0):
+            self.assertTablesEqual(df[[2, 5, 6]], tbl[[2, 5, 6]], sortby=None)
 
         # Column index
         with self.assertRaises(KeyError):
@@ -4085,8 +4115,11 @@ class TestCASTable(tm.TestCase):
         df2 = df.replace(8.00, '3000')
         df2['Cylinders'] = df2['Cylinders'].astype(float)
         self.assertTablesEqual(df2, sorttbl.replace(8.00, '3000'))
-        self.assertTablesEqual(df.replace('6.00', 4000),
-                               sorttbl.replace('6.00', 4000))
+
+
+        if pd_version < (0, 20, 0):
+            self.assertTablesEqual(df.replace('6.00', 4000),
+                                   sorttbl.replace('6.00', 4000))
 
         # Lists
         self.assertTablesEqual(df.replace(['BMW', 'Audi'], ['FFFFF', 'GGGGG']),

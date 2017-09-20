@@ -312,7 +312,10 @@ Computations / Descriptive Stats
    CASTable.css
    CASTable.cv
    CASTable.tvalue
+   CASTable.tstat
    CASTable.probt
+   CASTable.skewness
+   CASTable.kurtosis
 
 Reindexing / Selection / Label manipulation
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -545,7 +548,10 @@ Computations / Descriptive Stats
    CASColumn.css
    CASColumn.cv
    CASColumn.tvalue
+   CASColumn.tstat
    CASColumn.probt
+   CASColumn.skewness
+   CASColumn.kurtosis
    CASColumn.unique
    CASColumn.nunique
    CASColumn.is_unique
@@ -745,6 +751,9 @@ Computations / Descriptive Statistics
    CASTableGroupBy.stderr
    CASTableGroupBy.sum
    CASTableGroupBy.tvalue
+   CASTableGroupBy.tstat
+   CASTableGroupBy.skewness
+   CASTableGroupBy.kurtosis
    CASTableGroupBy.unique
    CASTableGroupBy.uss
    CASTableGroupBy.value_counts
