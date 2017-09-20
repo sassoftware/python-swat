@@ -3288,9 +3288,9 @@ class CASTable(ParamManager, ActionParamManager):
         col = self.copy()
 
         # Check for assignment
-        if re.match(r'^\s*\S+\s*=', expr):
-            colname = re.match(r'^\s*(\S+)\s*', expr).group(1)
-            expr = re.sub(r'^\s*\S+\s*=s*', r'', expr)
+        if re.match(r'^\s*\w+\s*=', expr):
+            colname = re.match(r'^\s*(\w+)\s*', expr).group(1)
+            expr = re.sub(r'^\s*\w+\s*=s*', r'', expr)
             insert = True
         else:
             colname = '_eval_%s_' % self.get_connection()._gen_id()
