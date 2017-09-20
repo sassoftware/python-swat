@@ -1178,6 +1178,13 @@ class TestCASTable(tm.TestCase):
         else:
             self.assertTablesEqual(tbldesc['MPG_City'], dfdesc['MPG_City'], precision=6)
 
+        # Test missing character values
+        tbl2 = self.table.replace({'Make': {'BMW': ''}})
+        df2 = df.replace({'Make': {'BMW': np.nan}})
+
+        self.assertColsEqual(tbl2.describe(include='all').loc['count'],
+                             df2.describe(include='all').loc['count'])
+
     @unittest.skipIf(int(pd.__version__.split('.')[1]) < 16, 'Need newer version of Pandas')
     def test_max(self):
         if self.server_type == 'windows.smp':

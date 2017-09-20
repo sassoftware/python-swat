@@ -2921,7 +2921,10 @@ class CASTable(ParamManager, ActionParamManager):
 
         out = self._retrieve('simple.distinct', inputs=inputs)['Distinct']
         out.set_index('Column', inplace=True)
-        return out['NMiss'].astype(np.int64).rsub(self._numrows)
+        out = out['NMiss'].astype(np.int64).rsub(self._numrows)
+        out.name = None
+        out.index.name = None
+        return out
 
 #   def cov(self, min_periods=None):
 #       raise NotImplementedError
@@ -3223,18 +3226,14 @@ class CASTable(ParamManager, ActionParamManager):
         idx = tuple([slice(None) for x in groups] + [labels])
         columns = [x for x in columns if x not in groups]
 
-        def fillna(dframe, label, value):
-            ''' Fill values at label with nan '''
-            try:
-                dframe.loc[label].fillna(value, axis='index', inplace=True)
-            except KeyError:
-                dframe.loc[label] = value
-
+        # Fill in counts using `count` method if possible
         if not groups:
-            if 'nmiss' in labels:
-                fillna(out, 'nmiss', 0)
-            if 'count' in labels:
-                fillna(out, 'count', numrows)
+            if has_character and ('nmiss' in labels or 'count' in labels):
+                count = self.count()
+                if 'nmiss' in labels:
+                    out.loc['nmiss'] = count.rsub(numrows)
+                if 'count' in labels:
+                    out.loc['count'] = count
             return out.loc[idx[0], columns]
 
         # TODO: Still need counts for character columns when by grouped
