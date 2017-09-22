@@ -748,14 +748,35 @@ class TestByGroups(tm.TestCase):
         df = self.get_cars_df().sort_values(SORT_KEYS)
         tbl = self.table.sort_values(SORT_KEYS)
 
-        tblgrp = tbl.groupby('Origin')['EngineSize'].nmiss()
+        tblgrp = tbl.groupby('Origin')['Cylinders'].nmiss()
+        self.assertEqual(len(tblgrp), 3)
+        self.assertEqual(tblgrp.loc['Asia'], 2)
+        self.assertEqual(tblgrp.loc['Europe'], 0)
+        self.assertEqual(tblgrp.loc['USA'], 0)
+
+        tblgrp = tbl['Cylinders'].groupby('Origin').nmiss()
+        self.assertEqual(len(tblgrp), 3)
+        self.assertEqual(tblgrp.loc['Asia'], 2)
+        self.assertEqual(tblgrp.loc['Europe'], 0)
+        self.assertEqual(tblgrp.loc['USA'], 0)
+
+        tblgrp = tbl['Cylinders'].groupby('Origin', as_index=False).nmiss()
         self.assertEqual(len(tblgrp), 3)
 
-        tblgrp = tbl['EngineSize'].groupby('Origin').nmiss()
-        self.assertEqual(len(tblgrp), 3)
+        # Test character missing values
+        tbl = self.table.replace({'Make': {'Buick': ''}})
 
-        tblgrp = tbl['EngineSize'].groupby('Origin', as_index=False).nmiss()
+        tblgrp = tbl.groupby('Origin')['Make'].nmiss()
         self.assertEqual(len(tblgrp), 3)
+        self.assertEqual(tblgrp.loc['Asia'], 0)
+        self.assertEqual(tblgrp.loc['Europe'], 0)
+        self.assertEqual(tblgrp.loc['USA'], 9)
+
+        tblgrp = tbl['Make'].groupby('Origin').nmiss()
+        self.assertEqual(len(tblgrp), 3)
+        self.assertEqual(tblgrp.loc['Asia'], 0)
+        self.assertEqual(tblgrp.loc['Europe'], 0)
+        self.assertEqual(tblgrp.loc['USA'], 9)
 
     def test_nmiss(self):
         # TODO: Not supported by Pandas; need comparison values
@@ -764,9 +785,20 @@ class TestByGroups(tm.TestCase):
 
         tblgrp = tbl.groupby('Origin').nmiss()
         self.assertEqual(len(tblgrp), 3)
+        self.assertEqual(tblgrp.loc['Asia', 'Cylinders'], 2)
+        self.assertEqual(tblgrp.loc['Europe', 'Cylinders'], 0)
+        self.assertEqual(tblgrp.loc['USA', 'Cylinders'], 0)
 
         tblgrp = tbl.groupby('Origin', as_index=False).nmiss()
         self.assertEqual(len(tblgrp), 3)
+
+        # Test character missing values
+        tbl = self.table.replace({'Make': {'Buick': ''}})
+        tblgrp = tbl.groupby('Origin').nmiss()
+        self.assertEqual(len(tblgrp), 3)
+        self.assertEqual(tblgrp.loc['Asia', 'Make'], 0)
+        self.assertEqual(tblgrp.loc['Europe', 'Make'], 0)
+        self.assertEqual(tblgrp.loc['USA', 'Make'], 9)
 
     def test_column_stderr(self):
         # TODO: Not supported by Pandas; need comparison values

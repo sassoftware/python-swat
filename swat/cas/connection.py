@@ -1015,6 +1015,11 @@ class CAS(object):
                 tbl = dict(name=tbl)
             tbl['vars'] = inputs
 
+        # Fix aggregate action when both inputs= and varspecs= are supplied
+        if 'table' in kwargs and action.lower() in ['aggregate', 'aggregation.aggregate']:
+            if 'inputs' in kwargs and 'varspecs' in kwargs:
+                kwargs.pop('inputs', None)
+
         kwargs.pop('__table__', None)
 
         # Workaround for tableinfo which aliases table= to name=, but

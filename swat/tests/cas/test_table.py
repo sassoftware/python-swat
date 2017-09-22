@@ -1111,12 +1111,12 @@ class TestCASTable(tm.TestCase):
             self.assertEqual(labels,
                 ['count', 'unique', 'mean', 'std', 'min', '25%', '50%', '75%'] +
                 ['max', 'nmiss', 'sum', 'stderr', 'var', 'uss'] +
-                ['cv', 'tvalue', 'probt', 'css', 'tstat', 'kurtosis', 'skewness'])
+                ['cv', 'tvalue', 'probt', 'css', 'kurtosis', 'skewness'])
         else:
             self.assertEqual(labels,
                 ['count', 'unique', 'mean', 'std', 'min', '25%', '50%', '75%'] +
                 ['max', 'nmiss', 'sum', 'stderr', 'var', 'uss'] +
-                ['cv', 'tvalue', 'probt', 'css', 'tstat'])
+                ['cv', 'tvalue', 'probt', 'css'])
 
         desc = self.table.describe(include='all', stats='all')
         labels = desc.index.tolist()
@@ -1124,12 +1124,12 @@ class TestCASTable(tm.TestCase):
             self.assertEqual(labels,
                 ['count', 'unique', 'top', 'freq', 'mean', 'std', 'min', '25%', '50%', '75%'] +
                 ['max', 'nmiss', 'sum', 'stderr', 'var', 'uss'] +
-                ['cv', 'tvalue', 'probt', 'css', 'tstat', 'kurtosis', 'skewness'])
+                ['cv', 'tvalue', 'probt', 'css', 'kurtosis', 'skewness'])
         else:
             self.assertEqual(labels,
                 ['count', 'unique', 'top', 'freq', 'mean', 'std', 'min', '25%', '50%', '75%'] +
                 ['max', 'nmiss', 'sum', 'stderr', 'var', 'uss'] +
-                ['cv', 'tvalue', 'probt', 'css', 'tstat'])
+                ['cv', 'tvalue', 'probt', 'css'])
 
         # Test all character data
         chardf = df.ix[:, ['Make', 'Model', 'Type', 'Origin']]

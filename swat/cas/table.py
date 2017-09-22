@@ -2906,22 +2906,41 @@ class CASTable(ParamManager, ActionParamManager):
 
         Returns
         -------
-        :class:`pandas.Series` object
+        :class:`pandas.Series`
+            If no By groups are specified.
+        :class:`pandas.DataFrame`
+            If By groups are specified.
 
         '''
+        self._loadactionset('aggregation')
+
         if numeric_only:
             inputs = self._get_dtypes(include='numeric')
         else:
-            inputs = self._columns or None
+            inputs = self._columns or self.columns
 
         groups = self.get_groupby_vars()
         if groups:
-            # TODO: Only supports numeric variables
-            return self._summary(inputs=inputs).xs('count', level=len(groups))
+            inputs = [x for x in inputs if x not in groups]
+            out = pd.concat(list(self._retrieve('aggregation.aggregate', 
+                                                varspecs=[
+                                                    dict(names=list(inputs), agg='n')
+                                                ]).values())[1:])
+            out = out.set_index('Column', append=True)['N']
+            out = out.unstack(level=-1)
+            out = out.astype('int64')
+            if isinstance(out, pd.DataFrame):
+                out.columns.name = None
+            return out[inputs]
 
-        out = self._retrieve('simple.distinct', inputs=inputs)['Distinct']
-        out.set_index('Column', inplace=True)
-        out = out['NMiss'].astype(np.int64).rsub(self._numrows)
+        out = pd.concat(list(self._retrieve('aggregation.aggregate', 
+                                            varspecs=[
+                                                dict(names=list(inputs), agg='n')
+                                            ]).values()))
+        out = out.set_index('Column')['N']
+        out = out.astype('int64')
+        if isinstance(out, pd.DataFrame):
+            out.columns.name = None
         out.name = None
         out.index.name = None
         return out
@@ -3050,17 +3069,17 @@ class CASTable(ParamManager, ActionParamManager):
         categories = ['count', 'unique', 'top', 'freq', 'mean', 'std', 'min'] + \
                      ['%d%%' % x for x in range(101)] + \
                      ['max', 'nmiss', 'sum', 'stderr', 'var', 'uss'] + \
-                     ['cv', 'tvalue', 'probt', 'css', 'tstat']
+                     ['cv', 'tvalue', 'probt', 'css']
 
         labels = ['count', 'unique', 'mean', 'std', 'min', 'pct'] + \
                  ['max', 'nmiss', 'sum', 'stderr', 'var', 'uss'] + \
-                 ['cv', 'tvalue', 'probt', 'css', 'tstat']
+                 ['cv', 'tvalue', 'probt', 'css']
 
         for param in self._retrieve('builtins.reflect',
                                     action='simple.summary')[0]['actions'][0]['params']:
             if param['name'].lower() == 'subset':
                 allowed_values = [x.lower() for x in param['allowedValues']
-                                  if x.lower() not in ['n', 't']]
+                                  if x.lower() not in ['n', 't', 'tstat']]
 
         for item in allowed_values:
             if item not in labels:
@@ -3097,7 +3116,7 @@ class CASTable(ParamManager, ActionParamManager):
             ``percentiles=`` argument.  Character statistics include `count`,
             `unique`, `top`, and `freq`.  In addition, the following can be
             specified, `nmiss`, `sum`, `stderr`, `var`, `uss`, `cv`, `tvalue`,
-            `probt`, `css`, `tstat`, `kurtosis`, and `skewness`.  If `all` is
+            `probt`, `css`, `kurtosis`, and `skewness`.  If `all` is
             specified, all relevant statistics will be returned.
 
         Returns
@@ -3226,17 +3245,33 @@ class CASTable(ParamManager, ActionParamManager):
         idx = tuple([slice(None) for x in groups] + [labels])
         columns = [x for x in columns if x not in groups]
 
-        # Fill in counts using `count` method if possible
-        if not groups:
-            if has_character and ('nmiss' in labels or 'count' in labels):
-                count = self.count()
-                if 'nmiss' in labels:
-                    out.loc['nmiss'] = count.rsub(numrows)
-                if 'count' in labels:
-                    out.loc['count'] = count
-            return out.loc[idx[0], columns]
+        out = out[columns]
 
-        # TODO: Still need counts for character columns when by grouped
+        # Fill in counts using `count` / `nmiss` method if possible
+        if has_character:
+            nmiss = count = None
+            if 'nmiss' in labels:
+                nmiss = tbl.nmiss()
+                if isinstance(nmiss, pd.Series):
+                    nmiss = nmiss.to_frame().T
+                elif not isinstance(count, pd.DataFrame):
+                    nmiss = pd.DataFrame([[nmiss]], columns=columns) 
+                nmiss['__stat_label__'] = 'nmiss'
+                nmiss = nmiss.set_index('__stat_label__', append=bool(groups))
+                out = out.drop(['nmiss'], level=groups and -1 or None, errors='ignore')
+            if 'count' in labels:
+                count = tbl.count()
+                if isinstance(count, pd.Series):
+                    count = count.to_frame().T
+                elif not isinstance(count, pd.DataFrame):
+                    count = pd.DataFrame([[count]], columns=columns) 
+                count['__stat_label__'] = 'count'
+                count = count.set_index('__stat_label__', append=bool(groups))
+                out = out.drop(['count'], level=groups and -1 or None, errors='ignore')
+            out = pd.concat([out] + [x for x in [nmiss, count] if x is not None])
+
+        if not groups:
+            return out.loc[idx[0], columns]
 
         out.sort_index(inplace=True)
 
@@ -3881,9 +3916,23 @@ class CASTable(ParamManager, ActionParamManager):
 
     # Not DataFrame methods, but they are available statistics.
 
-    def nmiss(self):
+    def nmiss(self, axis=0, level=None, numeric_only=False):
         '''
-        Return the number of missing values in each column
+        Return total number of missing values in each column
+
+        Parameters
+        ----------
+        axis : int, optional
+            Not impelmented.
+        level : int or level name, optional
+            Not implemented.
+        numeric_only : boolean, optional
+            Include only numeric columns.
+
+        See Also
+        --------
+        :meth:`count`
+        :meth:`pandas.DataFrame.count`
 
         Returns
         -------
@@ -3893,7 +3942,38 @@ class CASTable(ParamManager, ActionParamManager):
             If By groups are specified.
 
         '''
-        return self._get_summary_stat('nmiss').astype(np.int64)
+        self._loadactionset('aggregation')
+
+        if numeric_only:
+            inputs = self._get_dtypes(include='numeric')
+        else:
+            inputs = self._columns or self.columns
+
+        groups = self.get_groupby_vars()
+        if groups:
+            inputs = [x for x in inputs if x not in groups]
+            out = pd.concat(list(self._retrieve('aggregation.aggregate',
+                                                varspecs=[
+                                                    dict(names=list(inputs), agg='nmiss')
+                                                ]).values())[1:])
+            out = out.set_index('Column', append=True)['NMiss']
+            out = out.unstack(level=-1)
+            out = out.astype('int64')
+            if isinstance(out, pd.DataFrame):
+                out.columns.name = None
+            return out[inputs]
+
+        out = pd.concat(list(self._retrieve('aggregation.aggregate',
+                                            varspecs=[
+                                                dict(names=list(inputs), agg='nmiss')
+                                            ]).values()))
+        out = out.set_index('Column')['NMiss']
+        out = out.astype('int64')
+        if isinstance(out, pd.DataFrame):
+            out.columns.name = None
+        out.name = None
+        out.index.name = None
+        return out
 
     def stderr(self):
         '''
@@ -8308,7 +8388,9 @@ class CASColumn(CASTable):
             If By groups are specified.
 
         '''
-        return self._get_summary_stat('nmiss')
+        if self.get_groupby_vars():
+            return CASTable.nmiss(self)[self.name]
+        return CASTable.nmiss(self).iloc[0]
 
     def stderr(self):
         '''
