@@ -1509,7 +1509,13 @@ class CASTable(ParamManager, ActionParamManager):
 
         '''
         # Short-circuit all protected / private attributes
-        if name.startswith('_'):
+        if re.match(r'^__[a-z_]+__$', name):
+            raise AttributeError(name)
+
+        if name.startswith('_repr_') or name.startswith('_ipython_'):
+            raise AttributeError(name)
+
+        if name in ['_typ']:
             raise AttributeError(name)
 
         origname = name
