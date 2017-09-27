@@ -229,8 +229,11 @@ class CAS(object):
                 port = cf.get_option('cas.port')
 
             # Detect protocol
-            if hasattr(hostname, 'startswith') and (hostname.startswith('http:') or
-                                                    hostname.startswith('https:')):
+            if isinstance(hostname, items_types) and (hostname[0].startswith('http:') or
+                                                      hostname[0].startswith('https:')):
+                protocol = hostname[0].split(':', 1)[0]
+            elif isinstance(hostname, six.string_types) and (hostname.startswith('http:') or
+                                                             hostname.startswith('https:')):
                 protocol = hostname.split(':', 1)[0]
             else:
                 protocol = self._detect_protocol(hostname, port, protocol=protocol)
@@ -258,8 +261,8 @@ class CAS(object):
             # Create a new connection
             else:
                 # Set up hostnames
-                if isinstance(hostname, items_types):
-                    hostname = ' '.join(a2n(x) for x in hostname if x)
+                if protocol not in ['http', 'https'] and isinstance(hostname, items_types):
+                    hostname = a2n(' '.join(a2n(x) for x in hostname if x))
 
                 # Set up authinfo paths
                 if authinfo is not None and password is None:
@@ -271,7 +274,7 @@ class CAS(object):
                     password = 'authinfo={%s}' % password
 
                 # Set up connection parameters
-                params = (a2n(hostname), int(port), a2n(username), a2n(password),
+                params = (hostname, int(port), a2n(username), a2n(password),
                           a2n(soptions), self._sw_error)
                 if protocol in ['http', 'https']:
                     self._sw_connection = rest.REST_CASConnection(*params)
@@ -377,7 +380,7 @@ class CAS(object):
 
         Parameters
         ----------
-        hostname : string
+        hostname : string or list
             The CAS host to connect to.
         port : int
             The CAS port to connect to.
@@ -393,27 +396,38 @@ class CAS(object):
         if protocol is None:
             protocol = cf.get_option('cas.protocol')
 
+        if isinstance(hostname, six.string_types):
+            hostname = re.split(r'\s+', hostname.strip())
+
         # Try to detect the proper protocol
         if protocol == 'auto':
 
             import socket
 
 #           for ptype in ['http', 'https']:
-            for ptype in ['http']:
-                try:
-                    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                    sock.connect((hostname, port))
-                    sock.send(('GET /cas HTTP/1.1\r\nHost: %s\r\nConnection: close\r\nUser-Agent: Python-SWAT\r\nCache-Control: no-cache\r\n\r\n' % hostname).encode('utf8'))
+            for host in hostname:
+                for ptype in ['http']:
+                    try:
+                        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                        sock.connect((host, port))
+                        sock.send(('GET /cas HTTP/1.1\r\n' +
+                                   ('Host: %s\r\n' % host) +
+                                   'Connection: close\r\n' +
+                                   'User-Agent: Python-SWAT\r\n' +
+                                   'Cache-Control: no-cache\r\n\r\n').encode('utf8'))
+    
+                        if sock.recv(4).decode('utf-8').lower() == 'http':
+                            protocol = ptype
+                            break
 
-                    if sock.recv(4).decode('utf-8').lower() == 'http':
-                        protocol = ptype
-                        break
+                    except Exception as err:
+                        pass
 
-                except Exception as err:
-                    pass
+                    finally:
+                        sock.close()
 
-                finally:
-                    sock.close()
+                if protocol == ptype:
+                    break
 
             if protocol == 'auto':
                 protocol = 'cas'

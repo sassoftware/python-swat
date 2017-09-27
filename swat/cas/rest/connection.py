@@ -26,6 +26,7 @@ from __future__ import print_function, division, absolute_import, unicode_litera
 import base64
 import json
 import os
+import re
 import requests
 import six
 import socket
@@ -164,30 +165,51 @@ class REST_CASConnection(object):
         session = _soptions.get('session')
         locale = _soptions.get('locale')
 
-        if hostname.startswith('http:') or hostname.startswith('https:'):
-            protocol = hostname.split(':', 1)[0]
+        self._orig_hostname = hostname
+        self._orig_port = port
+
+        if isinstance(hostname, six.string_types):
+            hostname = re.split('\s+', hostname.strip())
+        else:
+            hostname = list(hostname)
+
+        if hostname[0].startswith('http:') or hostname[0].startswith('https:'):
+            protocol = hostname[0].split(':', 1)[0]
             self._baseurl = hostname
-            urlparts = urllib.parse.urlparse(hostname)
-            self._hostname = urlparts.hostname
-            self._port = urlparts.port or port
+            self._hostname = []
+            self._port = []
+            for host in hostname:
+                urlparts = urllib.parse.urlparse(host)
+                self._hostname.append(urlparts.hostname)
+                self._port.append(urlparts.port or port)
 
         else:
-            try:
-                ipaddr = socket.gethostbyname(hostname)
-            except Exception as exc:
-                raise SWATError(str(exc))
-            self._baseurl = '%s://%s:%d' % (protocol, ipaddr, port)
-            self._hostname = hostname
-            self._port = port
+            self._baseurl = []
+            self._hostname = []
+            self._port = []
+            for host in hostname:
+                try:
+                    ipaddr = socket.gethostbyname(host)
+                except Exception as exc:
+                    raise SWATError(str(exc))
+                self._baseurl.append('%s://%s:%d' % (protocol, ipaddr, port))
+                self._hostname.append(host)
+                self._port.append(port)
+
+        self._host_index = 0
+        self._current_hostname = self._hostname[self._host_index]
+        self._current_baseurl = self._baseurl[self._host_index]
+        self._current_port = self._port[self._host_index]
 
         authinfo = None
         if password and password.startswith('authinfo={'):
             authinfo = password[11:-2]
             authinfo = authinfo.split('}{')
-            authinfo = query_authinfo(host=self._hostname, user=username,
-                                      protocol=self._port, path=authinfo)
+            authinfo = query_authinfo(host=self._current_hostname, user=username,
+                                      protocol=self._current_port, path=authinfo)
         elif not password:
-            authinfo = query_authinfo(host=self._hostname, user=username, protocol=self._port)
+            authinfo = query_authinfo(host=self._current_hostname, user=username,
+                                      protocol=self._current_port)
 
         if authinfo is not None:
             hostname = authinfo.get('host', hostname)
@@ -212,31 +234,57 @@ class REST_CASConnection(object):
             'Authorization': self._auth,
         })
 
-        try:
-            if session:
-                res = self._req_sess.get(urllib.parse.urljoin(self._baseurl,
-                                         'cas/sessions/%s' % session), data=b'')
-                out = json.loads(a2u(res.text, 'utf-8'))
-                if res.status_code != 200 and 'error' in out:
-                    raise SWATError(out['error'])
-                self._session = out['uuid']
-            else:
-                res = self._req_sess.put(urllib.parse.urljoin(self._baseurl,
-                                         'cas/sessions'), data=b'')
-                out = json.loads(a2u(res.text, 'utf-8'))
-                if res.status_code != 200 and 'error' in out:
-                    raise SWATError(out['error'])
-                self._session = out['session']
+        while True:
+            try:
+                if session:
+                    res = self._req_sess.get(urllib.parse.urljoin(self._current_baseurl,
+                                             'cas/sessions/%s' % session), data=b'')
+                    out = json.loads(a2u(res.text, 'utf-8'))
+                    if out.get('error', None):
+                        if out.get('details', None):
+                            raise SWATError('%s (%s)' % (out['error'], out['details']))
+                        raise SWATError(out['error'])
+                    self._session = out['uuid']
+                    break
 
-                if locale:
-                    self.invoke('session.setlocale', dict(locale=locale))
-                    if self._results.get('disposition').get('severity', '') == 'Error':
-                        raise SWATError(self._results.get('disposition')
-                                        .get('formattedStatus',
-                                             'Invalid locale: %s' % locale))
-                    self._results.clear()
-        except Exception as exc:
-            raise SWATError(str(exc))
+                else:
+                    res = self._req_sess.put(urllib.parse.urljoin(self._current_baseurl,
+                                             'cas/sessions'), data=b'')
+                    out = json.loads(a2u(res.text, 'utf-8'))
+                    if out.get('error', None):
+                        if out.get('details', None):
+                            raise SWATError('%s (%s)' % (out['error'], out['details']))
+                        raise SWATError(out['error'])
+                    self._session = out['session']
+
+                    if locale:
+                        self.invoke('session.setlocale', dict(locale=locale))
+                        if self._results.get('disposition').get('severity', '') == 'Error':
+                            raise SWATError(self._results.get('disposition')
+                                            .get('formattedStatus',
+                                                 'Invalid locale: %s' % locale))
+                        self._results.clear()
+                    break
+
+            except requests.ConnectionError as exc:
+                self._set_next_connection()
+
+            except Exception as exc:
+                raise SWATError(str(exc))
+
+    def _set_next_connection(self):
+        ''' Iterate to the next available controller '''
+        self._host_index += 1
+        try:
+            self._current_hostname = self._hostname[self._host_index]
+            self._current_baseurl = self._baseurl[self._host_index]
+            self._current_port = self._port[self._host_index]
+        except IndexError:
+            self._current_hostname = ''
+            self._current_baseurl = ''
+            self._current_port = -1
+            raise SWATError('Unable to connect to any URL: %s' %
+                            ', '.join(self._baseurl))
 
     def invoke(self, action_name, kwargs):
         '''
@@ -269,14 +317,20 @@ class REST_CASConnection(object):
             'Content-Length': str(len(post_data)),
         })
 
-        try:
-            res = self._req_sess.post(urllib.parse.urljoin(self._baseurl,
-                                                           'cas/sessions/%s/actions/%s' %
-                                                           (self._session, action_name)),
-                                      data=post_data)
-            res = res.text
-        except Exception as exc:
-            raise SWATError(str(exc))
+        while True:
+            try:
+                res = self._req_sess.post(urllib.parse.urljoin(self._current_baseurl,
+                                                               'cas/sessions/%s/actions/%s' %
+                                                               (self._session, action_name)),
+                                          data=post_data)
+                res = res.text
+                break
+
+            except requests.ConnectionError as exc:
+                self._set_next_connection()
+
+            except Exception as exc:
+                raise SWATError(str(exc))
 
         try:
             self._results = json.loads(a2u(res, 'utf-8'), strict=False)
@@ -328,14 +382,14 @@ class REST_CASConnection(object):
         ''' Copy the connection object '''
         username, password = base64.b64decode(
                                  self._auth.split(b' ', 1)[-1]).split(b':', 1)
-        return type(self)(a2u(self.getHostname()), self.getPort(),
+        return type(self)(self._orig_hostname, self._orig_port,
                           a2u(username), a2u(password),
                           self._soptions,
                           self._error)
 
     def getHostname(self):
         ''' Get the connection hostname '''
-        return self._hostname
+        return self._current_hostname
 
     def getUsername(self):
         ''' Get the connection username '''
@@ -343,7 +397,7 @@ class REST_CASConnection(object):
 
     def getPort(self):
         ''' Get the connection port '''
-        return self._port
+        return self._current_port
 
     def getSession(self):
         ''' Get the connection session ID '''
@@ -356,7 +410,7 @@ class REST_CASConnection(object):
                 'Content-Type': 'application/json',
                 'Content-Length': '0',
             })
-            res = self._req_sess.delete(urllib.parse.urljoin(self._baseurl,
+            res = self._req_sess.delete(urllib.parse.urljoin(self._current_baseurl,
                                         'cas/sessions/%s' % self._session), data=b'')
             self._session = None
             return res.status_code
@@ -365,21 +419,30 @@ class REST_CASConnection(object):
         ''' Upload a data file '''
         with open(file_name, 'rb') as datafile:
             data = datafile.read()
+
         self._req_sess.headers.update({
             'Content-Type': 'application/octet-stream',
             'Content-Length': str(len(data)),
             'JSON-Parameters': json.dumps(_normalize_params(params))
         })
-        try:
-            res = self._req_sess.put(
-                      urllib.parse.urljoin(self._baseurl,
-                                           'cas/sessions/%s/actions/table.upload' %
-                                           self._session), data=data)
-            res = res.text
-        except Exception as exc:
-            raise SWATError(str(exc))
-        finally:
-            del self._req_sess.headers['JSON-Parameters']
+
+        while True:
+            try:
+                res = self._req_sess.put(
+                          urllib.parse.urljoin(self._current_baseurl,
+                                               'cas/sessions/%s/actions/table.upload' %
+                                               self._session), data=data)
+                res = res.text
+                break
+
+            except requests.ConnectionError as exc:
+                self._set_next_connection()
+
+            except Exception as exc:
+                raise SWATError(str(exc))
+
+            finally:
+                del self._req_sess.headers['JSON-Parameters']
 
         try:
             out = json.loads(a2u(res, 'utf-8'), strict=False)
