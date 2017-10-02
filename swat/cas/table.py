@@ -44,7 +44,8 @@ from .utils.params import ParamManager, ActionParamManager
 
 patch_pandas_sort()
 
-pd_version = tuple([int(x) for x in pd.__version__.split('.')])
+pd_version = tuple([int(x) for x in re.match(r'^(\d+)\.(\d+)\.(\d+)',
+                                             pd.__version__).groups()])
 
 OPERATOR_NAMES = {
     '+': 'add',
@@ -2928,10 +2929,10 @@ class CASTable(ParamManager, ActionParamManager):
         groups = self.get_groupby_vars()
         if groups:
             inputs = [x for x in inputs if x not in groups]
-            out = pd.concat(list(self._retrieve('aggregation.aggregate', 
-                                                varspecs=[
-                                                    dict(names=list(inputs), agg='n')
-                                                ]).values())[1:])
+            out = self._retrieve('aggregation.aggregate', 
+                                 varspecs=[dict(names=list(inputs), agg='n')])
+            out.pop('ByGroupInfo', None)
+            out = pd.concat(list(out.values()))
             out = out.set_index('Column', append=True)['N']
             out = out.unstack(level=-1)
             out = out.astype('int64')
@@ -2944,6 +2945,7 @@ class CASTable(ParamManager, ActionParamManager):
                                                 dict(names=list(inputs), agg='n')
                                             ]).values()))
         out = out.set_index('Column')['N']
+        out = out.loc[inputs]
         out = out.astype('int64')
         if isinstance(out, pd.DataFrame):
             out.columns.name = None
@@ -3958,10 +3960,10 @@ class CASTable(ParamManager, ActionParamManager):
         groups = self.get_groupby_vars()
         if groups:
             inputs = [x for x in inputs if x not in groups]
-            out = pd.concat(list(self._retrieve('aggregation.aggregate',
-                                                varspecs=[
-                                                    dict(names=list(inputs), agg='nmiss')
-                                                ]).values())[1:])
+            out = self._retrieve('aggregation.aggregate',
+                                 varspecs=[dict(names=list(inputs), agg='nmiss')])
+            out.pop('ByGroupInfo', None)
+            out = pd.concat(list(out.values()))
             out = out.set_index('Column', append=True)['NMiss']
             out = out.unstack(level=-1)
             out = out.astype('int64')
@@ -3974,6 +3976,7 @@ class CASTable(ParamManager, ActionParamManager):
                                                 dict(names=list(inputs), agg='nmiss')
                                             ]).values()))
         out = out.set_index('Column')['NMiss']
+        out = out.loc[inputs]
         out = out.astype('int64')
         if isinstance(out, pd.DataFrame):
             out.columns.name = None

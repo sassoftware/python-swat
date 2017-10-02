@@ -40,7 +40,8 @@ from swat.utils.compat import patch_pandas_sort
 
 patch_pandas_sort()
 
-pd_version = tuple([int(x) for x in pd.__version__.split('.')])
+pd_version = tuple([int(x) for x in re.match(r'^(\d+)\.(\d+)\.(\d+)',
+                                             pd.__version__).groups()])
 
 # Pick sort keys that will match across SAS and Pandas sorting orders
 SORT_KEYS = ['Origin', 'MSRP', 'Horsepower', 'Model']
