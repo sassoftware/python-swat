@@ -263,6 +263,8 @@ class CAS(object):
                 # Set up hostnames
                 if protocol not in ['http', 'https'] and isinstance(hostname, items_types):
                     hostname = a2n(' '.join(a2n(x) for x in hostname if x))
+                elif isinstance(hostname, six.string_types):
+                    hostname = a2n(hostname)
 
                 # Set up authinfo paths
                 if authinfo is not None and password is None:

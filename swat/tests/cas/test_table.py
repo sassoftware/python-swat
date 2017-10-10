@@ -4484,8 +4484,10 @@ class TestCASTable(tm.TestCase):
             self.assertPlotsEqual(tbl.hist()[3][1], df.hist()[3][1])
             self.assertPlotsEqual(tbl.hist()[3][2], df.hist()[3][2])
 
-        except ImportError as msg:
-            tm.TestCase.skipTest(self, '%s' % msg)
+        except Exception as msg:
+            if type(msg).__name__ in ['ImportError', 'TclError']:
+                tm.TestCase.skipTest(self, '%s' % msg)
+            raise
 
     def test_boxplot(self):
         tbl = self.table
@@ -4497,8 +4499,10 @@ class TestCASTable(tm.TestCase):
                 df[['MSRP', 'Invoice']].boxplot(return_type='axes')
             )
 
-        except ImportError as msg:
-            tm.TestCase.skipTest(self, '%s' % msg)
+        except Exception as msg:
+            if type(msg).__name__ in ['ImportError', 'TclError']:
+                tm.TestCase.skipTest(self, '%s' % msg)
+            raise
 
     def test_plot(self):
         tbl = self.table
@@ -4533,8 +4537,10 @@ class TestCASTable(tm.TestCase):
                 df.sort_values(['MSRP', 'Invoice']).plot('Make', ['MSRP', 'Invoice'], kind='bar')
             )
 
-        except ImportError as msg:
-            tm.TestCase.skipTest(self, '%s' % msg)
+        except Exception as msg:
+            if type(msg).__name__ in ['ImportError', 'TclError']:
+                tm.TestCase.skipTest(self, '%s' % msg)
+            raise
 
     def test_plot_sampling(self):
         tbl = self.table
@@ -4547,8 +4553,10 @@ class TestCASTable(tm.TestCase):
                    .sort_values(['MSRP', 'Invoice']).plot('MSRP', 'Invoice')
             )
 
-        except ImportError as msg:
-            tm.TestCase.skipTest(self, '%s' % msg)
+        except Exception as msg:
+            if type(msg).__name__ in ['ImportError', 'TclError']:
+                tm.TestCase.skipTest(self, '%s' % msg)
+            raise
 
     def test_plot_area(self):
         tbl = self.table
@@ -4560,8 +4568,10 @@ class TestCASTable(tm.TestCase):
                 df.sort_values(['MSRP', 'Invoice']).plot.area('Make', ['MSRP', 'Invoice'])
             )
 
-        except ImportError as msg:
-            tm.TestCase.skipTest(self, '%s' % msg)
+        except Exception as msg:
+            if type(msg).__name__ in ['ImportError', 'TclError']:
+                tm.TestCase.skipTest(self, '%s' % msg)
+            raise
 
     def test_plot_bar(self):
         tbl = self.table
@@ -4573,8 +4583,10 @@ class TestCASTable(tm.TestCase):
                 df['Cylinders'].sort_values().plot.bar()
             )
 
-        except ImportError as msg:
-            tm.TestCase.skipTest(self, '%s' % msg)
+        except Exception as msg:
+            if type(msg).__name__ in ['ImportError', 'TclError']:
+                tm.TestCase.skipTest(self, '%s' % msg)
+            raise
 
     def test_plot_barh(self):
         tbl = self.table
@@ -4586,8 +4598,10 @@ class TestCASTable(tm.TestCase):
                 df['Cylinders'].sort_values().plot.barh()
             )
 
-        except ImportError as msg:
-            tm.TestCase.skipTest(self, '%s' % msg)
+        except Exception as msg:
+            if type(msg).__name__ in ['ImportError', 'TclError']:
+                tm.TestCase.skipTest(self, '%s' % msg)
+            raise
 
     def test_plot_box(self):
         tbl = self.table
@@ -4599,8 +4613,10 @@ class TestCASTable(tm.TestCase):
                 df[['MSRP', 'Invoice']].plot.box()
             )
 
-        except ImportError as msg:
-            tm.TestCase.skipTest(self, '%s' % msg)
+        except Exception as msg:
+            if type(msg).__name__ in ['ImportError', 'TclError']:
+                tm.TestCase.skipTest(self, '%s' % msg)
+            raise
 
     def test_plot_density(self):
         tbl = self.table
@@ -4612,8 +4628,10 @@ class TestCASTable(tm.TestCase):
                 df[['MSRP', 'Invoice']].plot.density()
             )
 
-        except ImportError as msg:
-            tm.TestCase.skipTest(self, '%s' % msg)
+        except Exception as msg:
+            if type(msg).__name__ in ['ImportError', 'TclError']:
+                tm.TestCase.skipTest(self, '%s' % msg)
+            raise
 
     def test_plot_hexbin(self):
         tbl = self.table
@@ -4625,8 +4643,10 @@ class TestCASTable(tm.TestCase):
                 df.plot.hexbin('MSRP', 'Horsepower')
             )
 
-        except ImportError as msg:
-            tm.TestCase.skipTest(self, '%s' % msg)
+        except Exception as msg:
+            if type(msg).__name__ in ['ImportError', 'TclError']:
+                tm.TestCase.skipTest(self, '%s' % msg)
+            raise
 
     def test_plot_hist(self):
         tbl = self.table
@@ -4638,8 +4658,10 @@ class TestCASTable(tm.TestCase):
                 df.plot.hist(),
             )
 
-        except ImportError as msg:
-            tm.TestCase.skipTest(self, '%s' % msg)
+        except Exception as msg:
+            if type(msg).__name__ in ['ImportError', 'TclError']:
+                tm.TestCase.skipTest(self, '%s' % msg)
+            raise
 
     def test_plot_kde(self):
         tbl = self.table
@@ -4651,8 +4673,10 @@ class TestCASTable(tm.TestCase):
                 df[['MSRP', 'Invoice']].plot.kde()
             )
 
-        except ImportError as msg:
-            tm.TestCase.skipTest(self, '%s' % msg)
+        except Exception as msg:
+            if type(msg).__name__ in ['ImportError', 'TclError']:
+                tm.TestCase.skipTest(self, '%s' % msg)
+            raise
 
     def test_plot_line(self):
         tbl = self.table
@@ -4664,8 +4688,10 @@ class TestCASTable(tm.TestCase):
                 df.sort_values(['MSRP', 'Invoice']).plot.line('MSRP', 'Invoice')
             )
 
-        except ImportError as msg:
-            tm.TestCase.skipTest(self, '%s' % msg)
+        except Exception as msg:
+            if type(msg).__name__ in ['ImportError', 'TclError']:
+                tm.TestCase.skipTest(self, '%s' % msg)
+            raise
 
     def test_plot_pie(self):
         tbl = self.table
@@ -4677,8 +4703,10 @@ class TestCASTable(tm.TestCase):
                 df['Cylinders'].sort_values().plot.pie()
             )
 
-        except ImportError as msg:
-            tm.TestCase.skipTest(self, '%s' % msg)
+        except Exception as msg:
+            if type(msg).__name__ in ['ImportError', 'TclError']:
+                tm.TestCase.skipTest(self, '%s' % msg)
+            raise
 
     def test_plot_scatter(self):
         tbl = self.table
@@ -4690,8 +4718,10 @@ class TestCASTable(tm.TestCase):
                 df.plot.scatter('MSRP', 'Horsepower')
             )
 
-        except ImportError as msg:
-            tm.TestCase.skipTest(self, '%s' % msg)
+        except Exception as msg:
+            if type(msg).__name__ in ['ImportError', 'TclError']:
+                tm.TestCase.skipTest(self, '%s' % msg)
+            raise
 
     def test_eval(self):
         tbl = self.table

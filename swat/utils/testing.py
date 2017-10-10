@@ -162,15 +162,16 @@ def get_host_port_proto():
     # If there is no host or port in the environment, look for .casrc
     casrc = None
     rcname = '.casrc'
-    homepath = os.path.join(os.path.expanduser(os.environ.get('HOME', '~')), rcname)
+    homepath = os.path.abspath(os.path.normpath(
+                   os.path.join(os.path.expanduser(os.environ.get('HOME', '~')), rcname)))
     upath = os.path.join(r'u:', rcname)
     cfgfile = os.path.abspath(os.path.normpath(rcname))
 
     while not os.path.isfile(cfgfile):
-        if os.path.samefile(os.path.dirname(homepath), os.path.dirname(cfgfile)):
+        if os.path.dirname(homepath) == os.path.dirname(cfgfile):
             break
         newcfgfile = os.path.abspath(os.path.normpath(rcname)) 
-        if os.path.samefile(os.path.dirname(cfgfile), os.path.dirname(newcfgfile)):
+        if os.path.dirname(cfgfile) == os.path.dirname(newcfgfile):
             break
 
     if os.path.isfile(cfgfile):
