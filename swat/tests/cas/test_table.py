@@ -3279,7 +3279,7 @@ class TestCASTable(tm.TestCase):
     def test_column_to_xarray(self):
         try:
             import xarray
-        except ImportError:
+        except (ImportError, ValueError):
             tm.TestCase.skipTest(self, 'Need xarray installed')
 
         df = self.get_cars_df(all_doubles=False).sort_values(['Make'])
@@ -4485,7 +4485,7 @@ class TestCASTable(tm.TestCase):
             self.assertPlotsEqual(tbl.hist()[3][2], df.hist()[3][2])
 
         except Exception as msg:
-            if type(msg).__name__ in ['ImportError', 'TclError']:
+            if isinstance(msg, ImportError) or type(msg).__name__ in ['TclError']:
                 tm.TestCase.skipTest(self, '%s' % msg)
             raise
 
@@ -4500,7 +4500,7 @@ class TestCASTable(tm.TestCase):
             )
 
         except Exception as msg:
-            if type(msg).__name__ in ['ImportError', 'TclError']:
+            if isinstance(msg, ImportError) or type(msg).__name__ in ['TclError']:
                 tm.TestCase.skipTest(self, '%s' % msg)
             raise
 
@@ -4538,7 +4538,7 @@ class TestCASTable(tm.TestCase):
             )
 
         except Exception as msg:
-            if type(msg).__name__ in ['ImportError', 'TclError']:
+            if isinstance(msg, ImportError) or type(msg).__name__ in ['TclError']:
                 tm.TestCase.skipTest(self, '%s' % msg)
             raise
 
@@ -4554,7 +4554,7 @@ class TestCASTable(tm.TestCase):
             )
 
         except Exception as msg:
-            if type(msg).__name__ in ['ImportError', 'TclError']:
+            if isinstance(msg, ImportError) or type(msg).__name__ in ['TclError']:
                 tm.TestCase.skipTest(self, '%s' % msg)
             raise
 
@@ -4569,7 +4569,7 @@ class TestCASTable(tm.TestCase):
             )
 
         except Exception as msg:
-            if type(msg).__name__ in ['ImportError', 'TclError']:
+            if isinstance(msg, ImportError) or type(msg).__name__ in ['TclError']:
                 tm.TestCase.skipTest(self, '%s' % msg)
             raise
 
@@ -4584,7 +4584,7 @@ class TestCASTable(tm.TestCase):
             )
 
         except Exception as msg:
-            if type(msg).__name__ in ['ImportError', 'TclError']:
+            if isinstance(msg, ImportError) or type(msg).__name__ in ['TclError']:
                 tm.TestCase.skipTest(self, '%s' % msg)
             raise
 
@@ -4599,7 +4599,7 @@ class TestCASTable(tm.TestCase):
             )
 
         except Exception as msg:
-            if type(msg).__name__ in ['ImportError', 'TclError']:
+            if isinstance(msg, ImportError) or type(msg).__name__ in ['TclError']:
                 tm.TestCase.skipTest(self, '%s' % msg)
             raise
 
@@ -4614,7 +4614,7 @@ class TestCASTable(tm.TestCase):
             )
 
         except Exception as msg:
-            if type(msg).__name__ in ['ImportError', 'TclError']:
+            if isinstance(msg, ImportError) or type(msg).__name__ in ['TclError']:
                 tm.TestCase.skipTest(self, '%s' % msg)
             raise
 
@@ -4629,7 +4629,7 @@ class TestCASTable(tm.TestCase):
             )
 
         except Exception as msg:
-            if type(msg).__name__ in ['ImportError', 'TclError']:
+            if isinstance(msg, ImportError) or type(msg).__name__ in ['TclError']:
                 tm.TestCase.skipTest(self, '%s' % msg)
             raise
 
@@ -4644,7 +4644,7 @@ class TestCASTable(tm.TestCase):
             )
 
         except Exception as msg:
-            if type(msg).__name__ in ['ImportError', 'TclError']:
+            if isinstance(msg, ImportError) or type(msg).__name__ in ['TclError']:
                 tm.TestCase.skipTest(self, '%s' % msg)
             raise
 
@@ -4659,7 +4659,7 @@ class TestCASTable(tm.TestCase):
             )
 
         except Exception as msg:
-            if type(msg).__name__ in ['ImportError', 'TclError']:
+            if isinstance(msg, ImportError) or type(msg).__name__ in ['TclError']:
                 tm.TestCase.skipTest(self, '%s' % msg)
             raise
 
@@ -4674,7 +4674,7 @@ class TestCASTable(tm.TestCase):
             )
 
         except Exception as msg:
-            if type(msg).__name__ in ['ImportError', 'TclError']:
+            if isinstance(msg, ImportError) or type(msg).__name__ in ['TclError']:
                 tm.TestCase.skipTest(self, '%s' % msg)
             raise
 
@@ -4689,7 +4689,7 @@ class TestCASTable(tm.TestCase):
             )
 
         except Exception as msg:
-            if type(msg).__name__ in ['ImportError', 'TclError']:
+            if isinstance(msg, ImportError) or type(msg).__name__ in ['TclError']:
                 tm.TestCase.skipTest(self, '%s' % msg)
             raise
 
@@ -4704,7 +4704,7 @@ class TestCASTable(tm.TestCase):
             )
 
         except Exception as msg:
-            if type(msg).__name__ in ['ImportError', 'TclError']:
+            if isinstance(msg, ImportError) or type(msg).__name__ in ['TclError']:
                 tm.TestCase.skipTest(self, '%s' % msg)
             raise
 
@@ -4719,7 +4719,7 @@ class TestCASTable(tm.TestCase):
             )
 
         except Exception as msg:
-            if type(msg).__name__ in ['ImportError', 'TclError']:
+            if isinstance(msg, ImportError) or type(msg).__name__ in ['TclError']:
                 tm.TestCase.skipTest(self, '%s' % msg)
             raise
 

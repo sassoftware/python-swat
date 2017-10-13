@@ -510,7 +510,7 @@ def python2cas_timestamp(pyts):
 
     '''
     delta = pyts - CAS_EPOCH
-    if isinstance(delta, pd.tslib.NaTType):
+    if isinstance(delta, type(pd.NaT)):
         # TODO: Change when integers support missing values
         return 0
     return int64((delta.days * 24 * 60 * 60 * 10**6) +
@@ -569,7 +569,7 @@ def python2cas_date(pydt):
         delta = datetime.date.today() - CAS_EPOCH.date()
     else:
         delta = pydt - CAS_EPOCH.date()
-    if isinstance(delta, pd.tslib.NaTType):
+    if isinstance(delta, type(pd.NaT)):
         # TODO: Change when integers support missing values
         return 0
     return int32(delta.days)
@@ -626,7 +626,7 @@ def python2sas_date(pydt):
         delta = datetime.date.today() - CAS_EPOCH.date()
     else:
         delta = pydt - CAS_EPOCH.date()
-    if isinstance(delta, pd.tslib.NaTType):
+    if isinstance(delta, type(pd.NaT)):
         return np.nan
     return float(delta.days)
 
