@@ -1120,7 +1120,7 @@ class CAS(object):
 
         return signature
 
-    def upload(self, data, importoptions=None, casout=None):
+    def upload(self, data, importoptions=None, casout=None, **kwargs):
         '''
         Upload data from a local file into a CAS table
 
@@ -1157,6 +1157,8 @@ class CAS(object):
             Import options for the table.upload action.
         casout : dict, optional
             Output table definition for the `table.upload` action.
+        **kwargs : keyword arguments, optional
+            Additional parameters to the `table.upload` action.
 
         Examples
         --------
@@ -1217,8 +1219,6 @@ class CAS(object):
             'sas7bdat': 'basesas',
         }
 
-        kwargs = {}
-
         if importoptions is None:
             importoptions = {}
         if isinstance(importoptions, (dict, ParamManager)) and \
@@ -1256,7 +1256,7 @@ class CAS(object):
 
         return self._get_results([(CASResponse(resp, connection=self), self)])
 
-    def upload_file(self, data, importoptions=None, casout=None):
+    def upload_file(self, data, importoptions=None, casout=None, **kwargs):
         '''
         Upload a client-side data file to CAS and parse it into a CAS table
 
@@ -1270,18 +1270,21 @@ class CAS(object):
             Import options for the table.upload action.
         casout : dict, optional
             Output table definition for the `table.upload` action.
+        **kwargs : keyword arguments, optional
+            Additional parameters to the `table.upload` action.
 
         Returns
         -------
         :class:`CASTable`
 
         '''
-        out = self.upload(data, importoptions=importoptions, casout=casout)
+        out = self.upload(data, importoptions=importoptions,
+                          casout=casout, **kwargs)
         if out.severity > 1:
             raise SWATError(out.status)
         return out['casTable']
 
-    def upload_frame(self, data, importoptions=None, casout=None):
+    def upload_frame(self, data, importoptions=None, casout=None, **kwargs):
         '''
         Upload a client-side data file to CAS and parse it into a CAS table
 
@@ -1293,13 +1296,16 @@ class CAS(object):
             Import options for the table.upload action.
         casout : dict, optional
             Output table definition for the `table.upload` action.
+        **kwargs : keyword arguments, optional
+            Additional parameters to the `table.upload` action.
 
         Returns
         -------
         :class:`CASTable`
 
         '''
-        out = self.upload(data, importoptions=importoptions, casout=casout)
+        out = self.upload(data, importoptions=importoptions,
+                          casout=casout, **kwargs)
         if out.severity > 1:
             raise SWATError(out.status)
         return out['casTable']
