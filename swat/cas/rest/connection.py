@@ -319,6 +319,8 @@ class REST_CASConnection(object):
             'Content-Length': str(len(post_data)),
         })
 
+        result_id = None
+
         while True:
             try:
                 res = self._req_sess.post(urllib.parse.urljoin(self._current_baseurl,
@@ -330,6 +332,30 @@ class REST_CASConnection(object):
 
             except requests.ConnectionError as exc:
                 self._set_next_connection()
+
+                # Get ID of results
+                action_name = 'session.listresults'
+                post_data = a2u('').encode('utf-8')
+                self._req_sess.headers.update({
+                    'Content-Type': 'application/json',
+                    'Content-Length': str(len(post_data)),
+                })
+
+                res = self._req_sess.post(urllib.parse.urljoin(self._current_baseurl,
+                                                               'cas/sessions/%s/actions/%s' %
+                                                               (self._session, action_name)),
+                                          data=post_data)
+
+                out = json.loads(a2u(res.text, 'utf-8'), strict=False)
+                result_id = out['results']['Queued Results']['rows'][0][0]
+
+                # Setup retrieval of results from ID
+                action_name = 'session.fetchresult'
+                post_data = a2u('{"id":%s}' % result_id).encode('utf-8')
+                self._req_sess.headers.update({
+                    'Content-Type': 'application/json',
+                    'Content-Length': str(len(post_data)),
+                })
 
             except Exception as exc:
                 raise SWATError(str(exc))
