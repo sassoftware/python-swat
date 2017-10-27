@@ -1181,6 +1181,14 @@ class CAS(object):
         delete = False
         name = None
 
+        for key, value in list(kwargs.items()):
+            if importoptions is None and key.lower() == 'importoptions':
+                importoptions = value
+                del kwargs[key]
+            elif casout is None and key.lower() == 'casout':
+                casout = value
+                del kwargs[key]
+
         import pandas as pd
         if isinstance(data, pd.DataFrame):
             import tempfile
@@ -1278,10 +1286,20 @@ class CAS(object):
         :class:`CASTable`
 
         '''
+        for key, value in list(kwargs.items()):
+            if importoptions is None and key.lower() == 'importoptions':
+                importoptions = value
+                del kwargs[key] 
+            elif casout is None and key.lower() == 'casout':
+                casout = value
+                del kwargs[key] 
+
         out = self.upload(data, importoptions=importoptions,
                           casout=casout, **kwargs)
+
         if out.severity > 1:
             raise SWATError(out.status)
+
         return out['casTable']
 
     def upload_frame(self, data, importoptions=None, casout=None, **kwargs):
@@ -1304,10 +1322,20 @@ class CAS(object):
         :class:`CASTable`
 
         '''
+        for key, value in list(kwargs.items()):
+            if importoptions is None and key.lower() == 'importoptions':
+                importoptions = value
+                del kwargs[key]
+            elif casout is None and key.lower() == 'casout':
+                casout = value
+                del kwargs[key]
+
         out = self.upload(data, importoptions=importoptions,
                           casout=casout, **kwargs)
+
         if out.severity > 1:
             raise SWATError(out.status)
+
         return out['casTable']
 
     def invoke(self, _name_, **kwargs):
