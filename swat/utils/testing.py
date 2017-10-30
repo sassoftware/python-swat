@@ -73,8 +73,8 @@ class TestCase(unittest.TestCase):
         if hasattr(b, 'to_frame'):
             b = b.to_frame()
         if sortby:
-            a = a.sort_values(sortby)
-            b = b.sort_values(sortby)
+            a = a.sort_values(sortby, na_position='first')
+            b = b.sort_values(sortby, na_position='first')
         self.assertEqual(list(a.columns), list(b.columns))
         a = a.fillna(value=fillna)
         b = b.fillna(value=fillna)

@@ -10,6 +10,17 @@ API Reference
 
 .. _api.functions:
 
+Utility Functions
+-----------------
+
+.. currentmodule:: swat.functions
+
+.. autosummary::
+   :toctree: generated/
+
+   concat
+   merge
+
 
 CAS
 ---
@@ -164,7 +175,6 @@ Utilities
 .. autosummary::
    :toctree: generated/
 
-   concat
    reshape_bygroups
 
 
@@ -293,29 +303,34 @@ Computations / Descriptive Stats
 .. autosummary::
    :toctree: generated/
 
+   CASTable.abs
+   CASTable.all
+   CASTable.any
+   CASTable.clip
+   CASTable.clip_lower
+   CASTable.clip_upper
    CASTable.corr
    CASTable.count
+   CASTable.css
+   CASTable.cv
    CASTable.describe
    CASTable.eval
+   CASTable.kurt
    CASTable.max
    CASTable.mean
    CASTable.median
    CASTable.min
    CASTable.mode
+   CASTable.nmiss
+   CASTable.probt
    CASTable.quantile
+   CASTable.skew
+   CASTable.stderr
    CASTable.sum
    CASTable.std
-   CASTable.var
-   CASTable.nmiss
-   CASTable.stderr
-   CASTable.uss
-   CASTable.css
-   CASTable.cv
    CASTable.tvalue
-   CASTable.tstat
-   CASTable.probt
-   CASTable.skewness
-   CASTable.kurtosis
+   CASTable.uss
+   CASTable.var
 
 Reindexing / Selection / Label manipulation
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -341,6 +356,15 @@ Sorting
    CASTable.nlargest
    CASTable.nsmallest
    CASTable.to_xarray
+
+Combining / Merging
+~~~~~~~~~~~~~~~~~~~
+
+.. autosummary::
+   :toctree: generated/
+
+   CASTable.append
+   CASTable.merge
 
 Plotting
 ~~~~~~~~
@@ -548,10 +572,9 @@ Computations / Descriptive Stats
    CASColumn.css
    CASColumn.cv
    CASColumn.tvalue
-   CASColumn.tstat
    CASColumn.probt
-   CASColumn.skewness
-   CASColumn.kurtosis
+   CASColumn.skew
+   CASColumn.kurt
    CASColumn.unique
    CASColumn.nunique
    CASColumn.is_unique
@@ -751,9 +774,8 @@ Computations / Descriptive Statistics
    CASTableGroupBy.stderr
    CASTableGroupBy.sum
    CASTableGroupBy.tvalue
-   CASTableGroupBy.tstat
-   CASTableGroupBy.skewness
-   CASTableGroupBy.kurtosis
+   CASTableGroupBy.skew
+   CASTableGroupBy.kurt
    CASTableGroupBy.unique
    CASTableGroupBy.uss
    CASTableGroupBy.value_counts

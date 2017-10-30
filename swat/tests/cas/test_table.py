@@ -34,6 +34,7 @@ import swat
 import swat.utils.testing as tm
 import sys
 import unittest
+from swat.cas.table import concat
 
 from PIL import Image
 from swat.utils.compat import patch_pandas_sort
@@ -1269,6 +1270,45 @@ class TestCASTable(tm.TestCase):
         # Only character columns
         with self.assertRaises(swat.SWATError):
             out = self.table.datastep('keep Make Model Type Origin').mean().tolist()
+
+    def test_skew(self):
+        skew = self.table.skew()
+        dfskew = self.get_cars_df().skew()
+        self.assertTablesEqual(skew, dfskew, precision=4)
+
+        skew = self.table.skew(numeric_only=True)
+        dfskew = self.get_cars_df().skew(numeric_only=True)
+        self.assertTablesEqual(skew, dfskew, precision=4)
+
+        # Only character columns
+        with self.assertRaises(swat.SWATError):
+            out = self.table.datastep('keep Make Model Type Origin').skew().tolist()
+
+        skew = self.table.groupby('Origin').skew()
+        dfskew = self.get_cars_df().groupby('Origin').skew()
+        # Pandas messes up the column order
+        dfskew = dfskew[[x for x in self.table.columns if x in dfskew.columns]]
+        self.assertTablesEqual(skew, dfskew, precision=4)
+
+    def test_kurt(self):
+        kurt = self.table.kurt()
+        dfkurt = self.get_cars_df().kurt()
+        self.assertTablesEqual(kurt, dfkurt, precision=4)
+
+        kurt = self.table.kurt(numeric_only=True)
+        dfkurt = self.get_cars_df().kurt(numeric_only=True)
+        self.assertTablesEqual(kurt, dfkurt, precision=4)
+
+        # Only character columns
+        with self.assertRaises(swat.SWATError):
+            out = self.table.datastep('keep Make Model Type Origin').kurt().tolist()
+
+        # Not supported by Pandas
+#       kurt = self.table.groupby('Origin').kurt()
+#       dfkurt = self.get_cars_df().groupby('Origin').kurt()
+#       # Pandas messes up the column order
+#       dfkurt = dfkurt[[x for x in self.table.columns if x in dfskew.columns]]
+#       self.assertTablesEqual(kurt, dfkurt, precision=4)
 
     @unittest.skipIf(int(pd.__version__.split('.')[1]) < 16, 'Need newer version of Pandas')
     def test_min(self):
@@ -4745,6 +4785,309 @@ class TestCASTable(tm.TestCase):
         self.assertTrue(dfcol is not df)
         self.assertTrue(tblcol is not tbl)
         self.assertTablesEqual(dfcol, tblcol)
+
+    def _get_comp_data(self, limit=None):
+        df = pd.read_csv(six.StringIO('''Origin,A,B,C,D,E,X,Y,Z
+        Asia,0,-94,0,-70,,X,a
+        Asia,34,-12,-33,74,,X,b,
+        Asia,0,40,0,77,,X,c,
+        Europe,0,69,0,7,,X,,
+        Europe,0,88,0,-46,,X,e,
+        Europe,56,6,89,,,X,f,
+        USA,33,-33,-52,62,,X,,
+        USA,99,-60,0,76,,X,,
+        USA,0,-12,-80,-90,,X,,
+        USA,39,15,-72,-42,,X,,'''))
+        df['Y'] = df['Y'].fillna('')
+        df['Z'] = df['Z'].fillna('')
+
+        if limit is not None:
+            df = df.iloc[:limit]
+
+        tbl = self.s.upload_frame(df, 
+          importoptions=dict(vars=[
+              dict(name='Origin', type='varchar'),
+              dict(name='A', type='double'),
+              dict(name='B', type='double'),
+              dict(name='C', type='double'),
+              dict(name='D', type='double'),
+              dict(name='E', type='double'),
+              dict(name='X', type='varchar'),
+              dict(name='Y', type='varchar'),
+              dict(name='Z', type='varchar')
+          ]))
+
+        return df, tbl
+
+    def test_abs(self):
+        df, tbl = self._get_comp_data()
+        self.assertTablesEqual(df[['A', 'B', 'C', 'D', 'E']].abs(),
+                               tbl[['A', 'B', 'C', 'D', 'E']].abs()) 
+
+    def test_all(self):
+        df, tbl = self._get_comp_data()
+
+        self.assertColsEqual(df.all(), tbl.all())
+        self.assertColsEqual(df.all(skipna=True), tbl.all(skipna=True))
+
+        # When skipna=False, pandas doesn't use booleans anymore
+        self.assertColsEqual(df.all(skipna=False).apply(lambda x: pd.isnull(x) and x or bool(x)),
+                             tbl.all(skipna=False))
+
+        # By groups
+        self.assertTablesEqual(df.groupby('Origin').all(), tbl.groupby('Origin').all())
+        self.assertTablesEqual(df.groupby('Origin').all(skipna=True), tbl.groupby('Origin').all(skipna=True))
+
+        # When skipna=False, pandas doesn't use booleans anymore
+# TODO: Pandas seems inconsitent here.  It uses True without by groups, but if 
+#       a column contains an NaN and by groups, it uses NaN as the result... ?
+#       all = df.groupby('Origin').all(skipna=False).applymap(lambda x: pd.isnull(x) and x or bool(x))
+#       all.loc['Europe', 'D'] = True
+#       self.assertTablesEqual(all, tbl.groupby('Origin').all(skipna=False))
+
+    def test_any(self):
+        df, tbl = self._get_comp_data()
+
+        self.assertColsEqual(df.any(), tbl.any())
+        self.assertColsEqual(df.any(skipna=True), tbl.any(skipna=True))
+
+        # When skipna=False, pandas doesn't use booleans anymore
+        self.assertColsEqual(df.any(skipna=False).apply(lambda x: pd.isnull(x) and x or bool(x)),
+                             tbl.any(skipna=False))
+
+        # By groups
+        self.assertTablesEqual(df.groupby('Origin').any(), tbl.groupby('Origin').any())
+        self.assertTablesEqual(df.groupby('Origin').any(skipna=True), tbl.groupby('Origin').any(skipna=True))
+
+        # When skipna=False, pandas doesn't use booleans anymore
+        self.assertTablesEqual(df.groupby('Origin').any(skipna=False).applymap(lambda x: pd.isnull(x) and x or bool(x)),
+                               tbl.groupby('Origin').any(skipna=False))
+
+    def test_clip(self):
+        df, tbl = self._get_comp_data()
+
+        df = df[['A', 'B', 'C', 'D', 'E']]
+        tbl = tbl[['A', 'B', 'C', 'D', 'E']]
+
+        self.assertTablesEqual(df.clip(lower=-10), tbl.clip(lower=-10))
+        self.assertTablesEqual(df.clip(upper=15), tbl.clip(upper=15))
+        self.assertTablesEqual(df.clip(lower=-10, upper=15),
+                               tbl.clip(lower=-10, upper=15))
+
+        self.assertTablesEqual(df.clip_lower(-5), tbl.clip_lower(-5))
+
+        self.assertTablesEqual(df.clip_upper(-5), tbl.clip_upper(-5))
+
+    def _get_merge_data(self):
+        import swat.tests as st
+
+        finance = os.path.join(os.path.dirname(st.__file__), 'datasources', 'merge_finance.csv')
+        repertory = os.path.join(os.path.dirname(st.__file__), 'datasources', 'merge_repertory.csv')
+
+        df_finance = pd.read_csv(finance)
+        df_repertory = pd.read_csv(repertory)
+
+        tbl_finance = self.s.read_csv(finance, casout=dict(name='unittest.merge_finance',
+                                                           caslib=self.srcLib,
+                                                           replace=True))
+        tbl_repertory = self.s.read_csv(repertory, casout=dict(name='unittest.merge_repertory',
+                                                               caslib=self.srcLib,
+                                                               replace=True))
+
+        return (df_finance, df_repertory), (tbl_finance, tbl_repertory)
+
+    def test_merge(self):
+        dfs, tbls = self._get_merge_data()
+
+        df_finance, df_repertory = dfs
+        tbl_finance, tbl_repertory = tbls
+
+        def fill_char(frame):
+            for key in frame.columns:
+                if 'Id' in key:
+                    frame[key] = frame[key].fillna('')
+            frame['Play'] = frame['Play'].fillna('')
+            frame['Role'] = frame['Role'].fillna('')
+            frame['Name'] = frame['Name'].fillna('')
+            if '_merge' in frame.columns:
+                frame['_merge'] = frame['_merge'].astype(object)
+            if 'Which' in frame.columns:
+                frame['Which'] = frame['Which'].astype(object)
+            return frame
+
+        #
+        # Join methods
+        #
+
+        # defaults / inner -- ((*))
+        df_out = fill_char(df_finance.merge(df_repertory, on='IdNumber', indicator=True))
+        tbl_out = tbl_finance.merge(tbl_repertory, on='IdNumber', indicator=True)
+        try:
+            self.assertTablesEqual(df_out, tbl_out, sortby=['IdNumber', 'Play'])
+        finally:
+            tbl_out.droptable()
+
+        # inner -- ((*))
+        df_out = fill_char(df_finance.merge(df_repertory, on='IdNumber', how='inner', indicator=True))
+        tbl_out = tbl_finance.merge(tbl_repertory, on='IdNumber', how='inner', indicator=True)
+        try:
+            self.assertTablesEqual(df_out, tbl_out, sortby=['IdNumber', 'Play'])
+        finally:
+            tbl_out.droptable()
+
+        # outer -- (*(*)*)
+        df_out = fill_char(df_finance.merge(df_repertory, on='IdNumber', how='outer', indicator=True))
+        tbl_out = tbl_finance.merge(tbl_repertory, on='IdNumber', how='outer', indicator=True)
+        try:
+            self.assertTablesEqual(df_out, tbl_out, sortby=['IdNumber', 'Play'])
+        finally:
+            tbl_out.droptable()
+
+        # left -- (*(*))
+        df_out = fill_char(df_finance.merge(df_repertory, on='IdNumber', how='left', indicator=True))
+        tbl_out = tbl_finance.merge(tbl_repertory, on='IdNumber', how='left', indicator=True)
+        try:
+            self.assertTablesEqual(df_out, tbl_out, sortby=['IdNumber', 'Play'])
+        finally:
+            tbl_out.droptable()
+
+        # right -- ((*)*)
+        df_out = fill_char(df_finance.merge(df_repertory, on='IdNumber', how='right', indicator=True))
+        tbl_out = tbl_finance.merge(tbl_repertory, on='IdNumber', how='right', indicator=True)
+        try:
+            self.assertTablesEqual(df_out, tbl_out, sortby=['IdNumber', 'Play'])
+        finally:
+            tbl_out.droptable()
+
+        #
+        # TODO: Not supported by pandas
+        #
+
+        # left-minus-right -- (*())
+        tbl_out = tbl_finance.merge(tbl_repertory, on='IdNumber', how='left-minus-right', indicator='Which')
+        try:
+            self.assertEqual(len(tbl_out[tbl_out['Which'] == 'left_only']), len(tbl_out))
+        finally:
+            tbl_out.droptable()
+
+        # right-minus-left -- (()*)
+        tbl_out = tbl_finance.merge(tbl_repertory, on='IdNumber', how='right-minus-left', indicator='Which')
+        try:
+            self.assertEqual(len(tbl_out[tbl_out['Which'] == 'right_only']), len(tbl_out))
+        finally:
+            tbl_out.droptable()
+
+        # outer-minus-inner -- (*()*)
+        tbl_out = tbl_finance.merge(tbl_repertory, on='IdNumber', how='outer-minus-inner', indicator='Which')
+        try:
+            self.assertEqual(len(tbl_out[tbl_out['Which'] == 'right_only']) +
+                             len(tbl_out[tbl_out['Which'] == 'left_only']), len(tbl_out))
+        finally:
+            tbl_out.droptable()
+
+        #
+        # Join methods using different keys
+        #
+
+        # defaults / inner -- ((*))
+        df_out = fill_char(df_finance.merge(df_repertory, left_on='FinanceId', right_on='RepId', indicator=True))
+        tbl_out = tbl_finance.merge(tbl_repertory, left_on='FinanceId', right_on='RepId', indicator=True)
+        try:
+            self.assertTablesEqual(df_out, tbl_out, sortby=['IdNumber_x', 'IdNumber_y', 'Play'])
+        finally:
+            tbl_out.droptable()
+
+        # inner -- ((*))
+        df_out = fill_char(df_finance.merge(df_repertory, left_on='FinanceId', right_on='RepId', how='inner', indicator=True))
+        tbl_out = tbl_finance.merge(tbl_repertory, left_on='FinanceId', right_on='RepId', how='inner', indicator=True)
+        try:
+            self.assertTablesEqual(df_out, tbl_out, sortby=['IdNumber_x', 'IdNumber_y', 'Play'])
+        finally:
+            tbl_out.droptable()
+
+        # outer -- (*(*)*)
+        df_out = fill_char(df_finance.merge(df_repertory, left_on='FinanceId', right_on='RepId', how='outer', indicator=True))
+        tbl_out = tbl_finance.merge(tbl_repertory, left_on='FinanceId', right_on='RepId', how='outer', indicator=True)
+        try:
+            self.assertTablesEqual(df_out, tbl_out, sortby=['IdNumber_x', 'IdNumber_y', 'Play'])
+        finally:
+            tbl_out.droptable()
+
+        # left -- (*(*))
+        df_out = fill_char(df_finance.merge(df_repertory, left_on='FinanceId', right_on='RepId', how='left', indicator=True))
+        tbl_out = tbl_finance.merge(tbl_repertory, left_on='FinanceId', right_on='RepId', how='left', indicator=True)
+        try:
+            self.assertTablesEqual(df_out, tbl_out, sortby=['IdNumber_x', 'IdNumber_y', 'Play'])
+        finally:
+            tbl_out.droptable()
+
+        # right -- ((*)*)
+        df_out = fill_char(df_finance.merge(df_repertory, left_on='FinanceId', right_on='RepId', how='right', indicator=True))
+        tbl_out = tbl_finance.merge(tbl_repertory, left_on='FinanceId', right_on='RepId', how='right', indicator=True)
+        try:
+            self.assertTablesEqual(df_out, tbl_out, sortby=['IdNumber_x', 'IdNumber_y', 'Play'])
+        finally:
+            tbl_out.droptable()
+
+        #
+        # casout=
+        #
+        try:
+            tbl_out = tbl_finance.merge(tbl_repertory, on='IdNumber', indicator=True, casout='join_out')
+            self.assertEqual(tbl_out.params['name'], 'join_out')
+
+            tbl_out = tbl_finance.merge(tbl_repertory, on='IdNumber', indicator=True, casout=dict(name='join_out', replace=True))
+            self.assertEqual(tbl_out.params['name'], 'join_out')
+
+            tbl_out = tbl_finance.merge(tbl_repertory, on='IdNumber', indicator=True, casout=self.s.CASTable('join_out', replace=True))
+            self.assertEqual(tbl_out.params['name'], 'join_out')
+
+            with self.assertRaises(swat.SWATError):
+                tbl_out = tbl_finance.merge(tbl_repertory, on='IdNumber', indicator=True, casout=dict(name='join_out', replace=False))
+
+        finally:
+            tbl_out.droptable()
+
+    def _get_concat_data(self):
+        import swat.tests as st
+
+        cars_a = os.path.join(os.path.dirname(st.__file__), 'datasources', 'cars_a.csv')
+        cars_b = os.path.join(os.path.dirname(st.__file__), 'datasources', 'cars_b.csv')
+        cars_c = os.path.join(os.path.dirname(st.__file__), 'datasources', 'cars_c.csv')
+
+        df_a = pd.read_csv(cars_a)
+        df_b = pd.read_csv(cars_b)
+        df_c = pd.read_csv(cars_c)
+
+        tbl_a = self.s.read_csv(cars_a, casout=dict(name='unittest.cars_a',
+                                                    caslib=self.srcLib,
+                                                    replace=True))
+        tbl_b = self.s.read_csv(cars_b, casout=dict(name='unittest.cars_b',
+                                                    caslib=self.srcLib,
+                                                    replace=True))
+        tbl_c = self.s.read_csv(cars_c, casout=dict(name='unittest.cars_c',
+                                                    caslib=self.srcLib,
+                                                    replace=True))
+
+        return (df_a, df_b, df_c), (tbl_a, tbl_b, tbl_c)
+
+    def test_concat(self):
+        dfs, tbls = self._get_concat_data()
+
+        try:
+            df_out = pd.concat(dfs)
+            tbl_out = concat(tbls)
+            self.assertTablesEqual(df_out, tbl_out, sortby=SORT_KEYS)
+        finally:
+            tbl_out.droptable()
+
+        try:
+            df_out = pd.concat(dfs)
+            tbl_out = concat(tbls, casout='unittest.concat')
+            self.assertTablesEqual(df_out, tbl_out, sortby=SORT_KEYS)
+            self.assertEqual(tbl_out.name, 'unittest.concat')
+        finally:
+            tbl_out.droptable()
 
 
 if __name__ == '__main__':

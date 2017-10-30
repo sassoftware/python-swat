@@ -130,6 +130,301 @@ def _get_unique(seq, lowercase=False):
     return [x for x in seq if not (x in seen or seen.add(x))]
 
 
+def _to_datastep_params(casout):
+    '''
+    Convert object to data step parameters
+
+    Parameters
+    ----------
+    casout : string or CASTable or dict
+        The object to convert to a data step table specification
+
+    Returns
+    -------
+    string
+
+    '''
+    if casout is None:
+        return _quote(_gen_table_name())
+
+    if isinstance(casout, six.string_types):
+        return _quote(casout)
+
+    if isinstance(casout, CASTable):
+        casout = dict(casout.params)
+    elif isinstance(casout, dict):
+        pass
+    else:
+        raise TypeError('Unrecognized type for casout definition: %s' % type(casout))
+
+    outname = _quote(casout.get('name', _gen_table_name()))
+    outlib = casout.get('caslib')
+    outreplace = casout.get('replace')
+    outpromote = casout.get('promote')
+    outcopies = casout.get('copies')
+
+    options = []
+    if outlib:
+        options.append('caslib=%s' % _quote(outlib))
+    if outreplace is not None:
+        options.append('replace=%s' % (outreplace and 'yes' or 'no'))
+    if outpromote is not None:
+        options.append('promote=%s' % (outpromote and 'yes' or 'no'))
+    if outcopies is not None:
+        options.append('copies=%s' % outcopies)
+
+    if options:
+        return '%s(%s)' % (outname, ' '.join(options))
+
+    return outname
+
+
+def concat(objs, axis=0, join='outer', join_axes=None, ignore_index=False, keys=None,
+           levels=None, names=None, verify_integrity=False, copy=True, casout=None):
+    '''
+    Concatenate multiple CAS tables
+
+    Parameters
+    ----------
+    objs : list-of-CASTables
+        The CAS tables to concatenate
+    axis : int, optional
+        Not supported.
+    join : string, optional
+        Not supported.
+    join_axes : list, optional
+        Not supported.
+    ignore_index : boolean, optional
+        Not supported.
+    keys : list, optional
+        Not supported.
+    levels : list-of-sequences, optional
+        Not supported.
+    names : list, optional
+        Not supported.
+    verify_integrity : boolean, optional
+        Not supported.
+    copy : boolean, optional
+        Not supported.
+    casout : string or CASTable or dict, optional
+        The output CAS table specification
+
+    Returns
+    -------
+    :class:`CASTable`
+
+    '''
+    try:
+        views = []
+        for item in objs:
+            if item is None:
+                continue
+            views.append(item.to_view())
+
+        if not views:
+            raise ValueError('There are no tables to concatenate')
+
+        # Create data step code for concatenation
+        code = []
+        code.append('data %s;' % _to_datastep_params(casout))
+        code.append('    set %s;' % ' '.join(x.to_datastep_params() for x in views))
+        code.append('run;')
+        print('\n'.join(code))
+
+        out = objs[0].get_connection().retrieve('datastep.runcode', code='\n'.join(code),
+                                                _apptag='UI', _messagelevel='error')
+        if out.status:
+            raise SWATError(out.status)
+
+    finally:
+        for item in views:
+            try:
+                item._retrieve('table.droptable')
+            except Exception:
+                pass
+
+    return out['OutputCasTables'].ix[0, 'casTable']
+
+
+def merge(left, right, how='inner', on=None, left_on=None, right_on=None,
+          left_index=False, right_index=False, sort=False,
+          suffixes=('_x', '_y'), copy=True, indicator=False, validate=None,
+          casout=None):
+    '''
+    Merge CASTable objects using a database-style join on a column
+
+    Parameters
+    ----------
+    right : CASTable
+        The CASTable to join with
+    how : string, optional
+        * 'left' : use only keys from `left`
+        * 'right': use only keys from `right`
+        * 'outer' : all observations
+        * 'inner' : use intersection of keys
+        * 'left-minus-right' : `left` minus `right`
+        * 'right-minus-left' : `right` minus `left`
+        * 'outer-minus-inner' : opposite of 'inner'
+    on : string, optional
+        Column name to join on, if the same column name is in 
+        both tables
+    left_on : string, optional
+        The key from `left` to join on.  This is used if the
+        column names to join on are different in each table.
+    right_on : string, optional
+        The key from `right` to join on.  This s used if the
+        column names to join on are different in each table.
+    left_index : boolean, optional
+        Not supported.
+    right_index : boolean, optional
+        Not supported.
+    sort : boolean, optional
+        Not supported.
+    suffixes : two-element-tuple, optional
+        The suffixes to use for overlapping column names in the
+        resulting tables.  The first element is used for columns
+        in `left`.  The second element is used for columns in
+        `right`.
+    copy : boolean, optional
+        Not supported.
+    indicator : boolean or string, optional
+        Should a column be created that indicates which table the
+        key came from?  If True, a column named '_merge' will be
+        created with the values: 'left_only', 'right_only', or
+        'both'.  If False, no column is created.  If a string is
+        specified, a column is created using that name containing
+        the aforementioned values.
+    validate : string, optional
+        Not supported.
+    casout : string or CASTable or dict, optional
+        The output CAS table specification
+    
+    Returns
+    -------
+    :class:`CASTable`
+
+    '''
+    how = how.lower()
+
+    # Setup join column names
+    if on is None and left_on is None and right_on is None:
+        raise SWATError('A column name is required for joining tables.')
+    elif left_on is None and right_on is None:
+        left_on = on
+        right_on = on
+    elif left_on is None and right_on is not None:
+        left_on = right_on or on
+    elif left_on is not None and right_on is None:
+        right_on = left_on or on
+
+    # Find overlapping columns
+    left_rename = ''
+    right_rename = ''
+    extra_code = ''
+    left_cols = set([x for x in left.columns if x != left_on])
+    right_cols = set([x for x in right.columns if x != right_on])
+    same_cols = left_cols.intersection(right_cols)
+    if same_cols:
+        fmt = ' rename=(%s)'
+        left_rename = fmt % ' '.join(
+            ['%s=%s' % (_nlit(x), _nlit('%s%s' % (x, suffixes[0]))) for x in same_cols])
+        if left_on != right_on:
+            fmt = ' rename=(%s=%s %%s)' % (_nlit(right_on), _nlit(left_on))
+            extra_code = '    %s = %s;' % (_nlit(right_on), _nlit(left_on))
+        right_rename = fmt % ' '.join(
+            ['%s=%s' % (_nlit(x), _nlit('%s%s' % (x, suffixes[1]))) for x in same_cols])
+
+    left_missval = '.'
+    right_missval = '.'
+    if left_on != right_on:
+        if left[left_on].dtype in ['varchar', 'char', 'varbinary', 'binary']:
+            left_missval = '""'
+        if right[right_on].dtype in ['varchar', 'char', 'varbinary', 'binary']:
+            right_missval = '""'
+
+    left_view = None
+    right_view = None
+
+    try:
+        # Allow computed columns / where clauses to be available 
+        # data step code.
+        left_view = left.to_view()
+        right_view = right.to_view()
+
+        left_name = ''
+        right_name = ''
+        left_caslib = ''
+        right_caslib = ''
+        left_name = left_view.params['name']
+        right_name = right_view.params['name']
+        if left_view.params.get('caslib'):
+            left_caslib = ' caslib=%s' % _quote(left_view.params['caslib'])
+        if right_view.params.get('caslib'):
+            right_caslib = ' caslib=%s' % _quote(right_view.params['caslib'])
+
+        # Create data step code for merge
+        code = []
+        code.append('data %s;' % _to_datastep_params(casout))
+        code.append('    merge %s(in=__in_left%s%s) %s(in=__in_right%s%s);' %
+                    (_quote(left_name), left_caslib, left_rename,
+                     _quote(right_name), right_caslib, right_rename))
+
+        if extra_code:
+            code.append(extra_code) 
+
+        code.append('    by %s;' % _nlit(left_on))
+
+        if how in ['outer', 'full-outer']:
+            code.append('    if __in_left or __in_right;')
+        elif how in ['left', 'left-outer']:
+            code.append('    if __in_left;')
+        elif how in ['right', 'right-outer']:
+            code.append('    if __in_right;')
+        elif how in ['inner']:
+            code.append('    if __in_left and __in_right;')
+        elif how in ['left-minus-right']:
+            code.append('    if __in_left and ^__in_right;')
+        elif how in ['right-minus-left']:
+            code.append('    if ^__in_left and __in_right;')
+        elif how in ['outer-minus-inner']:
+            code.append('    if (__in_left and ^__in_right) '
+                        'or (^__in_left and __in_right);')
+        else:
+            raise ValueError('Unrecognized merge type: %s' % how)
+
+        if indicator:
+            if indicator is True:
+                indicator = '_merge'
+            else:
+                indicator = '%s' % indicator
+            code.append('    length %s $10;' % _nlit(indicator))
+            code.append('    if __in_left then')
+            code.append('        if __in_right then %s = "both";' % _nlit(indicator))
+            code.append('        else %s = "left_only";' % _nlit(indicator))
+            code.append('    else %s = "right_only";' % _nlit(indicator))
+
+        if left_on != right_on:
+            code.append('    if ^__in_left and __in_right then %s = %s;' %
+                        (_nlit(left_on), left_missval))
+            code.append('    if __in_left and ^__in_right then %s = %s;' %
+                        (_nlit(right_on), right_missval))
+
+        code.append('run;')
+    
+        out = left.get_connection().retrieve('datastep.runcode', code='\n'.join(code),
+                                             _apptag='UI', _messagelevel='error')
+        if out.status:
+            raise SWATError(out.status)
+
+    finally:
+        if left_view is not None:
+            left_view._retrieve('table.droptable')
+        if right_view is not None:
+            right_view._retrieve('table.droptable')
+
+    return out['OutputCasTables'].ix[0, 'casTable']
+
+
 class CASTableAccessor(object):
     ''' Base class for all accessor properties '''
 
@@ -1839,6 +2134,17 @@ class CASTable(ParamManager, ActionParamManager):
         '''
         return self.params['name']
 
+    def to_datastep_params(self):
+        '''
+        Create a data step table specification
+
+        Returns
+        -------
+        :class:`CASTable`
+
+        '''
+        return _to_datastep_params(self)
+
     #
     # Pandas DataFrame API
     #
@@ -2844,23 +3150,262 @@ class CASTable(ParamManager, ActionParamManager):
         out.columns.name = None
         return out[columns]
 
-#   def abs(self):
-#       raise NotImplementedError
+    def _materialize(self, casout=None, inplace=False, prefix=None, suffix=None):
+        '''
+        Materialize a table and options into an in-memory table
 
-#   def all(self, *args, **kwargs):
-#       raise NotImplementedError
+        Parameters
+        ----------
+        casout : dict, optional
+            The CAS output table definition
+        inplace : bool, optional
+            Should the output table be overwritten?
+            NOTE: If `prefix` or `suffix` are used, this option is only
+                  used to determine the table's base name.
+        prefix : string, optional
+            A string to use as the table name prefix
+        suffix : string, optional
+            A string to use as the table name suffix
 
-#   def any(self, *args, **kwargs):
-#       raise NotImplementedError
+        Returns
+        -------
+        :class:`CASTable`
 
-#   def clip(self, *args, **kwargs):
-#       raise NotImplementedError
+        '''
+        if casout is None:
+            casout = {}
 
-#   def clip_lower(self, threshold, **kwargs):
-#       raise NotImplementedError
+        if casout.get('caslib'):
+            caslib = casout['caslib']
+        elif inplace and 'caslib' in self.params:
+            caslib = self.params['caslib']
+        else:
+            caslib = self.getsessopt('caslib').caslib
 
-#   def clip_upper(self, threshold, **kwargs):
-#       raise NotImplementedError
+        if casout.get('name'):
+            newname = casout['name']
+        elif inplace:
+            newname = self.params['name']
+        else:
+            newname = _gen_table_name()
+
+        newname = '%s%s%s' % ((prefix or ''), newname, (suffix or ''))
+
+        return self._retrieve('table.partition',
+                              casout=dict(name=newname, caslib=caslib))['casTable']
+
+    def abs(self):
+        '''
+        Return a new CASTable with absolute values of numerics
+
+        Returns
+        -------
+        :class:`CASTable`
+
+        '''
+        tbl = self._materialize(prefix='_ABS')
+        code = []
+        for name, dtype in tbl.dtypes.items():
+            if dtype not in ['char', 'varchar', 'binary', 'varbinary',
+                             'date', 'time', 'datetime']:
+                code.append('    %s = ABS(%s);' % (_nlit(name), _nlit(name)))
+        return tbl._apply_datastep(code, inplace=True)
+
+    def _bool(self):
+        '''
+        Create boolean mask of table data
+
+        Returns
+        -------
+        :class:`CASTable` 
+
+        '''
+        cvars = []
+        ccode = []
+        groups = self.get_groupby_vars()
+        for name, dtype in self.dtypes.items():
+            if name in groups:
+                continue
+            boolname = _nlit('%s__bool__' % name) 
+            cvars.append(boolname)
+            if dtype in ['char', 'varchar', 'binary', 'varbinary']:
+                ccode.append('%s = LENGTHN(%s) > 0' %
+                             (_nlit(boolname), _nlit(name)))
+            else:
+                ccode.append('%s = choosen(MISSING(%s)+1, (%s ^= 0), .)' %
+                             (_nlit(boolname), _nlit(name), _nlit(name)))
+        out = self.copy(deep=True)
+        out.append_computed_columns(cvars, ccode, inplace=True)
+        return out[cvars]
+
+    def all(self, axis=None, bool_only=None, skipna=True, level=None, **kwargs):
+        '''
+        Return whether all elements in the column are True
+
+        Parameters
+        ----------
+        axis : int, optional
+            Not supported.
+        bool_only : bool, optional
+            Not supported.
+        skipna : bool, optional
+            Should missing values be skipped?  If False, and the entire 
+            column is missing, the result will also be a missing.
+        level : int, optional
+            Not supported.
+
+        Notes
+        -----
+        Since CAS can not distiguish between a missing charater value and
+        a blank value, all blanks are interpreted as False values (not missing).
+
+        Returns
+        -------
+        :class:`Series`
+            When no by groups are specified
+        :class:`CASTable`
+            When by groups are specified
+
+        '''
+        tbl = self._bool()
+        out = tbl.min()
+
+        if isinstance(out, pd.Series):
+            out.name = None
+            out.index = list(self.columns)
+            out.index.name = None
+        else:
+            groups = set(self.get_groupby_vars())
+            out.columns = [x for x in self.columns if x not in groups]
+
+        if skipna:
+            out = out.fillna(1.0).astype(bool)
+        elif isinstance(out, pd.Series):
+            out = out.apply(lambda x: pd.isnull(x) and x or bool(x))
+        else:
+            out = out.applymap(lambda x: pd.isnull(x) and x or bool(x))
+
+        return out
+
+    def any(self, axis=None, bool_only=None, skipna=True, level=None, **kwargs):
+        '''
+        Return whether any elements in the column are True
+
+        Parameters
+        ----------
+        axis : int, optional
+            Not supported.
+        bool_only : bool, optional
+            Not supported.
+        skipna : bool, optional
+            Should missing values be included?  If not, and the entire
+            column is missing, the result will also be a missing.
+        level : int, optional
+            Not supported.
+
+        Notes
+        -----
+        Since CAS can not distiguish between a missing charater value and
+        a blank value, all blanks are interpreted as False values (not missing).
+
+        Returns
+        -------
+        :class:`Series`
+            When no by groups are specified
+        :class:`CASTable`
+            When by groups are specified
+
+        '''
+        tbl = self._bool()
+        out = tbl.max()
+
+        if isinstance(out, pd.Series):
+            out.name = None
+            out.index = list(self.columns)
+            out.index.name = None
+        else:
+            groups = set(self.get_groupby_vars())
+            out.columns = [x for x in self.columns if x not in groups]
+
+        if skipna:
+            out = out.fillna(0.0).astype(bool)
+        elif isinstance(out, pd.Series):
+            out = out.apply(lambda x: pd.isnull(x) and x or bool(x))
+        else:
+            out = out.applymap(lambda x: pd.isnull(x) and x or bool(x))
+
+        return out
+
+    def clip(self, lower=None, upper=None, axis=None):
+        '''
+        Clip values at thresholds
+
+        Parameters
+        ----------
+        lower : float, optional
+            The lowest value to allow
+        upper : float, optional
+            The highest value to allow
+        axis : int, optional
+            Unsupported
+
+        Returns
+        -------
+        :class:`CASTable` 
+
+        '''
+        if lower is not None and upper is not None:
+            fmt = '    %%s = CHOOSEN(MISSING(%%s)+1, MIN(%s, MAX(%s, %%s)), .);' % (upper, lower)
+        elif lower is not None:
+            fmt = '    %%s = CHOOSEN(MISSING(%%s)+1, MAX(%s, %%s), .);' % lower
+        elif upper is not None:
+            fmt = '    %%s = CHOOSEN(MISSING(%%s)+1, MIN(%s, %%s), .);' % upper
+
+        tbl = self._materialize(prefix='_CLIP')
+        code = []
+        for name, dtype in tbl.dtypes.items():
+            if dtype not in ['char', 'varchar', 'binary', 'varbinary',
+                             'date', 'time', 'datetime']:
+                code.append(fmt % (_nlit(name), _nlit(name), _nlit(name)))
+
+        print('\n'.join(code))
+        return tbl._apply_datastep(code, inplace=True)
+
+    def clip_lower(self, threshold, axis=None):
+        '''
+        Clip values at lower threshold
+
+        Parameters
+        ----------
+        threshold : float, optional
+            The lowest value to allow
+        axis : int, optional
+            Unsupported
+
+        Returns
+        -------
+        :class:`CASTable`
+
+        '''
+        return self.clip(lower=threshold, axis=axis)
+
+    def clip_upper(self, threshold, axis=None):
+        '''
+        Clip values at upper threshold
+
+        Parameters
+        ----------
+        threshold : float, optional
+            The lowest value to allow
+        axis : int, optional
+            Unsupported
+
+        Returns
+        -------
+        :class:`CASTable`
+
+        '''
+        return self.clip(upper=threshold, axis=axis)
 
     def corr(self, method=None, min_periods=None):
         '''
@@ -3354,9 +3899,6 @@ class CASTable(ParamManager, ActionParamManager):
         else:
             return col
 
-#   def kurt(self, *args, **kwargs):
-#       raise NotImplementedError
-
 #   def mad(self, *args, **kwargs):
 #       raise NotImplementedError
 
@@ -3827,9 +4369,6 @@ class CASTable(ParamManager, ActionParamManager):
 #   def sem(self, *args, **kwargs):
 #       raise NotImplementedError
 
-#   def skew(self, *args, **kwargs):
-#       raise NotImplementedError
-
     def sum(self, axis=None, skipna=None, level=None, numeric_only=True):
         '''
         Return the sum of the values of each column
@@ -4068,7 +4607,7 @@ class CASTable(ParamManager, ActionParamManager):
         '''
         return self._get_summary_stat('probt')
 
-    def skewness(self):
+    def skewness(self, axis=None, skipna=True, level=None, numeric_only=None):
         '''
         Return the skewness of the values of each column
 
@@ -4080,9 +4619,14 @@ class CASTable(ParamManager, ActionParamManager):
             If By groups are specified.
 
         '''
-        return self._get_summary_stat('skewness')
+        tbl = self
+        if numeric_only:
+            tbl = self.select_dtypes(include='numeric')
+        return tbl._get_summary_stat('skewness')
 
-    def kurtosis(self):
+    skew = skewness
+
+    def kurtosis(self, axis=None, skipna=True, level=None, numeric_only=None):
         '''
         Return the kurtosis of the values of each column
 
@@ -4094,7 +4638,12 @@ class CASTable(ParamManager, ActionParamManager):
             If By groups are specified.
 
         '''
-        return self._get_summary_stat('kurtosis')
+        tbl = self
+        if numeric_only:
+            tbl = self.select_dtypes(include='numeric')
+        return tbl._get_summary_stat('kurtosis')
+
+    kurt = kurtosis
 
     # Reindexing / Selection / Label manipulation
 
@@ -4621,7 +5170,8 @@ class CASTable(ParamManager, ActionParamManager):
 
         return self._apply_datastep(code, inplace=inplace)
 
-    def _apply_datastep(self, code, inplace=False, casout=None):
+    def _apply_datastep(self, code, inplace=False, casout=None,
+                        prefix=None, suffix=None):
         '''
         Apply the given data step code to the table
 
@@ -4643,6 +5193,10 @@ class CASTable(ParamManager, ActionParamManager):
             Should the table be modified in-place?
         casout : dict, optional
             The output table specification
+        prefix : string, optional
+            String to use as table name prefix
+        suffix : string, optional
+            String to use as table name suffix
 
         Returns
         -------
@@ -4665,6 +5219,8 @@ class CASTable(ParamManager, ActionParamManager):
             newname = self.params['name']
         else:
             newname = _gen_table_name()
+
+        newname = '%s%s%s' % ((prefix or ''), newname, (suffix or ''))
 
         dscode = []
         dscode.append('data %s(caslib=%s);' % (_quote(newname), _quote(caslib)))
@@ -4810,16 +5366,92 @@ class CASTable(ParamManager, ActionParamManager):
 
     # Combining / joining / merging
 
-#   def append(self, other, **kwargs):
-#       raise NotImplementedError
+    def append(self, other, ignore_index=False, verify_integrity=False,
+               casout=None):
+        '''
+        Append rows of `other` to `self`
+
+        Parameters
+        ----------
+        other : CASTable
+            The CAS table containing the rows to append
+        ignore_index : boolean, optional
+            Not supported.
+        verify_integrity : boolean, optional
+            Not supported.
+
+        Returns
+        -------
+        :class:`CASTable`
+
+        '''
+        return concat([self, other], ignore_index=ignore_index,
+                      verify_integrity=verify_integrity, casout=casout)
 
 #   def assign(self, **kwargs):
 #       raise NotImplementedError
 
-#   def join(self, other, **kwargs):
-#       raise NotImplementedError
+    def merge(self, right, how='inner', on=None, left_on=None, right_on=None,
+              left_index=False, right_index=False, sort=False,
+              suffixes=('_x', '_y'), copy=True, indicator=False, casout=None):
+        '''
+        Merge CASTable objects using a database-style join on a column
 
-#   def merge(self, right, **kwargs):
+        Parameters
+        ----------
+        right : CASTable
+            The CASTable to join with
+        how : string, optional
+            * 'left' : use only keys from `self`
+            * 'right': use only keys from `right`
+            * 'outer' : all observations
+            * 'inner' : use intersection of keys
+            * 'left-minus-right' : `self` minus `right`
+            * 'right-minus-left' : `right` minus `self`
+            * 'outer-minus-inner' : opposite of 'inner'
+        on : string, optional
+            Column name to join on, if the same column name is in 
+            both tables
+        left_on : string, optional
+            The key from `self` to join on.  This is used if the
+            column names to join on are different in each table.
+        right_on : string, optional
+            The key from `right` to join on.  This s used if the
+            column names to join on are different in each table.
+        left_index : boolean, optional
+            Not supported.
+        right_index : boolean, optional
+            Not supported.
+        sort : boolean, optional
+            Not supported.
+        suffixes : two-element-tuple, optional
+            The suffixes to use for overlapping column names in the
+            resulting tables.  The first element is used for columns
+            in `self`.  The second element is used for columns in
+            `right`.
+        copy : boolean, optional
+            Not supported.
+        indicator : boolean or string, optional
+            Should a column be created that indicates which table the
+            key came from?  If True, a column named '_merge' will be
+            created with the values: 'left_only', 'right_only', or
+            'both'.  If False, no column is created.  If a string is
+            specified, a column is created using that name containing
+            the aforementioned values.
+        casout : string or CASTable or dict, optional
+            The CAS output table specification
+        
+        Returns
+        -------
+        :class:`CASTable`
+
+        '''
+        return merge(self, right, how=how, on=on, left_on=left_on,
+                     right_on=right_on, left_index=left_index,
+                     right_index=right_index, sort=sort, suffixes=suffixes,
+                     copy=copy, indicator=indicator, casout=casout)
+
+#   def join(self, other, on=None, how='left', lsuffix='', rsuffix='', sort=False):
 #       raise NotImplementedError
 
 #   def update(self, other, **kwargs):
@@ -8527,6 +9159,8 @@ class CASColumn(CASTable):
         '''
         return self._get_summary_stat('skewness')
 
+    skew = skewness
+
     def kurtosis(self):
         '''
         Return kurtosis
@@ -8544,6 +9178,8 @@ class CASColumn(CASTable):
 
         '''
         return self._get_summary_stat('kurtosis')
+
+    kurt = kurtosis
 
     # Serialization / IO / Conversion
 
@@ -9132,6 +9768,8 @@ class CASTableGroupBy(object):
             return self._table.skewness(*args, **kwargs)
         return self._table.skewness(*args, **kwargs).reset_index(self.get_groupby_vars())
 
+    skew = skewness
+
     def kurtosis(self, *args, **kwargs):
         '''
         Get kurtosis using groups
@@ -9145,6 +9783,8 @@ class CASTableGroupBy(object):
         if self._as_index:
             return self._table.kurtosis(*args, **kwargs)
         return self._table.kurtosis(*args, **kwargs).reset_index(self.get_groupby_vars())
+
+    kurt = kurtosis
 
     def describe(self, *args, **kwargs):
         '''

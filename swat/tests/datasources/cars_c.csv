@@ -1,0 +1,130 @@
+Make,Model,Type,Origin,DriveTrain,MSRP,Invoice,EngineSize,Cylinders,Horsepower,MPG_City,MPG_Highway,Weight,Wheelbase,Length
+Nissan,Pathfinder Armada SE,SUV,Asia,Front,33840,30815,5.6,8,305,13,19,5013,123,207
+Nissan,Pathfinder SE,SUV,Asia,Front,27339,25972,3.5,6,240,16,21,3871,106,183
+Nissan,Xterra XE V6,SUV,Asia,Front,20939,19512,3.3,6,180,17,20,3760,104,178
+Nissan,Sentra 1.8 4dr,Sedan,Asia,Front,12740,12205,1.8,4,126,28,35,2513,100,178
+Nissan,Sentra 1.8 S 4dr,Sedan,Asia,Front,14740,13747,1.8,4,126,28,35,2581,100,178
+Nissan,Altima S 4dr,Sedan,Asia,Front,19240,18030,2.5,4,175,21,26,3039,110,192
+Nissan,Sentra SE-R 4dr,Sedan,Asia,Front,17640,16444,2.5,4,165,23,28,2761,100,178
+Nissan,Altima SE 4dr,Sedan,Asia,Front,23290,21580,3.5,6,245,21,26,3197,110,192
+Nissan,Maxima SE 4dr,Sedan,Asia,Front,27490,25182,3.5,6,265,20,28,3473,111,194
+Nissan,Maxima SL 4dr,Sedan,Asia,Front,29440,26966,3.5,6,265,20,28,3476,111,194
+Nissan,Quest S,Sedan,Asia,Front,24780,22958,3.5,6,240,19,26,4012,124,204
+Nissan,Quest SE,Sedan,Asia,Front,32780,30019,3.5,6,240,18,25,4175,124,204
+Nissan,350Z coupe 2dr,Sports,Asia,Rear,26910,25203,3.5,6,287,20,26,3188,104,169
+Nissan,350Z Enthusiast convertible 2dr,Sports,Asia,Rear,34390,31845,3.5,6,287,20,26,3428,104,169
+Nissan,Frontier King Cab XE V6,Truck,Asia,All,19479,18253,3.3,6,180,17,20,3932,116,191
+Nissan,Titan King Cab XE,Truck,Asia,All,26650,24926,5.6,8,305,14,18,5287,140,224
+Nissan,Murano SL,Wagon,Asia,Rear,28739,27300,3.5,6,245,20,25,3801,111,188
+Oldsmobile,Alero GX 2dr,Sedan,USA,Front,18825,17642,2.2,4,140,24,32,2946,107,187
+Oldsmobile,Alero GLS 2dr,Sedan,USA,Front,23675,21485,3.4,6,170,20,29,3085,107,187
+Oldsmobile,Silhouette GL,Sedan,USA,Front,28790,26120,3.4,6,185,19,26,3948,120,201
+Pontiac,Aztekt,SUV,USA,Front,21595,19810,3.4,6,185,19,26,3779,108,182
+Pontiac,Sunfire 1SA 2dr,Sedan,USA,Front,15495,14375,2.2,4,140,24,33,2771,104,182
+Pontiac,Grand Am GT 2dr,Sedan,USA,Front,22450,20595,3.4,6,175,20,29,3118,107,186
+Pontiac,Grand Prix GT1 4dr,Sedan,USA,Front,22395,20545,3.8,6,200,20,30,3477,111,198
+Pontiac,Sunfire 1SC 2dr,Sedan,USA,Front,17735,16369,2.2,4,140,24,33,2771,104,182
+Pontiac,Grand Prix GT2 4dr,Sedan,USA,Front,24295,22284,3.8,6,200,20,30,3484,111,198
+Pontiac,Bonneville GXP 4dr,Sedan,USA,Front,35995,32997,4.6,8,275,17,20,3790,112,203
+Pontiac,Montana,Sedan,USA,Front,23845,21644,3.4,6,185,19,26,3803,112,187
+Pontiac,Montana EWB,Sedan,USA,All,31370,28454,3.4,6,185,18,24,4431,121,201
+Pontiac,GTO 2dr,Sports,USA,Rear,33500,30710,5.7,8,340,16,20,3725,110,190
+Pontiac,Vibe,Wagon,USA,Rear,17045,15973,1.8,4,130,29,36,2701,102,172
+Porsche,Cayenne S,SUV,Europe,All,56665,49865,4.5,8,340,14,18,4950,112,188
+Porsche,911 Carrera convertible 2dr (coupe),Sports,Europe,Rear,79165,69229,3.6,6,315,18,26,3135,93,175
+Porsche,911 Carrera 4S coupe 2dr (convert),Sports,Europe,All,84165,72206,3.6,6,315,17,24,3240,93,175
+Porsche,911 Targa coupe 2dr,Sports,Europe,Rear,76765,67128,3.6,6,315,18,26,3119,93,175
+Porsche,911 GT2 2dr,Sports,Europe,Rear,192465,173560,3.6,6,477,17,24,3131,93,175
+Porsche,Boxster convertible 2dr,Sports,Europe,Rear,43365,37886,2.7,6,228,20,29,2811,95,170
+Porsche,Boxster S convertible 2dr,Sports,Europe,Rear,52365,45766,3.2,6,258,18,26,2911,95,170
+Saab,9-3 Arc Sport 4dr,Sedan,Europe,Front,30860,29269,2,4,210,20,28,3175,105,183
+Saab,9-3 Aero 4dr,Sedan,Europe,Front,33360,31562,2,4,210,20,28,3175,105,183
+Saab,9-5 Arc 4dr,Sedan,Europe,Front,35105,33011,2.3,4,220,21,29,3470,106,190
+Saab,9-5 Aero 4dr,Sedan,Europe,Front,39465,37721,2.3,4,250,21,29,3470,106,190
+Saab,9-3 Arc convertible 2dr,Sedan,Europe,Front,40670,38520,2,4,210,21,29,3480,105,182
+Saab,9-3 Aero convertible 2dr,Sedan,Europe,Front,43175,40883,2,4,210,21,30,3700,105,182
+Saab,9-5 Aero,Wagon,Europe,Front,40845,38376,2.3,4,250,19,29,3620,106,190
+Saturn,VUE,SUV,USA,All,20585,19238,2.2,4,143,21,26,3381,107,181
+Saturn,Ion1 4dr,Sedan,USA,Front,10995,10319,2.2,4,140,26,35,2692,103,185
+Saturn,lon2 4dr,Sedan,USA,Front,14300,13393,2.2,4,140,26,35,2692,103,185
+Saturn,lon3 4dr,Sedan,USA,Front,15825,14811,2.2,4,140,26,35,2692,103,185
+Saturn,lon2 quad coupe 2dr,Sedan,USA,Front,14850,13904,2.2,4,140,26,35,2751,103,185
+Saturn,lon3 quad coupe 2dr,Sedan,USA,Front,16350,15299,2.2,4,140,26,35,2751,103,185
+Saturn,L300-2 4dr,Sedan,USA,Front,21410,19801,3,6,182,20,28,3197,107,190
+Saturn,L300 2,Wagon,USA,Front,23560,21779,2.2,4,140,24,34,3109,107,190
+Scion,xA 4dr hatch,Sedan,Asia,Front,12965,12340,1.5,4,108,32,38,2340,93,154
+Scion,xB,Wagon,Asia,Front,14165,13480,1.5,4,108,31,35,2425,98,155
+Subaru,Impreza 2.5 RS 4dr,Sedan,Asia,All,19945,18399,2.5,4,165,22,28,2965,99,174
+Subaru,Legacy L 4dr,Sedan,Asia,All,20445,18713,2.5,4,165,21,28,3285,104,184
+Subaru,Legacy GT 4dr,Sedan,Asia,All,25645,23336,2.5,4,165,21,28,3395,104,184
+Subaru,Outback Limited Sedan 4dr,Sedan,Asia,All,27145,24687,2.5,4,165,20,27,3495,104,184
+Subaru,Outback H6 4dr,Sedan,Asia,All,29345,26660,3,6,212,19,26,3610,104,184
+Subaru,Outback H-6 VDC 4dr,Sedan,Asia,All,31545,28603,3,6,212,19,26,3630,104,184
+Subaru,Impreza WRX 4dr,Sports,Asia,All,25045,23022,2,4,227,20,27,3085,99,174
+Subaru,Impreza WRX STi 4dr,Sports,Asia,All,31545,29130,2.5,4,300,18,24,3263,100,174
+Subaru,Baja,Truck,Asia,All,24520,22304,2.5,4,165,21,28,3485,104,193
+Subaru,Forester X,Wagon,Asia,All,21445,19646,2.5,4,165,21,28,3090,99,175
+Subaru,Outback,Wagon,Asia,All,23895,21773,2.5,4,165,21,28,3430,104,187
+Suzuki,XL-7 EX,SUV,Asia,Front,23699,22307,2.7,6,185,18,22,3682,110,187
+Suzuki,Vitara LX,SUV,Asia,All,17163,16949,2.5,6,165,19,22,3020,98,163
+Suzuki,Aeno S 4dr,Sedan,Asia,Front,12884,12719,2.3,4,155,25,31,2676,98,171
+Suzuki,Aerio LX 4dr,Sedan,Asia,Front,14500,14317,2.3,4,155,25,31,2676,98,171
+Suzuki,Forenza S 4dr,Sedan,Asia,Front,12269,12116,2,4,119,24,31,2701,102,177
+Suzuki,Forenza EX 4dr,Sedan,Asia,Front,15568,15378,2,4,119,22,30,2756,102,177
+Suzuki,Verona LX 4dr,Sedan,Asia,Front,17262,17053,2.5,6,155,20,27,3380,106,188
+Suzuki,Aerio SX,Wagon,Asia,All,16497,16291,2.3,4,155,24,29,2932,98,167
+Toyota,Prius 4dr (gas/electric),Hybrid,Asia,Front,20510,18926,1.5,4,110,59,51,2890,106,175
+Toyota,Sequoia SR5,SUV,Asia,All,35695,31827,4.7,8,240,14,17,5270,118,204
+Toyota,4Runner SR5 V6,SUV,Asia,Front,27710,24801,4,6,245,18,21,4035,110,189
+Toyota,Highlander V6,SUV,Asia,All,27930,24915,3.3,6,230,18,24,3935,107,185
+Toyota,Land Cruiser,SUV,Asia,All,54765,47986,4.7,8,325,13,17,5390,112,193
+Toyota,RAV4,SUV,Asia,All,20290,18553,2.4,4,161,22,27,3119,98,167
+Toyota,Corolla CE 4dr,Sedan,Asia,Front,14085,13065,1.8,4,130,32,40,2502,102,178
+Toyota,Corolla S 4dr,Sedan,Asia,Front,15030,13650,1.8,4,130,32,40,2524,102,178
+Toyota,Corolla LE 4dr,Sedan,Asia,Front,15295,13889,1.8,4,130,32,40,2524,102,178
+Toyota,Echo 2dr manual,Sedan,Asia,Front,10760,10144,1.5,4,108,35,43,2035,93,163
+Toyota,Echo 2dr auto,Sedan,Asia,Front,11560,10896,1.5,4,108,33,39,2085,93,163
+Toyota,Echo 4dr,Sedan,Asia,Front,11290,10642,1.5,4,108,35,43,2055,93,163
+Toyota,Camry LE 4dr,Sedan,Asia,Front,19560,17558,2.4,4,157,24,33,3086,107,189
+Toyota,Camry LE V6 4dr,Sedan,Asia,Front,22775,20325,3,6,210,21,29,3296,107,189
+Toyota,Camry Solara SE 2dr,Sedan,Asia,Front,19635,17722,2.4,4,157,24,33,3175,107,193
+Toyota,Camry Solara SE V6 2dr,Sedan,Asia,Front,21965,19819,3.3,6,225,20,29,3417,107,193
+Toyota,Avalon XL 4dr,Sedan,Asia,Front,26560,23693,3,6,210,21,29,3417,107,192
+Toyota,Camry XLE V6 4dr,Sedan,Asia,Front,25920,23125,3,6,210,21,29,3362,107,189
+Toyota,Camry Solara SLE V6 2dr,Sedan,Asia,Front,26510,23908,3.3,6,225,20,29,3439,107,193
+Toyota,Avalon XLS 4dr,Sedan,Asia,Front,30920,27271,3,6,210,21,29,3439,107,192
+Toyota,Sienna CE,Sedan,Asia,Front,23495,21198,3.3,6,230,19,27,4120,119,200
+Toyota,Sienna XLE Limited,Sedan,Asia,Front,28800,25690,3.3,6,230,19,27,4165,119,200
+Toyota,Celica GT-S 2dr,Sports,Asia,Front,22570,20363,1.8,4,180,24,33,2500,102,171
+Toyota,MR2 Spyder convertible 2dr,Sports,Asia,Rear,25130,22787,1.8,4,138,26,32,2195,97,153
+Toyota,Tacoma,Truck,Asia,Rear,12800,11879,2.4,4,142,22,27,2750,103,191
+Toyota,Tundra Regular Cab V6,Truck,Asia,Rear,16495,14978,3.4,6,190,16,18,3925,128,218
+Toyota,Tundra Access Cab V6 SR5,Truck,Asia,All,25935,23520,3.4,6,190,14,17,4435,128,218
+Toyota,Matrix XR,Wagon,Asia,Front,16695,15156,1.8,4,130,29,36,2679,102,171
+Volkswagen,Touareg V6,SUV,Europe,All,35515,32243,3.2,6,220,15,20,5086,112,187
+Volkswagen,Golf GLS 4dr,Sedan,Europe,Front,18715,17478,2,4,115,24,31,2897,99,165
+Volkswagen,GTI 1.8T 2dr hatch,Sedan,Europe,Front,19825,18109,1.8,4,180,24,31,2934,99,168
+Volkswagen,Jetta GLS TDI 4dr,Sedan,Europe,Front,21055,19638,1.9,4,100,38,46,3003,99,172
+Volkswagen,New Beetle GLS 1.8T 2dr,Sedan,Europe,Front,21055,19638,1.8,4,150,24,31,2820,99,161
+Volkswagen,Jetta GLI VR6 4dr,Sedan,Europe,Front,23785,21686,2.8,6,200,21,30,3179,99,172
+Volkswagen,New Beetle GLS convertible 2dr,Sedan,Europe,Front,23215,21689,2,4,115,24,30,3082,99,161
+Volkswagen,Passat GLS 4dr,Sedan,Europe,Front,23955,21898,1.8,4,170,22,31,3241,106,185
+Volkswagen,Passat GLX V6 4MOTION 4dr,Sedan,Europe,Front,33180,30583,2.8,6,190,19,26,3721,106,185
+Volkswagen,Passat W8 4MOTION 4dr,Sedan,Europe,Front,39235,36052,4,8,270,18,25,3953,106,185
+Volkswagen,Phaeton 4dr,Sedan,Europe,Front,65000,59912,4.2,8,335,16,22,5194,118,204
+Volkswagen,Phaeton W12 4dr,Sedan,Europe,Front,75000,69130,6,12,420,12,19,5399,118,204
+Volkswagen,Jetta GL,Wagon,Europe,Front,19005,17427,2,4,115,24,30,3034,99,174
+Volkswagen,Passat GLS 1.8T,Wagon,Europe,Front,24955,22801,1.8,4,170,22,31,3338,106,184
+Volkswagen,Passat W8,Wagon,Europe,Front,40235,36956,4,8,270,18,25,4067,106,184
+Volvo,XC90 T6,SUV,Europe,All,41250,38851,2.9,6,268,15,20,4638,113,189
+Volvo,S40 4dr,Sedan,Europe,Front,25135,23701,1.9,4,170,22,29,2767,101,178
+Volvo,S60 2.5 4dr,Sedan,Europe,All,31745,29916,2.5,5,208,20,27,3903,107,180
+Volvo,S60 T5 4dr,Sedan,Europe,Front,34845,32902,2.3,5,247,20,28,3766,107,180
+Volvo,S60 R 4dr,Sedan,Europe,All,37560,35382,2.5,5,300,18,25,3571,107,181
+Volvo,S80 2.9 4dr,Sedan,Europe,Front,37730,35542,2.9,6,208,20,28,3576,110,190
+Volvo,S80 2.5T 4dr,Sedan,Europe,All,37885,35688,2.5,5,194,20,27,3691,110,190
+Volvo,C70 LPT convertible 2dr,Sedan,Europe,Front,40565,38203,2.4,5,197,21,28,3450,105,186
+Volvo,C70 HPT convertible 2dr,Sedan,Europe,Front,42565,40083,2.3,5,242,20,26,3450,105,186
+Volvo,S80 T6 4dr,Sedan,Europe,Front,45210,42573,2.9,6,268,19,26,3653,110,190
+Volvo,V40,Wagon,Europe,Front,26135,24641,1.9,4,170,22,29,2822,101,180
+Volvo,XC70,Wagon,Europe,All,35145,33112,2.5,5,208,20,27,3823,109,186
