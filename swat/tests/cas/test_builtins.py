@@ -224,9 +224,12 @@ class TestBuiltins(tm.TestCase):
         self.assertGreaterEqual(len(aset), 3)
         self.assertEqual(aset.columns[0], 'name')
         self.assertEqual(aset.columns[1], 'description')
-        self.assertEqual(aset.iloc[0].tolist(), ['annTrain','Train an artificial neural network'])
-        self.assertEqual(aset.iloc[1].tolist(), ['annScore','Score a table using an artificial neural network model'])
-        self.assertEqual(aset.iloc[2].tolist(), ['annCode','Generate DATA step scoring code from an artificial neural network model'])
+        self.assertTrue(aset.iloc[0].tolist() == ['annTrain','Train an artificial neural network'] or
+                        aset.iloc[0].tolist() == ['annTrain','Trains an artificial neural network'])
+        self.assertTrue(aset.iloc[1].tolist() == ['annScore','Score a table using an artificial neural network model'] or
+                         aset.iloc[1].tolist() == ['annScore','Scores a table using an artificial neural network model'])
+        self.assertTrue(aset.iloc[2].tolist() == ['annCode','Generate DATA step scoring code from an artificial neural network model'] or
+                         aset.iloc[2].tolist() == ['annCode','Generates DATA step scoring code from an artificial neural network model'])
         
         # List an action that is loaded.
         act = self.s.builtins.help(action='annTrain', showHidden=True)

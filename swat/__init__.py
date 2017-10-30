@@ -78,7 +78,10 @@ from .cas.table import CASTable
 from .cas.utils import table
 
 # DataFrame with SAS metadata
-from .dataframe import SASDataFrame, concat, reshape_bygroups
+from .dataframe import SASDataFrame, reshape_bygroups
+
+# Functions
+from .functions import concat, merge
 
 # Exceptions
 from .exceptions import SWATError, SWATOptionError, SWATCASActionError
