@@ -1365,17 +1365,17 @@ class TestCASTable(tm.TestCase):
         dfmode = df.mode()
         tblmode = tbl.mode()
 
-        self.assertEqual(dfmode.to_csv(index=False), tblmode.to_csv(index=False))
+        self.assertTablesEqual(dfmode, tblmode)
 
         # Numeric only
         dfmode = df.mode(numeric_only=True)
         tblmode = tbl.mode(numeric_only=True)
-        self.assertEqual(dfmode.to_csv(index=False), tblmode.to_csv(index=False))
+        self.assertTablesEqual(dfmode, tblmode)
 
         # Character only
         dfmode = df[['Make', 'Model', 'Type', 'Origin']].mode()
         tblmode = tbl[['Make', 'Model', 'Type', 'Origin']].mode()
-        self.assertEqual(dfmode.to_csv(index=False), tblmode.to_csv(index=False))
+        self.assertTablesEqual(dfmode, tblmode)
 
         # Column mode
         self.assertEqual(df['Make'].mode().tolist(), tbl['Make'].mode().tolist())
@@ -4155,8 +4155,8 @@ class TestCASTable(tm.TestCase):
 #       self.assertTablesEqual(df.fillna(value=pd.DataFrame([[50, 40]], columns=['Cylinders', 'Foo'])),
 #                              sorttbl.fillna(value=pd.DataFrame([[50, 40]], columns=['Cylinders', 'Foo'])))
 
-        self.assertTablesEqual(df.fillna(value={'Cylinders':50}, inplace=True),
-                               sorttbl.fillna(value={'Cylinders':50}, inplace=True))
+        self.assertEqual(df.fillna(value={'Cylinders':50}, inplace=True),
+                         sorttbl.fillna(value={'Cylinders':50}, inplace=True))
 
         self.assertTablesEqual(df, sorttbl)
 

@@ -435,9 +435,9 @@ class SASDataFrame(pd.DataFrame):
         '''
         return SASDataFrame
 
-    @property
-    def _constructor_sliced(self):
-        return pd.Series
+#   @property
+#   def _constructor_sliced(self):
+#       return pd.Series
 
 #   def __getattr__(self, name):
 #       if name == '_repr_html_' and get_option('display.notebook.repr_html'):

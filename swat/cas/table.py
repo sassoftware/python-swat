@@ -3811,7 +3811,11 @@ class CASTable(ParamManager, ActionParamManager):
                     nmiss = pd.DataFrame([[nmiss]], columns=columns) 
                 nmiss['__stat_label__'] = 'nmiss'
                 nmiss = nmiss.set_index('__stat_label__', append=bool(groups))
-                out = out.drop(['nmiss'], level=groups and -1 or None, errors='ignore')
+                if pd_version >= (0, 16, 1):
+                    out = out.drop(['nmiss'], level=groups and -1 or None,
+                                   errors='ignore')
+                elif 'nmiss' in out.index:
+                    out = out.drop(['nmiss'], level=groups and -1 or None)
             if 'count' in labels:
                 count = tbl.count()
                 if isinstance(count, pd.Series):
@@ -3820,7 +3824,11 @@ class CASTable(ParamManager, ActionParamManager):
                     count = pd.DataFrame([[count]], columns=columns) 
                 count['__stat_label__'] = 'count'
                 count = count.set_index('__stat_label__', append=bool(groups))
-                out = out.drop(['count'], level=groups and -1 or None, errors='ignore')
+                if pd_version >= (0, 16, 1):
+                    out = out.drop(['count'], level=groups and -1 or None,
+                                   errors='ignore')
+                elif 'count' in out.index:
+                    out = out.drop(['count'], level=groups and -1 or None)
             out = pd.concat([out] + [x for x in [nmiss, count] if x is not None])
 
         if not groups:
@@ -4933,7 +4941,12 @@ class CASTable(ParamManager, ActionParamManager):
                     code.append('     if ( missing(%s) ) then %s = %s;' %
                                 (_nlit(name), _nlit(name), float(repl)))
 
-        return self._apply_datastep(code, inplace=inplace)
+        out = self._apply_datastep(code, inplace=inplace)
+
+        if inplace:
+            return
+
+        return out
 
     def replace(self, to_replace=None, value=None, inplace=False, limit=None,
                 regex=False, method='pad', **kwargs):
