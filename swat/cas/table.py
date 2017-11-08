@@ -3205,7 +3205,7 @@ class CASTable(ParamManager, ActionParamManager):
         '''
         tbl = self._materialize(prefix='_ABS')
         code = []
-        for name, dtype in tbl.dtypes.items():
+        for name, dtype in tbl.dtypes.iteritems():
             if dtype not in ['char', 'varchar', 'binary', 'varbinary',
                              'date', 'time', 'datetime']:
                 code.append('    %s = ABS(%s);' % (_nlit(name), _nlit(name)))
@@ -3223,7 +3223,7 @@ class CASTable(ParamManager, ActionParamManager):
         cvars = []
         ccode = []
         groups = self.get_groupby_vars()
-        for name, dtype in self.dtypes.items():
+        for name, dtype in self.dtypes.iteritems():
             if name in groups:
                 continue
             boolname = _nlit('%s__bool__' % name) 
@@ -3363,7 +3363,7 @@ class CASTable(ParamManager, ActionParamManager):
 
         tbl = self._materialize(prefix='_CLIP')
         code = []
-        for name, dtype in tbl.dtypes.items():
+        for name, dtype in tbl.dtypes.iteritems():
             if dtype not in ['char', 'varchar', 'binary', 'varbinary',
                              'date', 'time', 'datetime']:
                 code.append(fmt % (_nlit(name), _nlit(name), _nlit(name)))

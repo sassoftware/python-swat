@@ -4155,9 +4155,8 @@ class TestCASTable(tm.TestCase):
 #       self.assertTablesEqual(df.fillna(value=pd.DataFrame([[50, 40]], columns=['Cylinders', 'Foo'])),
 #                              sorttbl.fillna(value=pd.DataFrame([[50, 40]], columns=['Cylinders', 'Foo'])))
 
-        self.assertEqual(df.fillna(value={'Cylinders':50}, inplace=True),
-                         sorttbl.fillna(value={'Cylinders':50}, inplace=True))
-
+        df.fillna(value={'Cylinders':50}, inplace=True),
+        self.assertTrue(sorttbl.fillna(value={'Cylinders':50}, inplace=True) is None)
         self.assertTablesEqual(df, sorttbl)
 
     def test_dropna(self):

@@ -411,6 +411,7 @@ class CAS(object):
                 for ptype in ['http']:
                     try:
                         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                        sock.settimeout(10)
                         sock.connect((host, port))
                         sock.send(('GET /cas HTTP/1.1\r\n' +
                                    ('Host: %s\r\n' % host) +
