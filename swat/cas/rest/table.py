@@ -282,9 +282,9 @@ class REST_CASTable(object):
                         outrow.append(base64.b64decode(item['data']))
                     except:
                         try:
-                            outrow.append(base64.b64decode(item['data']+'='))
+                            outrow.append(base64.b64decode(item['data'] + '='))
                         except:
-                            outrow.append(base64.b64decode(item['data']+'=='))
+                            outrow.append(base64.b64decode(item['data'] + '=='))
                 # Check for datetime, date, time
                 elif dtype == 'datetime':
                     if item < decimal.Decimal('-9223372036854775807.5'):

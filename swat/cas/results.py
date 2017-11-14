@@ -24,11 +24,11 @@ Utilities for collecting results from a CAS action
 from __future__ import print_function, division, absolute_import, unicode_literals
 
 import collections
-import pandas as pd
-import pandas.core.common as pdcom
 import pprint
 import re
 import six
+import pandas as pd
+import pandas.core.common as pdcom
 from ..dataframe import SASDataFrame, concat
 from ..notebook.zeppelin import show as z_show
 from ..utils.compat import OrderedDict
@@ -44,9 +44,11 @@ class RendererMixin(object):
         i = 0
         for key, value in six.iteritems(self):
             if i == 0:
-                print('%%html <div class="cas-results-key"><b>&#167; %s</b></div>' % key)
+                print('%%html <div class="cas-results-key">'
+                      '<b>&#167; %s</b></div>' % key)
             else:
-                print('%%html <div class="cas-results-key"><b><hr/>&#167; %s</b></div>' % key)
+                print('%%html <div class="cas-results-key">'
+                      '<b><hr/>&#167; %s</b></div>' % key)
 
             print('')
 
@@ -74,7 +76,7 @@ class RendererMixin(object):
                              (self.performance.memory / 1048576.0))
             if stats:
                 print('%%html <p class="cas-results-performance"><small>%s</small></p>' %
-                              ' &#183; '.join(stats))
+                      ' &#183; '.join(stats))
 
     def _repr_html_(self):
         '''
@@ -448,6 +450,7 @@ class CASResults(RendererMixin, OrderedDict):
         out = CASResults()
 
         bykey = []
+
         def set_bykey(attrs):
             ''' Locate By variable keys '''
             if bykey:
@@ -476,8 +479,8 @@ class CASResults(RendererMixin, OrderedDict):
                         break
                 elif name:
                     try:
-                        if attrs['ByVar%sValue' % i] != name[i-1] and \
-                                attrs['ByVar%sValueFormatted' % i] != name[i-1]:
+                        if attrs['ByVar%sValue' % i] != name[i - 1] and \
+                                attrs['ByVar%sValueFormatted' % i] != name[i - 1]:
                             match = False
                             break
                     except IndexError:
@@ -558,8 +561,7 @@ class CASResults(RendererMixin, OrderedDict):
                                     label=out[0].label, title=out[0].title,
                                     formatter=out[0].formatter,
                                     attrs=attrs, colinfo=out[0].colinfo.copy())
-            else:
-                return pd.concat(out, **kwargs)
+            return pd.concat(out, **kwargs)
 
         return out
 

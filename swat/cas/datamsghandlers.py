@@ -27,9 +27,9 @@ import base64
 import copy
 import re
 import datetime
+import warnings
 import numpy as np
 import pandas as pd
-import warnings
 from .utils.datetime import (str2cas_timestamp, str2cas_datetime, str2cas_date,
                              str2cas_time, str2sas_timestamp, str2sas_datetime,
                              str2sas_date, str2sas_time, cas2python_timestamp,
@@ -331,8 +331,10 @@ class CASDataMsgHandler(object):
                 if vtype in ['BINARY', 'VARBINARY'] and \
                         hasattr(self._sw_databuffer, 'setBinaryFromBase64'):
                     if isinstance(value, (binary_types, text_types)):
-                        errorcheck(self._sw_databuffer.setBinaryFromBase64(row, offset,
-                                        a2n(base64.b64encode(a2b(transformer(value))))),
+                        errorcheck(self._sw_databuffer\
+                                        .setBinaryFromBase64(row, offset,
+                                            a2n(base64.b64encode(
+                                                    a2b(transformer(value))))),
                                    self._sw_databuffer)
                     else:
                         errorcheck(self._sw_databuffer.setBinaryFromBase64(row,
@@ -340,7 +342,7 @@ class CASDataMsgHandler(object):
                                                                            a2n('')),
                                    self._sw_databuffer)
                 else:
-                    if isinstance(value, binary_types) or isinstance(value, text_types):
+                    if isinstance(value, (text_types, binary_types)):
                         errorcheck(self._sw_databuffer.setString(row, offset,
                                                                  a2n(transformer(value))),
                                    self._sw_databuffer)
@@ -350,9 +352,9 @@ class CASDataMsgHandler(object):
             elif vrtype == 'NUMERIC' and vtype in ['INT32', 'DATE']:
                 if pd.isnull(value):
                     value = get_option('cas.missing.%s' % vtype.lower())
-                    warnings.warn(("Missing value found in 32-bit integer-based column '%s'.\n" %
-                                   v['name']) +
-                                  ("Substituting cas.missing.%s option value (%s)." %
+                    warnings.warn(('Missing value found in 32-bit '
+                                   'integer-based column \'%s\'.\n' % v['name']) +
+                                  ('Substituting cas.missing.%s option value (%s).' %
                                    (vtype.lower(), value)),
                                   RuntimeWarning)
                 if length > 4:
@@ -367,9 +369,9 @@ class CASDataMsgHandler(object):
             elif vrtype == 'NUMERIC' and vtype in ['INT64', 'DATETIME', 'TIME']:
                 if pd.isnull(value):
                     value = get_option('cas.missing.%s' % vtype.lower())
-                    warnings.warn(("Missing value found in 64-bit integer-based column '%s'.\n"
-                                   % v['name']) +
-                                  ("Substituting cas.missing.%s option value (%s)." %
+                    warnings.warn(('Missing value found in 64-bit '
+                                   'integer-based column \'%s\'.\n' % v['name']) +
+                                  ('Substituting cas.missing.%s option value (%s).' %
                                    (vtype.lower(), value)),
                                   RuntimeWarning)
                 if length > 8:
@@ -559,7 +561,7 @@ class PandasDataFrame(CASDataMsgHandler):
         # Add support for SASDataFrame metadata
         colinfo = {}
         if isinstance(data, SASDataFrame):
-            label = data.label
+            # label = data.label
             colinfo = data.colinfo
 
         elif isinstance(data, pd.DataFrame):
@@ -580,11 +582,11 @@ class PandasDataFrame(CASDataMsgHandler):
         for name, nptype in zip(data.columns, data.dtypes):
             length, rtype, subtype = typemap(name, nptype)
             if subtype == 'DATETIME' and name not in transformers:
-                transformers[name] = lambda x: str2cas_timestamp(x)
+                transformers[name] = str2cas_timestamp
             elif subtype == 'DATE' and name not in transformers:
-                transformers[name] = lambda x: str2cas_date(x)
+                transformers[name] = str2cas_date
             elif subtype == 'TIME' and name not in transformers:
-                transformers[name] = lambda x: str2cas_time(x)
+                transformers[name] = str2cas_time
 
             variables.append({'name': name, 'rtype': rtype, 'type': subtype,
                               'offset': reclen, 'length': length})

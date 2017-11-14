@@ -25,7 +25,9 @@ from __future__ import print_function, division, absolute_import, unicode_litera
 
 import os
 import re
+import sys
 import unittest
+import pandas as pd
 
 UUID_RE = r'^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$'
 
@@ -122,8 +124,8 @@ def get_cas_data_lib(server_type):
 
 
 def get_user_pass():
-    ''' 
-    Get the username and password from the environment if possible 
+    '''
+    Get the username and password from the environment if possible
 
     If the environment does not contain a username and password,
     they will be retrieved from a ~/.authinfo file.
@@ -132,15 +134,15 @@ def get_user_pass():
     username = None
     password = None
     if 'CASUSER' in os.environ:
-        username = os.environ['CASUSER'] 
+        username = os.environ['CASUSER']
     if 'CASPASSWORD' in os.environ:
-        password = os.environ['CASPASSWORD'] 
+        password = os.environ['CASPASSWORD']
     return username, password
 
 
 def get_host_port_proto():
-    ''' 
-    Get the host, port and protocol from a .casrc file 
+    '''
+    Get the host, port and protocol from a .casrc file
 
     NOTE: .casrc files are written in Lua
 
@@ -170,7 +172,7 @@ def get_host_port_proto():
     while not os.path.isfile(cfgfile):
         if os.path.dirname(homepath) == os.path.dirname(cfgfile):
             break
-        newcfgfile = os.path.abspath(os.path.normpath(rcname)) 
+        newcfgfile = os.path.abspath(os.path.normpath(rcname))
         if os.path.dirname(cfgfile) == os.path.dirname(newcfgfile):
             break
 
@@ -188,7 +190,7 @@ def get_host_port_proto():
 
 def _read_casrc(path):
     '''
-    Read the .casrc file using Lua 
+    Read the .casrc file using Lua
 
     Parameters
     ----------
@@ -254,22 +256,22 @@ def _read_casrc(path):
                 setattr(lg, name, eval(value))
 
     try:
-       cashost = str(lg.cashost)
+        cashost = str(lg.cashost)
     except:
-       sys.sterr.write('ERROR: Could not access cashost setting\n')
-       sys.exit(1)
+        sys.sterr.write('ERROR: Could not access cashost setting\n')
+        sys.exit(1)
 
     try:
-       casport = int(lg.casport)
+        casport = int(lg.casport)
     except:
-       sys.sterr.write('ERROR: Could not access casport setting\n')
-       sys.exit(1)
+        sys.sterr.write('ERROR: Could not access casport setting\n')
+        sys.exit(1)
 
     try:
-       if lg.casprotocol:
-           casprotocol = str(lg.casprotocol)
+        if lg.casprotocol:
+            casprotocol = str(lg.casprotocol)
     except:
-       pass
+        pass
 
     return cashost, casport, casprotocol
 
@@ -287,7 +289,7 @@ def load_data(conn, path, server_type, casout=None):
     server_type : string
         The type of CAS server in the form platform.mpp|smp[.nohdfs]
     casout : dict
-        The CAS output table specification 
+        The CAS output table specification
 
     Returns
     -------
@@ -320,41 +322,42 @@ def load_data(conn, path, server_type, casout=None):
 
     # If server version doesn't exist, upload local copy
     if 'tableName' not in res or not res['tableName']:
-        #sys.stderr.write('NOTE: Uploading local data file.')
+        # sys.stderr.write('NOTE: Uploading local data file.')
         res = conn.upload(os.path.join(os.path.dirname(st.__file__), path), casout=casout)
 
     return res
 
 
 def runtests(xmlrunner=False):
-   ''' Run unit tests '''
-   import sys
+    ''' Run unit tests '''
+    import sys
 
-   if '--profile' in sys.argv:
-       import profile
-       import pstats
+    if '--profile' in sys.argv:
+        import profile
+        import pstats
 
-       sys.argv = [x for x in sys.argv if x != '--profile']
+        sys.argv = [x for x in sys.argv if x != '--profile']
 
-       if xmlrunner:
-           import xmlrunner as xr
-           profile.run("unittest.main(testRunner=xr.XMLTestRunner(output='test-reports', verbosity=2))", '_stats.txt')
-       else:
-           profile.run('unittest.main()', '_stats.txt')
+        if xmlrunner:
+            import xmlrunner as xr
+            profile.run('unittest.main(testRunner=xr.XMLTestRunner('
+                        'output=\'test-reports\', verbosity=2))', '_stats.txt')
+        else:
+            profile.run('unittest.main()', '_stats.txt')
 
-       stats = pstats.Stats('_stats.txt')
-       #stats.strip_dirs()
-       stats.sort_stats('cumulative', 'calls')
-       stats.print_stats(25)
-       stats.sort_stats('time', 'calls')
-       stats.print_stats(25)
+        stats = pstats.Stats('_stats.txt')
+        # stats.strip_dirs()
+        stats.sort_stats('cumulative', 'calls')
+        stats.print_stats(25)
+        stats.sort_stats('time', 'calls')
+        stats.print_stats(25)
 
-   elif xmlrunner:
-       import xmlrunner as xr
-       unittest.main(testRunner=xr.XMLTestRunner(output='test-reports', verbosity=2)) 
+    elif xmlrunner:
+        import xmlrunner as xr
+        unittest.main(testRunner=xr.XMLTestRunner(output='test-reports', verbosity=2))
 
-   else:
-       unittest.main()
+    else:
+        unittest.main()
 
 
 def get_cas_host_type(conn):
@@ -377,9 +380,9 @@ def get_cas_host_type(conn):
     # Check to see if HDFS is present
     out = conn.table.querycaslib(caslib='CASUSERHDFS')
     for key, value in list(out.items()):
-       if 'CASUSERHDFS' in key and value:
-           # Default HDFS caslib for user exists
-           htype = ''
+        if 'CASUSERHDFS' in key and value:
+            # Default HDFS caslib for user exists
+            htype = ''
 
     if stype == 'mpp' and (len(htype) > 0):
         return ostype + '.' + stype + '.' + htype

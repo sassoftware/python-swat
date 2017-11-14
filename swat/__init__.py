@@ -66,27 +66,27 @@ if sys.hexversion < 0x02070000:
     raise RuntimeError('Python 2.7 or newer is required to use this package.')
 
 # Configuration
-from . import config
+from . import config    # noqa: E402
 from .config import (set_option, get_option, reset_option, describe_option,
-                     options, option_context)
+                     options, option_context)    # noqa: E402
 
 # CAS utilities
-from .cas import (CAS, vl, nil, getone, getnext, datamsghandlers, blob)
-from .cas.table import CASTable
+from .cas import (CAS, vl, nil, getone, getnext, datamsghandlers, blob)    # noqa: E402
+from .cas.table import CASTable    # noqa: E402
 
 # Conflicts with .cas.table, so we import it excplicitly here
-from .cas.utils import table
+from .cas.utils import table    # noqa: E402
 
 # DataFrame with SAS metadata
-from .dataframe import SASDataFrame, reshape_bygroups
+from .dataframe import SASDataFrame, reshape_bygroups    # noqa: E402
 
 # Functions
-from .functions import concat, merge
+from .functions import concat, merge    # noqa: E402
 
 # Exceptions
-from .exceptions import SWATError, SWATOptionError, SWATCASActionError
+from .exceptions import SWATError, SWATOptionError, SWATCASActionError    # noqa: E402
 
 # SAS Formatter
-from .formatter import SASFormatter
+from .formatter import SASFormatter    # noqa: E402
 
 __version__ = '1.2.2-dev'

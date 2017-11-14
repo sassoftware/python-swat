@@ -25,4 +25,4 @@ Data message handlers
 
 from __future__ import print_function, division, absolute_import, unicode_literals
 
-from .cas.datamsghandlers import *
+from .cas.datamsghandlers import *    # noqa: F403

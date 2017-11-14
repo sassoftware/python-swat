@@ -23,13 +23,13 @@ Classes for interfacing with CAS actions and action sets
 
 from __future__ import print_function, division, absolute_import, unicode_literals
 
-import six
 import json
 import keyword
-import pandas as pd
 import re
 import textwrap
 import weakref
+import six
+import pandas as pd
 from ..config import get_option
 from ..exceptions import SWATError
 from ..utils import mergedefined

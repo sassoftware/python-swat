@@ -55,16 +55,16 @@ else:
     items_types = (list, tuple, set)
     dict_types = (dict,)
     int32_types = (np.int32, int)
-    int64_types = (np.int64, long)
+    int64_types = (np.int64, long)    # noqa: F821
     int_types = int32_types + int64_types
     float64_types = (np.float64, float)
     num_types = int_types + float64_types
     binary_types = (str, bytes)
     bool_types = (bool, np.bool_)
-    text_types = (unicode,)
+    text_types = (unicode,)    # noqa: F821
     char_types = binary_types + text_types
     int32 = int
-    int64 = long
+    int64 = long    # noqa: F821
     float64 = float
 
 

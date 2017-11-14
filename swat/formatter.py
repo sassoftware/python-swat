@@ -25,12 +25,12 @@ from __future__ import print_function, division, absolute_import, unicode_litera
 
 import datetime
 import numpy as np
+from pandas import Timestamp
 from . import clib
 from .cas import utils
 from .clib import errorcheck
 from .cas.table import CASTable
 from .exceptions import SWATError
-from pandas import Timestamp
 from .utils import getsoptions
 from .utils.compat import (a2n, a2u, int32, int64, float64, float64_types,
                            int32_types, int64_types, text_types, binary_types,
@@ -191,19 +191,19 @@ class SASFormatter(object):
                              self._sw_formatter)
         elif isinstance(value, (datetime.datetime, Timestamp)):
             out = errorcheck(a2u(self._sw_formatter.formatDouble(
-                                 utils.python2sas_datetime(value),
+                                 utils.datetime.python2sas_datetime(value),
                                  a2n(sasfmt), int32(width)),
                                  a2n('utf-8')),
                              self._sw_formatter)
         elif isinstance(value, datetime.date):
             out = errorcheck(a2u(self._sw_formatter.formatDouble(
-                                 utils.python2sas_date(value),
+                                 utils.datetime.python2sas_date(value),
                                  a2n(sasfmt), int32(width)),
                                  a2n('utf-8')),
                              self._sw_formatter)
         elif isinstance(value, datetime.time):
             out = errorcheck(a2u(self._sw_formatter.formatDouble(
-                                 utils.python2sas_time(value),
+                                 utils.datetime.python2sas_time(value),
                                  a2n(sasfmt), int32(width)),
                                  a2n('utf-8')),
                              self._sw_formatter)

@@ -23,8 +23,8 @@ Class for receiving responses from a CAS action
 
 from __future__ import print_function, division, absolute_import, unicode_literals
 
-import six
 import weakref
+import six
 from ..utils.compat import a2u, binary_types
 from ..utils import cachedproperty
 from ..clib import errorcheck

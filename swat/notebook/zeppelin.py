@@ -31,6 +31,7 @@ import six
 import sys
 from ..utils.compat import a2b
 
+
 def img2tag(img, fmt='png', **kwargs):
     '''
     Convert image data into HTML tag with data URL
@@ -54,6 +55,7 @@ def img2tag(img, fmt='png', **kwargs):
     css = css and ("style='%s' " % '; '.join(css)) or ''
     return "<img src='%s' %s/>" % (img.decode('ascii'), css)
 
+
 def show(obj, **kwargs):
     ''' Display object using the Zeppelin Display System '''
     if hasattr(obj, '_z_show_'):
@@ -75,7 +77,8 @@ def show(obj, **kwargs):
         show_svg(obj, **kwargs)
 
     else:
-        print('%%html <pre>%s</pre>' % cgi.escape(pprint.pformat(obj))) 
+        print('%%html <pre>%s</pre>' % cgi.escape(pprint.pformat(obj)))
+
 
 def show_image(img, fmt='png', width='auto', height='auto'):
     ''' Display an Image object '''
@@ -92,6 +95,7 @@ def show_image(img, fmt='png', width='auto', height='auto'):
 
     print(out.format(width=width, height=height, img=img))
 
+
 def show_svg(img, width='auto', height='auto'):
     ''' Display an SVG object '''
     img = img._repr_svg_()
@@ -100,12 +104,13 @@ def show_svg(img, width='auto', height='auto'):
 
     print(out.format(width=width, height=height, img=img))
 
+
 def show_matplotlib(plt, fmt='png', width='auto', height='auto'):
     ''' Display a Matplotlib plot '''
     if fmt in ['png', 'jpeg', 'jpg']:
         io = six.BytesIO()
-        plt.savefig(img, format=fmt)
-        img = img2tag(img.getvalue(), width=width, height=height)
+        plt.savefig(io, format=fmt)
+        img = img2tag(io.getvalue(), width=width, height=height)
         io.close()
 
     elif fmt == 'svg':
@@ -120,6 +125,7 @@ def show_matplotlib(plt, fmt='png', width='auto', height='auto'):
     out = "%html <div style='width:{width}; height:{height}'>{img}</div>"
 
     print(out.format(width=width, height=height, img=img))
+
 
 def show_dataframe(df, show_index=None, max_result=None, **kwargs):
     '''

@@ -27,9 +27,9 @@ import base64
 import json
 import os
 import re
+import socket
 import requests
 import six
-import socket
 from six.moves import urllib
 from .message import REST_CASMessage
 from .response import REST_CASResponse
@@ -169,7 +169,7 @@ class REST_CASConnection(object):
         self._orig_port = port
 
         if isinstance(hostname, six.string_types):
-            hostname = re.split('\s+', hostname.strip())
+            hostname = re.split(r'\s+', hostname.strip())
         else:
             hostname = list(hostname)
 
@@ -261,8 +261,9 @@ class REST_CASConnection(object):
 
                     if locale:
                         self.invoke('session.setlocale', dict(locale=locale))
-                        if self._results.get('disposition').get('severity', '') == 'Error':
-                            raise SWATError(self._results.get('disposition')
+                        if self._results.get('disposition', {})\
+                                .get('severity', '') == 'Error':
+                            raise SWATError(self._results.get('disposition', {})
                                             .get('formattedStatus',
                                                  'Invalid locale: %s' % locale))
                         self._results.clear()
@@ -323,10 +324,11 @@ class REST_CASConnection(object):
 
         while True:
             try:
-                res = self._req_sess.post(urllib.parse.urljoin(self._current_baseurl,
-                                                               'cas/sessions/%s/actions/%s' %
-                                                               (self._session, action_name)),
-                                          data=post_data)
+                res = self._req_sess.post(
+                          urllib.parse.urljoin(self._current_baseurl,
+                                               'cas/sessions/%s/actions/%s' %
+                                               (self._session, action_name)),
+                          data=post_data)
                 res = res.text
                 break
 
@@ -341,10 +343,11 @@ class REST_CASConnection(object):
                     'Content-Length': str(len(post_data)),
                 })
 
-                res = self._req_sess.post(urllib.parse.urljoin(self._current_baseurl,
-                                                               'cas/sessions/%s/actions/%s' %
-                                                               (self._session, action_name)),
-                                          data=post_data)
+                res = self._req_sess.post(
+                           urllib.parse.urljoin(self._current_baseurl,
+                                                'cas/sessions/%s/actions/%s' %
+                                                (self._session, action_name)),
+                           data=post_data)
 
                 out = json.loads(a2u(res.text, 'utf-8'), strict=False)
                 result_id = out['results']['Queued Results']['rows'][0][0]

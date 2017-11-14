@@ -23,22 +23,22 @@ CASTable class for interfacing with data tables in CAS
 
 from __future__ import print_function, division, absolute_import, unicode_literals
 
-import six
 import copy
 import keyword
-import numpy as np
-import pandas as pd
 import re
 import sys
 import uuid
 import weakref
+import numpy as np
+import pandas as pd
+import six
+from .utils.params import ParamManager, ActionParamManager
 from ..config import get_option
 from ..exceptions import SWATError
 from ..utils import dict2kwargs, getattr_safe_property
 from ..utils.compat import (int_types, binary_types, text_types, items_types,
                             patch_pandas_sort, char_types, num_types)
 from ..utils.keyword import dekeywordify
-from .utils.params import ParamManager, ActionParamManager
 
 # pylint: disable=W0212, W0221, W0613, R0904, C0330
 
@@ -61,7 +61,7 @@ OPERATOR_NAMES = {
     '>=': 'ge',
     '<=': 'le',
     '==': 'eq',
-    '=':  'eq',
+    '=': 'eq',
     '^=': 'ne',
     '!=': 'ne',
 }
@@ -266,7 +266,7 @@ def merge(left, right, how='inner', on=None, left_on=None, right_on=None,
         * 'right-minus-left' : `right` minus `left`
         * 'outer-minus-inner' : opposite of 'inner'
     on : string, optional
-        Column name to join on, if the same column name is in 
+        Column name to join on, if the same column name is in
         both tables
     left_on : string, optional
         The key from `left` to join on.  This is used if the
@@ -298,7 +298,7 @@ def merge(left, right, how='inner', on=None, left_on=None, right_on=None,
         Not supported.
     casout : string or CASTable or dict, optional
         The output CAS table specification
-    
+
     Returns
     -------
     :class:`CASTable`
@@ -346,7 +346,7 @@ def merge(left, right, how='inner', on=None, left_on=None, right_on=None,
     right_view = None
 
     try:
-        # Allow computed columns / where clauses to be available 
+        # Allow computed columns / where clauses to be available
         # data step code.
         left_view = left.to_view()
         right_view = right.to_view()
@@ -370,7 +370,7 @@ def merge(left, right, how='inner', on=None, left_on=None, right_on=None,
                      _quote(right_name), right_caslib, right_rename))
 
         if extra_code:
-            code.append(extra_code) 
+            code.append(extra_code)
 
         code.append('    by %s;' % _nlit(left_on))
 
@@ -410,7 +410,7 @@ def merge(left, right, how='inner', on=None, left_on=None, right_on=None,
                         (_nlit(right_on), right_missval))
 
         code.append('run;')
-    
+
         out = left.get_connection().retrieve('datastep.runcode', code='\n'.join(code),
                                              _apptag='UI', _messagelevel='error')
         if out.status:
@@ -599,8 +599,6 @@ class CASTableAnyLocationAccessor(CASTableAccessor):
     accessor = 'ix'
 
     def __getitem__(self, pos):
-        numrows = None
-
         is_column = isinstance(self._table(), CASColumn)
         if is_column:
             if isinstance(pos, tuple):
@@ -3217,7 +3215,7 @@ class CASTable(ParamManager, ActionParamManager):
 
         Returns
         -------
-        :class:`CASTable` 
+        :class:`CASTable`
 
         '''
         cvars = []
@@ -3226,7 +3224,7 @@ class CASTable(ParamManager, ActionParamManager):
         for name, dtype in self.dtypes.iteritems():
             if name in groups:
                 continue
-            boolname = _nlit('%s__bool__' % name) 
+            boolname = _nlit('%s__bool__' % name)
             cvars.append(boolname)
             if dtype in ['char', 'varchar', 'binary', 'varbinary']:
                 ccode.append('%s = LENGTHN(%s) > 0' %
@@ -3249,7 +3247,7 @@ class CASTable(ParamManager, ActionParamManager):
         bool_only : bool, optional
             Not supported.
         skipna : bool, optional
-            Should missing values be skipped?  If False, and the entire 
+            Should missing values be skipped?  If False, and the entire
             column is missing, the result will also be a missing.
         level : int, optional
             Not supported.
@@ -3351,11 +3349,12 @@ class CASTable(ParamManager, ActionParamManager):
 
         Returns
         -------
-        :class:`CASTable` 
+        :class:`CASTable`
 
         '''
         if lower is not None and upper is not None:
-            fmt = '    %%s = CHOOSEN(MISSING(%%s)+1, MIN(%s, MAX(%s, %%s)), .);' % (upper, lower)
+            fmt = '    %%s = CHOOSEN(MISSING(%%s)+1, MIN(%s, MAX(%s, %%s)), .);' \
+                  % (upper, lower)
         elif lower is not None:
             fmt = '    %%s = CHOOSEN(MISSING(%%s)+1, MAX(%s, %%s), .);' % lower
         elif upper is not None:
@@ -3474,7 +3473,7 @@ class CASTable(ParamManager, ActionParamManager):
         groups = self.get_groupby_vars()
         if groups:
             inputs = [x for x in inputs if x not in groups]
-            out = self._retrieve('aggregation.aggregate', 
+            out = self._retrieve('aggregation.aggregate',
                                  varspecs=[dict(names=list(inputs), agg='n')])
             out.pop('ByGroupInfo', None)
             out = pd.concat(list(out.values()))
@@ -3485,7 +3484,7 @@ class CASTable(ParamManager, ActionParamManager):
                 out.columns.name = None
             return out[inputs]
 
-        out = pd.concat(list(self._retrieve('aggregation.aggregate', 
+        out = pd.concat(list(self._retrieve('aggregation.aggregate',
                                             varspecs=[
                                                 dict(names=list(inputs), agg='n')
                                             ]).values()))
@@ -3808,7 +3807,7 @@ class CASTable(ParamManager, ActionParamManager):
                 if isinstance(nmiss, pd.Series):
                     nmiss = nmiss.to_frame().T
                 elif not isinstance(count, pd.DataFrame):
-                    nmiss = pd.DataFrame([[nmiss]], columns=columns) 
+                    nmiss = pd.DataFrame([[nmiss]], columns=columns)
                 nmiss['__stat_label__'] = 'nmiss'
                 nmiss = nmiss.set_index('__stat_label__', append=bool(groups))
                 if pd_version >= (0, 16, 1):
@@ -3821,7 +3820,7 @@ class CASTable(ParamManager, ActionParamManager):
                 if isinstance(count, pd.Series):
                     count = count.to_frame().T
                 elif not isinstance(count, pd.DataFrame):
-                    count = pd.DataFrame([[count]], columns=columns) 
+                    count = pd.DataFrame([[count]], columns=columns)
                 count['__stat_label__'] = 'count'
                 count = count.set_index('__stat_label__', append=bool(groups))
                 if pd_version >= (0, 16, 1):
@@ -4818,7 +4817,6 @@ class CASTable(ParamManager, ActionParamManager):
             n = 1
 
         if n is not None:
-            numrows = self._numrows
             frac = float(n) / self._numrows
             if frac <= 0:
                 raise RuntimeError('Sample percentage will return no samples.')
@@ -5127,7 +5125,7 @@ class CASTable(ParamManager, ActionParamManager):
         def to_re_sub(patt, to):
             ''' Convert object to regex pattern substitution syntax '''
             flags = ''
-            if type(from_) is regex_type:
+            if type(patt) is regex_type:
                 flags = re_flags_to_str(patt.flags)
                 patt = patt.pattern
             if not isinstance(patt, char_types):
@@ -5423,7 +5421,7 @@ class CASTable(ParamManager, ActionParamManager):
             * 'right-minus-left' : `right` minus `self`
             * 'outer-minus-inner' : opposite of 'inner'
         on : string, optional
-            Column name to join on, if the same column name is in 
+            Column name to join on, if the same column name is in
             both tables
         left_on : string, optional
             The key from `self` to join on.  This is used if the
@@ -5453,7 +5451,7 @@ class CASTable(ParamManager, ActionParamManager):
             the aforementioned values.
         casout : string or CASTable or dict, optional
             The CAS output table specification
-        
+
         Returns
         -------
         :class:`CASTable`
@@ -6018,7 +6016,6 @@ class CASTable(ParamManager, ActionParamManager):
             Keyword arguments to the export method.
 
         '''
-        from ..dataframe import concat
         kwargs = kwargs.copy()
         params = {}
         params['sample_pct'] = kwargs.pop('sample_pct', None)
@@ -6520,15 +6517,14 @@ class CASTable(ParamManager, ActionParamManager):
         is_column = isinstance(self, CASColumn)
 
         # tbl[colname]
-        if not(is_column) and (isinstance(key, text_types) or
-                               isinstance(key, binary_types)):
+        if not(is_column) and isinstance(key, (text_types, binary_types)):
             columns = set([x.lower() for x in list(self.columns)])
             if key.lower() not in columns:
                 raise KeyError(key)
             return self._to_column(key)
 
         # tbl[[colnames|colindexes]]
-        if not(is_column) and (isinstance(key, list) or isinstance(key, pd.Index)):
+        if not(is_column) and isinstance(key, (list, pd.Index)):
             out = self.copy()
             columns = list(out.columns)
             colset = set([x.lower() for x in columns])
@@ -7328,7 +7324,7 @@ class CharacterColumnMethods(object):
         '''
         return self._compute('isnumeric',
                              r"prxmatch('/^\s*(0?\.\d+|\d+(\.\d*)?)\s*$/', " +
-                             r"{value}) > 0")
+                             r'{value}) > 0')
 
 #   def soundslike(self, arg):
 #       '''
@@ -8417,8 +8413,7 @@ class CASColumn(CASTable):
                 computedvars.append(acomputedvars)
                 computedvarsprogram.append(acomputedvarsprogram)
                 kwargs[key] = aexpr
-            elif use_quotes and (isinstance(value, text_types) or
-                                 isinstance(value, binary_types)):
+            elif use_quotes and isinstance(value, (text_types, binary_types)):
                 kwargs[key] = '"%s"' % _escape_string(value)
             elif isinstance(value, items_types):
                 items = []
@@ -8992,7 +8987,7 @@ class CASColumn(CASTable):
             groups = self.get_groupby_vars()
             if groups:
                 out.name = tmpname
-                sum = out.sum(level=list(range(len(out.index.names)-1))).to_frame()
+                sum = out.sum(level=list(range(len(out.index.names) - 1))).to_frame()
                 out = out.reset_index(level=-1)
                 out = pd.merge(out, sum, left_index=True, right_index=True, how='inner')
                 out[tmpname] = out[tmpname + '_x'] / out[tmpname + '_y']

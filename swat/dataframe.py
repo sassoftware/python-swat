@@ -849,7 +849,6 @@ class SASDataFrame(pd.DataFrame):
 
         # Get the names of all of the By variables
         byvars = []
-        byvarsfmt = []
         byvals = []
         byvalsfmt = []
         numbycols = 0

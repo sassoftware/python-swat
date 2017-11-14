@@ -32,25 +32,25 @@ else:
     LICENSE = 'Apache v2.0'
 
 setup(
-    zip_safe = False,
-    name = 'swat',
-    version = '1.2.2-dev',
-    description = 'SAS Scripting Wrapper for Analytics Transfer (SWAT)',
-    long_description = README,
-    author = 'SAS',
-    author_email = 'Kevin.Smith@sas.com',
-    url = 'http://github.com/sassoftware/python-swat/',
-    license = LICENSE,
-    packages = find_packages(),
-    package_data = {
+    zip_safe=False,
+    name='swat',
+    version='1.2.2-dev',
+    description='SAS Scripting Wrapper for Analytics Transfer (SWAT)',
+    long_description=README,
+    author='SAS',
+    author_email='Kevin.Smith@sas.com',
+    url='http://github.com/sassoftware/python-swat/',
+    license=LICENSE,
+    packages=find_packages(),
+    package_data={
         'swat': ['lib/*/*', 'tests/datasources/*'],
     },
-    install_requires = [
+    install_requires=[
         'pandas >= 0.16.0',
         'six >= 1.9.0',
         'requests',
     ],
-    classifiers = [
+    classifiers=[
         'Development Status :: 5 - Production/Stable',
         'Environment :: Console',
         'Intended Audience :: Science/Research',

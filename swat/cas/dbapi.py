@@ -30,13 +30,13 @@ try:
     from exceptions import StandardError
 except ImportError:
     StandardError = Exception
-import pandas
-import six
 import time
 import uuid
-import weakref
 from collections import namedtuple
+import six
+import pandas as pd
 from .connection import CAS
+from ..compat import items_types, binary_types, text_types
 from ..exceptions import SWATError
 from ..utils.compat import (int32, int64, float64, int32_types,
                             int64_types, float64_types)
@@ -331,7 +331,7 @@ class Cursor(object):
     def callproc(self, procname, parameters):
         ''' Call a stored procedure '''
         self._reset_output()
-        return self._raise_error(NotSupported, 'callproc')
+        return self._raise_error(NotSupportedError, 'callproc')
 
     def callaction(self, actionname, **parameters):
         ''' Call a CAS action '''
@@ -347,6 +347,7 @@ class Cursor(object):
 
     @property
     def closed(self):
+        ''' Is the connection closed? '''
         return self._connection is None
 
     def _get_table(self):
@@ -362,7 +363,7 @@ class Cursor(object):
             return []
         keys = []
         if isinstance(parameters, dict):
-            keys = list(paramters.keys())
+            keys = list(parameters.keys())
             values = list(parameters.values())
         elif isinstance(parameters, items_types):
             values = list(parameters)
@@ -409,8 +410,8 @@ class Cursor(object):
 
     def executemany(self, operation, seq_of_parameters=None):
         ''' Execute multiple database operations '''
-        if parameters is None:
-            parameters = []
+        # if parameters is None:
+        #     parameters = []
         self._reset_output()
         for parameters in seq_of_parameters:
             out = self.execute(operation, parameters)
@@ -572,8 +573,7 @@ class DBAPITypeObject:
             return 0
         if other < self._values:
             return 1
-        else:
-            return -1
+        return -1
 
 
 # Standard Types

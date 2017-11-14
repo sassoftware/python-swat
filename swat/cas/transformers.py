@@ -541,14 +541,14 @@ def py2cas(soptions, _sw_error, **kwargs):
             for v in item:
                 j = set_list_value(_sw_sublist, j, None, v)
             i = i + 1
-        elif isinstance(item, dict_types) or isinstance(item, ParamManager):
+        elif isinstance(item, (dict_types, ParamManager)):
             if isinstance(item, ParamManager):
                 item = item.to_params()
             _sw_sublist = errorcheck(_sw_values.createListAt(
                                      i, key, len(item)), _sw_values)
             j = 0
             for k, v in six.iteritems(item):
-                if isinstance(k, binary_types) or isinstance(k, text_types):
+                if isinstance(k, (text_types, binary_types)):
                     j = set_list_value(_sw_sublist, j, k, v)
                 else:
                     j = set_list_value(_sw_sublist, j, None, v)

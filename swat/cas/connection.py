@@ -28,8 +28,8 @@ import copy
 import json
 import os
 import re
-import six
 import weakref
+import six
 from . import rest
 from .. import clib
 from .. import config as cf
@@ -52,6 +52,7 @@ from .utils.params import ParamManager, ActionParamManager
 # pylint: disable=W0212
 
 RETRY_ACTION_CODE = 0x280034
+
 
 def _option_handler(key, value):
     ''' Handle option changes '''
@@ -229,12 +230,16 @@ class CAS(object):
                 port = cf.get_option('cas.port')
 
             # Detect protocol
-            if isinstance(hostname, items_types) and (hostname[0].startswith('http:') or
-                                                      hostname[0].startswith('https:')):
+            if (isinstance(hostname, items_types) and
+                    (hostname[0].startswith('http:') or
+                     hostname[0].startswith('https:'))):
                 protocol = hostname[0].split(':', 1)[0]
-            elif isinstance(hostname, six.string_types) and (hostname.startswith('http:') or
-                                                             hostname.startswith('https:')):
+
+            elif (isinstance(hostname, six.string_types) and
+                  (hostname.startswith('http:') or
+                   hostname.startswith('https:'))):
                 protocol = hostname.split(':', 1)[0]
+
             else:
                 protocol = self._detect_protocol(hostname, port, protocol=protocol)
 
@@ -261,7 +266,8 @@ class CAS(object):
             # Create a new connection
             else:
                 # Set up hostnames
-                if protocol not in ['http', 'https'] and isinstance(hostname, items_types):
+                if (protocol not in ['http', 'https'] and
+                        isinstance(hostname, items_types)):
                     hostname = a2n(' '.join(a2n(x) for x in hostname if x))
                 elif isinstance(hostname, six.string_types):
                     hostname = a2n(hostname)
@@ -418,7 +424,7 @@ class CAS(object):
                                    'Connection: close\r\n' +
                                    'User-Agent: Python-SWAT\r\n' +
                                    'Cache-Control: no-cache\r\n\r\n').encode('utf8'))
-    
+
                         if sock.recv(4).decode('utf-8').lower() == 'http':
                             protocol = ptype
                             break
@@ -429,7 +435,10 @@ class CAS(object):
                     finally:
                         sock.close()
 
-                if protocol == ptype:
+                    if protocol != 'auto':
+                        break
+
+                if protocol != 'auto':
                     break
 
             if protocol == 'auto':
@@ -1061,7 +1070,7 @@ class CAS(object):
                         param['value'] = kwargs[param['name']].replace('"', '\\u0022')
                     # TODO: This should only happen for binary inputs (i.e., never)
                     elif isinstance(kwargs[param['name']], binary_types):
-#                       param['value'] = kwargs[param['name']].replace('"', '\\u0022')
+                        # param['value'] = kwargs[param['name']].replace('"', '\\u0022')
                         pass
                     else:
                         param['value'] = kwargs[param['name']]
@@ -1084,7 +1093,7 @@ class CAS(object):
 
         '''
         newkwargs = kwargs.copy()
-        for key, value in six.iteritems(kwargs):
+        for value in six.itervalues(kwargs):
             if isinstance(value, ActionParamManager):
                 newkwargs.update(value.get_action_params(name, {}))
         return newkwargs
@@ -1290,10 +1299,10 @@ class CAS(object):
         for key, value in list(kwargs.items()):
             if importoptions is None and key.lower() == 'importoptions':
                 importoptions = value
-                del kwargs[key] 
+                del kwargs[key]
             elif casout is None and key.lower() == 'casout':
                 casout = value
-                del kwargs[key] 
+                del kwargs[key]
 
         out = self.upload(data, importoptions=importoptions,
                           casout=casout, **kwargs)
@@ -1704,12 +1713,12 @@ class CAS(object):
         name = name.lower()
 
         # Check cache for actionset and action classes
-        if atype in [None, 'actionset'] and name in self._actionset_classes \
-            and self._actionset_classes[name] is not None:
+        if (atype in [None, 'actionset'] and name in self._actionset_classes and
+                self._actionset_classes[name] is not None):
             return self._actionset_classes[name]()
 
-        if atype in [None, 'action'] and name in self._action_classes and \
-            self._action_classes[name] is not None:
+        if (atype in [None, 'action'] and name in self._action_classes and
+                self._action_classes[name] is not None):
             if class_requested:
                 return self._action_classes[name]
             return self._action_classes[name]()
@@ -2113,7 +2122,7 @@ class CAS(object):
         :class:`CASTable`
 
         '''
-        return self._read_any('read_pickle', path, casout=None, **kwargs)
+        return self._read_any('read_pickle', path, casout=casout, **kwargs)
 
     def read_table(self, filepath_or_buffer, casout=None, **kwargs):
         '''

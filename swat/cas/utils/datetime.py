@@ -24,9 +24,9 @@ Datetime utilities for interfacing with CAS
 from __future__ import print_function, division, absolute_import, unicode_literals
 
 import datetime
+import time
 import numpy as np
 import pandas as pd
-import time
 from ...utils.compat import int64, int32
 
 
@@ -61,6 +61,7 @@ def str2cas_timestamp(dts):
 
     '''
     return python2cas_datetime(pd.to_datetime(dts))
+
 
 str2cas_datetime = str2cas_timestamp
 
@@ -145,6 +146,7 @@ def str2sas_timestamp(dts):
     '''
     return python2sas_datetime(pd.to_datetime(dts))
 
+
 str2sas_datetime = str2sas_timestamp
 
 
@@ -226,6 +228,7 @@ def sas2python_timestamp(sts):
     '''
     return cas2python_timestamp(sas2cas_timestamp(sts))
 
+
 sas2python_datetime = sas2python_timestamp
 
 
@@ -294,6 +297,7 @@ def sas2cas_timestamp(sts):
 
     '''
     return int64(sts * 10**6)
+
 
 sas2cas_datetime = sas2cas_timestamp
 
@@ -368,6 +372,7 @@ def cas2python_timestamp(cts):
     '''
     return CAS_EPOCH + datetime.timedelta(microseconds=cts)
 
+
 cas2python_datetime = cas2python_timestamp
 
 
@@ -436,6 +441,7 @@ def cas2sas_timestamp(cdt):
 
     '''
     return cdt / float(10**6)
+
 
 cas2sas_datetime = cas2sas_timestamp
 
@@ -515,6 +521,7 @@ def python2cas_timestamp(pyts):
         return 0
     return int64((delta.days * 24 * 60 * 60 * 10**6) +
                  (delta.seconds * 10**6) + delta.microseconds)
+
 
 python2cas_datetime = python2cas_timestamp
 
@@ -596,6 +603,7 @@ def python2sas_timestamp(pyts):
 
     '''
     return python2cas_timestamp(pyts) / float(10**6)
+
 
 python2sas_datetime = python2sas_timestamp
 

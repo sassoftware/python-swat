@@ -24,9 +24,9 @@ Global functions
 from __future__ import print_function, division, absolute_import, unicode_literals
 
 import pandas as pd
-import six
-from .cas import table
 from . import dataframe
+from .cas import table
+
 
 def concat(objs, **kwargs):
     '''
@@ -42,7 +42,7 @@ def concat(objs, **kwargs):
     See Also
     --------
     :func:`pd.concat`
-     
+
     Returns
     -------
     :class:`CASTable`
@@ -66,6 +66,7 @@ def concat(objs, **kwargs):
         return dataframe.concat(objs, **kwargs)
 
     return pd.concat(objs, **kwargs)
+
 
 def merge(left, right, **kwargs):
     '''

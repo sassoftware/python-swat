@@ -25,4 +25,4 @@ IPython magics
 
 from __future__ import print_function, division, absolute_import, unicode_literals
 
-from .cas.magics import *
+from .cas.magics import *    # noqa: F403

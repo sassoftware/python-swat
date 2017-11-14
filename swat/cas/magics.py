@@ -25,8 +25,8 @@ from __future__ import print_function, division, absolute_import, unicode_litera
 
 import re
 import uuid
-from ..exceptions import SWATError
 from IPython.core.magic import Magics, magics_class, line_cell_magic
+from ..exceptions import SWATError
 
 
 @magics_class
