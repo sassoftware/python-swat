@@ -33,6 +33,7 @@ import six
 from six.moves import urllib
 from .message import REST_CASMessage
 from .response import REST_CASResponse
+from ..types import blob
 from ..table import CASTable
 from ...config import options
 from ...exceptions import SWATError
@@ -115,6 +116,9 @@ def _normalize_params(params):
             value = int32(value)
         elif isinstance(value, float64_types):
             value = float64(value)
+        elif isinstance(value, blob):
+            b64data = base64.b64encode(value)
+            value = dict(data=a2u(b64data), length=len(b64data))
         out[key] = value
     return out
 
