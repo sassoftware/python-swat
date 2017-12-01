@@ -231,9 +231,9 @@ class REST_CASConnection(object):
 
         self._req_sess = requests.Session()
         if 'SSLCALISTLOC' in os.environ:
-            self._req_sess.cert = os.environ['SSLCALISTLOC']
+            self._req_sess.verify = os.environ['SSLCALISTLOC']
         elif 'CAS_CLIENT_SSL_CA_LIST' in os.environ:
-            self._req_sess.cert = os.environ['CAS_CLIENT_SSL_CA_LIST']
+            self._req_sess.verify = os.environ['CAS_CLIENT_SSL_CA_LIST']
         self._req_sess.headers.update({
             'Content-Type': 'application/json',
             'Content-Length': '0',
