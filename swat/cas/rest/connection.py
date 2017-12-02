@@ -27,7 +27,6 @@ import base64
 import json
 import os
 import re
-import socket
 import requests
 import six
 from six.moves import urllib
@@ -192,11 +191,7 @@ class REST_CASConnection(object):
             self._hostname = []
             self._port = []
             for host in hostname:
-                try:
-                    ipaddr = socket.gethostbyname(host)
-                except Exception as exc:
-                    raise SWATError(str(exc))
-                self._baseurl.append('%s://%s:%d' % (protocol, ipaddr, port))
+                self._baseurl.append('%s://%s:%d' % (protocol, host, port))
                 self._hostname.append(host)
                 self._port.append(port)
 
