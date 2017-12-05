@@ -1419,6 +1419,7 @@ class TestCASTable(tm.TestCase):
         self.assertEqual(dfmed.tolist(), tblmed.tolist())
 
     @unittest.skipIf(int(pd.__version__.split('.')[1]) < 18, 'Need newer version of Pandas')
+    @unittest.skipIf(tuple([int(x) for x in np.__version__.split('.')[:2]]) < (1, 9), 'Need newer version of numpy')
     def test_quantile(self):
         df = self.get_cars_df()
         tbl = self.table
