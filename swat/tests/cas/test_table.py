@@ -1274,7 +1274,7 @@ class TestCASTable(tm.TestCase):
     def test_skew(self):
         try:
             skew = self.table.skew()
-        except KeyError, msg:
+        except KeyError as msg:
             if 'skew' in msg:
                 unittest.skip('CAS server does not support skew')
         dfskew = self.get_cars_df().skew()
@@ -1297,7 +1297,7 @@ class TestCASTable(tm.TestCase):
     def test_kurt(self):
         try:
             kurt = self.table.kurt()
-        except KeyError, msg:
+        except KeyError as msg:
             if 'kurt' in msg:
                 unittest.skip('CAS server does not support kurtosis')
         dfkurt = self.get_cars_df().kurt()
