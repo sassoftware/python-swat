@@ -67,10 +67,10 @@ class TestCall(tm.TestCase):
         r = self.s.sessionProp.setsessopt(caslib=self.srcLib) 
         
         r = self.s.actionTest.testdynamictable(tableinfo=self.tablename)
-        self.assertEqual(r.messages[0], "NOTE: Table '" + self.tablename + "':")
-        self.assertEqual(r.messages[1], "NOTE: -->Name: " + self.tablename)
-        self.assertEqual(r.messages[2], "NOTE: -->nRecs: 428")
-        self.assertEqual(r.messages[3], "NOTE: -->nVars: 15")
+        self.assertIn("NOTE: Table '" + self.tablename + "':", r.messages)
+        self.assertIn("NOTE: -->Name: " + self.tablename, r.messages)
+        self.assertIn("NOTE: -->nRecs: 428", r.messages)
+        self.assertIn( "NOTE: -->nVars: 15", r.messages)
         
         self.s.droptable(caslib=self.srcLib, table=self.tablename)        
 

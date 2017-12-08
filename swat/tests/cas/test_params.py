@@ -370,7 +370,8 @@ class TestParams(tm.TestCase):
         # Developer said we might get a table name back but that is about all.
         # The alltypes action is for testing only.        
         self.assertIsNotNone(r)
-        self.assertEqual(r.severity, 0)
+        if not r.messages or not r.messages[0].startswith('WARNING: License for feature'):
+            self.assertEqual(r.severity, 0)
         
         # Cleanup after ourselves
         r = self.s.table.droptable(caslib=r['caslib'], table=r['tableName'])      

@@ -100,10 +100,11 @@ class TestCASResponse(tm.TestCase):
         conn = self.table.invoke('loadactionset', actionset='simple')
 
         for resp in conn:
-            self.assertEqual(resp.messages, ["NOTE: Added action set 'simple'."])
-            self.assertEqual(resp.disposition.to_dict(), dict(debug=None, reason=None, 
-                                                              severity=0, status=None,
-                                                              status_code=0))
+            self.assertIn("NOTE: Added action set 'simple'.", resp.messages)
+            if not resp.messages[0].startswith('WARNING: License for feature'):
+                self.assertEqual(resp.disposition.to_dict(), dict(debug=None, reason=None, 
+                                                                  severity=0, status=None,
+                                                                  status_code=0))
             self.assertEqual(set(resp.performance.to_dict().keys()), 
                              set(['cpu_system_time', 'cpu_user_time', 'elapsed_time', 'memory', 
                                   'memory_os', 'memory_quota', 'system_cores',

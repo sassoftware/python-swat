@@ -1272,7 +1272,11 @@ class TestCASTable(tm.TestCase):
             out = self.table.datastep('keep Make Model Type Origin').mean().tolist()
 
     def test_skew(self):
-        skew = self.table.skew()
+        try:
+            skew = self.table.skew()
+        except KeyError, msg:
+            if 'skew' in msg:
+                unittest.skip('CAS server does not support skew')
         dfskew = self.get_cars_df().skew()
         self.assertTablesEqual(skew, dfskew, precision=4)
 
@@ -1291,7 +1295,11 @@ class TestCASTable(tm.TestCase):
         self.assertTablesEqual(skew, dfskew, precision=4)
 
     def test_kurt(self):
-        kurt = self.table.kurt()
+        try:
+            kurt = self.table.kurt()
+        except KeyError, msg:
+            if 'kurt' in msg:
+                unittest.skip('CAS server does not support kurtosis')
         dfkurt = self.get_cars_df().kurt()
         self.assertTablesEqual(kurt, dfkurt, precision=4)
 
