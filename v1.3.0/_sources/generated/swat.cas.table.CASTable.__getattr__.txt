@@ -1,0 +1,6 @@
+swat.cas.table.CASTable.__getattr__
+===================================
+
+.. currentmodule:: swat.cas.table
+
+.. automethod:: CASTable.__getattr__

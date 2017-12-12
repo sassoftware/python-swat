@@ -1,0 +1,6 @@
+swat.cas.table.CASTable.to_latex
+================================
+
+.. currentmodule:: swat.cas.table
+
+.. automethod:: CASTable.to_latex

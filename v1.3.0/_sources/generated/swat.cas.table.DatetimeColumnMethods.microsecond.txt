@@ -1,0 +1,6 @@
+swat.cas.table.DatetimeColumnMethods.microsecond
+================================================
+
+.. currentmodule:: swat.cas.table
+
+.. autoattribute:: DatetimeColumnMethods.microsecond

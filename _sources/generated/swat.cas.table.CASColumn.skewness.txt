@@ -1,0 +1,6 @@
+swat.cas.table.CASColumn.skewness
+=================================
+
+.. currentmodule:: swat.cas.table
+
+.. automethod:: CASColumn.skewness

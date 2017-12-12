@@ -1,0 +1,33 @@
+swat.cas.datamsghandlers.CSV
+============================
+
+.. currentmodule:: swat.cas.datamsghandlers
+
+.. autoclass:: CSV
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~CSV.__init__
+      ~CSV.finish
+      ~CSV.getone
+      ~CSV.getrow
+      ~CSV.send
+      ~CSV.write
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~CSV.args
+   
+   

@@ -1,0 +1,6 @@
+swat.cas.table.DatetimeColumnMethods.dayofweek
+==============================================
+
+.. currentmodule:: swat.cas.table
+
+.. autoattribute:: DatetimeColumnMethods.dayofweek

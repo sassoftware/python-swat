@@ -1,0 +1,6 @@
+swat.cas.table.CASTableGroupBy.to_series
+========================================
+
+.. currentmodule:: swat.cas.table
+
+.. automethod:: CASTableGroupBy.to_series
