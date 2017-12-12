@@ -9,6 +9,17 @@ What's New
 
 This document outlines features and improvements from each release.
 
+v1.3.0 (December 12, 2017)
+==========================
+
+- Add new summary statistics for new version of CAS
+- Improve missing value support in ``CASTable`` ``describe`` method
+- Add controller failover support
+- Improve encrypted communication support
+- Add ``add``, ``any``, ``all``, ``merge``, and ``append`` methods to ``CASTable``
+- Add ``merge`` and ``concat`` functions with ``CASTable`` support
+
+
 v1.2.1 (September 13, 2017)
 ===========================
 

@@ -1,6 +1,15 @@
 
 # Change Log
 
+## 1.3.0 - 2017-12-12
+
+- Add new summary statistics for new version of CAS
+- Improve missing value support in `CASTable` `describe` method
+- Add controller failover support
+- Improve encrypted communication support
+- Add `add`, `any`, `all`, `merge`, and `append` methods to `CASTable`
+- Add `merge` and `concat` functions with `CASTable` support
+
 ## 1.2.1 - 2017-09-13
 
 - Better support for binary data in table uploads and parameters
