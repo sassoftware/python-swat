@@ -25,6 +25,7 @@ from __future__ import print_function, division, absolute_import, unicode_litera
 
 import base64
 import datetime
+import warnings
 import numpy as np
 import pandas as pd
 import six
@@ -327,10 +328,20 @@ def ctb2tabular(_sw_table, soptions='', connection=None):
 
     # Apply mimetype transformations
     if mimetypes:
-        from PIL import Image
         from io import BytesIO
+        Image = True
         for key, value in mimetypes.items():
             if value.startswith('image/'):
+                if Image is True:
+                    Image = None
+                    try:
+                        from PIL import Image
+                    except ImportError:
+                        warnings.warn('The PIL or Pillow package is required '
+                                      'to convert bytes to Image objects',
+                                      RuntimeWarning)
+                if Image is None:
+                    continue
                 cdf[key] = cdf[key].map(lambda x: Image.open(BytesIO(x)))
 
     # Check for By group information
