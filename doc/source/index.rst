@@ -48,6 +48,7 @@ to the best of both worlds.
    getting-started
    workflows
    binary-vs-rest
+   encryption
    loading-data
    table-vs-dataframe
    indexing

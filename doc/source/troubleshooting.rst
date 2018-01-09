@@ -9,6 +9,36 @@ Just as with any authenticated network service, you may run into problems
 from time to time while connecting to CAS.  These are some of the more
 common problems you may run across.
 
+Unable to Connect
+=================
+
+There are various reasons that you may not be able to connect to your CAS
+server.  You have have an incorrect hostname or port number.  There may be
+a firewall preventing you from reaching the CAS server.  Not being able
+to connect to a server will result in a error that looks like the following.
+
+.. code-block:: python
+
+   In [1]: conn = swat.CAS(hostname, port)
+
+   . . .
+
+   Traceback (most recent call last):
+     File "<stdin>", line 1, in <module>
+     File "swat/cas/connection.py", line 297, in __init__
+       raise SWATError(self._sw_error.getLastErrorMessage())
+   swat.exceptions.SWATError: Could not connect to 'my-cas' on port 5570.
+
+If you have verified that the server is running on that host and port, and 
+that you are not being blocked, another possible reason for failure to connect
+is that the CAS server may be configured to use encrypted communication.
+For information on how to configure the Python SWAT client to communicate
+with CAS servers over encrypted connections, see :ref:`encryption`.
+
+.. note:: Beginning in SAS Viya 3.3, encrypted communication is enabled
+          in the server by default.
+
+
 Missing Linux Library Dependencies
 ==================================
 
