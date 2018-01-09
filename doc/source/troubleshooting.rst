@@ -13,7 +13,7 @@ Unable to Connect
 =================
 
 There are various reasons that you may not be able to connect to your CAS
-server.  You have have an incorrect hostname or port number.  There may be
+server.  You may have an incorrect hostname or port number.  There may be
 a firewall preventing you from reaching the CAS server.  Not being able
 to connect to a server will result in a error that looks like the following.
 
