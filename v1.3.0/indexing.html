@@ -90,6 +90,7 @@
 <li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting Started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="workflows.html">Workflows</a></li>
 <li class="toctree-l1"><a class="reference internal" href="binary-vs-rest.html">Binary vs. REST</a></li>
+<li class="toctree-l1"><a class="reference internal" href="encryption.html">Encryption (SSL)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="loading-data.html">Loading Data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="table-vs-dataframe.html">CASTable vs. DataFrame vs. SASDataFrame</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Indexing and Data Selection</a><ul>
@@ -212,12 +213,12 @@ you to subset the columns that are visible in the table.</p>
 <div class="highlight-ipython"><div class="highlight"><pre><span></span><span class="gp">In [1]: </span><span class="n">tbl</span> <span class="o">=</span> <span class="n">conn</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;https://raw.githubusercontent.com/&#39;</span>
 <span class="gp">   ...: </span>                    <span class="s1">&#39;sassoftware/sas-viya-programming/master/data/cars.csv&#39;</span><span class="p">)</span>
 <span class="gp">   ...: </span>
-<span class="go">NOTE: Cloud Analytic Services made the uploaded file available as table TMPGFJ_PSS4 in caslib CASUSER(kesmit).</span>
-<span class="go">NOTE: The table TMPGFJ_PSS4 has been created in caslib CASUSER(kesmit) from binary data uploaded to Cloud Analytic Services.</span>
+<span class="go">NOTE: Cloud Analytic Services made the uploaded file available as table TMPVI2Y_4E4 in caslib CASUSER(kesmit).</span>
+<span class="go">NOTE: The table TMPVI2Y_4E4 has been created in caslib CASUSER(kesmit) from binary data uploaded to Cloud Analytic Services.</span>
 
 <span class="gp">In [2]: </span><span class="n">tbl</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
 <span class="go">                                                                                                                                                                                                                                            Out[2]: </span>
-<span class="go">Selected Rows from Table TMPGFJ_PSS4</span>
+<span class="go">Selected Rows from Table TMPVI2Y_4E4</span>
 
 <span class="go">    Make           Model   Type Origin DriveTrain     MSRP  Invoice  \</span>
 <span class="go">0  Acura             MDX    SUV   Asia        All  36945.0  33337.0   </span>
@@ -256,7 +257,7 @@ you to subset the columns that are visible in the table.</p>
 <p>Selecting multiple columns returns a new <a class="reference internal" href="generated/swat.cas.table.CASTable.html#swat.cas.table.CASTable" title="swat.cas.table.CASTable"><code class="xref py py-class docutils literal"><span class="pre">CASTable</span></code></a> object.</p>
 <div class="highlight-ipython"><div class="highlight"><pre><span></span><span class="gp">In [4]: </span><span class="n">tbl</span><span class="p">[[</span><span class="s1">&#39;Make&#39;</span><span class="p">,</span> <span class="s1">&#39;Model&#39;</span><span class="p">,</span> <span class="s1">&#39;Horsepower&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
 <span class="gh">Out[4]: </span><span class="go"></span>
-<span class="go">Selected Rows from Table TMPGFJ_PSS4</span>
+<span class="go">Selected Rows from Table TMPVI2Y_4E4</span>
 
 <span class="go">    Make           Model  Horsepower</span>
 <span class="go">0  Acura             MDX       265.0</span>
@@ -306,7 +307,7 @@ this time, this is equivalent to <code class="docutils literal"><span class="pre
 object. Again, this is equivalent to <code class="docutils literal"><span class="pre">tbl[['Make',</span> <span class="pre">'Model']]</span></code>.</p>
 <div class="highlight-ipython"><div class="highlight"><pre><span></span><span class="gp">In [7]: </span><span class="n">tbl</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="p">[</span><span class="s1">&#39;Make&#39;</span><span class="p">,</span> <span class="s1">&#39;Model&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
 <span class="gh">Out[7]: </span><span class="go"></span>
-<span class="go">Selected Rows from Table TMPGFJ_PSS4</span>
+<span class="go">Selected Rows from Table TMPVI2Y_4E4</span>
 
 <span class="go">    Make           Model</span>
 <span class="go">0  Acura             MDX</span>
@@ -319,7 +320,7 @@ object. Again, this is equivalent to <code class="docutils literal"><span class=
 <p>Slicing using column names allows you to select a range of columns.</p>
 <div class="highlight-ipython"><div class="highlight"><pre><span></span><span class="gp">In [8]: </span><span class="n">tbl</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s1">&#39;Model&#39;</span><span class="p">:</span><span class="s1">&#39;Invoice&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
 <span class="gh">Out[8]: </span><span class="go"></span>
-<span class="go">Selected Rows from Table TMPGFJ_PSS4</span>
+<span class="go">Selected Rows from Table TMPVI2Y_4E4</span>
 
 <span class="go">            Model   Type Origin DriveTrain     MSRP  Invoice</span>
 <span class="go">0             MDX    SUV   Asia        All  36945.0  33337.0</span>
@@ -332,7 +333,7 @@ object. Again, this is equivalent to <code class="docutils literal"><span class=
 <p>You can even specify a step size.</p>
 <div class="highlight-ipython"><div class="highlight"><pre><span></span><span class="gp">In [9]: </span><span class="n">tbl</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s1">&#39;Model&#39;</span><span class="p">:</span><span class="s1">&#39;Invoice&#39;</span><span class="p">:</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
 <span class="gh">Out[9]: </span><span class="go"></span>
-<span class="go">Selected Rows from Table TMPGFJ_PSS4</span>
+<span class="go">Selected Rows from Table TMPVI2Y_4E4</span>
 
 <span class="go">            Model Origin     MSRP</span>
 <span class="go">0             MDX   Asia  36945.0</span>
@@ -365,7 +366,7 @@ integer, a list of integers, or a slice.</p>
 <p>Using a list of integers returns a new <a class="reference internal" href="generated/swat.cas.table.CASTable.html#swat.cas.table.CASTable" title="swat.cas.table.CASTable"><code class="xref py py-class docutils literal"><span class="pre">CASTable</span></code></a> object.</p>
 <div class="highlight-ipython"><div class="highlight"><pre><span></span><span class="gp">In [11]: </span><span class="n">tbl</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">3</span><span class="p">]]</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
 <span class="gh">Out[11]: </span><span class="go"></span>
-<span class="go">Selected Rows from Table TMPGFJ_PSS4</span>
+<span class="go">Selected Rows from Table TMPVI2Y_4E4</span>
 
 <span class="go">            Model     MSRP Origin</span>
 <span class="go">0             MDX  36945.0   Asia</span>
@@ -378,7 +379,7 @@ integer, a list of integers, or a slice.</p>
 <p>Of course, ranges work here as well, with or without a step size.</p>
 <div class="highlight-ipython"><div class="highlight"><pre><span></span><span class="gp">In [12]: </span><span class="n">tbl</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">:</span><span class="mi">6</span><span class="p">]</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
 <span class="gh">Out[12]: </span><span class="go"></span>
-<span class="go">Selected Rows from Table TMPGFJ_PSS4</span>
+<span class="go">Selected Rows from Table TMPVI2Y_4E4</span>
 
 <span class="go">    Type Origin DriveTrain     MSRP</span>
 <span class="go">0    SUV   Asia        All  36945.0</span>
@@ -390,7 +391,7 @@ integer, a list of integers, or a slice.</p>
 </div>
 <div class="highlight-ipython"><div class="highlight"><pre><span></span><span class="gp">In [13]: </span><span class="n">tbl</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,</span> <span class="mi">6</span><span class="p">:</span><span class="mi">2</span><span class="p">:</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
 <span class="gh">Out[13]: </span><span class="go"></span>
-<span class="go">Selected Rows from Table TMPGFJ_PSS4</span>
+<span class="go">Selected Rows from Table TMPVI2Y_4E4</span>
 
 <span class="go">    Make           Model   Type Origin DriveTrain     MSRP  Invoice  \</span>
 <span class="go">0  Acura             MDX    SUV   Asia        All  36945.0  33337.0   </span>
@@ -440,7 +441,7 @@ except that it takes a mix of column names and indexes.</p>
 </div>
 <div class="highlight-ipython"><div class="highlight"><pre><span></span><span class="gp">In [16]: </span><span class="n">tbl</span><span class="o">.</span><span class="n">ix</span><span class="p">[:,</span> <span class="p">[</span><span class="s1">&#39;Model&#39;</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">3</span><span class="p">]]</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
 <span class="gh">Out[16]: </span><span class="go"></span>
-<span class="go">Selected Rows from Table TMPGFJ_PSS4</span>
+<span class="go">Selected Rows from Table TMPVI2Y_4E4</span>
 
 <span class="go">            Model DriveTrain Origin</span>
 <span class="go">0             MDX        All   Asia</span>
@@ -452,7 +453,7 @@ except that it takes a mix of column names and indexes.</p>
 </div>
 <div class="highlight-ipython"><div class="highlight"><pre><span></span><span class="gp">In [17]: </span><span class="n">tbl</span><span class="o">.</span><span class="n">ix</span><span class="p">[:,</span> <span class="s1">&#39;Model&#39;</span><span class="p">:</span><span class="mi">6</span><span class="p">:</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
 <span class="gh">Out[17]: </span><span class="go"></span>
-<span class="go">Selected Rows from Table TMPGFJ_PSS4</span>
+<span class="go">Selected Rows from Table TMPVI2Y_4E4</span>
 
 <span class="go">            Model Origin     MSRP</span>
 <span class="go">0             MDX   Asia  36945.0</span>
@@ -487,7 +488,7 @@ is <cite>true</cite>).</p>
 <p>Here is a basic example that selects all cars with an MSRP value over 80,000.</p>
 <div class="highlight-ipython"><div class="highlight"><pre><span></span><span class="gp">In [19]: </span><span class="n">tbl</span><span class="p">[</span><span class="n">tbl</span><span class="o">.</span><span class="n">MSRP</span> <span class="o">&gt;</span> <span class="mi">80000</span><span class="p">]</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
 <span class="gh">Out[19]: </span><span class="go"></span>
-<span class="go">Selected Rows from Table TMPGFJ_PSS4</span>
+<span class="go">Selected Rows from Table TMPVI2Y_4E4</span>
 
 <span class="go">     Make                         Model    Type  Origin DriveTrain     MSRP  \</span>
 <span class="go">0   Acura        NSX coupe 2dr manual S  Sports    Asia       Rear  89765.0   </span>
@@ -517,7 +518,7 @@ your comparisons operations in parentheses before combining them with
 these operators.</p>
 <div class="highlight-ipython"><div class="highlight"><pre><span></span><span class="gp">In [20]: </span><span class="n">tbl</span><span class="p">[(</span><span class="n">tbl</span><span class="o">.</span><span class="n">MSRP</span> <span class="o">&gt;</span> <span class="mi">80000</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">tbl</span><span class="o">.</span><span class="n">Horsepower</span> <span class="o">&gt;</span> <span class="mi">400</span><span class="p">)]</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
 <span class="gh">Out[20]: </span><span class="go"></span>
-<span class="go">Selected Rows from Table TMPGFJ_PSS4</span>
+<span class="go">Selected Rows from Table TMPVI2Y_4E4</span>
 
 <span class="go">            Make                         Model    Type  Origin DriveTrain  \</span>
 <span class="go">0           Audi                      RS 6 4dr  Sports  Europe      Front   </span>
@@ -547,7 +548,7 @@ object, you can split operations across multiple steps.</p>
 
 <span class="gp">In [22]: </span><span class="n">expensive</span><span class="p">[</span><span class="n">expensive</span><span class="o">.</span><span class="n">Horsepower</span> <span class="o">&gt;</span> <span class="mi">400</span><span class="p">]</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
 <span class="gh">Out[22]: </span><span class="go"></span>
-<span class="go">Selected Rows from Table TMPGFJ_PSS4</span>
+<span class="go">Selected Rows from Table TMPVI2Y_4E4</span>
 
 <span class="go">            Make                         Model    Type  Origin DriveTrain  \</span>
 <span class="go">0           Audi                      RS 6 4dr  Sports  Europe      Front   </span>
@@ -587,7 +588,7 @@ directly using the <a class="reference internal" href="generated/swat.cas.table.
 in more readable code when using longer expressions.</p>
 <div class="highlight-ipython"><div class="highlight"><pre><span></span><span class="gp">In [23]: </span><span class="n">tbl</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="s1">&#39;MSRP &gt; 80000 and Horsepower &gt; 400&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
 <span class="gh">Out[23]: </span><span class="go"></span>
-<span class="go">Selected Rows from Table TMPGFJ_PSS4</span>
+<span class="go">Selected Rows from Table TMPVI2Y_4E4</span>
 
 <span class="go">            Make                         Model    Type  Origin DriveTrain  \</span>
 <span class="go">0           Audi                      RS 6 4dr  Sports  Europe      Front   </span>
@@ -616,7 +617,7 @@ in more readable code when using longer expressions.</p>
 
 <span class="gp">In [25]: </span><span class="n">expensive</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="s1">&#39;Horsepower &gt; 400&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
 <span class="gh">Out[25]: </span><span class="go"></span>
-<span class="go">Selected Rows from Table TMPGFJ_PSS4</span>
+<span class="go">Selected Rows from Table TMPVI2Y_4E4</span>
 
 <span class="go">            Make                         Model    Type  Origin DriveTrain  \</span>
 <span class="go">0           Audi                      RS 6 4dr  Sports  Europe      Front   </span>

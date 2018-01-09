@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Python Module Index &mdash; SWAT 1.3.0 documentation</title>
+  <title>Encryption (SSL) &mdash; SWAT 1.3.0 documentation</title>
   
 
   
@@ -33,13 +33,8 @@
 
   
     <link rel="top" title="SWAT 1.3.0 documentation" href="index.html"/>
- 
-
-    <script type="text/javascript">
-      DOCUMENTATION_OPTIONS.COLLAPSE_INDEX = true;
-    </script>
-
-
+        <link rel="next" title="Loading Data" href="loading-data.html"/>
+        <link rel="prev" title="Binary vs. REST" href="binary-vs-rest.html"/> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
@@ -89,13 +84,13 @@
           
             
             
-                <ul>
+                <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="whatsnew.html">What&#8217;s New</a></li>
 <li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting Started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="workflows.html">Workflows</a></li>
 <li class="toctree-l1"><a class="reference internal" href="binary-vs-rest.html">Binary vs. REST</a></li>
-<li class="toctree-l1"><a class="reference internal" href="encryption.html">Encryption (SSL)</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Encryption (SSL)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="loading-data.html">Loading Data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="table-vs-dataframe.html">CASTable vs. DataFrame vs. SASDataFrame</a></li>
 <li class="toctree-l1"><a class="reference internal" href="indexing.html">Indexing and Data Selection</a></li>
@@ -128,7 +123,7 @@
         <div class="rst-content">
           
 
-
+ 
 
 
 
@@ -140,10 +135,12 @@
   <ul class="wy-breadcrumbs">
     <li><a href="index.html">Docs</a> &raquo;</li>
       
-    <li>Python Module Index</li>
+    <li>Encryption (SSL)</li>
     <li class="wy-breadcrumbs-aside">
       
           
+          <a href="_sources/encryption.txt" rel="nofollow"> View page source</a>
+        
       
     </li>
   </ul>
@@ -152,28 +149,37 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-
-   <h1>Python Module Index</h1>
-
-   <div class="modindex-jumpbox">
-   <a href="#cap-s"><strong>s</strong></a>
-   </div>
-
-   <table class="indextable modindextable" cellspacing="0" cellpadding="2">
-     <tr class="pcap"><td></td><td>&nbsp;</td><td></td></tr>
-     <tr class="cap" id="cap-s"><td></td><td>
-       <strong>s</strong></td><td></td></tr>
-     <tr>
-       <td></td>
-       <td>
-       <a href="index.html#module-swat"><code class="xref">swat</code></a></td><td>
-       <em></em></td></tr>
-   </table>
+  <div class="section" id="encryption-ssl">
+<span id="encryption"></span><h1>Encryption (SSL)<a class="headerlink" href="#encryption-ssl" title="Permalink to this headline">¶</a></h1>
+<p>If your CAS server is configured to use SSL for communication, you must
+configure your certificates on the client side as well.  To
+do this, you simply set the following environment variable in the environment
+where you are running Python:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">CAS_CLIENT_SSL_CA_LIST</span><span class="o">=</span><span class="s1">&#39;/path/to/certificates.pem&#39;</span>
+</pre></div>
+</div>
+<p>The path indicated here is a client-side path, so the certificates are
+typically copied to a local directory from the server.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Beginning in SAS Viya 3.3, encrypted communication is enabled
+in the server by default.</p>
+</div>
+</div>
 
 
            </div>
           </div>
           <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="loading-data.html" class="btn btn-neutral float-right" title="Loading Data" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="binary-vs-rest.html" class="btn btn-neutral" title="Binary vs. REST" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
   
 
   <hr/>
