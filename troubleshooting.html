@@ -90,6 +90,7 @@
 <li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting Started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="workflows.html">Workflows</a></li>
 <li class="toctree-l1"><a class="reference internal" href="binary-vs-rest.html">Binary vs. REST</a></li>
+<li class="toctree-l1"><a class="reference internal" href="encryption.html">Encryption (SSL)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="loading-data.html">Loading Data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="table-vs-dataframe.html">CASTable vs. DataFrame vs. SASDataFrame</a></li>
 <li class="toctree-l1"><a class="reference internal" href="indexing.html">Indexing and Data Selection</a></li>
@@ -98,6 +99,7 @@
 <li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="gotchas.html">Programming Gotchas</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Troubleshooting</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#unable-to-connect">Unable to Connect</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#missing-linux-library-dependencies">Missing Linux Library Dependencies</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#incorrect-sas-tk-configuration">Incorrect SAS TK Configuration</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#unable-to-import-pyxxswat">Unable to Import _pyXXswat</a></li>
@@ -160,6 +162,34 @@
 <p>Just as with any authenticated network service, you may run into problems
 from time to time while connecting to CAS.  These are some of the more
 common problems you may run across.</p>
+<div class="section" id="unable-to-connect">
+<h2>Unable to Connect<a class="headerlink" href="#unable-to-connect" title="Permalink to this headline">¶</a></h2>
+<p>There are various reasons that you may not be able to connect to your CAS
+server.  You have have an incorrect hostname or port number.  There may be
+a firewall preventing you from reaching the CAS server.  Not being able
+to connect to a server will result in a error that looks like the following.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">In</span> <span class="p">[</span><span class="mi">1</span><span class="p">]:</span> <span class="n">conn</span> <span class="o">=</span> <span class="n">swat</span><span class="o">.</span><span class="n">CAS</span><span class="p">(</span><span class="n">hostname</span><span class="p">,</span> <span class="n">port</span><span class="p">)</span>
+
+<span class="o">.</span> <span class="o">.</span> <span class="o">.</span>
+
+<span class="n">Traceback</span> <span class="p">(</span><span class="n">most</span> <span class="n">recent</span> <span class="n">call</span> <span class="n">last</span><span class="p">):</span>
+  <span class="n">File</span> <span class="s2">&quot;&lt;stdin&gt;&quot;</span><span class="p">,</span> <span class="n">line</span> <span class="mi">1</span><span class="p">,</span> <span class="ow">in</span> <span class="o">&lt;</span><span class="n">module</span><span class="o">&gt;</span>
+  <span class="n">File</span> <span class="s2">&quot;swat/cas/connection.py&quot;</span><span class="p">,</span> <span class="n">line</span> <span class="mi">297</span><span class="p">,</span> <span class="ow">in</span> <span class="n">__init__</span>
+    <span class="k">raise</span> <span class="n">SWATError</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_sw_error</span><span class="o">.</span><span class="n">getLastErrorMessage</span><span class="p">())</span>
+<span class="n">swat</span><span class="o">.</span><span class="n">exceptions</span><span class="o">.</span><span class="n">SWATError</span><span class="p">:</span> <span class="n">Could</span> <span class="ow">not</span> <span class="n">connect</span> <span class="n">to</span> <span class="s1">&#39;my-cas&#39;</span> <span class="n">on</span> <span class="n">port</span> <span class="mf">5570.</span>
+</pre></div>
+</div>
+<p>If you have verified that the server is running on that host and port, and
+that you are not being blocked, another possible reason for failure to connect
+is that the CAS server may be configured to use encrypted communication.
+For information on how to configure the Python SWAT client to communicate
+with CAS servers over encrypted connections, see <a class="reference internal" href="encryption.html#encryption"><span class="std std-ref">Encryption (SSL)</span></a>.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Beginning in SAS Viya 3.3, encrypted communication is enabled
+in the server by default.</p>
+</div>
+</div>
 <div class="section" id="missing-linux-library-dependencies">
 <h2>Missing Linux Library Dependencies<a class="headerlink" href="#missing-linux-library-dependencies" title="Permalink to this headline">¶</a></h2>
 <p>SWAT uses various shared libraries commonly available on Linux machines.

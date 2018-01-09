@@ -95,6 +95,7 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="binary-vs-rest.html">Binary vs. REST</a></li>
+<li class="toctree-l1"><a class="reference internal" href="encryption.html">Encryption (SSL)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="loading-data.html">Loading Data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="table-vs-dataframe.html">CASTable vs. DataFrame vs. SASDataFrame</a></li>
 <li class="toctree-l1"><a class="reference internal" href="indexing.html">Indexing and Data Selection</a></li>
@@ -185,12 +186,12 @@ such as <a class="reference external" href="http://pandas.pydata.org/pandas-docs
 <span class="gp">In [3]: </span><span class="n">tbl</span> <span class="o">=</span> <span class="n">conn</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;https://raw.githubusercontent.com/&#39;</span>
 <span class="gp">   ...: </span>                    <span class="s1">&#39;sassoftware/sas-viya-programming/master/data/cars.csv&#39;</span><span class="p">)</span>
 <span class="gp">   ...: </span>
-<span class="go">NOTE: Cloud Analytic Services made the uploaded file available as table TMPFGJ86QOC in caslib CASUSER(kesmit).</span>
-<span class="go">NOTE: The table TMPFGJ86QOC has been created in caslib CASUSER(kesmit) from binary data uploaded to Cloud Analytic Services.</span>
+<span class="go">NOTE: Cloud Analytic Services made the uploaded file available as table TMPQV83ABMQ in caslib CASUSER(kesmit).</span>
+<span class="go">NOTE: The table TMPQV83ABMQ has been created in caslib CASUSER(kesmit) from binary data uploaded to Cloud Analytic Services.</span>
 
 <span class="gp">In [4]: </span><span class="n">tbl</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
 <span class="go">                                                                                                                                                                                                                                            Out[4]: </span>
-<span class="go">Selected Rows from Table TMPFGJ86QOC</span>
+<span class="go">Selected Rows from Table TMPQV83ABMQ</span>
 
 <span class="go">    Make           Model   Type Origin DriveTrain     MSRP  Invoice  \</span>
 <span class="go">0  Acura             MDX    SUV   Asia        All  36945.0  33337.0   </span>
@@ -221,7 +222,7 @@ pass in the table argument, or you can call the CAS action directly on the
 <span class="gh">Out[5]: </span><span class="go"></span>
 <span class="go">[Summary]</span>
 
-<span class="go"> Descriptive Statistics for TMPFGJ86QOC</span>
+<span class="go"> Descriptive Statistics for TMPQV83ABMQ</span>
 <span class="go"> </span>
 <span class="go">         Column      Min       Max      N  NMiss          Mean         Sum  \</span>
 <span class="go"> 0         MSRP  10280.0  192465.0  428.0    0.0  32774.855140  14027638.0   </span>
@@ -259,13 +260,13 @@ pass in the table argument, or you can call the CAS action directly on the
 <span class="go"> 8   7.685150  269.196577   0.000000e+00  0.962287   2.133649  </span>
 <span class="go"> 9   7.704349  268.525733   0.000000e+00  0.181977   0.614725  </span>
 
-<span class="go">+ Elapsed: 0.0156s, user: 0.013s, sys: 0.005s, mem: 5.36mb</span>
+<span class="go">+ Elapsed: 0.0175s, user: 0.01s, sys: 0.011s, mem: 5.36mb</span>
 
 <span class="gp">In [6]: </span><span class="n">tbl</span><span class="o">.</span><span class="n">summary</span><span class="p">()</span>
-<span class="go">                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      Out[6]: </span>
+<span class="go">                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     Out[6]: </span>
 <span class="go">[Summary]</span>
 
-<span class="go"> Descriptive Statistics for TMPFGJ86QOC</span>
+<span class="go"> Descriptive Statistics for TMPQV83ABMQ</span>
 <span class="go"> </span>
 <span class="go">         Column      Min       Max      N  NMiss          Mean         Sum  \</span>
 <span class="go"> 0         MSRP  10280.0  192465.0  428.0    0.0  32774.855140  14027638.0   </span>
@@ -303,7 +304,7 @@ pass in the table argument, or you can call the CAS action directly on the
 <span class="go"> 8   7.685150  269.196577   0.000000e+00  0.962287   2.133649  </span>
 <span class="go"> 9   7.704349  268.525733   0.000000e+00  0.181977   0.614725  </span>
 
-<span class="go">+ Elapsed: 0.0139s, user: 0.014s, sys: 0.002s, mem: 5.35mb</span>
+<span class="go">+ Elapsed: 0.0164s, user: 0.017s, sys: 0.003s, mem: 5.35mb</span>
 
 <span class="gp">In [7]: </span><span class="n">conn</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 </pre></div>
@@ -342,12 +343,12 @@ on the next call.</p>
 <span class="gp">In [10]: </span><span class="n">tbl</span> <span class="o">=</span> <span class="n">conn</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;https://raw.githubusercontent.com/&#39;</span>
 <span class="gp">   ....: </span>                    <span class="s1">&#39;sassoftware/sas-viya-programming/master/data/cars.csv&#39;</span><span class="p">)</span>
 <span class="gp">   ....: </span>
-<span class="go">NOTE: Cloud Analytic Services made the uploaded file available as table TMPJDX1_L_7 in caslib CASUSER(kesmit).</span>
-<span class="go">NOTE: The table TMPJDX1_L_7 has been created in caslib CASUSER(kesmit) from binary data uploaded to Cloud Analytic Services.</span>
+<span class="go">NOTE: Cloud Analytic Services made the uploaded file available as table TMP9FCX2SLY in caslib CASUSER(kesmit).</span>
+<span class="go">NOTE: The table TMP9FCX2SLY has been created in caslib CASUSER(kesmit) from binary data uploaded to Cloud Analytic Services.</span>
 
 <span class="gp">In [11]: </span><span class="n">tbl</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
 <span class="go">                                                                                                                                                                                                                                            Out[11]: </span>
-<span class="go">Selected Rows from Table TMPJDX1_L_7</span>
+<span class="go">Selected Rows from Table TMP9FCX2SLY</span>
 
 <span class="go">    Make           Model   Type Origin DriveTrain     MSRP  Invoice  \</span>
 <span class="go">0  Acura             MDX    SUV   Asia        All  36945.0  33337.0   </span>
@@ -376,7 +377,7 @@ on the next call.</p>
 <span class="gp">   ....: </span>
 
 <span class="gp">In [13]: </span><span class="n">tbl</span><span class="o">.</span><span class="n">summary</span><span class="p">(</span><span class="n">resultfunc</span><span class="o">=</span><span class="n">result_cb</span><span class="p">)</span>
-<span class="go">&gt;&gt;&gt; RESULT Summary Descriptive Statistics for TMPJDX1_L_7</span>
+<span class="go">&gt;&gt;&gt; RESULT Summary Descriptive Statistics for TMP9FCX2SLY</span>
 
 <span class="go">        Column      Min       Max      N  NMiss          Mean         Sum  \</span>
 <span class="go">0         MSRP  10280.0  192465.0  428.0    0.0  32774.855140  14027638.0   </span>
@@ -421,7 +422,7 @@ on the next call.</p>
 <span class="gp">   ....: </span>
 
 <span class="gp">In [15]: </span><span class="n">tbl</span><span class="o">.</span><span class="n">summary</span><span class="p">(</span><span class="n">responsefunc</span><span class="o">=</span><span class="n">response_cb</span><span class="p">)</span>
-<span class="go">&gt;&gt;&gt; RESPONSE Summary Descriptive Statistics for TMPJDX1_L_7</span>
+<span class="go">&gt;&gt;&gt; RESPONSE Summary Descriptive Statistics for TMP9FCX2SLY</span>
 
 <span class="go">        Column      Min       Max      N  NMiss          Mean         Sum  \</span>
 <span class="go">0         MSRP  10280.0  192465.0  428.0    0.0  32774.855140  14027638.0   </span>
@@ -489,12 +490,12 @@ thread on the client.</p>
 <span class="gp">In [20]: </span><span class="n">tbl1</span> <span class="o">=</span> <span class="n">conn1</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;https://raw.githubusercontent.com/&#39;</span>
 <span class="gp">   ....: </span>                      <span class="s1">&#39;sassoftware/sas-viya-programming/master/data/class.csv&#39;</span><span class="p">)</span>
 <span class="gp">   ....: </span>
-<span class="go">NOTE: Cloud Analytic Services made the uploaded file available as table TMPLMPU1MIT in caslib CASUSER(kesmit).</span>
-<span class="go">NOTE: The table TMPLMPU1MIT has been created in caslib CASUSER(kesmit) from binary data uploaded to Cloud Analytic Services.</span>
+<span class="go">NOTE: Cloud Analytic Services made the uploaded file available as table TMPZD2FDSPL in caslib CASUSER(kesmit).</span>
+<span class="go">NOTE: The table TMPZD2FDSPL has been created in caslib CASUSER(kesmit) from binary data uploaded to Cloud Analytic Services.</span>
 
 <span class="gp">In [21]: </span><span class="n">tbl1</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
 <span class="go">                                                                                                                                                                                                                                            Out[21]: </span>
-<span class="go">Selected Rows from Table TMPLMPU1MIT</span>
+<span class="go">Selected Rows from Table TMPZD2FDSPL</span>
 
 <span class="go">      Name Sex   Age  Height  Weight</span>
 <span class="go">0   Alfred   M  14.0    69.0   112.5</span>
@@ -506,12 +507,12 @@ thread on the client.</p>
 <span class="gp">In [22]: </span><span class="n">tbl2</span> <span class="o">=</span> <span class="n">conn2</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;https://raw.githubusercontent.com/&#39;</span>
 <span class="gp">   ....: </span>                      <span class="s1">&#39;sassoftware/sas-viya-programming/master/data/cars.csv&#39;</span><span class="p">)</span>
 <span class="gp">   ....: </span>
-<span class="go">                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          NOTE: Cloud Analytic Services made the uploaded file available as table TMP3F0DY35J in caslib CASUSER(kesmit).</span>
-<span class="go">NOTE: The table TMP3F0DY35J has been created in caslib CASUSER(kesmit) from binary data uploaded to Cloud Analytic Services.</span>
+<span class="go">                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          NOTE: Cloud Analytic Services made the uploaded file available as table TMPXATZT8DO in caslib CASUSER(kesmit).</span>
+<span class="go">NOTE: The table TMPXATZT8DO has been created in caslib CASUSER(kesmit) from binary data uploaded to Cloud Analytic Services.</span>
 
 <span class="gp">In [23]: </span><span class="n">tbl2</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
 <span class="go">                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      Out[23]: </span>
-<span class="go">Selected Rows from Table TMP3F0DY35J</span>
+<span class="go">Selected Rows from Table TMPXATZT8DO</span>
 
 <span class="go">    Make           Model   Type Origin DriveTrain     MSRP  Invoice  \</span>
 <span class="go">0  Acura             MDX    SUV   Asia        All  36945.0  33337.0   </span>
@@ -545,7 +546,7 @@ one and retrieve the responses from both connections.</p>
 <span class="gp">   ....: </span>    <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">resp</span><span class="p">:</span>
 <span class="gp">   ....: </span>        <span class="k">print</span><span class="p">(</span><span class="s1">&#39;&gt;&gt;&gt; RESULT&#39;</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
 <span class="gp">   ....: </span>
-<span class="go">&gt;&gt;&gt; RESULT Summary Descriptive Statistics for TMPLMPU1MIT</span>
+<span class="go">&gt;&gt;&gt; RESULT Summary Descriptive Statistics for TMPZD2FDSPL</span>
 
 <span class="go">   Column   Min    Max     N  NMiss        Mean     Sum        Std    StdErr  \</span>
 <span class="go">0     Age  11.0   16.0  19.0    0.0   13.315789   253.0   1.492672  0.342442   </span>
@@ -561,7 +562,7 @@ one and retrieve the responses from both connections.</p>
 <span class="go">0  0.063612 -1.110926  </span>
 <span class="go">1 -0.259670 -0.138969  </span>
 <span class="go">2  0.183351  0.683365  </span>
-<span class="go">&gt;&gt;&gt; RESULT Summary Descriptive Statistics for TMP3F0DY35J</span>
+<span class="go">&gt;&gt;&gt; RESULT Summary Descriptive Statistics for TMPXATZT8DO</span>
 
 <span class="go">        Column      Min       Max      N  NMiss          Mean         Sum  \</span>
 <span class="go">0         MSRP  10280.0  192465.0  428.0    0.0  32774.855140  14027638.0   </span>
