@@ -1271,6 +1271,7 @@ class TestCASTable(tm.TestCase):
         with self.assertRaises(swat.SWATError):
             out = self.table.datastep('keep Make Model Type Origin').mean().tolist()
 
+    @unittest.skipIf(pd_version < (0, 18, 0), 'Need newer version of Pandas')
     def test_skew(self):
         try:
             skew = self.table.skew()
@@ -1293,6 +1294,7 @@ class TestCASTable(tm.TestCase):
         dfskew = dfskew[[x for x in self.table.columns if x in dfskew.columns]]
         self.assertTablesEqual(skew, dfskew, precision=4)
 
+    @unittest.skipIf(pd_version < (0, 17, 0), 'Need newer version of Pandas')
     def test_kurt(self):
         try:
             kurt = self.table.kurt()
@@ -4778,19 +4780,20 @@ class TestCASTable(tm.TestCase):
         self.assertColsEqual(dfcol, tblcol)
         self.assertEqual(list(df.columns), list(tbl.columns))
 
-        dfcol = df.eval('MPG_Avg = (MPG_City + MPG_Highway) / 2', inplace=True)
-        tblcol = tbl.eval('MPG_Avg = (MPG_City + MPG_Highway) / 2', inplace=True)
-        self.assertTrue(dfcol is None)
-        self.assertTrue(tblcol is None)
-        self.assertTablesEqual(df, tbl)
+        if pd_version > (0, 18, 0):
+            dfcol = df.eval('MPG_Avg = (MPG_City + MPG_Highway) / 2', inplace=True)
+            tblcol = tbl.eval('MPG_Avg = (MPG_City + MPG_Highway) / 2', inplace=True)
+            self.assertTrue(dfcol is None)
+            self.assertTrue(tblcol is None)
+            self.assertTablesEqual(df, tbl)
 
-        dfcol = df.eval('MPG_Avg = (MPG_City + MPG_Highway) / 2', inplace=False)
-        tblcol = tbl.eval('MPG_Avg = (MPG_City + MPG_Highway) / 2', inplace=False)
-        self.assertTrue(dfcol is not None)
-        self.assertTrue(tblcol is not None)
-        self.assertTrue(dfcol is not df)
-        self.assertTrue(tblcol is not tbl)
-        self.assertTablesEqual(dfcol, tblcol)
+            dfcol = df.eval('MPG_Avg = (MPG_City + MPG_Highway) / 2', inplace=False)
+            tblcol = tbl.eval('MPG_Avg = (MPG_City + MPG_Highway) / 2', inplace=False)
+            self.assertTrue(dfcol is not None)
+            self.assertTrue(tblcol is not None)
+            self.assertTrue(dfcol is not df)
+            self.assertTrue(tblcol is not tbl)
+            self.assertTablesEqual(dfcol, tblcol)
 
     def _get_comp_data(self, limit=None):
         df = pd.read_csv(six.StringIO('''Origin,A,B,C,D,E,X,Y,Z
@@ -4902,6 +4905,7 @@ class TestCASTable(tm.TestCase):
 
         return (df_finance, df_repertory), (tbl_finance, tbl_repertory)
 
+    @unittest.skipIf(pd_version < (0, 18, 0), 'Need newer version of Pandas')
     def test_merge(self):
         dfs, tbls = self._get_merge_data()
 

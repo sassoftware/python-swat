@@ -751,7 +751,7 @@ class CASTablePlotter(object):
 
         '''
         params, kwargs = self._get_plot_params(x=x, y=y, **kwargs)
-        return self._table._fetch(**params).plot.area(x=x, y=y, **kwargs)
+        return self._table._fetch(**params).plot(x=x, y=y, kind='area', **kwargs)
 
     def bar(self, x=None, y=None, **kwargs):
         '''
@@ -772,7 +772,7 @@ class CASTablePlotter(object):
 
         '''
         params, kwargs = self._get_plot_params(x=x, y=y, **kwargs)
-        return self._table._fetch(**params).plot.bar(x=None, y=None, **kwargs)
+        return self._table._fetch(**params).plot(x=x, y=y, kind='bar', **kwargs)
 
     def barh(self, x=None, y=None, **kwargs):
         '''
@@ -793,7 +793,7 @@ class CASTablePlotter(object):
 
         '''
         params, kwargs = self._get_plot_params(x=x, y=y, **kwargs)
-        return self._table._fetch(**params).plot.barh(x=x, y=y, **kwargs)
+        return self._table._fetch(**params).plot(x=x, y=y, kind='barh', **kwargs)
 
     def box(self, by=None, **kwargs):
         '''
@@ -814,7 +814,7 @@ class CASTablePlotter(object):
 
         '''
         params, kwargs = self._get_plot_params(by=by, **kwargs)
-        return self._table._fetch(**params).plot.box(by=by, **kwargs)
+        return self._table._fetch(**params).plot(by=by, kind='box', **kwargs)
 
     def density(self, **kwargs):
         '''
@@ -835,7 +835,7 @@ class CASTablePlotter(object):
 
         '''
         params, kwargs = self._get_plot_params(**kwargs)
-        return self._table._fetch(**params).plot.density(**kwargs)
+        return self._table._fetch(**params).plot(kind='density', **kwargs)
 
     def hexbin(self, x=None, y=None, C=None, reduce_C_function=None,
                gridsize=None, **kwargs):
@@ -857,10 +857,12 @@ class CASTablePlotter(object):
 
         '''
         params, kwargs = self._get_plot_params(x=x, y=y, **kwargs)
+        if reduce_C_function is not None:
+            kwargs['reduce_C_function'] = reduce_C_function
+        if gridsize is not None:
+            kwargs['gridsize'] = gridsize
         return self._table._fetch(**params)\
-                   .plot.hexbin(x=x, y=y, C=C,
-                                reduce_C_function=reduce_C_function,
-                                gridsize=gridsize, **kwargs)
+                   .plot(x=x, y=y, C=C, kind='hexbin', **kwargs)
 
     def hist(self, by=None, bins=10, **kwargs):
         '''
@@ -881,7 +883,8 @@ class CASTablePlotter(object):
 
         '''
         params, kwargs = self._get_plot_params(by=by, **kwargs)
-        return self._table._fetch(**params).plot.hist(by=by, bins=bins, **kwargs)
+        return self._table._fetch(**params).plot(by=by, bins=bins,
+                                                 kind='hist', **kwargs)
 
     def kde(self, **kwargs):
         '''
@@ -902,7 +905,7 @@ class CASTablePlotter(object):
 
         '''
         params, kwargs = self._get_plot_params(**kwargs)
-        return self._table._fetch(**params).plot.kde(**kwargs)
+        return self._table._fetch(**params).plot(kind='kde', **kwargs)
 
     def line(self, x=None, y=None, **kwargs):
         '''
@@ -923,7 +926,7 @@ class CASTablePlotter(object):
 
         '''
         params, kwargs = self._get_plot_params(x=x, y=y, **kwargs)
-        return self._table._fetch(**params).plot.line(x=x, y=y, **kwargs)
+        return self._table._fetch(**params).plot(x=x, y=y, kind='line', **kwargs)
 
     def pie(self, y=None, **kwargs):
         '''
@@ -946,7 +949,7 @@ class CASTablePlotter(object):
         if y is None and isinstance(self._table, CASColumn):
             y = self._table.columns[0]
         params, kwargs = self._get_plot_params(y=y, **kwargs)
-        return self._table._fetch(**params).plot.pie(y=y, **kwargs)
+        return self._table._fetch(**params).plot(y=y, kind='pie', **kwargs)
 
     def scatter(self, x, y, s=None, c=None, **kwargs):
         '''
@@ -967,7 +970,8 @@ class CASTablePlotter(object):
 
         '''
         params, kwargs = self._get_plot_params(x=x, y=y, **kwargs)
-        return self._table._fetch(**params).plot.scatter(x, y, s=s, c=c, **kwargs)
+        return self._table._fetch(**params).plot(x, y, s=s, c=c,
+                                                 kind='scatter', **kwargs)
 
 
 @six.python_2_unicode_compatible

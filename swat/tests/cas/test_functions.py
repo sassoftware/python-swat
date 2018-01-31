@@ -44,6 +44,10 @@ USER, PASSWD = tm.get_user_pass()
 HOST, PORT, PROTOCOL = tm.get_host_port_proto()
 
 
+pd_version = tuple([int(x) for x in re.match(r'^(\d+)\.(\d+)\.(\d+)',
+                                             pd.__version__).groups()])
+
+
 class TestFunctions(tm.TestCase):
 
     server_type = None
@@ -140,6 +144,7 @@ class TestFunctions(tm.TestCase):
 
         return (df_finance, df_repertory), (tbl_finance, tbl_repertory)
 
+    @unittest.skipIf(pd_version < (0, 18, 0), 'Need newer version of Pandas')
     def test_merge(self):
         dfs, tbls = self._get_merge_data()
 
