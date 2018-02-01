@@ -297,16 +297,11 @@ def load_data(conn, path, server_type, casout=None):
 
     '''
     import swat.tests as st
+    import platform
 
     # Get location of data and casout
     data_lib = get_cas_data_lib(server_type)
     out_lib = get_casout_lib(server_type)
-
-    # Remap Windows path separators
-    sep = '/'
-    if 'win' in server_type:
-        sep = '\\'
-        path = path.replace('/', '\\')
 
     if casout is None:
         casout = dict(caslib='casuser')
@@ -315,15 +310,23 @@ def load_data(conn, path, server_type, casout=None):
         casout['caslib'] = out_lib
 
     if 'name' not in casout:
-        casout['name'] = re.sub(sep, '.', os.path.splitext(path)[0])
+        casout['name'] = re.sub('/', '.', os.path.splitext(path)[0])
 
     # Try to load server version first
-    res = conn.loadtable(caslib=data_lib, path=path, casout=casout)
+    if 'win' in server_type:
+        res = conn.loadtable(caslib=data_lib, path=path.replace('/', '\\'), casout=casout)
+    else:
+        res = conn.loadtable(caslib=data_lib, path=path, casout=casout)
 
     # If server version doesn't exist, upload local copy
     if 'tableName' not in res or not res['tableName']:
         # sys.stderr.write('NOTE: Uploading local data file.')
-        res = conn.upload(os.path.join(os.path.dirname(st.__file__), path), casout=casout)
+        if 'win' in platform.system().lower():
+            res = conn.upload(os.path.join(os.path.dirname(st.__file__),
+                                           path.replace('/', '\\')), casout=casout)
+        else:
+            res = conn.upload(os.path.join(os.path.dirname(st.__file__),
+                                           path), casout=casout)
 
     return res
 
