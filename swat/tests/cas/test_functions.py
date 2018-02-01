@@ -25,6 +25,7 @@
 import datetime
 import os
 import pandas as pd
+import re
 import six
 import swat
 import swat.utils.testing as tm
