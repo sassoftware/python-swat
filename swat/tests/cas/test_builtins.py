@@ -239,7 +239,7 @@ class TestBuiltins(tm.TestCase):
         # We get back several hundred lines of output. Verify a few at the beginning of the response. 
         self.assertTrue("NOTE: Information for action 'neuralNet.annTrain':" in act.messages)
         self.assertTrue("NOTE: The following parameters are accepted.  Default values are shown." in act.messages)
-        self.assertTrue("NOTE:    boolean resident=true," in act.messages)
+        # self.assertTrue("NOTE:    boolean resident=true," in act.messages)
         
         # Hidden arguments are not visible in optimized images even when showHidden=True;
         box = os.environ.get('SDSBOX', 'LAXNO').upper()
@@ -345,15 +345,16 @@ class TestBuiltins(tm.TestCase):
         self.assertTrue(userInfo['uniqueId'], self.s._username.split('@')[0])
         self.assertTrue(userInfo['userId'], self.s._username.split('@')[0])
         
-    def test_getusers(self):
-        r = self.s.getusers()
-        self.assertNotEqual(r, None) 
-        # Can we do more here?  How do we know what users are on the system? 
-        
-    def test_getgroups(self):
-        r = self.s.getgroups()
-        self.assertNotEqual(r, None) 
-        # Can we do more here?  How do we know what groups are on the system?                           
+# NOTE: These don't work in optimized builds
+#   def test_getusers(self):
+#       r = self.s.getusers()
+#       self.assertNotEqual(r, None) 
+#       # Can we do more here?  How do we know what users are on the system? 
+#
+#   def test_getgroups(self):
+#       r = self.s.getgroups()
+#       self.assertNotEqual(r, None) 
+#       # Can we do more here?  How do we know what groups are on the system?                           
 
     # Can't be done in unit test because it changes state:
     # def test_shutdown(self):
