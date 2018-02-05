@@ -23,6 +23,9 @@ SWAT C library functions
 
 from __future__ import print_function, division, absolute_import, unicode_literals
 
+import glob
+import os
+import sys
 from .utils.compat import PY3, WIDE_CHARS, a2u
 from .exceptions import SWATError
 
@@ -66,6 +69,11 @@ def _import_pyswat():
                          'installed.  You can either install them using the full '
                          'platform-dependent install file, or use the REST interface '
                          'as an alternative.')
+
+    # Make sure the correct libssl.so is used
+    libssl = list(sorted(glob.glob(os.path.join(sys.prefix, 'lib', 'libssl.so*'))))
+    if libssl:
+        os.environ['TKESSL_OPENSSL_LIB'] = libssl[-1]
 
     # Try to import the C extension
     try:
