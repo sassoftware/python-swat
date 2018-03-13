@@ -226,6 +226,8 @@ def sas2python_timestamp(sts):
     :class:`datetime.datetime`
 
     '''
+    if pd.isnull(sts):
+        return pd.NaT
     return cas2python_timestamp(sas2cas_timestamp(sts))
 
 
@@ -251,6 +253,8 @@ def sas2python_date(sdt):
     :class:`datetime.date`
 
     '''
+    if pd.isnull(sdt):
+        return pd.NaT
     return cas2python_date(sas2cas_date(sdt))
 
 
@@ -273,6 +277,8 @@ def sas2python_time(sts):
     :class:`datetime.time`
 
     '''
+    if pd.isnull(sts):
+        return pd.NaT
     return cas2python_time(sas2cas_time(sts))
 
 

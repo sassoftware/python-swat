@@ -276,7 +276,7 @@ def _read_casrc(path):
     return cashost, casport, casprotocol
 
 
-def load_data(conn, path, server_type, casout=None):
+def load_data(conn, path, server_type, casout=None, importoptions=None):
     '''
     If data exists on the server, use it.  Otherwise, upload the data set.
 
@@ -314,19 +314,23 @@ def load_data(conn, path, server_type, casout=None):
 
     # Try to load server version first
     if 'win' in server_type:
-        res = conn.loadtable(caslib=data_lib, path=path.replace('/', '\\'), casout=casout)
+        res = conn.loadtable(caslib=data_lib, path=path.replace('/', '\\'),
+                             casout=casout, importoptions=importoptions)
     else:
-        res = conn.loadtable(caslib=data_lib, path=path, casout=casout)
+        res = conn.loadtable(caslib=data_lib, path=path, casout=casout,
+                             importoptions=importoptions)
 
     # If server version doesn't exist, upload local copy
     if 'tableName' not in res or not res['tableName']:
         # sys.stderr.write('NOTE: Uploading local data file.')
         if 'win' in platform.system().lower():
             res = conn.upload(os.path.join(os.path.dirname(st.__file__),
-                                           path.replace('/', '\\')), casout=casout)
+                                           path.replace('/', '\\')), casout=casout,
+                              importoptions=importoptions)
         else:
             res = conn.upload(os.path.join(os.path.dirname(st.__file__),
-                                           path), casout=casout)
+                                           path), casout=casout,
+                              importoptions=importoptions)
 
     return res
 

@@ -196,6 +196,31 @@ def check_string_list(val):
     return check_string(val)
 
 
+register_option('cas.dataset.date_formats', 'string or list of strings',
+                check_string_list,
+                ['B8601DA', 'DATE', 'DAY', 'DDMMYY.?', 'DOWNAME', 'E8601DA',
+                 'EURDFDD', 'EURDFDE', 'EURDFDN', 'EURDFDWN', 'EURDFMN', 'EURDFMY',
+                 'EURDFWDX', 'EURDFWKX', 'HDATE', 'HEBDATE', 'JULDAY', 'JULIAN',
+                 'MINGUO', 'MMDDYY.?', 'MMYY.?', 'MONNAME', 'MONTH', 'MONYY',
+                 'NENGO', 'NLDATE[A-Z]*', 'PDJULG', 'PDJULI', 'QTRR', 'QTR',
+                 'WEEKDATE', 'WEEKDATX', 'WEEKDAY', 'WEEKU', 'WEEKV', 'WEEK',
+                 'WORDDATE', 'WORDDATX', 'YEAR', 'YYMMDD.?', 'YYMM.?', 'YYMM.?',
+                 'YYMON', 'YYQR.?', 'YYQZ', 'YYQ', 'YYQ.?', 'YYWEEKU', 'YYWEEKV',
+                 'YYWEEKW'],
+                'Format names used to indicate the column should be converted\n' +
+                'to a Python date object.')
+
+register_option('cas.dataset.datetime_formats', 'string or list of strings',
+                check_string_list,
+                ['B8601DN', 'B8601DT', 'B8601DX', 'B8601DZ', 'B8601LX', 'B8601LZ',
+                 'B8601TM', 'B8601TX', 'B8601TZ', 'DATEAMPM', 'DATETIME', 'DTDATE',
+                 'DTMONYY', 'DTWEEKV', 'DTWKDATX', 'DTYEAR', 'DTYYQC', 'E8601DN',
+                 'E8601DT', 'E8601DX', 'E8601DZ', 'E8601LX', 'E8601LZ', 'E8601TM',
+                 'E8601TX', 'E8601TZ', 'EURDFDT', 'HHMM', 'HOUR', 'MDYAMPM', 'MMSS',
+                 'NLDATM[A-Z]*', 'NLTIMAP', 'NLTIME', 'TIMEAMPM', 'TIME', 'TOD'],
+                'Format names used to indicate the column should be converted\n' +
+                'to a Python datetime object.')
+
 register_option('cas.dataset.index_name', 'string or list of strings',
                 check_string_list, '_Index_',
                 'The name or names of the columns to be automatically converted\n' +

@@ -28,6 +28,7 @@ import datetime
 import warnings
 import numpy as np
 import pandas as pd
+import re
 import six
 from .utils import datetime as casdt
 from .. import clib
@@ -229,6 +230,19 @@ def ctb2tabular(_sw_table, soptions='', connection=None):
                         _sw_table))
     kwargs['attrs'] = attrs
 
+    # Setup date / datetime regexes
+
+    dt_formats = get_option('cas.dataset.datetime_formats')
+    if isinstance(dt_formats, six.string_types):
+        dt_formats = [dt_formats]
+    datetime_regex = re.compile(r'^(%s)\d*\.\d*$' % '|'.join(dt_formats), flags=re.I)
+
+    d_formats = get_option('cas.dataset.date_formats')
+    if isinstance(dt_formats, six.string_types):
+        d_formats = [d_formats]
+    date_regex = re.compile(r'^(%s)\d*\.\d*$' % '|'.join(d_formats), flags=re.I)
+
+    # Construct columns
     ncolumns = check(_sw_table.getNColumns(), _sw_table)
     caslib = None
     tablename = None
@@ -239,6 +253,8 @@ def ctb2tabular(_sw_table, soptions='', connection=None):
     dtypes = []
     colinfo = {}
     mimetypes = {}
+    dates = []
+    datetimes = []
     intmiss = {}
     for i in range(ncolumns):
         col = SASColumnSpec.fromtable(_sw_table, i)
@@ -261,6 +277,11 @@ def ctb2tabular(_sw_table, soptions='', connection=None):
         if dtype == 'double':
             dtypes.append((col.name, 'f8'))
             colinfo[col.name] = col
+            if col.format:
+                if datetime_regex.match(col.format):
+                    datetimes.append(col.name)
+                elif date_regex.match(col.format):
+                    dates.append(col.name)
         elif dtype in set(['char', 'varchar']):
             dtypes.append((col.name, '|U%d' % (col.width or 1)))
             colinfo[col.name] = col
@@ -343,6 +364,12 @@ def ctb2tabular(_sw_table, soptions='', connection=None):
                 if Image is None:
                     continue
                 cdf[key] = cdf[key].map(lambda x: Image.open(BytesIO(x)))
+
+    # Apply date / datetime transformations
+    for item in dates:
+        cdf[item] = cdf[item].apply(casdt.sas2python_date)
+    for item in datetimes:
+        cdf[item] = cdf[item].apply(casdt.sas2python_datetime)
 
     # Check for By group information
     optbycol = get_option('cas.dataset.bygroup_columns')

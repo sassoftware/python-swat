@@ -28,8 +28,50 @@ import sys
 import unittest
 from swat.cas.utils.datetime import *
 
+from swat.utils.compat import patch_pandas_sort
+from swat.utils.testing import UUID_RE, get_cas_host_type, load_data
+
+patch_pandas_sort()
+
+# Pick sort keys that will match across SAS and Pandas sorting orders
+SORT_KEYS = ['Origin', 'MSRP', 'Horsepower', 'Model']
+
+USER, PASSWD = tm.get_user_pass()
+HOST, PORT, PROTOCOL = tm.get_host_port_proto()
+
 
 class TestDateTime(tm.TestCase):
+
+    server_type = None
+
+    def setUp(self):
+        swat.reset_option()
+        swat.options.cas.print_messages = False
+        swat.options.interactive_mode = True
+        swat.options.cas.missing.int64 = -999999
+
+        self.s = swat.CAS(HOST, PORT, USER, PASSWD, protocol=PROTOCOL)
+
+        if type(self).server_type is None:
+            type(self).server_type = get_cas_host_type(self.s)
+
+        self.srcLib = tm.get_casout_lib(self.server_type)
+
+        self.dates = load_data(self.s, 'datasources/dates.csv', self.server_type,
+                               importoptions=dict(vars=dict(Region=dict(),
+                                                            Date=dict(format='DATE'))))['casTable']
+        self.dates = self.dates.to_frame().set_index('Region')
+
+        self.datetimes = load_data(self.s, 'datasources/datetimes.csv', self.server_type,
+                                   importoptions=dict(vars=dict(Region=dict(),
+                                                                Datetime=dict(format='DATETIME'))))['casTable']
+        self.datetimes = self.datetimes.to_frame().set_index('Region')
+
+    def tearDown(self):
+        # tear down tests
+        self.s.endsession()
+        del self.s
+        swat.reset_option()
     
     def test_cas_datetime(self):
         self.assertEqual(str2cas_timestamp('19700101T12:00'), 315662400000000)
@@ -86,6 +128,20 @@ class TestDateTime(tm.TestCase):
 #                        3653)
         self.assertEqual(python2sas_time(datetime.time(12, 0)),
                          43200)
+
+    def test_sas_date_conversion(self):
+        self.assertEqual(self.dates.loc['N', 'Date'], datetime.date(1960, 1, 21))    
+        self.assertEqual(self.dates.loc['S', 'Date'], datetime.date(1960, 1, 31))    
+        self.assertEqual(self.dates.loc['E', 'Date'], datetime.date(1960, 10, 27))    
+        self.assertEqual(self.dates.loc['W', 'Date'], datetime.date(1961, 2, 4))    
+        self.assertTrue(pd.isnull(self.dates.loc['X', 'Date']))
+                        
+    def test_sas_datetime_conversion(self):
+        self.assertEqual(self.datetimes.loc['N', 'Datetime'], datetime.datetime(2000, 3, 17, 0, 0, 0))
+        self.assertEqual(self.datetimes.loc['S', 'Datetime'], datetime.datetime(1991, 10, 17, 14, 45, 32)) 
+        self.assertEqual(self.datetimes.loc['E', 'Datetime'], datetime.datetime(1960, 1, 1, 0, 0, 0))
+        self.assertEqual(self.datetimes.loc['W', 'Datetime'], datetime.datetime(1959, 12, 31, 23, 59, 59))
+        self.assertTrue(pd.isnull(self.datetimes.loc['X', 'Datetime']))
                         
 
 if __name__ == '__main__':
