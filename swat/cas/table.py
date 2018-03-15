@@ -320,27 +320,61 @@ def merge(left, right, how='inner', on=None, left_on=None, right_on=None,
     # Find overlapping columns
     left_rename = ''
     right_rename = ''
-    extra_code = ''
-    left_cols = set([x for x in left.columns if x != left_on])
-    right_cols = set([x for x in right.columns if x != right_on])
+    left_dtypes = left.dtypes.to_dict()
+    right_dtypes = right.dtypes.to_dict()
+    left_columns = left.columns
+    right_columns = right.columns
+    left_cols = set([x for x in left_columns if x != left_on])
+    right_cols = set([x for x in right_columns if x != right_on])
     same_cols = left_cols.intersection(right_cols)
+    varchars = []
+    varbins = []
     if same_cols:
-        fmt = ' rename=(%s)'
-        left_rename = fmt % ' '.join(
+        left_rename = ' ' + ' '.join(
             ['%s=%s' % (_nlit(x), _nlit('%s%s' % (x, suffixes[0]))) for x in same_cols])
-        if left_on != right_on:
-            fmt = ' rename=(%s=%s %%s)' % (_nlit(right_on), _nlit(left_on))
-            extra_code = '    %s = %s;' % (_nlit(right_on), _nlit(left_on))
-        right_rename = fmt % ' '.join(
+        right_rename = ' ' + ' '.join(
             ['%s=%s' % (_nlit(x), _nlit('%s%s' % (x, suffixes[1]))) for x in same_cols])
+
+        varchars.extend([_nlit('%s%s' % (x, suffixes[0]))
+                         for x in same_cols if left_dtypes[x] == 'varchar'])
+        varchars.extend([_nlit('%s%s' % (x, suffixes[1]))
+                         for x in same_cols if right_dtypes[x] == 'varchar'])
+
+        varbins.extend([_nlit('%s%s' % (x, suffixes[0]))
+                        for x in same_cols if left_dtypes[x] == 'varbinary'])
+        varbins.extend([_nlit('%s%s' % (x, suffixes[1]))
+                        for x in same_cols if right_dtypes[x] == 'varbinary'])
+
+    left_map = {item: item for item in left.columns}
+    right_map = {item: item for item in right.columns}
+    for item in same_cols:
+        left_map[item] = '%s%s' % (item, suffixes[0])
+        right_map[item] = '%s%s' % (item, suffixes[1])
+
+    left_rename = ' rename=(%s=__by_var%s)' % (_nlit(left_on), left_rename)
+    right_rename = ' rename=(%s=__by_var%s)' % (_nlit(right_on), right_rename)
+
+    columns = ' '.join([_nlit(left_map[x]) for x in left_columns] +
+                       [_nlit(right_map[x]) for x in right_columns])
 
     left_missval = '.'
     right_missval = '.'
     if left_on != right_on:
-        if left[left_on].dtype in ['varchar', 'char', 'varbinary', 'binary']:
+        if left_dtypes[left_on] in ['varchar', 'char', 'varbinary', 'binary']:
             left_missval = '""'
-        if right[right_on].dtype in ['varchar', 'char', 'varbinary', 'binary']:
+        if right_dtypes[right_on] in ['varchar', 'char', 'varbinary', 'binary']:
             right_missval = '""'
+
+    if left_dtypes[left_on] == 'varchar':
+        varchars.append(_nlit(left_on))
+    elif left_dtypes[left_on] == 'varbinary':
+        varbins.append(_nlit(left_on))
+
+    if right_on != left_on:
+        if right_dtypes[right_on] == 'varchar':
+            varchars.append(_nlit(right_on))
+        elif right_dtypes[right_on] == 'varbinary':
+            varbins.append(_nlit(right_on))
 
     left_view = None
     right_view = None
@@ -365,32 +399,107 @@ def merge(left, right, how='inner', on=None, left_on=None, right_on=None,
         # Create data step code for merge
         code = []
         code.append('data %s;' % _to_datastep_params(casout))
+        code.append('    retain %s;' % columns)
+
+        if varchars and varbins:
+            code.append('    length %s varchar(*) %s varbinary(*);' %
+                        (' '.join(varchars), ' '.join(varbins)))
+        elif varbins:
+            code.append('    length %s varbinary(*);' % ' '.join(varbins))
+        elif varchars:
+            code.append('    length %s varchar(*);' % ' '.join(varchars))
+
         code.append('    merge %s(in=__in_left%s%s) %s(in=__in_right%s%s);' %
                     (_quote(left_name), left_caslib, left_rename,
                      _quote(right_name), right_caslib, right_rename))
 
-        if extra_code:
-            code.append(extra_code)
-
-        code.append('    by %s;' % _nlit(left_on))
+        code.append('    by __by_var;')
 
         if how in ['outer', 'full-outer']:
-            code.append('    if __in_left or __in_right;')
+            code.append('    if __in_left or __in_right then do;'
+                        '        if __in_left then do;'
+                        '            %(left_on)s = __by_var;'
+                        '        end;'
+                        '        if __in_right then do;'
+                        '            %(right_on)s = __by_var;'
+                        '        end;'
+                        '    end;'
+                        '    else do;'
+                        '        delete;'
+                        '    end;')
         elif how in ['left', 'left-outer']:
-            code.append('    if __in_left;')
+            code.append('    if __in_left then do;'
+                        '        if __in_right then do;'
+                        '            %(right_on)s = __by_var;'
+                        '        end;'
+                        '        else do;'
+                        '            %(right_on)s = %(right_missval)s;'
+                        '        end;'
+                        '        %(left_on)s = __by_var;'
+                        '    end;'
+                        '    else do;'
+                        '        delete;'
+                        '    end;')
         elif how in ['right', 'right-outer']:
-            code.append('    if __in_right;')
+            code.append('    if __in_right then do;'
+                        '        if __in_left then do;'
+                        '            %(left_on)s = __by_var;'
+                        '        end;'
+                        '        else do;'
+                        '            %(left_on)s = %(left_missval)s;'
+                        '        end;'
+                        '        %(right_on)s = __by_var;'
+                        '    end;'
+                        '    else do;'
+                        '        delete;'
+                        '    end;')
         elif how in ['inner']:
-            code.append('    if __in_left and __in_right;')
+            code.append('    if __in_left and __in_right then do;'
+                        '        %(left_on)s = __by_var;'
+                        '        %(right_on)s = __by_var;'
+                        '    end;'
+                        '    else do;'
+                        '        delete;'
+                        '    end;')
         elif how in ['left-minus-right']:
-            code.append('    if __in_left and ^__in_right;')
+            code.append('    if __in_left and ^__in_right then do;'
+                        '        %(left_on)s = __by_var;'
+                        '        %(right_on)s = %(right_missval)s;'
+                        '    end;'
+                        '    else do;'
+                        '        delete;'
+                        '    end;')
         elif how in ['right-minus-left']:
-            code.append('    if ^__in_left and __in_right;')
+            code.append('    if ^__in_left and __in_right then do;'
+                        '        %(left_on)s = %(left_missval)s;'
+                        '        %(right_on)s = __by_var;'
+                        '    end;'
+                        '    else do;'
+                        '        delete;'
+                        '    end;')
         elif how in ['outer-minus-inner']:
-            code.append('    if (__in_left and ^__in_right) '
-                        'or (^__in_left and __in_right);')
+            code.append('    if (__in_left and ^__in_right) or (^__in_left and __in_right) then do;'
+                        '        if __in_left then do;'
+                        '            %(left_on)s = __by_var;'
+                        '        end;'
+                        '        else do;'
+                        '            %(left_on)s = %(left_missval)s;'
+                        '        end;'
+                        '        if __in_right then do;'
+                        '            %(right_on)s = __by_var;'
+                        '        end;'
+                        '        else do;'
+                        '            %(right_on)s = %(right_missval)s;'
+                        '        end;'
+                        '    end;'
+                        '    else do;'
+                        '        delete;'
+                        '    end;')
         else:
             raise ValueError('Unrecognized merge type: %s' % how)
+
+        code[-1] = code[-1] % dict(left_on=_nlit(left_on), right_on=_nlit(right_on),
+                                   left_missval=left_missval, right_missval=right_missval)
 
         if indicator:
             if indicator is True:
@@ -403,11 +512,7 @@ def merge(left, right, how='inner', on=None, left_on=None, right_on=None,
             code.append('        else %s = "left_only";' % _nlit(indicator))
             code.append('    else %s = "right_only";' % _nlit(indicator))
 
-        if left_on != right_on:
-            code.append('    if ^__in_left and __in_right then %s = %s;' %
-                        (_nlit(left_on), left_missval))
-            code.append('    if __in_left and ^__in_right then %s = %s;' %
-                        (_nlit(right_on), right_missval))
+        code.append('    drop __by_var;')
 
         code.append('run;')
 
