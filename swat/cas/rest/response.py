@@ -75,8 +75,8 @@ class REST_CASResponse(object):
 
         self._messages = [x['message'] for x in obj.get('logEntries', [])]
 
-        self._metrics = {camel2underscore(k): v
-                         for k, v in obj.get('metrics', {}).items()}
+        metrics = obj.get('metrics', {}) or {}
+        self._metrics = {camel2underscore(k): v for k, v in metrics.items()}
 
         self._results = obj.get('results', {})
 
