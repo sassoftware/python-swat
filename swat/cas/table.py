@@ -28,6 +28,7 @@ import keyword
 import re
 import sys
 import uuid
+import warnings
 import weakref
 import numpy as np
 import pandas as pd
@@ -2382,6 +2383,10 @@ class CASTable(ParamManager, ActionParamManager):
         '''
         if n is None:
             n = get_option('cas.dataset.max_rows_fetched')
+            if self._numrows > n:
+                warnings.warn(('Data downloads are limited to %d rows.  To change this limit, '
+                               'set swat.options.cas.dataset.max_rows_fetched to the desired limit.')
+                               % n, RuntimeWarning)
         tbl = self.copy()
         tbl._intersect_columns(columns, inplace=True)
         return tbl._fetch(to=n).as_matrix()
@@ -5652,8 +5657,12 @@ class CASTable(ParamManager, ActionParamManager):
             from_ = kwargs['from_']
 
         if 'to' not in kwargs:
-            kwargs['to'] = min(from_ + get_option('cas.dataset.max_rows_fetched'),
-                               MAX_INT64_INDEX)
+            max_rows_fetched = get_option('cas.dataset.max_rows_fetched')
+            kwargs['to'] = min(from_ + max_rows_fetched, MAX_INT64_INDEX)
+            if self._numrows > max_rows_fetched:
+                warnings.warn(('Data downloads are limited to %d rows.  To change this limit, '
+                               'set swat.options.cas.dataset.max_rows_fetched to the desired limit.')
+                               % max_rows_fetched, RuntimeWarning)
 
         # Compute sample percentage as needed
         if sample_pct is None and sample:
