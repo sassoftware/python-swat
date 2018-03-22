@@ -18,3 +18,6 @@ typically copied to a local directory from the server.
 
 .. note:: Beginning in SAS Viya 3.3, encrypted communication is enabled
              in the server by default.
+
+.. note:: The hostname used when connecting to CAS must match the hostname
+          in the certificate.
