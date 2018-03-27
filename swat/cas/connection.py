@@ -48,6 +48,7 @@ from .request import CASRequest
 from .response import CASResponse
 from .results import CASResults
 from .utils.params import ParamManager, ActionParamManager
+from .utils.misc import super_dir
 
 # pylint: disable=W0212
 
@@ -326,7 +327,7 @@ class CAS(object):
         self._results_hooks = {}
 
         # Preload __dir__ information.  It will be extended later with action names
-        self._dir = set([x for x in self.__dict__.keys() if not x.startswith('_')])
+        self._dir = set([x for x in super_dir(CAS, self)])
 
         # Pre-populate action set attributes
         for asname, value in self.retrieve('builtins.help',
@@ -604,7 +605,13 @@ class CAS(object):
         return self.__getattr__(name, atype='actionset')
 
     def __dir__(self):
-        return list(self._dir) + list(self.get_action_names())
+        return list(sorted(list(self._dir) + list(self.get_action_names())))
+
+    def __dir_actions__(self):
+        return list(sorted(self.get_action_names()))
+
+    def __dir_members__(self):
+        return list(sorted(self._dir))
 
     def __str__(self):
         args = []
@@ -3085,3 +3092,17 @@ def getnext(*objs, **kwargs):
         for conn in connections:
             errorcheck(conn._sw_connection.stopAction(), conn._sw_connection)
         raise
+
+
+def dir_actions(obj):
+    ''' Return list of CAS actionsets / actions associated with the object '''
+    if hasattr(obj, '__dir_actions__'):
+        return obj.__dir_actions__()
+    return []
+
+
+def dir_members(obj):
+    ''' Return list of object members, not including associated CAS actionsets / actions '''
+    if hasattr(obj, '__dir_members__'):
+        return obj.__dir_members__()
+    return dir(obj)

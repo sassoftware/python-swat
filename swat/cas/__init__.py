@@ -25,7 +25,7 @@ from __future__ import print_function, division, absolute_import, unicode_litera
 
 from .utils import InitializeTK, vl, table, initialize_tk
 from .actions import CASAction, CASActionSet
-from .connection import CAS, getone, getnext
+from .connection import CAS, getone, getnext, dir_actions, dir_members
 from .table import CASTable
 from .transformers import py2cas
 from .types import nil, blob

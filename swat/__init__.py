@@ -72,6 +72,7 @@ from .config import (set_option, get_option, reset_option, describe_option,
 
 # CAS utilities
 from .cas import (CAS, vl, nil, getone, getnext, datamsghandlers, blob)    # noqa: E402
+from .cas import (dir_actions, dir_members)    # noqa: E402
 from .cas.table import CASTable    # noqa: E402
 
 # Conflicts with .cas.table, so we import it excplicitly here

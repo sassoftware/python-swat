@@ -23,5 +23,6 @@ Utilities for CAS modules
 
 from __future__ import print_function, division, absolute_import, unicode_literals
 
+from .misc import super_dir
 from .params import vl, table
 from .tk import InitializeTK, initialize_tk

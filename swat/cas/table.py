@@ -34,6 +34,7 @@ import numpy as np
 import pandas as pd
 import six
 from .utils.params import ParamManager, ActionParamManager
+from .utils.misc import super_dir
 from ..config import get_option
 from ..exceptions import SWATError
 from ..utils import dict2kwargs, getattr_safe_property
@@ -1253,7 +1254,7 @@ class CASTable(ParamManager, ActionParamManager):
 
         self._plot = CASTablePlotter(self)
 
-        self._dir = set([x for x in self.__dict__.keys() if not x.startswith('_')])
+        self._dir = set([x for x in super_dir(CASTable, self)])
         self.params.set_dir_values(type(self).all_params)
 
         # Add doc to params
@@ -1574,10 +1575,21 @@ class CASTable(ParamManager, ActionParamManager):
     def __dir__(self):
         try:
             conn = self.get_connection()
-            return list(self._dir) + list(conn.get_action_names())
+            return list(sorted(list(self._dir) + list(conn.get_action_names())))
         except:
             pass
-        return list(self._dir)
+        return list(sorted(self._dir))
+
+    def __dir_actions__(self):
+        try:
+            conn = self.get_connection()
+            return list(sorted(conn.get_action_names()))
+        except:
+            pass
+        return []
+
+    def __dir_members__(self):
+        return list(sorted(self._dir))
 
     @classmethod
     def _bootstrap(cls, connection):
