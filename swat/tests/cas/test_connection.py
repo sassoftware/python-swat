@@ -285,8 +285,6 @@ class TestConnection(tm.TestCase):
                 slist[i].endsession()
 
     def test_upload(self):
-        if self.server_type == 'windows.smp':
-            unittest.TestCase.skipTest(self, 'Skip on WX6 until defect S1225125 fixed')                   
         import swat.tests as st
 
         numtbls = len(self.s.tableinfo().get('TableInfo', []))
@@ -343,9 +341,6 @@ class TestConnection(tm.TestCase):
         tbl.droptable()
 
     def test_upload_file(self):
-        if self.server_type == 'windows.smp':
-            unittest.TestCase.skipTest(self, 'Skip on WX6 until defect S1225125 fixed')
-
         import swat.tests as st
         
         numtbls = len(self.s.tableinfo().get('TableInfo', []))
@@ -368,9 +363,6 @@ class TestConnection(tm.TestCase):
         tbl.droptable()
 
     def test_upload_frame(self):
-        if self.server_type == 'windows.smp':
-            unittest.TestCase.skipTest(self, 'Skip on WX6 until defect S1225125 fixed')
-
         import swat.tests as st
         
         numtbls = len(self.s.tableinfo().get('TableInfo', []))
