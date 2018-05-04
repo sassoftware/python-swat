@@ -224,3 +224,30 @@ The second code sample below shows the error for an incorrect password.
    . . .
        
    SWATError: Could not connect to 'my-cas' on port 12345.
+
+
+UnicodeEncodeError in Windows Console
+=====================================
+
+If you attempt to print content from a CAS action that contains UTF-8 encoded 
+characters, you may encounter an error like the following:
+
+.. code-block:: python
+
+   Traceback (most recent call last):
+     File "<stdin>", line 1, in <module>
+     File "c:\anaconda3\lib\encodings\cp437.py", line 19, in encode
+       return codecs.charmap_encode(input,self.errors,encoding_map)[0]
+   UnicodeEncodeError: 'charmap' codec can't encode characters in position 525-526: character maps to <undefined>
+
+This can happen if the encoding in your Windows console is set to an encoding
+that can't handle the characters in the CAS output.  There are a few solutions
+to this issue.
+
+   1.  Upgrade to Python 3.6.  Python 3.6 includes a fix that will allow the 
+       characters to be displayed properly.
+   2.  Run 'chcp 65001' in the console before executing your Python code.  This
+       will change the codepage in the console to one that will support the
+       characters.
+   3.  Install the `win-unicode-console <https://github.com/Drekin/win-unicode-console>`_
+       package and follow the instructions to enable it.
