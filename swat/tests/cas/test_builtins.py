@@ -336,9 +336,12 @@ class TestBuiltins(tm.TestCase):
         self.assertTrue(len(userInfo) >= 7)
         self.assertEqual(userInfo['anonymous'], 0)
         # WX6 returns an empty string for groups
-        self.assertIn(userInfo['groups'], [['users'],''])         
-        self.assertEqual(userInfo['hostAccount'], 1)
-        self.assertEqual(userInfo['providedName'], self.s._username)
+        if isinstance(userInfo['groups'], list):
+            self.assertTrue('users' in userInfo['groups'] or
+                            'Everyone' in userInfo['groups'])
+        self.assertIn(userInfo['hostAccount'], [1, False])
+        self.assertEqual(userInfo['providedName'].split('\\')[-1].split('@')[0],
+                         self.s._username.split('\\')[-1].split('@')[0])
         # WX6 returns 'Windows' for providerName
         self.assertIn(userInfo['providerName'], ['Active Directory', 'Windows'])
         # WX6 returns the domain for uniqueId

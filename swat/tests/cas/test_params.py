@@ -394,7 +394,7 @@ class TestParams(tm.TestCase):
         
         # Cleanup after ourselves
         r  = self.s.table.droptable(caslib=self.trgLib, table="ALLTYPES_OUTTABLE") 
-        self.assertRegex(r.status, "^Cloud Analytic Services dropped table ALLTYPES_OUTTABLE from caslib " + self.trgLib.upper() + "(\(\w+\))?\.$")   
+        self.assertRegex(r.status, "^Cloud Analytic Services dropped table ALLTYPES_OUTTABLE from caslib " + self.trgLib.upper() + "(\([^\)]+\))?\.$")   
         
     def test_alltypesWithOuttableContainingSpecialChars(self):
         r = self.s.actionTest.alltypes(casout=dict(name="MYDATA.MEM ~`!@#$%^&()_+={}[];,'", caslib=self.trgLib))

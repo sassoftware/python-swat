@@ -177,13 +177,13 @@ class TestFunctions(tm.TestCase):
         self.assertTablesEqual(df_out,
                                fill_char(swat.merge(tbl_finance.fetch(to=1000, sastypes=False)['Fetch'],
                                                    tbl_repertory.fetch(to=1000, sastypes=False)['Fetch'],
-                                                   on='IdNumber', indicator=True)))
+                                                   on='IdNumber', indicator=True)), sortby=['IdNumber', 'Play'])
 
         # Use DataFrames
         self.assertTablesEqual(df_out,
                                fill_char(swat.merge(pd.DataFrame(tbl_finance.to_frame()),
                                                     pd.DataFrame(tbl_repertory.to_frame()),
-                                                    on='IdNumber', indicator=True)))
+                                                    on='IdNumber', indicator=True)), sortby=['IdNumber', 'Play'])
 
 
 

@@ -80,6 +80,8 @@ class TestCall(tm.TestCase):
         r = self.s.builtins.reflect(actionset="actionTest")
         self.assertEqual(r[0]['name'], 'actionTest')
         self.assertEqual(r[0]['label'], 'Test')
+        if 'autoRetry' in r[0]['actions'][0]:
+            del r[0]['actions'][0]['autoRetry']
         self.assertEqual(r[0]['actions'][0], {'desc': 'Test function that calls other actions', 'name': 'testCall', 'params': []})
 
         self.assertEqual( r.status, None )
