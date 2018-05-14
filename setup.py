@@ -33,7 +33,7 @@ else:
 
 setup(
     zip_safe=False,
-    name='swat',
+    name='sas-swat',
     version='1.3.1-dev',
     description='SAS Scripting Wrapper for Analytics Transfer (SWAT)',
     long_description=README,
