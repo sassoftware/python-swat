@@ -7,7 +7,9 @@ Installation
 The SWAT package is installed using the ``pip`` command.  The requirements
 for using the binary protocol of CAS (recommended) are as follows.
 
-* **64-bit** Python 2.7 or 3.4-3.6 on Linux (see shared library notes below)
+* **64-bit** Python 2.7 or 3.4-3.6 on Linux or Windows
+
+For Linux, see additional shared library notes below.
 
 The binary protocol requires pre-compiled components found in the ``pip``
 installer only.  These pieces are not available as source code and
@@ -33,8 +35,8 @@ If you do not have ``pip`` installed, you can use ``easy_install pip`` to add
 it to your current Python installation.
 
 
-Linux Library Dependencies
---------------------------
+Additional Linux Library Dependencies
+-------------------------------------
 
 Some Linux distributions may not install all of the needed shared libraries
 by default.  Most notably, the shared library ``libnuma.so.1`` is required to
