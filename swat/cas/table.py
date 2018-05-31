@@ -49,6 +49,11 @@ patch_pandas_sort()
 pd_version = tuple([int(x) for x in re.match(r'^(\d+)\.(\d+)\.(\d+)',
                                              pd.__version__).groups()])
 
+if pd_version >= (0, 23, 0):
+    concat_sort = dict(sort=False)
+else:
+    concat_sort = dict()
+
 OPERATOR_NAMES = {
     '+': 'add',
     '-': 'sub',
@@ -545,8 +550,8 @@ class CASTableRowScalarAccessor(CASTableAccessor):
     def __getitem__(self, pos):
         tbl = self._table()
         if isinstance(tbl, CASColumn):
-            return tbl.get_value(pos, 0)
-        return tbl.get_value(*pos)
+            return tbl.iat[pos, 0]
+        return tbl.iat[slice(*pos)]
 
 
 class CASTableLabelScalarAccessor(CASTableAccessor):
@@ -557,10 +562,10 @@ class CASTableLabelScalarAccessor(CASTableAccessor):
         if isinstance(tbl, CASColumn):
             if pos < 0 or pos >= tbl._numrows:
                 raise KeyError(pos)
-            return tbl.get_value(pos, 0)
+            return tbl.iat[pos, 0]
         if pos[0] < 0 or pos[0] >= tbl._numrows:
             raise KeyError(pos)
-        return tbl.get_value(*pos)
+        return tbl.iat[slice(*pos)]
 
 
 def _get_table_selection(table, args):
@@ -1240,6 +1245,7 @@ class CASTable(ParamManager, ActionParamManager):
     def __init__(self, name, **table_params):
         ParamManager.__init__(self, name=name, **table_params)
         ActionParamManager.__init__(self)
+        self._pandas_enabled = True
         self._connection = None
         self._contexts = []
 
@@ -1265,6 +1271,22 @@ class CASTable(ParamManager, ActionParamManager):
             doc = 'Table Parameters' + init.__doc__.split('Table Parameters', 1)[-1]
             doc = doc.split('Returns')[0].rstrip()
             self.params.set_doc(doc)
+
+    def _disable_pandas(self):
+        '''
+        Disable selected pandas DataFrame features
+
+        Some versions of pandas cause lookups of attributes on CASTables
+        that can cause interruptions of running actions.  These
+        features can be disable temporarily to bypass the pandas
+        features where needed.
+
+        '''
+        self._pandas_enabled = False
+
+    def _enable_pandas(self):
+        '''  Re-enable pandas features '''
+        self._pandas_enabled = True
 
     def append_columns(self, *items, **kwargs):
         '''
@@ -2287,7 +2309,9 @@ class CASTable(ParamManager, ActionParamManager):
         return self.copy(exclude='groupby')._retrieve('simple.numrows')['numrows']
 
     def __len__(self):
-        return self._numrows
+        if self._pandas_enabled:
+            return self._numrows
+        raise AttributeError('__len__')
 
     # NOTE: Workaround to keep the DataFrame text renderer from trying
     #       to fetch all the values in the table.
@@ -2401,7 +2425,7 @@ class CASTable(ParamManager, ActionParamManager):
                                % n, RuntimeWarning)
         tbl = self.copy()
         tbl._intersect_columns(columns, inplace=True)
-        return tbl._fetch(to=n).as_matrix()
+        return tbl._fetch(to=n).values
 
     @getattr_safe_property
     def dtypes(self):
@@ -3017,7 +3041,7 @@ class CASTable(ParamManager, ActionParamManager):
         if index < 0:
             index = index + numrows
         out = self._fetch(from_=index + 1, to=index + 1)
-        return out.get_value(out.index.values[0], col, **kwargs)
+        return out.at[out.index.values[0], col]
 
     def lookup(self, row_labels, col_labels):
         ''' Retrieve values indicated by row_labels, col_labels positions '''
@@ -3907,8 +3931,8 @@ class CASTable(ParamManager, ActionParamManager):
             else:
                 summ.drop(['min', 'max'], inplace=True)
 
-            out = pd.concat(x for x in [topk_val, pct, summ, topk_freq]
-                            if x is not None)
+            out = pd.concat((x for x in [topk_val, pct, summ, topk_freq]
+                             if x is not None), **concat_sort)
 
         else:
             if stats is None:
@@ -3917,7 +3941,8 @@ class CASTable(ParamManager, ActionParamManager):
                 labels = ['count', 'unique', 'top', 'freq', 'min', 'max']
             else:
                 labels = stats
-            out = pd.concat(x for x in [topk_freq, topk_val] if x is not None)
+            out = pd.concat((x for x in [topk_freq, topk_val] if x is not None),
+                            **concat_sort)
 
         groups = self.get_groupby_vars()
         idx = tuple([slice(None) for x in groups] + [labels])
@@ -3970,8 +3995,15 @@ class CASTable(ParamManager, ActionParamManager):
         tmpname = str(uuid.uuid4())
         out.index.names = groups + [tmpname]
         out.reset_index(inplace=True)
-        out[tmpname] = out[tmpname].astype('category', categories=categories,
-                                           ordered=True)
+        if pd_version >= (0, 21, 0):
+            from pandas.api.types import CategoricalDtype
+            out[tmpname] = out[tmpname].astype(CategoricalDtype(
+                                                   categories=categories,
+                                                   ordered=True))
+        else:
+            out[tmpname] = out[tmpname].astype('category',
+                                               categories=categories,
+                                               ordered=True)
         out.sort_values(groups + [tmpname], inplace=True)
         out.set_index(groups + [tmpname], inplace=True)
         out.index.names = groups + [None]
@@ -8178,7 +8210,7 @@ class CASColumn(CASTable):
         '''
         out = self._fetch(from_=key + 1, to=key + 1)
         try:
-            return out.get_value(out.index.values[0], self._columns[0])
+            return out.at[out.index.values[0], self._columns[0]]
         except (KeyError, IndexError):
             pass
         return default
@@ -9012,7 +9044,7 @@ class CASColumn(CASTable):
             del out[tmpname]
             return out.groupby(names)[var].unique()
 
-        return pd.Series(out.index, name=self.name).as_matrix()
+        return pd.Series(out.index, name=self.name).values
 
     def nunique(self, dropna=True):
         '''

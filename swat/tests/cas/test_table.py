@@ -26,6 +26,7 @@
 import copy
 import io
 import os
+import matplotlib
 import numpy as np
 import pandas as pd
 import re
@@ -39,6 +40,7 @@ from swat.cas.table import concat
 from PIL import Image
 from swat.utils.compat import patch_pandas_sort
 
+matplotlib.use('Agg')
 patch_pandas_sort()
 
 pd_version = tuple([int(x) for x in re.match(r'^(\d+)\.(\d+)\.(\d+)',
@@ -909,6 +911,7 @@ class TestCASTable(tm.TestCase):
 
         self.assertEqual(i, self.table.shape[0])
 
+    @unittest.skipIf(pd_version >= (0, 21, 0), 'Deprecated in pandas')
     def test_get_value(self):
         df = self.get_cars_df()
         tbl = self.table
@@ -1834,7 +1837,7 @@ class TestCASTable(tm.TestCase):
         tbl = self.table.sort_values(['Make', 'MSRP'])
 
         with self.assertRaises(NotImplementedError):
-            tbl.at[0, 0] 
+            tbl.at[0, 0]
 
 #       self.assertEqual(df.iat[10, 5], tbl.at[10, 5])
 #       self.assertEqual(df.iat[99, 0], tbl.at[99, 0])
@@ -2189,10 +2192,10 @@ class TestCASTable(tm.TestCase):
                          sorted(tbl.xs('Model', axis=1).tolist()))
 
         with self.assertRaises(IndexError):
-            tbl.xs(0, axis=0) 
+            tbl.xs(0, axis=0)
 
         with self.assertRaises(swat.SWATError):
-            tbl.xs(0, axis=2) 
+            tbl.xs(0, axis=2)
 
     def test_column_xs(self):
         tbl = self.table
@@ -3382,6 +3385,7 @@ class TestCASTable(tm.TestCase):
 
         self.assertEqual(sorted(dfs.split('\n')), sorted(tbls.split('\n')))
 
+    @unittest.skipIf(pd_version >= (0, 21, 0), 'Deprecated in pandas')
     def test_column_from_csv(self):
         import swat.tests as st
 
@@ -3573,6 +3577,7 @@ class TestCASTable(tm.TestCase):
         self.assertColsEqual(df.time.dt.days_in_month, tbl.time.dt.days_in_month)
         self.assertColsEqual(df.datetime.dt.days_in_month, tbl.datetime.dt.days_in_month)
 
+    @unittest.skipIf(pd_version >= (0, 21, 0), 'Deprecated in pandas')
     def test_from_csv(self):
         df = self.get_cars_df()
 
@@ -3627,6 +3632,7 @@ class TestCASTable(tm.TestCase):
         else:
            self.assertTrue(set(tbl.dtypes.unique()), set(['double', 'int64', 'varchar']))
 
+    @unittest.skipIf(pd_version >= (0, 23, 0), 'Deprecated in pandas')
     def test_from_items(self):
         df = self.get_cars_df()
         dfitems = tuple(df.to_dict().items())
@@ -4066,24 +4072,24 @@ class TestCASTable(tm.TestCase):
         tbl = self.table.sort_values(SORT_KEYS)
 
         self.assertColsEqual(df['Cylinders'].isin([6, 8]),
-                             tbl['Cylinders'].isin([6, 8])) 
+                             tbl['Cylinders'].isin([6, 8]))
 
         df = self.get_cars_df().sort_values('Make')
         tbl = self.table.sort_values('Make')
 
         self.assertColsEqual(df['Make'].isin(['Acura', 'BMW', 'Porsche']),
-                             tbl['Make'].isin(['Acura', 'BMW', 'Porsche'])) 
+                             tbl['Make'].isin(['Acura', 'BMW', 'Porsche']))
 
         self.assertColsEqual(df['Make'].isin(('Acura', 'BMW', 'Porsche')),
-                             tbl['Make'].isin(('Acura', 'BMW', 'Porsche'))) 
+                             tbl['Make'].isin(('Acura', 'BMW', 'Porsche')))
 
         self.assertColsEqual(df['Make'].isin({'Acura', 'BMW', 'Porsche'}),
-                             tbl['Make'].isin({'Acura', 'BMW', 'Porsche'})) 
+                             tbl['Make'].isin({'Acura', 'BMW', 'Porsche'}))
 
         self.assertColsEqual(
             df['Make'].isin(df.query('Make == "Acura" or Make == "BMW" or Make == "Porsche"')['Make']),
             tbl['Make'].isin(tbl.query('Make = "Acura" or Make = "BMW" or Make = "Porsche"')['Make']))
-         
+
         self.assertColsEqual(
             df['Make'].isin(df.query('Make == "Acura" or Make == "BMW" or Make == "Porsche"')['Make']),
             tbl['Make'].isin(df.query('Make == "Acura" or Make == "BMW" or Make == "Porsche"')['Make']))
@@ -4104,23 +4110,23 @@ class TestCASTable(tm.TestCase):
         self.assertTrue('CARS1' in out)
         self.assertTrue('CARS2' in out)
         self.assertTrue('CARS3' in out)
-        
+
         cars1.droptable('cars2', caslib=self.srcLib)
-         
+
         out = self.s.tableinfo(caslib=self.srcLib).TableInfo['Name'].tolist()
         self.assertTrue('CARS1' in out)
         self.assertTrue('CARS2' not in out)
         self.assertTrue('CARS3' in out)
 
         cars3.droptable(name='cars1', caslib=self.srcLib)
-        
+
         out = self.s.tableinfo(caslib=self.srcLib).TableInfo['Name'].tolist()
         self.assertTrue('CARS1' not in out)
         self.assertTrue('CARS2' not in out)
         self.assertTrue('CARS3' in out)
 
         cars3.droptable()
-        
+
         out = self.s.tableinfo(caslib=self.srcLib).TableInfo['Name'].tolist()
         self.assertTrue('CARS1' not in out)
         self.assertTrue('CARS2' not in out)
@@ -4318,13 +4324,13 @@ class TestCASTable(tm.TestCase):
 
         tbl['One'] = 1
         tbl['Two'] = 2
-         
+
         colinfo = tbl.columninfo()['ColumnInfo'].set_index('Column').T
 
         out = tbl.partition(casout=dict(name='test_partition_table', replace=True))
         pcolinfo = out.casTable.columninfo()['ColumnInfo'].set_index('Column').T
         self.assertTablesEqual(colinfo, pcolinfo)
-        
+
         colinfo = colinfo.drop('ID').drop('Label')
 
         out = tbl[['Model', 'MSRP']].partition(casout=dict(name='test_partition_table', replace=True))
@@ -4349,7 +4355,7 @@ class TestCASTable(tm.TestCase):
 
     def test_sample(self):
         tbl = self.table
- 
+
         # Test n=
         out = tbl.sample(n=12)
         self.assertEqual(len(out), 12)
@@ -4445,7 +4451,7 @@ class TestCASTable(tm.TestCase):
         self.assertNotEqual(samp1.to_dict(), samp2.to_dict())
         self.assertEqual(num_tables, len(tbl.tableinfo().TableInfo))
 
-        swat.options.cas.dataset.max_rows_fetched = 10 
+        swat.options.cas.dataset.max_rows_fetched = 10
 
         num_tables = len(tbl.tableinfo().TableInfo)
         samp1 = tbl._fetch(sample=True, fetchvars=['Make', 'Model'])
@@ -4474,7 +4480,7 @@ class TestCASTable(tm.TestCase):
 
         # Test groupby
         tbl.params.groupby = ['Origin']
-      
+
         num_tables = len(tbl.tableinfo().TableInfo)
         samp = tbl.to_frame(sample_pct=0.01, fetchvars=['Make', 'Model'])
         self.assertEqual(len(samp), 4)
@@ -4814,7 +4820,7 @@ class TestCASTable(tm.TestCase):
         if limit is not None:
             df = df.iloc[:limit]
 
-        tbl = self.s.upload_frame(df, 
+        tbl = self.s.upload_frame(df,
           importoptions=dict(vars=[
               dict(name='Origin', type='varchar'),
               dict(name='A', type='double'),
@@ -4832,7 +4838,7 @@ class TestCASTable(tm.TestCase):
     def test_abs(self):
         df, tbl = self._get_comp_data()
         self.assertTablesEqual(df[['A', 'B', 'C', 'D', 'E']].abs().sort_values(['A', 'B']),
-                               tbl[['A', 'B', 'C', 'D', 'E']].abs().sort_values(['A', 'B'])) 
+                               tbl[['A', 'B', 'C', 'D', 'E']].abs().sort_values(['A', 'B']))
 
     def test_all(self):
         df, tbl = self._get_comp_data()
@@ -4849,7 +4855,7 @@ class TestCASTable(tm.TestCase):
         self.assertTablesEqual(df.groupby('Origin').all(skipna=True), tbl.groupby('Origin').all(skipna=True))
 
         # When skipna=False, pandas doesn't use booleans anymore
-# TODO: Pandas seems inconsitent here.  It uses True without by groups, but if 
+# TODO: Pandas seems inconsitent here.  It uses True without by groups, but if
 #       a column contains an NaN and by groups, it uses NaN as the result... ?
 #       all = df.groupby('Origin').all(skipna=False).applymap(lambda x: pd.isnull(x) and x or bool(x))
 #       all.loc['Europe', 'D'] = True
@@ -4870,8 +4876,9 @@ class TestCASTable(tm.TestCase):
         self.assertTablesEqual(df.groupby('Origin').any(skipna=True), tbl.groupby('Origin').any(skipna=True))
 
         # When skipna=False, pandas doesn't use booleans anymore
-        self.assertTablesEqual(df.groupby('Origin').any(skipna=False).applymap(lambda x: pd.isnull(x) and x or bool(x)),
-                               tbl.groupby('Origin').any(skipna=False))
+        if pd_version < (0, 23, 0):
+            self.assertTablesEqual(df.groupby('Origin').any(skipna=False).applymap(lambda x: pd.isnull(x) and x or bool(x)),
+                                   tbl.groupby('Origin').any(skipna=False))
 
     def test_clip(self):
         df, tbl = self._get_comp_data()

@@ -520,6 +520,8 @@ class SASDataFrame(pd.DataFrame):
         '''
         result = super(SASDataFrame, self).insert(*args, **kwargs)
         for col in self.columns:
+            if isinstance(col, (tuple, list)) and col:
+                col = col[0]
             if col not in self.colinfo:
                 self.colinfo[col] = SASColumnSpec(col)
         return result

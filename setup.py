@@ -22,9 +22,9 @@ import glob
 from setuptools import setup, find_packages
 
 try:
-    README = open('README.rst', 'r').read()
+    README = open('README.md', 'r').read()
 except:
-    README = 'See README.rst'
+    README = 'See README.md'
 
 if glob.glob('swat/lib/*/tk*'):
     LICENSE = 'Apache v2.0 (SWAT) + SAS Additional Functionality (SAS TK)'
@@ -50,6 +50,8 @@ setup(
         'six >= 1.9.0',
         'requests',
     ],
+    platforms='any',
+    python_requires='>=2.7,!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*',
     classifiers=[
         'Development Status :: 5 - Production/Stable',
         'Environment :: Console',

@@ -413,10 +413,16 @@ def ctb2tabular(_sw_table, soptions='', connection=None):
         tables = []
         for lib, tbl in zip(cdf[caslib], cdf[tablename]):
             if connection is not None:
-                tables.append(connection.CASTable(tbl, caslib=lib))
+                tbl = connection.CASTable(tbl, caslib=lib)
             else:
-                tables.append(CASTable(tbl, caslib=lib))
+                tbl = CASTable(tbl, caslib=lib)
+            tbl._disable_pandas()
+            tables.append(tbl)
+        # In newer versions of pandas, this causes the __len__ method to
+        # be called, this can cause CAS results to be truncated due to
+        # additional CAS actions being called.
         cdf['casTable'] = pd.Series(tables, name='casTable')
+        cdf['casTable'].apply(lambda x: x._enable_pandas())
         cdf.colinfo['casTable'] = SASColumnSpec('casTable', label='Table', dtype='object')
 
     if tformat == 'dataframe':
