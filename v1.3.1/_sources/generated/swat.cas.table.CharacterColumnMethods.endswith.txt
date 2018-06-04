@@ -1,0 +1,6 @@
+swat.cas.table.CharacterColumnMethods.endswith
+==============================================
+
+.. currentmodule:: swat.cas.table
+
+.. automethod:: CharacterColumnMethods.endswith

@@ -1,0 +1,6 @@
+swat.cas.table.CharacterColumnMethods.capitalize
+================================================
+
+.. currentmodule:: swat.cas.table
+
+.. automethod:: CharacterColumnMethods.capitalize

@@ -1,0 +1,6 @@
+swat.cas.table.DatetimeColumnMethods.is_quarter_end
+===================================================
+
+.. currentmodule:: swat.cas.table
+
+.. autoattribute:: DatetimeColumnMethods.is_quarter_end

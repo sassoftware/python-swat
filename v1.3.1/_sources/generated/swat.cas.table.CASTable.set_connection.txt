@@ -1,0 +1,6 @@
+swat.cas.table.CASTable.set_connection
+======================================
+
+.. currentmodule:: swat.cas.table
+
+.. automethod:: CASTable.set_connection

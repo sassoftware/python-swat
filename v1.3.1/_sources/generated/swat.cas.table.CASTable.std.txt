@@ -1,0 +1,6 @@
+swat.cas.table.CASTable.std
+===========================
+
+.. currentmodule:: swat.cas.table
+
+.. automethod:: CASTable.std

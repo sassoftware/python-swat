@@ -1,0 +1,6 @@
+swat.cas.table.CASTableGroupBy.kurtosis
+=======================================
+
+.. currentmodule:: swat.cas.table
+
+.. automethod:: CASTableGroupBy.kurtosis

@@ -1,0 +1,6 @@
+swat.cas.table.SASColumnMethods.trigamma
+========================================
+
+.. currentmodule:: swat.cas.table
+
+.. automethod:: SASColumnMethods.trigamma

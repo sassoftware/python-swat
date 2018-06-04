@@ -1,0 +1,6 @@
+swat.cas.table.CASColumn.ne
+===========================
+
+.. currentmodule:: swat.cas.table
+
+.. automethod:: CASColumn.ne
