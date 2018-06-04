@@ -1,6 +1,13 @@
 
 # Change Log
 
+## 1.3.1 - 2018-06-04
+
+- Increase compatibility with older and newer versions of pandas
+- Automatically convert columns with SAS date/time formats to Python date/time objects
+- Improve `CASTable.merge` algorithm
+- Fix autocompletion on `CAS` and `CASTable` objects
+
 ## 1.3.0 - 2017-12-12
 
 - Add new summary statistics for new version of CAS

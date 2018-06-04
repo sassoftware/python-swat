@@ -9,6 +9,15 @@ What's New
 
 This document outlines features and improvements from each release.
 
+v1.3.1 (June 4, 2018)
+=====================
+
+- Increase compatibility with older and newer versions of pandas
+- Automatically convert columns with SAS date/time formats to Python date/time objects
+- Improve `CASTable.merge` algorithm
+- Fix autocompletion on `CAS` and `CASTable` objects
+
+
 v1.3.0 (December 12, 2017)
 ==========================
 
