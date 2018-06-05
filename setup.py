@@ -34,9 +34,10 @@ else:
 setup(
     zip_safe=False,
     name='swat',
-    version='1.3.1',
+    version='1.3.2-dev',
     description='SAS Scripting Wrapper for Analytics Transfer (SWAT)',
     long_description=README,
+    #long_description_content_type='text/markdown',
     author='SAS',
     author_email='Kevin.Smith@sas.com',
     url='http://github.com/sassoftware/python-swat/',
