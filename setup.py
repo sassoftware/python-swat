@@ -19,32 +19,30 @@
 ''' Install the SAS Scripting Wrapper for Analytics Transfer (SWAT) module '''
 
 import glob
+import os
 from setuptools import setup, find_packages
 
-try:
-    README = open('README.md', 'r').read()
-except:
-    README = 'See README.md'
 
-if glob.glob('swat/lib/*/tk*'):
-    LICENSE = 'Apache v2.0 (SWAT) + SAS Additional Functionality (SAS TK)'
-else:
-    LICENSE = 'Apache v2.0'
+def get_file(fname):
+    with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), fname),
+              encoding='utf8') as infile:
+        return infile.read()
+
 
 setup(
     zip_safe=False,
     name='swat',
     version='1.3.2-dev',
     description='SAS Scripting Wrapper for Analytics Transfer (SWAT)',
-    long_description=README,
-    #long_description_content_type='text/markdown',
+    long_description=get_file('README.md'),
+    long_description_content_type='text/markdown',
     author='SAS',
     author_email='Kevin.Smith@sas.com',
     url='http://github.com/sassoftware/python-swat/',
-    license=LICENSE,
+    license='Apache v2.0 (SWAT) + SAS Additional Functionality (SAS TK)',
     packages=find_packages(),
     package_data={
-        'swat': ['lib/*/*', 'tests/datasources/*'],
+        'swat': ['lib/*/*.*', 'tests/datasources/*.*'],
     },
     install_requires=[
         'pandas >= 0.16.0',
