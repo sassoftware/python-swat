@@ -4198,7 +4198,410 @@ class CASTable(ParamManager, ActionParamManager):
 
         return out.loc[stats[0]]
 
-    def max(self, axis=None, skipna=True, level=None, numeric_only=False, **kwargs):
+    def _get_casout_stat(self, stat, axis=None, skipna=True, level=None,
+                         numeric_only=False, percentile_values=None,
+                         casout=None, **kwargs):
+        '''
+        Get the requested statistic in a pandas-like CAS table
+
+        Parameters
+        ----------
+        stat : string
+            The name of the statistic to compute
+        axis : int, optional
+            Unsupported
+        skipna : bool, optional
+            Should missing values be dropped?
+        level : int, optional
+            Unsupported
+        numeric_only : bool, optional
+            Should just the numeric variables be used?
+        percentile_values : list-of-floats, optional
+            The list of percentiles to compute
+
+        Returns
+        -------
+        :class:`CASTable`
+
+        '''
+        if casout:
+            if isinstance(casout, CASTable):
+                casout = casout.to_outtable_params()
+            elif isinstance(casout, dict):
+                casout = CASTable(**casout).to_outtable_params()
+        else:
+            casout = _gen_table_name()
+
+        groups = set(self.get_groupby_vars())
+
+        if numeric_only:
+            inputs = self._get_dtypes(include='numeric')
+        else:
+            inputs = set(self.columns)
+
+        inputs = inputs.difference(groups)
+
+        if stat == 'min':
+            out = self._retrieve('simple.topk', order='value', includemissing=not skipna,
+                                 inputs=inputs, raw=True, topk=0, bottomk=1,
+                                 casout=casout, **kwargs)
+            return self._normalize_topk_casout(out['OutputCasTables']['casTable'][0])
+
+        elif stat == 'max':
+            out = self._retrieve('simple.topk', order='value', includemissing=not skipna,
+                                 inputs=inputs, raw=True, topk=1, bottomk=0,
+                                 casout=casout, **kwargs)
+            return self._normalize_topk_casout(out['OutputCasTables']['casTable'][0])
+
+        elif stat == 'unique':
+            out = self._retrieve('simple.distinct', includemissing=not skipna,
+                                 inputs=inputs, casout=casout, **kwargs)
+            return self._normalize_distinct_casout(out['OutputCasTables']['casTable'][0])
+
+        elif stat in ['median', 'percentile']:
+            num_cols = set(self._get_dtypes(include='numeric'))
+            inputs = inputs.intersection(num_cols)
+
+            if stat == 'median':
+                percentile_values = [0.5]
+            if not isinstance(percentile_values, (list, tuple, set)):
+                percentile_values = [percentile_values]
+
+            out = self._retrieve('percentile.percentile', # includemissing=not skipna,
+                                 inputs=inputs, values=percentile_values,
+                                 casout=casout, **kwargs)
+
+            return self._normalize_percentile_casout(out['OutputCasTables']['casTable'][0],
+                                                     median=stat == 'median')
+
+        else:
+            summ_stats = ['css', 'cv', 'kurtosis', 'mean', 'n', 'nmiss',
+                          'probt', 'skewness', 'std', 'stderr', 'sum',
+                          't', 'tstat', 'uss', 'var']
+
+            if stat not in summ_stats:
+                raise ValueError('%s is not a valid statistic' % stat)
+
+            num_cols = set(self._get_dtypes(include='numeric'))
+            inputs = inputs.intersection(num_cols)
+            out = self._retrieve('simple.summary', # includemissing=not skipna,
+                                 inputs=inputs, casout=casout, **kwargs)
+
+            return self._normalize_summary_casout(out['OutputCasTables']['casTable'][0], stat)
+
+    def _normalize_bygroups(self, drop=None, rename=None):
+        '''
+        Return bygroups names as well as drop / rename statements for bygroup options
+
+        Parameters
+        ----------
+        drop : list, optional
+            List of additional variables to drop
+        rename : list, optional
+            List of additional variables to rename
+
+        Returns
+        -------
+        (column-list, bygroups-list, raw-bygroups-list, fmt-groups-list,
+         keep-stmt, drop-stmt, rename-stmt)
+
+        '''
+        drop = list(drop or [])
+        rename = list(rename or [])
+        keep = []
+        cols = []
+
+        groups = []
+        raw_groups = []
+        fmt_groups = []
+        for item in self.get_groupby_vars():
+            raw_groups.append(item)
+            groups.append(item)
+            fmt_groups.append('%s_f' % item)
+            groups.append('%s_f' % item)
+
+        bygroup_columns = get_option('cas.dataset.bygroup_columns')
+        bygroup_formatted_suffix = get_option('cas.dataset.bygroup_formatted_suffix')
+
+        if bygroup_columns == 'none':
+            drop.extend(groups)
+
+        elif bygroup_columns == 'raw':
+            drop.extend(fmt_groups)
+            keep.extend(raw_groups)
+            cols.extend(raw_groups)
+
+        elif bygroup_columns == 'formatted':
+            drop.extend(raw_groups)
+            for i, item in enumerate(fmt_groups):
+                newname = _nlit(re.sub(r'_f$', r'', fmt_groups[i]))
+                rename.append('%s=%s' % (_nlit(fmt_groups[i]), newname))
+                keep.append(newname)
+                cols.append(newname)
+
+        elif bygroup_columns == 'both':
+            if bygroup_formatted_suffix != '_f':
+                for i, item in enumerate(fmt_groups):
+                    newname = _nlit(re.sub(r'_f$', bygroup_formatted_suffix, fmt_groups[i]))
+                    rename.append('%s=%s' % (_nlit(fmt_groups[i]), newname))
+                    keep.append(raw_groups[i])
+                    keep.append(newname)
+                    cols.append(newname)
+            else:
+                    keep.extend(groups)
+                    cols.append(groups)
+
+        for col in list(self.columns):
+            if col not in groups:
+                keep.append(col)
+                cols.append(col)
+
+        keep = 'keep %s;' % ' '.join(_nlit(x) for x in keep)
+        drop = 'drop %s;' % ' '.join(_nlit(x) for x in drop)
+        rename = rename and ('rename %s;' % ' '.join(rename)) or ''
+
+        return cols, groups, raw_groups, fmt_groups, keep, drop, rename
+
+    def _normalize_percentile_casout(self, table, median=False):
+        '''
+        Normalize percentile output table to pandas-like structure
+
+        Parameters
+        ----------
+        table : CASTable
+            Percentile output table
+        median : bool, optional
+            Is this a median only computation?  If so, the quantile column
+            is dropped.
+
+        Returns
+        -------
+        :class:'CASTable'
+
+        '''
+        self._loadactionset('transpose')
+
+        if median:
+            out = self._normalize_bygroups(drop=['_NAME_', '_Pctl_'])
+        else:
+            out = self._normalize_bygroups(rename=['_Pctl_=quantile'])
+
+        cols, groups, raw_groups, fmt_groups, keep, drop, rename = out
+
+        dstbl = table.to_datastep_params()
+
+        table.params['replace'] = True
+
+        table.groupby(groups + ['_Pctl_'])._retrieve('transpose.transpose', id='_Column_',
+                                                     transpose=['_Value_'],
+                                                     casout=table)
+
+        dsout = self._retrieve('datastep.runcode', code=r'''
+            data %s;
+                set %s;
+                %s
+                %s
+            run;''' % (dstbl, dstbl, drop, rename));
+
+        tbl = dsout['OutputCasTables']['casTable'][0]
+
+        return tbl
+
+    def _normalize_summary_casout(self, table, stat):
+        '''
+        Normalize summary output table to pandas-like structure
+
+        Parameters
+        ----------
+        table : CASTable
+            Summary output table
+        stat : string
+            The name of the output statistic
+
+        Returns
+        -------
+        :class:`CASTable`
+
+        '''
+        self._loadactionset('transpose')
+
+        out = self._normalize_bygroups(drop=['_NAME_'])
+        cols, groups, raw_groups, fmt_groups, keep, drop, rename = out
+
+        tbl = _gen_table_name()
+
+        table.groupby(groups)._retrieve('transpose.transpose', id='_Column_',
+                                        transpose=['_%s_' % stat.title()],
+                                        casout=dict(name=tbl))
+
+        dsout = self._retrieve('datastep.runcode', code=r'''
+            data %s;
+                set %s;
+                %s
+                %s
+            run;''' % (_quote(tbl), _quote(tbl), drop, rename));
+
+        tbl = dsout['OutputCasTables']['casTable'][0]
+
+        return tbl
+
+    def _normalize_distinct_casout(self, table):
+        '''
+        Normalize distinct output table to pandas-like structure
+
+        Parameters
+        ----------
+        table : CASTable
+            Distinct output table
+
+        Returns
+        -------
+        :class:`CASTable`
+
+        '''
+        self._loadactionset('transpose')
+
+        out = self._normalize_bygroups(drop=['_NAME_'])
+        cols, groups, raw_groups, fmt_groups, keep, drop, rename = out
+
+        tbl = _gen_table_name()
+
+        table.groupby(groups)._retrieve('transpose.transpose', id='_Column_',
+                                        transpose=['_NDis_'],
+                                        casout=dict(name=tbl))
+
+        dsout = self._retrieve('datastep.runcode', code=r'''
+            data %s;
+                set %s;
+                %s
+                %s
+            run;''' % (_quote(tbl), _quote(tbl), drop, rename));
+
+        tbl = dsout['OutputCasTables']['casTable'][0]
+
+        return tbl
+
+    def _normalize_topk_casout(self, table):
+        '''
+        Normalize topk output table to pandas-like structure
+
+        Parameters
+        ----------
+        table : CASTable
+            Topk output table
+
+        Returns
+        -------
+        :class:`CASTable`
+
+        '''
+        self._loadactionset('transpose')
+
+        out = self._normalize_bygroups(drop=['_NAME_'])
+        cols, groups, raw_groups, fmt_groups, keep, drop, rename = out
+
+        char_tbl = None
+        num_tbl = None
+        num_cols = self._get_dtypes(include='numeric')
+        nums = ' '.join(_nlit(x) for x in num_cols)
+        char_cols = self._get_dtypes(include='character')
+        chars = ' '.join(_nlit(x) for x in char_cols)
+
+        if '_Charvar_' in table.columns:
+            char_tbl = _gen_table_name()
+            table.groupby(groups)._retrieve('transpose.transpose', id='_Column_',
+                                            transpose=['_Charvar_'],
+                                            casout=dict(name=char_tbl))
+
+        if '_Numvar_' in table.columns:
+            num_tbl = _gen_table_name()
+            table.groupby(groups)._retrieve('transpose.transpose', id='_Column_',
+                                            transpose=['_Numvar_'],
+                                            casout=dict(name=num_tbl))
+
+        ds_groups = ' '.join([_nlit(x) for x in groups])
+
+        out_tbl = _gen_table_name()
+
+        if char_tbl and num_tbl:
+            dsout = self._retrieve('datastep.runcode', code=r'''
+                data %s;
+                    merge %s(keep=%s %s in=__numeric)
+                          %s(keep=%s %s in=__character);
+                    by %s;
+                    if __numeric and __character;
+                    %s
+                    %s
+                run;''' % (_quote(out_tbl), _quote(num_tbl), ds_groups, nums,
+                           _quote(char_tbl), ds_groups, chars, ds_groups,
+                           rename, drop))
+
+            out_tbl = dsout['OutputCasTables']['casTable'][0]
+
+            out_tbl.params['replace'] = True
+            out_tbl.vars = cols
+
+            out_tbl._retrieve('table.partition', casout=out_tbl)
+
+        elif char_tbl:
+            dsout = self._retrieve('datastep.runcode', code=r'''
+                data %s;
+                    set %s;
+                    %s
+                    %s
+                run;''' % (_quote(out_tbl), _quote(char_tbl), drop, rename));
+            out_tbl = dsout['OutputCasTables']['casTable'][0]
+
+        elif num_tbl:
+            dsout = self._retrieve('datastep.runcode', code=r'''
+                data %s;
+                    set %s;
+                    %s
+                    %s
+                run;''' % (_quote(out_tbl), _quote(num_tbl), drop, rename));
+            out_tbl = dsout['OutputCasTables']['casTable'][0]
+
+        if char_tbl:
+            self.get_connection().CASTable(char_tbl)._retrieve('table.droptable')
+
+        if num_tbl:
+            self.get_connection().CASTable(num_tbl)._retrieve('table.droptable')
+
+        table._retrieve('table.droptable')
+
+        return out_tbl
+
+    def _use_casout_for_stat(self, casout):
+        ''' Determine if an casout table should be used for action output '''
+        bygroups = self.get_groupby_vars()
+
+        if bygroups:
+
+            if casout is not None:
+                return True
+
+            self._loadactionset('datapreprocess')
+
+#           num_groups_tbl = self._retrieve('simple.groupbyinfo',
+#                                           novars=True)['OutputCasTables']['casTable'][0]
+#           num_groups = len(num_groups_tbl)
+#           num_groups_tbl._retrieve('table.droptable')
+
+            tbl = self.copy()
+            tbl.params.pop('groupby')
+            out = tbl._retrieve('datapreprocess.highcardinality', inputs=bygroups)
+            num_groups = out['HighCardinalityDetails']['CardinalityEstimate'].product()
+
+            if num_groups > get_option('cas.dataset.bygroup_casout_threshold'):
+                warnings.warn('The number of potential by groupings is greater than ' +
+                              'cas.dataset.bygroup_casout_threshold.  The results will ' +
+                              'be written to a CAS table.', RuntimeWarning)
+                return True
+
+        return False
+
+    def max(self, axis=None, skipna=True, level=None, numeric_only=False,
+            casout=None, **kwargs):
         '''
         Return the maximum value of each column
 
@@ -4212,6 +4615,9 @@ class CASTable(ParamManager, ActionParamManager):
             Not implemented.
         numeric_only : boolean, optional
             Include only numeric columns.
+        casout : bool or string or dict or CASTable, optional
+            Indicates the CAS output table to use for output.
+            NOTE: This is only use if by groups are used.
 
         See Also
         --------
@@ -4225,10 +4631,14 @@ class CASTable(ParamManager, ActionParamManager):
             If by groups are specified.
 
         '''
+        if self._use_casout_for_stat(casout):
+            return self._get_casout_stat('max', axis=axis, skipna=skipna, level=level,
+                                         numeric_only=numeric_only, casout=casout,
+                                         **kwargs)
         return self._topk_values('max', axis=axis, skipna=skipna, level=level,
                                  numeric_only=numeric_only, **kwargs)
 
-    def mean(self, axis=None, skipna=True, level=None, numeric_only=False):
+    def mean(self, axis=None, skipna=True, level=None, numeric_only=False, casout=None):
         '''
         Return the mean value of each column
 
@@ -4242,6 +4652,9 @@ class CASTable(ParamManager, ActionParamManager):
             Not implemented.
         numeric_only : boolean, optional
             Include only numeric columns.
+        casout : bool or string or dict or CASTable, optional
+            Indicates the CAS output table to use for output.
+            NOTE: This is only use if by groups are used.
 
         See Also
         --------
@@ -4255,9 +4668,14 @@ class CASTable(ParamManager, ActionParamManager):
             If by groups are specified.
 
         '''
+        if self._use_casout_for_stat(casout):
+            return self._get_casout_stat('mean', axis=axis, skipna=skipna, level=level,
+                                         numeric_only=numeric_only, casout=casout, 
+                                         **kwargs)
         return self._get_summary_stat('mean')
 
-    def median(self, axis=None, skipna=None, level=None, numeric_only=None, **kwargs):
+    def median(self, axis=None, skipna=None, level=None, numeric_only=None,
+               casout=None, **kwargs):
         '''
         Return the median value of each numeric column
 
@@ -4271,6 +4689,9 @@ class CASTable(ParamManager, ActionParamManager):
             Not implemented.
         numeric_only : boolean, optional
             Include only numeric columns.
+        casout : bool or string or dict or CASTable, optional
+            Indicates the CAS output table to use for output.
+            NOTE: This is only use if by groups are used.
 
         See Also
         --------
@@ -4284,9 +4705,14 @@ class CASTable(ParamManager, ActionParamManager):
             If by groups are specified.
 
         '''
+        if self._use_casout_for_stat(casout):
+            return self._get_casout_stat('median', axis=axis, skipna=skipna, level=level,
+                                         numeric_only=numeric_only, casout=casout, 
+                                         **kwargs)
         return self.quantile(0.5, axis=axis, interpolation='nearest')
 
-    def min(self, axis=None, skipna=True, level=None, numeric_only=False, **kwargs):
+    def min(self, axis=None, skipna=True, level=None, numeric_only=False,
+            casout=None, **kwargs):
         '''
         Return the minimum value of each column
 
@@ -4300,6 +4726,9 @@ class CASTable(ParamManager, ActionParamManager):
             Not implemented.
         numeric_only : boolean, optional
             Include only numeric columns.
+        casout : bool or string or dict or CASTable, optional
+            Indicates the CAS output table to use for output.
+            NOTE: This is only use if by groups are used.
 
         See Also
         --------
@@ -4313,6 +4742,10 @@ class CASTable(ParamManager, ActionParamManager):
             If by groups are specified.
 
         '''
+        if self._use_casout_for_stat(casout):
+            return self._get_casout_stat('min', axis=axis, skipna=skipna, level=level,
+                                         numeric_only=numeric_only, casout=casout, 
+                                         **kwargs)
         return self._topk_values('min', axis=axis, skipna=skipna, level=level,
                                  numeric_only=numeric_only, **kwargs)
 
@@ -4477,7 +4910,8 @@ class CASTable(ParamManager, ActionParamManager):
 #   def prod(self, *args, **kwargs):
 #       raise NotImplementedError
 
-    def quantile(self, q=0.5, axis=0, numeric_only=True, interpolation='nearest'):
+    def quantile(self, q=0.5, axis=0, numeric_only=True, interpolation='nearest',
+                 casout=None, **kwargs):
         '''
         Return values at the given quantile
 
@@ -4491,6 +4925,9 @@ class CASTable(ParamManager, ActionParamManager):
             Include only numeric columns.
         interpolation : string, optional
             Only 'nearest' is supported.
+        casout : bool or string or dict or CASTable, optional
+            Indicates the CAS output table to use for output.
+            NOTE: This is only use if by groups are used.
 
         See Also
         --------
@@ -4504,6 +4941,12 @@ class CASTable(ParamManager, ActionParamManager):
             If By groups are specified.
 
         '''
+        if self._use_casout_for_stat(casout):
+            return self._get_casout_stat('percentile', axis=axis, skipna=skipna, level=level,
+                                         numeric_only=numeric_only, casout=casout, 
+                                         percentile_values=q,
+                                         **kwargs)
+
         tbl = self
 
         if numeric_only:
@@ -4534,7 +4977,8 @@ class CASTable(ParamManager, ActionParamManager):
 #   def sem(self, *args, **kwargs):
 #       raise NotImplementedError
 
-    def sum(self, axis=None, skipna=None, level=None, numeric_only=True):
+    def sum(self, axis=None, skipna=None, level=None, numeric_only=True,
+            casout=None):
         '''
         Return the sum of the values of each column
 
@@ -4548,6 +4992,9 @@ class CASTable(ParamManager, ActionParamManager):
             Not implemented.
         numeric_only : boolean, optional
             Include only numeric columns.
+        casout : bool or string or dict or CASTable, optional
+            Indicates the CAS output table to use for output.
+            NOTE: This is only use if by groups are used.
 
         See Also
         --------
@@ -4562,9 +5009,13 @@ class CASTable(ParamManager, ActionParamManager):
 
         '''
         # TODO: Need character variables (??)
+        if self._use_casout_for_stat(casout):
+            return self._get_casout_stat('sum', axis=axis, skipna=skipna, level=level,
+                                         numeric_only=numeric_only, casout=casout)
         return self._get_summary_stat('sum')
 
-    def std(self, axis=None, skipna=None, level=None, ddof=1, numeric_only=True):
+    def std(self, axis=None, skipna=None, level=None, ddof=1, numeric_only=True,
+            casout=None):
         '''
         Return the standard deviation of the values of each column
 
@@ -4580,6 +5031,9 @@ class CASTable(ParamManager, ActionParamManager):
             Not implemented.
         numeric_only : boolean, optional
             Include only numeric columns.
+        casout : bool or string or dict or CASTable, optional
+            Indicates the CAS output table to use for output.
+            NOTE: This is only use if by groups are used.
 
         See Also
         --------
@@ -4593,9 +5047,13 @@ class CASTable(ParamManager, ActionParamManager):
             If By groups are specified.
 
         '''
+        if self._use_casout_for_stat(casout):
+            return self._get_casout_stat('std', axis=axis, skipna=skipna, level=level,
+                                         numeric_only=numeric_only, casout=casout)
         return self._get_summary_stat('std')
 
-    def var(self, axis=None, skipna=None, level=None, ddof=1, numeric_only=True):
+    def var(self, axis=None, skipna=None, level=None, ddof=1, numeric_only=True,
+            casout=None):
         '''
         Return the variance of the values of each column
 
@@ -4611,6 +5069,9 @@ class CASTable(ParamManager, ActionParamManager):
             Not implemented.
         numeric_only : boolean, optional
             Include only numeric columns.
+        casout : bool or string or dict or CASTable, optional
+            Indicates the CAS output table to use for output.
+            NOTE: This is only use if by groups are used.
 
         See Also
         --------
@@ -4624,11 +5085,14 @@ class CASTable(ParamManager, ActionParamManager):
             If By groups are specified.
 
         '''
+        if self._use_casout_for_stat(casout):
+            return self._get_casout_stat('var', axis=axis, skipna=skipna, level=level,
+                                         numeric_only=numeric_only, casout=casout)
         return self._get_summary_stat('var')
 
     # Not DataFrame methods, but they are available statistics.
 
-    def nmiss(self, axis=0, level=None, numeric_only=False):
+    def nmiss(self, axis=0, level=None, numeric_only=False, casout=None):
         '''
         Return total number of missing values in each column
 
@@ -4640,6 +5104,9 @@ class CASTable(ParamManager, ActionParamManager):
             Not implemented.
         numeric_only : boolean, optional
             Include only numeric columns.
+        casout : bool or string or dict or CASTable, optional
+            Indicates the CAS output table to use for output.
+            NOTE: This is only use if by groups are used.
 
         See Also
         --------
@@ -4654,6 +5121,10 @@ class CASTable(ParamManager, ActionParamManager):
             If By groups are specified.
 
         '''
+        if self._use_casout_for_stat(casout):
+            return self._get_casout_stat('nmiss', axis=axis, skipna=skipna, level=level,
+                                         numeric_only=numeric_only, casout=casout)
+
         self._loadactionset('aggregation')
 
         if numeric_only:
@@ -4688,10 +5159,16 @@ class CASTable(ParamManager, ActionParamManager):
         out.index.name = None
         return out
 
-    def stderr(self):
+    def stderr(self, casout=None):
         '''
         Return the standard error of the values of each column
 
+        Parameters
+        ----------
+        casout : bool or string or dict or CASTable, optional
+            Indicates the CAS output table to use for output.
+            NOTE: This is only use if by groups are used.
+
         Returns
         -------
         :class:`pandas.Series`
@@ -4700,12 +5177,20 @@ class CASTable(ParamManager, ActionParamManager):
             If By groups are specified.
 
         '''
+        if self._use_casout_for_stat(casout):
+            return self._get_casout_stat('stderr', casout=casout)
         return self._get_summary_stat('stderr')
 
-    def uss(self):
+    def uss(self, casout=None):
         '''
         Return the uncorrected sum of squares of the values of each column
 
+        Parameters
+        ----------
+        casout : bool or string or dict or CASTable, optional
+            Indicates the CAS output table to use for output.
+            NOTE: This is only use if by groups are used.
+
         Returns
         -------
         :class:`pandas.Series`
@@ -4714,12 +5199,20 @@ class CASTable(ParamManager, ActionParamManager):
             If By groups are specified.
 
         '''
+        if self._use_casout_for_stat(casout):
+            return self._get_casout_stat('uss', casout)
         return self._get_summary_stat('uss')
 
-    def css(self):
+    def css(self, casout=None):
         '''
         Return the corrected sum of squares of the values of each column
 
+        Parameters
+        ----------
+        casout : bool or string or dict or CASTable, optional
+            Indicates the CAS output table to use for output.
+            NOTE: This is only use if by groups are used.
+
         Returns
         -------
         :class:`pandas.Series`
@@ -4728,12 +5221,20 @@ class CASTable(ParamManager, ActionParamManager):
             If By groups are specified.
 
         '''
+        if self._use_casout_for_stat(casout):
+            return self._get_casout_stat('css', casout=casout)
         return self._get_summary_stat('css')
 
-    def cv(self):
+    def cv(self, casout=None):
         '''
         Return the coefficient of variation of the values of each column
 
+        Parameters
+        ----------
+        casout : bool or string or dict or CASTable, optional
+            Indicates the CAS output table to use for output.
+            NOTE: This is only use if by groups are used.
+
         Returns
         -------
         :class:`pandas.Series`
@@ -4742,12 +5243,20 @@ class CASTable(ParamManager, ActionParamManager):
             If By groups are specified.
 
         '''
+        if self._use_casout_for_stat(casout):
+            return self._get_casout_stat('cv', casout=casout)
         return self._get_summary_stat('cv')
 
-    def tvalue(self):
+    def tvalue(self, casout=None):
         '''
         Return the T-statistics for hypothesis testing of the values of each column
 
+        Parameters
+        ----------
+        casout : bool or string or dict or CASTable, optional
+            Indicates the CAS output table to use for output.
+            NOTE: This is only use if by groups are used.
+
         Returns
         -------
         :class:`pandas.Series`
@@ -4756,12 +5265,20 @@ class CASTable(ParamManager, ActionParamManager):
             If By groups are specified.
 
         '''
+        if self._use_casout_for_stat(casout):
+            return self._get_casout_stat('tstat', casout=casout)
         return self._get_summary_stat('tvalue')
 
-    def probt(self):
+    def probt(self, casout=None):
         '''
         Return the p-value of the T-statistics of the values of each column
 
+        Parameters
+        ----------
+        casout : bool or string or dict or CASTable, optional
+            Indicates the CAS output table to use for output.
+            NOTE: This is only use if by groups are used.
+
         Returns
         -------
         :class:`pandas.Series`
@@ -4770,12 +5287,21 @@ class CASTable(ParamManager, ActionParamManager):
             If By groups are specified.
 
         '''
+        if self._use_casout_for_stat(casout):
+            return self._get_casout_stat('probt', casout=casout)
         return self._get_summary_stat('probt')
 
-    def skewness(self, axis=None, skipna=True, level=None, numeric_only=None):
+    def skewness(self, axis=None, skipna=True, level=None, numeric_only=None,
+                 casout=None):
         '''
         Return the skewness of the values of each column
 
+        Parameters
+        ----------
+        casout : bool or string or dict or CASTable, optional
+            Indicates the CAS output table to use for output.
+            NOTE: This is only use if by groups are used.
+
         Returns
         -------
         :class:`pandas.Series`
@@ -4784,16 +5310,28 @@ class CASTable(ParamManager, ActionParamManager):
             If By groups are specified.
 
         '''
+        if self._use_casout_for_stat(casout):
+            return self._get_casout_stat('skew', axis=axis, skipna=skipna, level=level,
+                                         numeric_only=numeric_only, casout=casout)
+
         tbl = self
         if numeric_only:
             tbl = self.select_dtypes(include='numeric')
+
         return tbl._get_summary_stat('skewness')
 
     skew = skewness
 
-    def kurtosis(self, axis=None, skipna=True, level=None, numeric_only=None):
+    def kurtosis(self, axis=None, skipna=True, level=None, numeric_only=None,
+                 casout=None):
         '''
         Return the kurtosis of the values of each column
+
+        Parameters
+        ----------
+        casout : bool or string or dict or CASTable, optional
+            Indicates the CAS output table to use for output.
+            NOTE: This is only use if by groups are used.
 
         Returns
         -------
@@ -4803,9 +5341,14 @@ class CASTable(ParamManager, ActionParamManager):
             If By groups are specified.
 
         '''
+        if self._use_casout_for_stat(casout):
+            return self._get_casout_stat('kurt', axis=axis, skipna=skipna, level=level,
+                                         numeric_only=numeric_only, casout=casout)
+
         tbl = self
         if numeric_only:
             tbl = self.select_dtypes(include='numeric')
+
         return tbl._get_summary_stat('kurtosis')
 
     kurt = kurtosis
@@ -8885,9 +9428,8 @@ class CASColumn(CASTable):
             If By groups are specified.
 
         '''
-        out = self._topk_values('min', axis=axis, skipna=skipna, level=level,
-                                **kwargs)
-        if self.get_groupby_vars():
+        out = self._topk_values('min', axis=axis, skipna=skipna, level=level, **kwargs)
+        if groupby:
             return out[self.name]
         return out.at[self.name]
 
