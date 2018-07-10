@@ -264,6 +264,17 @@ register_option('cas.dataset.bygroup_as_index', 'boolean', check_boolean, True,
                 'If True, any by group columns are set as the DataFrame index.')
 
 #
+# Debugging options
+#
+
+register_option('cas.debug.requests', 'boolean', check_boolean, False,
+                'Display requested URL when accessing REST interface.')
+register_option('cas.debug.request_bodies', 'boolean', check_boolean, False,
+                'Display body of request when accessing REST interface.')
+register_option('cas.debug.responses', 'boolean', check_boolean, False,
+                'Display raw responses from server.')
+
+#
 # IPython notebook options
 #
 #
