@@ -9350,7 +9350,7 @@ class CASColumn(CASTable):
         '''
         return CASTable._get_summary_stat(self, name)[self.name]
 
-    def max(self, axis=None, skipna=True, level=None, **kwargs):
+    def max(self, axis=None, skipna=True, level=None, casout=None, **kwargs):
         '''
         Return the maximum value
 
@@ -9367,13 +9367,19 @@ class CASColumn(CASTable):
             If By groups are specified.
 
         '''
+        if self._use_casout_for_stat(casout):
+            return self._get_casout_stat('max', axis=axis, skipna=skipna, level=level,
+                                         casout=casout, **kwargs)
+
         out = self._topk_values('max', axis=axis, skipna=skipna, level=level,
                                 **kwargs)
+
         if self.get_groupby_vars():
             return out[self.name]
+
         return out.at[self.name]
 
-    def mean(self, axis=None, skipna=True, level=None, **kwargs):
+    def mean(self, axis=None, skipna=True, level=None, casout=None, **kwargs):
         '''
         Return the mean value
 
@@ -9390,9 +9396,13 @@ class CASColumn(CASTable):
             If By groups are specified.
 
         '''
+        if self._use_casout_for_stat(casout):
+            return self._get_casout_stat('mean', axis=axis, skipna=skipna, level=level,
+                                         casout=casout, **kwargs)
+
         return self._get_summary_stat('mean')
 
-    def median(self, q=0.5, axis=0, interpolation='nearest'):
+    def median(self, q=0.5, axis=0, interpolation='nearest', casout=None):
         '''
         Return the median value
 
@@ -9409,9 +9419,12 @@ class CASColumn(CASTable):
             If By groups are specified.
 
         '''
+        if self._use_casout_for_stat(casout):
+            return self._get_casout_stat('median', axis=axis, casout=casout)
+
         return self.quantile(0.5, axis=axis, interpolation='nearest')
 
-    def min(self, axis=None, skipna=True, level=None, **kwargs):
+    def min(self, axis=None, skipna=True, level=None, casout=None, **kwargs):
         '''
         Return the minimum value
 
@@ -9428,9 +9441,15 @@ class CASColumn(CASTable):
             If By groups are specified.
 
         '''
+        if self._use_casout_for_stat(casout):
+            return self._get_casout_stat('min', axis=axis, skipna=skipna, level=level,
+                                         casout=casout, **kwargs)
+
         out = self._topk_values('min', axis=axis, skipna=skipna, level=level, **kwargs)
-        if groupby:
+
+        if self.get_groupby_vars():
             return out[self.name]
+
         return out.at[self.name]
 
     def mode(self, axis=0, max_tie=100):
@@ -9449,7 +9468,7 @@ class CASColumn(CASTable):
         '''
         return CASTable.mode(self, axis=axis, max_tie=max_tie)[self.name]
 
-    def quantile(self, q=0.5, axis=0, interpolation='nearest'):
+    def quantile(self, q=0.5, axis=0, interpolation='nearest', casout=None):
         '''
         Return the value at the given quantile
 
@@ -9466,10 +9485,14 @@ class CASColumn(CASTable):
             If By groups are specified.
 
         '''
+        if self._use_casout_for_stat(casout):
+            return self._get_casout_stat('percentile', axis=axis, casout=casout,
+                                         percentile_values=q)
+
         return CASTable.quantile(self, q=q, axis=axis, numeric_only=False,
                                  interpolation=interpolation)[self.name]
 
-    def sum(self, axis=None, skipna=None, level=None):
+    def sum(self, axis=None, skipna=None, level=None, casout=None):
         '''
         Return the sum of the values
 
@@ -9486,6 +9509,10 @@ class CASColumn(CASTable):
             If By groups are specified.
 
         '''
+        if self._use_casout_for_stat(casout):
+            return self._get_casout_stat('sum', axis=axis, skipna=skipna, level=level,
+                                         casout=casout)
+
         return self._get_summary_stat('sum')
 
     def nlargest(self, n=5, keep='first'):
@@ -9520,7 +9547,7 @@ class CASColumn(CASTable):
         '''
         return self.sort_values([self.name], ascending=True).slice(0, n)
 
-    def std(self, axis=None, skipna=None, level=None, ddof=1):
+    def std(self, axis=None, skipna=None, level=None, ddof=1, casout=None):
         '''
         Return the standard deviation of the values
 
@@ -9537,9 +9564,13 @@ class CASColumn(CASTable):
             If By groups are specified.
 
         '''
+        if self._use_casout_for_stat(casout):
+            return self._get_casout_stat('std', axis=axis, skipna=skipna, level=level,
+                                         casout=casout)
+
         return self._get_summary_stat('std')
 
-    def var(self, axis=None, skipna=None, level=None, ddof=1):
+    def var(self, axis=None, skipna=None, level=None, ddof=1, casout=None):
         '''
         Return the unbiased variance of the values
 
@@ -9556,9 +9587,13 @@ class CASColumn(CASTable):
             If By groups are specified.
 
         '''
+        if self._use_casout_for_stat(casout):
+            return self._get_casout_stat('var', axis=axis, skipna=skipna, level=level,
+                                         casout=casout)
+
         return self._get_summary_stat('var')
 
-    def unique(self):
+    def unique(self, casout=None):
         '''
         Return array of unique values in the CASColumn
 
@@ -9575,6 +9610,9 @@ class CASColumn(CASTable):
             If By groups are specified.
 
         '''
+        if self._use_casout_for_stat(casout):
+            return self._get_casout_stat('unique', casout=casout)
+
         tmpname = str(uuid.uuid4())
         out = self._frequencies(includemissing=True)
 
@@ -9725,7 +9763,7 @@ class CASColumn(CASTable):
 
     # Not DataFrame methods, but they are available statistics.
 
-    def nmiss(self):
+    def nmiss(self, casout=None):
         '''
         Return number of missing values
 
@@ -9741,11 +9779,14 @@ class CASColumn(CASTable):
             If By groups are specified.
 
         '''
+        if self._use_casout_for_stat(casout):
+            return self._get_casout_stat('nmiss', casout=casout)
+
         if self.get_groupby_vars():
             return CASTable.nmiss(self)[self.name]
         return CASTable.nmiss(self).iloc[0]
 
-    def stderr(self):
+    def stderr(self, casout=None):
         '''
         Return standard error of the values
 
@@ -9761,9 +9802,12 @@ class CASColumn(CASTable):
             If By groups are specified.
 
         '''
+        if self._use_casout_for_stat(casout):
+            return self._get_casout_stat('stderr', casout=casout)
+
         return self._get_summary_stat('stderr')
 
-    def uss(self):
+    def uss(self, casout=None):
         '''
         Return uncorrected sum of squares of the values
 
@@ -9779,9 +9823,12 @@ class CASColumn(CASTable):
             If By groups are specified.
 
         '''
+        if self._use_casout_for_stat(casout):
+            return self._get_casout_stat('uss', casout=casout)
+
         return self._get_summary_stat('uss')
 
-    def css(self):
+    def css(self, casout=None):
         '''
         Return corrected sum of squares of the values
 
@@ -9797,9 +9844,12 @@ class CASColumn(CASTable):
             If By groups are specified.
 
         '''
+        if self._use_casout_for_stat(casout):
+            return self._get_casout_stat('css', casout=casout)
+
         return self._get_summary_stat('css')
 
-    def cv(self):
+    def cv(self, casout=None):
         '''
         Return coefficient of variation of the values
 
@@ -9815,9 +9865,12 @@ class CASColumn(CASTable):
             If By groups are specified.
 
         '''
+        if self._use_casout_for_stat(casout):
+            return self._get_casout_stat('cv', casout=casout)
+
         return self._get_summary_stat('cv')
 
-    def tvalue(self):
+    def tvalue(self, casout=None):
         '''
         Return value of T-statistic for hypothetical testing
 
@@ -9833,9 +9886,12 @@ class CASColumn(CASTable):
             If By groups are specified.
 
         '''
+        if self._use_casout_for_stat(casout):
+            return self._get_casout_stat('tstat', casout=casout)
+
         return self._get_summary_stat('tvalue')
 
-    def probt(self):
+    def probt(self, casout=None):
         '''
         Return p-value of the T-statistic
 
@@ -9851,9 +9907,12 @@ class CASColumn(CASTable):
             If By groups are specified.
 
         '''
+        if self._use_casout_for_stat(casout):
+            return self._get_casout_stat('probt', casout=casout)
+
         return self._get_summary_stat('probt')
 
-    def skewness(self):
+    def skewness(self, casout=None):
         '''
         Return skewness
 
@@ -9869,11 +9928,14 @@ class CASColumn(CASTable):
             If By groups are specified.
 
         '''
+        if self._use_casout_for_stat(casout):
+            return self._get_casout_stat('skew', casout=casout)
+
         return self._get_summary_stat('skewness')
 
     skew = skewness
 
-    def kurtosis(self):
+    def kurtosis(self, casout=None):
         '''
         Return kurtosis
 
@@ -9889,6 +9951,9 @@ class CASColumn(CASTable):
             If By groups are specified.
 
         '''
+        if self._use_casout_for_stat(casout):
+            return self._get_casout_stat('kurt', casout=casout)
+
         return self._get_summary_stat('kurtosis')
 
     kurt = kurtosis
