@@ -272,6 +272,17 @@ register_option('cas.dataset.bygroup_casout_threshold', 'int', check_int, 25000,
                 'cardinality of each by group variable.')
 
 #
+# Debugging options
+#
+
+register_option('cas.debug.requests', 'boolean', check_boolean, False,
+                'Display requested URL when accessing REST interface.')
+register_option('cas.debug.request_bodies', 'boolean', check_boolean, False,
+                'Display body of request when accessing REST interface.')
+register_option('cas.debug.responses', 'boolean', check_boolean, False,
+                'Display raw responses from server.')
+
+#
 # IPython notebook options
 #
 #

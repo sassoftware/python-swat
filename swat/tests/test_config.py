@@ -245,7 +245,7 @@ class TestConfig(tm.TestCase):
 
     def test_suboptions(self):
         self.assertEqual(list(sorted(get_suboptions('cas').keys())), 
-                         ['dataset', 'exception_on_severity',
+                         ['dataset', 'debug', 'exception_on_severity',
                           'hostname', 'missing',
                           'port', 'print_messages', 'protocol',
                           'trace_actions', 'trace_ui_actions'])
