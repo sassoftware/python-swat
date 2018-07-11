@@ -4253,10 +4253,24 @@ class CASTable(ParamManager, ActionParamManager):
                                  casout=casout, **kwargs)
             return self._normalize_topk_casout(out['OutputCasTables']['casTable'][0])
 
+        # NOTE: Only works with a single column
         elif stat == 'unique':
+            out = self._retrieve('simple.freq', includemissing=not skipna,
+                                 inputs=[inputs[0]], casout=casout, **kwargs)
+            return self._normalize_unique_casout(out['OutputCasTables']['casTable'][0],
+                                                 column=inputs[0])
+
+        elif stat == 'nunique':
             out = self._retrieve('simple.distinct', includemissing=not skipna,
-                                 inputs=inputs, casout=casout, **kwargs)
-            return self._normalize_distinct_casout(out['OutputCasTables']['casTable'][0])
+                                 inputs=[inputs[0]], casout=casout, **kwargs)
+            return self._normalize_distinct_casout(out['OutputCasTables']['casTable'][0],
+                                                   skipna=skipna)
+
+        elif stat == 'nmiss':
+            out = self._retrieve('simple.distinct',
+                                 inputs=[inputs[0]], casout=casout, **kwargs)
+            return self._normalize_distinct_casout(out['OutputCasTables']['casTable'][0],
+                                                   column='_NMiss_', skipna=False)
 
         elif stat in ['median', 'percentile']:
             num_cols = self._get_dtypes(include='numeric')
@@ -4276,7 +4290,7 @@ class CASTable(ParamManager, ActionParamManager):
                                                              len(percentile_values) == 1))
 
         else:
-            summ_stats = ['css', 'cv', 'kurtosis', 'mean', 'n', 'nmiss',
+            summ_stats = ['css', 'cv', 'kurtosis', 'mean', 'n',
                           'probt', 'skewness', 'std', 'stderr', 'sum',
                           't', 'tstat', 'uss', 'var']
 
@@ -4463,7 +4477,43 @@ class CASTable(ParamManager, ActionParamManager):
 
         return tbl
 
-    def _normalize_distinct_casout(self, table):
+    def _normalize_unique_casout(self, table, column):
+        '''
+        Normalize freq output table to pandas-like structure
+
+        Parameters
+        ----------
+        table : CASTable
+            Distinct output table
+
+        Returns
+        -------
+        :class:`CASTable`
+
+        '''
+        typecol = '_Numvar_'
+        if '_Charvar_' in table.columns:
+            typecol = '_Charvar_'
+
+        out = self._normalize_bygroups(drop=['_Column_', '_Level_',
+                                             '_Frequency_', '_Fmtvar_'],
+                                       rename=['%s=%s' % (typecol, column)])
+        cols, groups, raw_groups, fmt_groups, retain, keep, drop, rename = out
+
+        dsout = self._retrieve('datastep.runcode', code=r'''
+            data %s;
+                %s
+                set %s;
+                %s
+                %s
+            run;''' % (table.to_datastep_params(), retain,
+                       table.to_datastep_params(), drop, rename));
+
+        tbl = dsout['OutputCasTables']['casTable'][0]
+
+        return tbl
+
+    def _normalize_distinct_casout(self, table, column='_NDis_', skipna=True):
         '''
         Normalize distinct output table to pandas-like structure
 
@@ -4479,13 +4529,19 @@ class CASTable(ParamManager, ActionParamManager):
         '''
         self._loadactionset('transpose')
 
+        if skipna:
+            skipna = '    if cmiss(of _all_) then delete;\n' + \
+                     '    if nmiss(of _all_) then delete;\n'
+        else:
+            skipna = ''
+
         out = self._normalize_bygroups(drop=['_NAME_'])
         cols, groups, raw_groups, fmt_groups, retain, keep, drop, rename = out
 
         tbl = _gen_table_name()
 
         table.groupby(groups)._retrieve('transpose.transpose', id='_Column_',
-                                        transpose=['_NDis_'],
+                                        transpose=[column],
                                         casout=dict(name=tbl))
 
         dsout = self._retrieve('datastep.runcode', code=r'''
@@ -4493,7 +4549,8 @@ class CASTable(ParamManager, ActionParamManager):
                 set %s;
                 %s
                 %s
-            run;''' % (_quote(tbl), _quote(tbl), drop, rename));
+                %s
+            run;''' % (_quote(tbl), _quote(tbl), drop, rename, skipna));
 
         tbl = dsout['OutputCasTables']['casTable'][0]
 
@@ -4600,15 +4657,15 @@ class CASTable(ParamManager, ActionParamManager):
 
             self._loadactionset('datapreprocess')
 
-#           num_groups_tbl = self._retrieve('simple.groupbyinfo',
-#                                           novars=True)['OutputCasTables']['casTable'][0]
-#           num_groups = len(num_groups_tbl)
-#           num_groups_tbl._retrieve('table.droptable')
+            num_groups_tbl = self._retrieve('simple.groupbyinfo',
+                                            novars=True)['OutputCasTables']['casTable'][0]
+            num_groups = len(num_groups_tbl)
+            num_groups_tbl._retrieve('table.droptable')
 
-            tbl = self.copy()
-            tbl.params.pop('groupby')
-            out = tbl._retrieve('datapreprocess.highcardinality', inputs=bygroups)
-            num_groups = out['HighCardinalityDetails']['CardinalityEstimate'].product()
+#           tbl = self.copy()
+#           tbl.params.pop('groupby')
+#           out = tbl._retrieve('datapreprocess.highcardinality', inputs=bygroups)
+#           num_groups = out['HighCardinalityDetails']['CardinalityEstimate'].product()
 
             if num_groups > get_option('cas.dataset.bygroup_casout_threshold'):
                 warnings.warn('The number of potential by groupings is greater than ' +
@@ -5142,7 +5199,7 @@ class CASTable(ParamManager, ActionParamManager):
 
         '''
         if self._use_casout_for_stat(casout):
-            return self._get_casout_stat('nmiss', axis=axis, skipna=skipna, level=level,
+            return self._get_casout_stat('nmiss', axis=axis, level=level,
                                          numeric_only=numeric_only, casout=casout)
 
         self._loadactionset('aggregation')
@@ -9649,7 +9706,7 @@ class CASColumn(CASTable):
 
         return pd.Series(out.index, name=self.name).values
 
-    def nunique(self, dropna=True):
+    def nunique(self, dropna=True, casout=None):
         '''
         Return number of unique elements in the CASColumn
 
@@ -9666,6 +9723,8 @@ class CASColumn(CASTable):
             If By groups are specified.
 
         '''
+        if self._use_casout_for_stat(casout):
+            return self._get_casout_stat('nunique', skipna=dropna, casout=casout)
         return self._topk_values('unique', skipna=dropna)[self.name]
 
     @getattr_safe_property

@@ -406,8 +406,32 @@ class TestByGroups(tm.TestCase):
         self.assertEqual(sorted(dfgrp.iloc[1, 1]), sorted(tblgrp.iloc[1, 1]))
         self.assertEqual(sorted(dfgrp.iloc[2, 1]), sorted(tblgrp.iloc[2, 1]))
 
+        #
+        # Test casout threshold
+        #
+        swat.options.cas.dataset.bygroup_casout_threshold = 2
+
+        tblgrp = tbl['MSRP'].groupby('Origin', as_index=False).unique()
+        self.assertEqual(tblgrp.__class__.__name__, 'CASTable')
+        dfgrp = dfgrp.set_index('Origin')
+        tblgrp = tblgrp.to_frame().set_index('Origin')
+        self.assertEqual(sorted(dfgrp.loc['Asia']['MSRP']),
+                         sorted(tblgrp.loc['Asia']['MSRP']))
+        self.assertEqual(sorted(dfgrp.loc['Europe']['MSRP']),
+                         sorted(tblgrp.loc['Europe']['MSRP']))
+        self.assertEqual(sorted(dfgrp.loc['USA']['MSRP']),
+                         sorted(tblgrp.loc['USA']['MSRP']))
+
     def test_unique(self):
         tbl = self.table.sort_values(SORT_KEYS)
+
+        with self.assertRaises(AttributeError):
+            tbl.groupby('Origin').unique()
+
+        #
+        # Test casout threshold
+        #
+        swat.options.cas.dataset.bygroup_casout_threshold = 2
 
         with self.assertRaises(AttributeError):
             tbl.groupby('Origin').unique()
@@ -429,8 +453,25 @@ class TestByGroups(tm.TestCase):
         tblgrp = tbl['MSRP'].groupby(['Origin', 'Cylinders'], as_index=False).nunique()
         self.assertTablesEqual(dfgrp.reset_index(), tblgrp, sortby=None)
 
+        #
+        # Test casout threshold
+        #
+        swat.options.cas.dataset.bygroup_casout_threshold = 2
+
+        tblgrp = tbl['MSRP'].groupby(['Origin', 'Cylinders'], as_index=False).nunique()
+        self.assertEqual(tblgrp.__class__.__name__, 'CASTable')
+        self.assertTablesEqual(dfgrp.reset_index(), tblgrp, sortby=None)
+
     def test_nunique(self):
         tbl = self.table.sort_values(SORT_KEYS)
+
+        with self.assertRaises(AttributeError):
+            tbl.groupby('Origin').nunique()
+
+        #
+        # Test casout threshold
+        #
+        swat.options.cas.dataset.bygroup_casout_threshold = 2
 
         with self.assertRaises(AttributeError):
             tbl.groupby('Origin').nunique()
@@ -452,8 +493,26 @@ class TestByGroups(tm.TestCase):
         dfgrp.name = None
         self.assertTablesEqual(dfgrp.reset_index().set_index('EngineSize'), tblgrp, sortby=None)
 
+        #
+        # Test casout threshold
+        #
+        swat.options.cas.dataset.bygroup_casout_threshold = 2
+
+        tblgrp = tbl['EngineSize'].groupby(['Origin', 'Cylinders'], as_index=False).value_counts()
+        dfgrp.name = None
+        self.assertEqual(tblgrp.__class__.__name__, 'CASTable')
+        self.assertTablesEqual(dfgrp.reset_index().set_index('EngineSize'), tblgrp, sortby=None)
+
     def test_value_counts(self):
         tbl = self.table.sort_values(SORT_KEYS)
+
+        with self.assertRaises(AttributeError):
+            tbl.groupby('Origin').value_counts()
+
+        #
+        # Test casout threshold
+        #
+        swat.options.cas.dataset.bygroup_casout_threshold = 2
 
         with self.assertRaises(AttributeError):
             tbl.groupby('Origin').value_counts()
@@ -950,6 +1009,20 @@ class TestByGroups(tm.TestCase):
         self.assertEqual(tblgrp.loc['Europe'], 0)
         self.assertEqual(tblgrp.loc['USA'], 9)
 
+        #
+        # Test casout threshold
+        #
+        swat.options.cas.dataset.bygroup_casout_threshold = 2
+
+        tblgrp = tbl['Cylinders'].groupby('Origin').nmiss()
+        self.assertEqual(tblgrp.__class__.__name__, 'CASTable')
+        self.assertEqual(len(tblgrp), 3)
+        tblgrp = tblgrp.to_frame().set_index('Origin')['Cylinders']
+        print(tblgrp)
+        self.assertEqual(tblgrp.loc['Asia'], 2)
+        self.assertEqual(tblgrp.loc['Europe'], 0)
+        self.assertEqual(tblgrp.loc['USA'], 0)
+
     def test_nmiss(self):
         # TODO: Not supported by Pandas; need comparison values
         df = self.get_cars_df().sort_values(SORT_KEYS)
@@ -971,6 +1044,15 @@ class TestByGroups(tm.TestCase):
         self.assertEqual(tblgrp.loc['Asia', 'Make'], 0)
         self.assertEqual(tblgrp.loc['Europe', 'Make'], 0)
         self.assertEqual(tblgrp.loc['USA', 'Make'], 9)
+
+        #
+        # Test casout threshold
+        #
+        swat.options.cas.dataset.bygroup_casout_threshold = 2
+
+        tblgrp = tbl.groupby('Origin', as_index=False).nmiss()
+        self.assertEqual(tblgrp.__class__.__name__, 'CASTable')
+        self.assertEqual(len(tblgrp), 3)
 
     def test_column_stderr(self):
         # TODO: Not supported by Pandas; need comparison values
