@@ -4237,9 +4237,9 @@ class CASTable(ParamManager, ActionParamManager):
         if numeric_only:
             inputs = self._get_dtypes(include='numeric')
         else:
-            inputs = set(self.columns)
+            inputs = self.columns
 
-        inputs = inputs.difference(groups)
+        inputs = [x for x in inputs if x not in groups]
 
         if stat == 'min':
             out = self._retrieve('simple.topk', order='value', includemissing=not skipna,
@@ -4259,11 +4259,11 @@ class CASTable(ParamManager, ActionParamManager):
             return self._normalize_distinct_casout(out['OutputCasTables']['casTable'][0])
 
         elif stat in ['median', 'percentile']:
-            num_cols = set(self._get_dtypes(include='numeric'))
-            inputs = inputs.intersection(num_cols)
+            num_cols = self._get_dtypes(include='numeric')
+            inputs = [x for x in inputs if x in num_cols]
 
             if stat == 'median':
-                percentile_values = [0.5]
+                percentile_values = [50]
             if not isinstance(percentile_values, (list, tuple, set)):
                 percentile_values = [percentile_values]
 
@@ -4272,7 +4272,8 @@ class CASTable(ParamManager, ActionParamManager):
                                  casout=casout, **kwargs)
 
             return self._normalize_percentile_casout(out['OutputCasTables']['casTable'][0],
-                                                     median=stat == 'median')
+                                                     single=(stat == 'median' or
+                                                             len(percentile_values) == 1))
 
         else:
             summ_stats = ['css', 'cv', 'kurtosis', 'mean', 'n', 'nmiss',
@@ -4282,8 +4283,9 @@ class CASTable(ParamManager, ActionParamManager):
             if stat not in summ_stats:
                 raise ValueError('%s is not a valid statistic' % stat)
 
-            num_cols = set(self._get_dtypes(include='numeric'))
-            inputs = inputs.intersection(num_cols)
+            num_cols = self._get_dtypes(include='numeric')
+            inputs = [x for x in inputs if x in num_cols]
+            print(inputs)
             out = self._retrieve('simple.summary', # includemissing=not skipna,
                                  inputs=inputs, casout=casout, **kwargs)
 
@@ -4310,6 +4312,7 @@ class CASTable(ParamManager, ActionParamManager):
         rename = list(rename or [])
         keep = []
         cols = []
+        retain = []
 
         groups = []
         raw_groups = []
@@ -4319,6 +4322,8 @@ class CASTable(ParamManager, ActionParamManager):
             groups.append(item)
             fmt_groups.append('%s_f' % item)
             groups.append('%s_f' % item)
+            retain.append(item)
+            retain.append('%s_f' % item)
 
         bygroup_columns = get_option('cas.dataset.bygroup_columns')
         bygroup_formatted_suffix = get_option('cas.dataset.bygroup_formatted_suffix')
@@ -4355,14 +4360,17 @@ class CASTable(ParamManager, ActionParamManager):
             if col not in groups:
                 keep.append(col)
                 cols.append(col)
+            if col not in retain:
+                retain.append(col)
 
         keep = 'keep %s;' % ' '.join(_nlit(x) for x in keep)
         drop = 'drop %s;' % ' '.join(_nlit(x) for x in drop)
+        retain = 'retain %s;' % ' '.join(_nlit(x) for x in retain)
         rename = rename and ('rename %s;' % ' '.join(rename)) or ''
 
-        return cols, groups, raw_groups, fmt_groups, keep, drop, rename
+        return cols, groups, raw_groups, fmt_groups, retain, keep, drop, rename
 
-    def _normalize_percentile_casout(self, table, median=False):
+    def _normalize_percentile_casout(self, table, single=False):
         '''
         Normalize percentile output table to pandas-like structure
 
@@ -4370,8 +4378,8 @@ class CASTable(ParamManager, ActionParamManager):
         ----------
         table : CASTable
             Percentile output table
-        median : bool, optional
-            Is this a median only computation?  If so, the quantile column
+        single : bool, optional
+            Is this a single quantile computation?  If so, the quantile column
             is dropped.
 
         Returns
@@ -4381,12 +4389,12 @@ class CASTable(ParamManager, ActionParamManager):
         '''
         self._loadactionset('transpose')
 
-        if median:
+        if single:
             out = self._normalize_bygroups(drop=['_NAME_', '_Pctl_'])
         else:
-            out = self._normalize_bygroups(rename=['_Pctl_=quantile'])
+            out = self._normalize_bygroups(drop=['_NAME_'], rename=['_Pctl_=quantile'])
 
-        cols, groups, raw_groups, fmt_groups, keep, drop, rename = out
+        cols, groups, raw_groups, fmt_groups, retain, keep, drop, rename = out
 
         dstbl = table.to_datastep_params()
 
@@ -4398,10 +4406,11 @@ class CASTable(ParamManager, ActionParamManager):
 
         dsout = self._retrieve('datastep.runcode', code=r'''
             data %s;
+                %s
                 set %s;
                 %s
                 %s
-            run;''' % (dstbl, dstbl, drop, rename));
+            run;''' % (dstbl, retain, dstbl, drop, rename));
 
         tbl = dsout['OutputCasTables']['casTable'][0]
 
@@ -4425,21 +4434,30 @@ class CASTable(ParamManager, ActionParamManager):
         '''
         self._loadactionset('transpose')
 
+        stat = stat.lower()
+        if stat in ['t', 'tstat']:
+            stat = 'T'
+        elif stat == 'probt':
+            stat = 'prt'
+        else:
+            stat = stat.title()
+
         out = self._normalize_bygroups(drop=['_NAME_'])
-        cols, groups, raw_groups, fmt_groups, keep, drop, rename = out
+        cols, groups, raw_groups, fmt_groups, retain, keep, drop, rename = out
 
         tbl = _gen_table_name()
 
         table.groupby(groups)._retrieve('transpose.transpose', id='_Column_',
-                                        transpose=['_%s_' % stat.title()],
+                                        transpose=['_%s_' % stat],
                                         casout=dict(name=tbl))
-
+        print(retain)
         dsout = self._retrieve('datastep.runcode', code=r'''
             data %s;
+                %s
                 set %s;
                 %s
                 %s
-            run;''' % (_quote(tbl), _quote(tbl), drop, rename));
+            run;''' % (_quote(tbl), retain, _quote(tbl), drop, rename));
 
         tbl = dsout['OutputCasTables']['casTable'][0]
 
@@ -4462,7 +4480,7 @@ class CASTable(ParamManager, ActionParamManager):
         self._loadactionset('transpose')
 
         out = self._normalize_bygroups(drop=['_NAME_'])
-        cols, groups, raw_groups, fmt_groups, keep, drop, rename = out
+        cols, groups, raw_groups, fmt_groups, retain, keep, drop, rename = out
 
         tbl = _gen_table_name()
 
@@ -4498,7 +4516,7 @@ class CASTable(ParamManager, ActionParamManager):
         self._loadactionset('transpose')
 
         out = self._normalize_bygroups(drop=['_NAME_'])
-        cols, groups, raw_groups, fmt_groups, keep, drop, rename = out
+        cols, groups, raw_groups, fmt_groups, retain, keep, drop, rename = out
 
         char_tbl = None
         num_tbl = None
@@ -4638,7 +4656,8 @@ class CASTable(ParamManager, ActionParamManager):
         return self._topk_values('max', axis=axis, skipna=skipna, level=level,
                                  numeric_only=numeric_only, **kwargs)
 
-    def mean(self, axis=None, skipna=True, level=None, numeric_only=False, casout=None):
+    def mean(self, axis=None, skipna=True, level=None, numeric_only=False, casout=None,
+             **kwargs):
         '''
         Return the mean value of each column
 
@@ -4670,7 +4689,7 @@ class CASTable(ParamManager, ActionParamManager):
         '''
         if self._use_casout_for_stat(casout):
             return self._get_casout_stat('mean', axis=axis, skipna=skipna, level=level,
-                                         numeric_only=numeric_only, casout=casout, 
+                                         numeric_only=numeric_only, casout=casout,
                                          **kwargs)
         return self._get_summary_stat('mean')
 
@@ -4941,8 +4960,15 @@ class CASTable(ParamManager, ActionParamManager):
             If By groups are specified.
 
         '''
+        single_quantile = False
+        if not isinstance(q, items_types):
+            q = [q]
+            single_quantile = True
+
+        q = [x * 100 for x in q]
+
         if self._use_casout_for_stat(casout):
-            return self._get_casout_stat('percentile', axis=axis, skipna=skipna, level=level,
+            return self._get_casout_stat('percentile', axis=axis,
                                          numeric_only=numeric_only, casout=casout, 
                                          percentile_values=q,
                                          **kwargs)
@@ -4952,17 +4978,11 @@ class CASTable(ParamManager, ActionParamManager):
         if numeric_only:
             tbl = tbl.select_dtypes(include='numeric')
 
-        single_quantile = False
-        if not isinstance(q, items_types):
-            q = [q]
-            single_quantile = True
-
         groups = tbl.get_groupby_vars()
 
         columns = [x for x in tbl.columns if x not in groups]
 
-        out = tbl._percentiles(percentiles=[x * 100 for x in q],
-                               format_labels=False)[columns]
+        out = tbl._percentiles(percentiles=q, format_labels=False)[columns]
 
         if single_quantile:
             out = out.reset_index(level=-1, drop=True)
@@ -9486,6 +9506,9 @@ class CASColumn(CASTable):
 
         '''
         if self._use_casout_for_stat(casout):
+            if not isinstance(q, items_types):
+                q = [q]
+            q = [x * 100 for x in q]
             return self._get_casout_stat('percentile', axis=axis, casout=casout,
                                          percentile_values=q)
 

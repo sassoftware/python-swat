@@ -473,6 +473,15 @@ class TestByGroups(tm.TestCase):
         tblgrp = tbl['EngineSize'].groupby('Origin', as_index=False).max()
         self.assertTablesEqual(dfgrp.reset_index(), tblgrp, sortby=None)
 
+        #
+        # Test casout threshold
+        #
+        swat.options.cas.dataset.bygroup_casout_threshold = 2
+
+        tblgrp = tbl['EngineSize'].groupby('Origin', as_index=False).max()
+        self.assertEqual(tblgrp.__class__.__name__, 'CASTable')
+        self.assertTablesEqual(dfgrp.reset_index(), tblgrp, sortby=None)
+
     @unittest.skipIf(int(pd.__version__.split('.')[1]) < 16, 'Need newer version of Pandas')
     def test_max(self):
         df = self.get_cars_df().sort_values(SORT_KEYS)
@@ -486,6 +495,24 @@ class TestByGroups(tm.TestCase):
 
         dfgrp = df.groupby('Origin', as_index=False).max()
         tblgrp = tbl.groupby('Origin', as_index=False).max()
+        # Drop Model since they get sorted differently
+        self.assertTablesEqual(dfgrp.drop('Model', axis=1), tblgrp.drop('Model', axis=1),
+                               sortby=None, include_index=True)
+
+        #
+        # Test casout threshold
+        #
+        swat.options.cas.dataset.bygroup_casout_threshold = 2
+
+#       dfgrp = df.groupby('Origin').max()
+#       tblgrp = tbl.groupby('Origin').max()
+#       # Drop Model since they get sorted differently
+#       self.assertTablesEqual(dfgrp.drop('Model', axis=1), tblgrp.drop('Model', axis=1),
+#                              sortby=None, include_index=True)
+
+        dfgrp = df.groupby('Origin', as_index=False).max()
+        tblgrp = tbl.groupby('Origin', as_index=False).max()
+        self.assertEqual(tblgrp.__class__.__name__, 'CASTable')
         # Drop Model since they get sorted differently
         self.assertTablesEqual(dfgrp.drop('Model', axis=1), tblgrp.drop('Model', axis=1),
                                sortby=None, include_index=True)
@@ -505,6 +532,15 @@ class TestByGroups(tm.TestCase):
         tblgrp = tbl['EngineSize'].groupby('Origin', as_index=False).min()
         self.assertTablesEqual(dfgrp.reset_index(), tblgrp, sortby=None)
 
+        #
+        # Test casout threshold
+        #
+        swat.options.cas.dataset.bygroup_casout_threshold = 2
+
+        tblgrp = tbl['EngineSize'].groupby('Origin', as_index=False).min()
+        self.assertEqual(tblgrp.__class__.__name__, 'CASTable')
+        self.assertTablesEqual(dfgrp.reset_index(), tblgrp, sortby=None)
+
     @unittest.skipIf(int(pd.__version__.split('.')[1]) < 16, 'Need newer version of Pandas')
     def test_min(self):
         df = self.get_cars_df().sort_values(SORT_KEYS)
@@ -518,6 +554,24 @@ class TestByGroups(tm.TestCase):
 
         dfgrp = df.groupby('Origin', as_index=False).min()
         tblgrp = tbl.groupby('Origin', as_index=False).min()
+        # Drop Type since it gets sorted differently
+        self.assertTablesEqual(dfgrp.drop('Type', axis=1), tblgrp.drop('Type', axis=1),
+                               sortby=None)
+
+        #
+        # Test casout threshold
+        #
+        swat.options.cas.dataset.bygroup_casout_threshold = 2
+
+#       dfgrp = df.groupby('Origin').min()
+#       tblgrp = tbl.groupby('Origin').min().to_frame()
+#       # Drop Type since it gets sorted differently
+#       self.assertTablesEqual(dfgrp.drop('Type', axis=1), tblgrp.drop('Type', axis=1),
+#                              sortby=None)
+
+        dfgrp = df.groupby('Origin', as_index=False).min()
+        tblgrp = tbl.groupby('Origin', as_index=False).min()
+        self.assertEqual(tblgrp.__class__.__name__, 'CASTable')
         # Drop Type since it gets sorted differently
         self.assertTablesEqual(dfgrp.drop('Type', axis=1), tblgrp.drop('Type', axis=1),
                                sortby=None)
@@ -537,6 +591,15 @@ class TestByGroups(tm.TestCase):
         tblgrp = tbl['EngineSize'].groupby('Origin', as_index=False).mean()
         self.assertTablesEqual(dfgrp.reset_index(), tblgrp, sortby=None, decimals=5)
 
+        #
+        # Test casout threshold
+        #
+        swat.options.cas.dataset.bygroup_casout_threshold = 2
+
+        tblgrp = tbl['EngineSize'].groupby('Origin', as_index=False).mean()
+        self.assertEqual(tblgrp.__class__.__name__, 'CASTable')
+        self.assertTablesEqual(dfgrp.reset_index(), tblgrp, sortby=None, decimals=5)
+
     @unittest.skipIf(sys.version_info.major < 3, 'Need newer version of Python')
     def test_mean(self):
         df = self.get_cars_df().sort_values(SORT_KEYS)
@@ -548,6 +611,16 @@ class TestByGroups(tm.TestCase):
 
         dfgrp = df.groupby('Origin', as_index=False).mean()
         tblgrp = tbl.groupby('Origin', as_index=False).mean()
+        self.assertTablesEqual(dfgrp, tblgrp, sortby=None, decimals=5)
+
+        #
+        # Test casout threshold
+        #
+        swat.options.cas.dataset.bygroup_casout_threshold = 2
+
+        dfgrp = df.groupby('Origin', as_index=False).mean()
+        tblgrp = tbl.groupby('Origin', as_index=False).mean()
+        self.assertEqual(tblgrp.__class__.__name__, 'CASTable')
         self.assertTablesEqual(dfgrp, tblgrp, sortby=None, decimals=5)
 
     def test_column_median(self):
@@ -565,6 +638,15 @@ class TestByGroups(tm.TestCase):
         tblgrp = tbl['EngineSize'].groupby('Origin', as_index=False).median()
         self.assertTablesEqual(dfgrp.reset_index(), tblgrp, sortby=None)
 
+        #
+        # Test casout threshold
+        #
+        swat.options.cas.dataset.bygroup_casout_threshold = 2
+
+        tblgrp = tbl['EngineSize'].groupby('Origin', as_index=False).median()
+        self.assertEqual(tblgrp.__class__.__name__, 'CASTable')
+        self.assertTablesEqual(dfgrp.reset_index(), tblgrp, sortby=None)
+
     @unittest.skipIf(sys.version_info.major < 3, 'Need newer version of Python')
     def test_median(self):
         df = self.get_cars_df().sort_values(SORT_KEYS)
@@ -576,6 +658,16 @@ class TestByGroups(tm.TestCase):
 
         dfgrp = df.groupby('Origin', as_index=False).median()
         tblgrp = tbl.groupby('Origin', as_index=False).median()
+        self.assertTablesEqual(dfgrp, tblgrp, sortby=None)
+
+        #
+        # Test casout threshold
+        #
+        swat.options.cas.dataset.bygroup_casout_threshold = 2
+
+        dfgrp = df.groupby('Origin', as_index=False).median()
+        tblgrp = tbl.groupby('Origin', as_index=False).median()
+        self.assertEqual(tblgrp.__class__.__name__, 'CASTable')
         self.assertTablesEqual(dfgrp, tblgrp, sortby=None)
 
     @unittest.skipIf(int(pd.__version__.split('.')[1]) < 16, 'Need newer version of Pandas')
@@ -643,6 +735,15 @@ class TestByGroups(tm.TestCase):
         tblgrp = tbl['EngineSize'].groupby('Origin', as_index=False).quantile()
         self.assertTablesEqual(dfgrp.reset_index(), tblgrp, sortby=None)
 
+        #
+        # Test casout threshold
+        #
+        swat.options.cas.dataset.bygroup_casout_threshold = 2
+
+        tblgrp = tbl['EngineSize'].groupby('Origin', as_index=False).quantile()
+        self.assertEqual(tblgrp.__class__.__name__, 'CASTable')
+        self.assertTablesEqual(dfgrp.reset_index(), tblgrp, sortby=None)
+
     @unittest.skipIf(sys.version_info.major < 3, 'Need newer version of Python')
     def test_quantile(self):
         df = self.get_cars_df().sort_values(SORT_KEYS)
@@ -660,6 +761,18 @@ class TestByGroups(tm.TestCase):
         tblgrp = tblgrp.drop('Origin', axis=1)
         self.assertTablesEqual(dfgrp, tblgrp, sortby=None)
 
+        #
+        # Test casout threshold
+        #
+        swat.options.cas.dataset.bygroup_casout_threshold = 2
+
+        dfgrp = df.groupby('Origin', as_index=False).quantile()
+        tblgrp = tbl.groupby('Origin', as_index=False).quantile()
+        # For some reason Pandas drops this column, but I think it should be there.
+        tblgrp = tblgrp.drop('Origin', axis=1)
+        self.assertEqual(tblgrp.__class__.__name__, 'CASTable')
+        self.assertTablesEqual(dfgrp, tblgrp, sortby=None)
+
     def test_column_sum(self):
         df = self.get_cars_df().sort_values(SORT_KEYS)
         tbl = self.table.sort_values(SORT_KEYS)
@@ -675,6 +788,15 @@ class TestByGroups(tm.TestCase):
         tblgrp = tbl['EngineSize'].groupby('Origin', as_index=False).sum()
         self.assertTablesEqual(dfgrp.reset_index(), tblgrp, sortby=None, decimals=5)
 
+        #
+        # Test casout threshold
+        #
+        swat.options.cas.dataset.bygroup_casout_threshold = 2
+
+        tblgrp = tbl['EngineSize'].groupby('Origin', as_index=False).sum()
+        self.assertEqual(tblgrp.__class__.__name__, 'CASTable')
+        self.assertTablesEqual(dfgrp.reset_index(), tblgrp, sortby=None, decimals=5)
+
     def test_sum(self):
         df = self.get_cars_df().sort_values(SORT_KEYS)
         tbl = self.table.sort_values(SORT_KEYS)
@@ -685,6 +807,16 @@ class TestByGroups(tm.TestCase):
 
         dfgrp = df.groupby('Origin', as_index=False).sum()
         tblgrp = tbl.groupby('Origin', as_index=False).sum()
+        self.assertTablesEqual(dfgrp, tblgrp, decimals=5, sortby=None)
+
+        #
+        # Test casout threshold
+        #
+        swat.options.cas.dataset.bygroup_casout_threshold = 2
+
+        dfgrp = df.groupby('Origin', as_index=False).sum()
+        tblgrp = tbl.groupby('Origin', as_index=False).sum()
+        self.assertEqual(tblgrp.__class__.__name__, 'CASTable')
         self.assertTablesEqual(dfgrp, tblgrp, decimals=5, sortby=None)
 
     def test_column_std(self):
@@ -702,6 +834,15 @@ class TestByGroups(tm.TestCase):
         tblgrp = tbl['EngineSize'].groupby('Origin', as_index=False).std()
         self.assertTablesEqual(dfgrp.reset_index(), tblgrp, sortby=None, decimals=5)
 
+        #
+        # Test casout threshold
+        #
+        swat.options.cas.dataset.bygroup_casout_threshold = 2
+
+        tblgrp = tbl['EngineSize'].groupby('Origin', as_index=False).std()
+        self.assertEqual(tblgrp.__class__.__name__, 'CASTable')
+        self.assertTablesEqual(dfgrp.reset_index(), tblgrp, sortby=None, decimals=5)
+
     def test_std(self):
         df = self.get_cars_df().sort_values(SORT_KEYS)
         tbl = self.table.sort_values(SORT_KEYS)
@@ -712,6 +853,16 @@ class TestByGroups(tm.TestCase):
 
         #dfgrp = df.groupby('Origin', as_index=False).std()
         tblgrp = tbl.groupby('Origin', as_index=False).std()
+        self.assertTablesEqual(dfgrp.reset_index(), tblgrp, decimals=5, sortby=None)
+
+        #
+        # Test casout threshold
+        #
+        swat.options.cas.dataset.bygroup_casout_threshold = 2
+
+        #dfgrp = df.groupby('Origin', as_index=False).std()
+        tblgrp = tbl.groupby('Origin', as_index=False).std()
+        self.assertEqual(tblgrp.__class__.__name__, 'CASTable')
         self.assertTablesEqual(dfgrp.reset_index(), tblgrp, decimals=5, sortby=None)
 
     def test_column_var(self):
@@ -731,6 +882,17 @@ class TestByGroups(tm.TestCase):
         tblgrp = tblgrp.drop('Origin', axis=1)
         self.assertTablesEqual(dfgrp, tblgrp, decimals=5, sortby=None)
 
+        #
+        # Test casout threshold
+        #
+        swat.options.cas.dataset.bygroup_casout_threshold = 2
+
+        tblgrp = tbl['EngineSize'].groupby('Origin', as_index=False).var()
+        # For some reason Pandas drops this column, but I think it should be there.
+        tblgrp = tblgrp.drop('Origin', axis=1)
+        self.assertEqual(tblgrp.__class__.__name__, 'CASTable')
+        self.assertTablesEqual(dfgrp, tblgrp, decimals=5, sortby=None)
+
     def test_var(self):
         df = self.get_cars_df().sort_values(SORT_KEYS)
         tbl = self.table.sort_values(SORT_KEYS)
@@ -741,6 +903,16 @@ class TestByGroups(tm.TestCase):
 
         dfgrp = df.groupby('Origin', as_index=False).var()
         tblgrp = tbl.groupby('Origin', as_index=False).var()
+        self.assertTablesEqual(dfgrp, tblgrp, decimals=3, sortby=None)
+
+        #
+        # Test casout threshold
+        #
+        swat.options.cas.dataset.bygroup_casout_threshold = 2
+
+        dfgrp = df.groupby('Origin', as_index=False).var()
+        tblgrp = tbl.groupby('Origin', as_index=False).var()
+        self.assertEqual(tblgrp.__class__.__name__, 'CASTable')
         self.assertTablesEqual(dfgrp, tblgrp, decimals=3, sortby=None)
 
     def test_column_nmiss(self):
@@ -814,6 +986,15 @@ class TestByGroups(tm.TestCase):
         tblgrp = tbl['EngineSize'].groupby('Origin', as_index=False).stderr()
         self.assertEqual(len(tblgrp), 3)
 
+        #
+        # Test casout threshold
+        #
+        swat.options.cas.dataset.bygroup_casout_threshold = 2
+
+        tblgrp = tbl['EngineSize'].groupby('Origin', as_index=False).stderr()
+        self.assertEqual(tblgrp.__class__.__name__, 'CASTable')
+        self.assertEqual(len(tblgrp), 3)
+
     def test_stderr(self):
         # TODO: Not supported by Pandas; need comparison values
         df = self.get_cars_df().sort_values(SORT_KEYS)
@@ -823,6 +1004,15 @@ class TestByGroups(tm.TestCase):
         self.assertEqual(len(tblgrp), 3)
 
         tblgrp = tbl.groupby('Origin', as_index=False).stderr()
+        self.assertEqual(len(tblgrp), 3)
+
+        #
+        # Test casout threshold
+        #
+        swat.options.cas.dataset.bygroup_casout_threshold = 2
+
+        tblgrp = tbl.groupby('Origin', as_index=False).stderr()
+        self.assertEqual(tblgrp.__class__.__name__, 'CASTable')
         self.assertEqual(len(tblgrp), 3)
 
     def test_column_uss(self):
@@ -839,6 +1029,15 @@ class TestByGroups(tm.TestCase):
         tblgrp = tbl['EngineSize'].groupby('Origin', as_index=False).uss()
         self.assertEqual(len(tblgrp), 3)
 
+        #
+        # Test casout threshold
+        #
+        swat.options.cas.dataset.bygroup_casout_threshold = 2
+
+        tblgrp = tbl['EngineSize'].groupby('Origin', as_index=False).uss()
+        self.assertEqual(tblgrp.__class__.__name__, 'CASTable')
+        self.assertEqual(len(tblgrp), 3)
+
     def test_uss(self):
         # TODO: Not supported by Pandas; need comparison values
         df = self.get_cars_df().sort_values(SORT_KEYS)
@@ -848,6 +1047,15 @@ class TestByGroups(tm.TestCase):
         self.assertEqual(len(tblgrp), 3)
 
         tblgrp = tbl.groupby('Origin', as_index=False).uss()
+        self.assertEqual(len(tblgrp), 3)
+
+        #
+        # Test casout threshold
+        #
+        swat.options.cas.dataset.bygroup_casout_threshold = 2
+
+        tblgrp = tbl.groupby('Origin', as_index=False).uss()
+        self.assertEqual(tblgrp.__class__.__name__, 'CASTable')
         self.assertEqual(len(tblgrp), 3)
 
     def test_column_css(self):
@@ -864,12 +1072,30 @@ class TestByGroups(tm.TestCase):
         tblgrp = tbl['EngineSize'].groupby('Origin', as_index=False).css()
         self.assertEqual(len(tblgrp), 3)
 
+        #
+        # Test casout threshold
+        #
+        swat.options.cas.dataset.bygroup_casout_threshold = 2
+
+        tblgrp = tbl['EngineSize'].groupby('Origin', as_index=False).css()
+        self.assertEqual(tblgrp.__class__.__name__, 'CASTable')
+        self.assertEqual(len(tblgrp), 3)
+
     def test_css(self):
         # TODO: Not supported by Pandas; need comparison values
         df = self.get_cars_df().sort_values(SORT_KEYS)
         tbl = self.table.sort_values(SORT_KEYS)
 
         tblgrp = tbl.groupby('Origin').css()
+        self.assertEqual(len(tblgrp), 3)
+
+        #
+        # Test casout threshold
+        #
+        swat.options.cas.dataset.bygroup_casout_threshold = 2
+
+        tblgrp = tbl.groupby('Origin').css()
+        self.assertEqual(tblgrp.__class__.__name__, 'CASTable')
         self.assertEqual(len(tblgrp), 3)
 
     def test_column_cv(self):
@@ -886,6 +1112,15 @@ class TestByGroups(tm.TestCase):
         tblgrp = tbl['EngineSize'].groupby('Origin', as_index=False).cv()
         self.assertEqual(len(tblgrp), 3)
 
+        #
+        # Test casout threshold
+        #
+        swat.options.cas.dataset.bygroup_casout_threshold = 2
+
+        tblgrp = tbl['EngineSize'].groupby('Origin', as_index=False).cv()
+        self.assertEqual(tblgrp.__class__.__name__, 'CASTable')
+        self.assertEqual(len(tblgrp), 3)
+
     def test_cv(self):
         # TODO: Not supported by Pandas; need comparison values
         df = self.get_cars_df().sort_values(SORT_KEYS)
@@ -895,6 +1130,15 @@ class TestByGroups(tm.TestCase):
         self.assertEqual(len(tblgrp), 3)
 
         tblgrp = tbl.groupby('Origin', as_index=False).cv()
+        self.assertEqual(len(tblgrp), 3)
+
+        #
+        # Test casout threshold
+        #
+        swat.options.cas.dataset.bygroup_casout_threshold = 2
+
+        tblgrp = tbl.groupby('Origin', as_index=False).cv()
+        self.assertEqual(tblgrp.__class__.__name__, 'CASTable')
         self.assertEqual(len(tblgrp), 3)
 
     def test_column_tvalue(self):
@@ -911,6 +1155,15 @@ class TestByGroups(tm.TestCase):
         tblgrp = tbl['EngineSize'].groupby('Origin', as_index=False).tvalue()
         self.assertEqual(len(tblgrp), 3)
 
+        #
+        # Test casout threshold
+        #
+        swat.options.cas.dataset.bygroup_casout_threshold = 2
+
+        tblgrp = tbl['EngineSize'].groupby('Origin', as_index=False).tvalue()
+        self.assertEqual(tblgrp.__class__.__name__, 'CASTable')
+        self.assertEqual(len(tblgrp), 3)
+
     def test_tvalue(self):
         # TODO: Not supported by Pandas; need comparison values
         df = self.get_cars_df().sort_values(SORT_KEYS)
@@ -920,6 +1173,15 @@ class TestByGroups(tm.TestCase):
         self.assertEqual(len(tblgrp), 3)
 
         tblgrp = tbl.groupby('Origin', as_index=False).tvalue()
+        self.assertEqual(len(tblgrp), 3)
+
+        #
+        # Test casout threshold
+        #
+        swat.options.cas.dataset.bygroup_casout_threshold = 2
+
+        tblgrp = tbl['EngineSize'].groupby('Origin', as_index=False).tvalue()
+        self.assertEqual(tblgrp.__class__.__name__, 'CASTable')
         self.assertEqual(len(tblgrp), 3)
 
     def test_column_probt(self):
@@ -936,6 +1198,15 @@ class TestByGroups(tm.TestCase):
         tblgrp = tbl['EngineSize'].groupby('Origin', as_index=False).probt()
         self.assertEqual(len(tblgrp), 3)
 
+        #
+        # Test casout threshold
+        #
+        swat.options.cas.dataset.bygroup_casout_threshold = 2
+
+        tblgrp = tbl['EngineSize'].groupby('Origin', as_index=False).probt()
+        self.assertEqual(tblgrp.__class__.__name__, 'CASTable')
+        self.assertEqual(len(tblgrp), 3)
+
     def test_probt(self):
         # TODO: Not supported by Pandas; need comparison values
         df = self.get_cars_df().sort_values(SORT_KEYS)
@@ -945,6 +1216,15 @@ class TestByGroups(tm.TestCase):
         self.assertEqual(len(tblgrp), 3)
 
         tblgrp = tbl.groupby('Origin', as_index=False).probt()
+        self.assertEqual(len(tblgrp), 3)
+
+        #
+        # Test casout threshold
+        #
+        swat.options.cas.dataset.bygroup_casout_threshold = 2
+
+        tblgrp = tbl.groupby('Origin', as_index=False).probt()
+        self.assertEqual(tblgrp.__class__.__name__, 'CASTable')
         self.assertEqual(len(tblgrp), 3)
 
     @unittest.skipIf(int(pd.__version__.split('.')[1]) < 16, 'Need newer version of Pandas')
