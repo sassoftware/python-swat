@@ -457,6 +457,7 @@ class TestByGroups(tm.TestCase):
         # Test casout threshold
         #
         swat.options.cas.dataset.bygroup_casout_threshold = 2
+        swat.options.cas.dataset.bygroup_columns = 'raw'
 
         tblgrp = tbl['MSRP'].groupby(['Origin', 'Cylinders'], as_index=False).nunique()
         self.assertEqual(tblgrp.__class__.__name__, 'CASTable')
@@ -497,11 +498,16 @@ class TestByGroups(tm.TestCase):
         # Test casout threshold
         #
         swat.options.cas.dataset.bygroup_casout_threshold = 2
+        swat.options.cas.dataset.bygroup_columns = 'raw'
 
         tblgrp = tbl['EngineSize'].groupby(['Origin', 'Cylinders'], as_index=False).value_counts()
-        dfgrp.name = None
+        dfgrp = dfgrp.reset_index()[['Origin', 'Cylinders', 'EngineSize', 0]]
+        dfgrp['_Frequency_'] = dfgrp[0]
+        del dfgrp[0]
+        dfgrp = dfgrp.sort_values(['Origin', 'Cylinders', '_Frequency_', 'EngineSize'])
+        tblgrp = tblgrp.sort_values(['Origin', 'Cylinders', '_Frequency_', 'EngineSize'])
         self.assertEqual(tblgrp.__class__.__name__, 'CASTable')
-        self.assertTablesEqual(dfgrp.reset_index().set_index('EngineSize'), tblgrp, sortby=None)
+        self.assertTablesEqual(dfgrp, tblgrp, sortby=None)
 
     def test_value_counts(self):
         tbl = self.table.sort_values(SORT_KEYS)
@@ -1014,6 +1020,7 @@ class TestByGroups(tm.TestCase):
         #
         swat.options.cas.dataset.bygroup_casout_threshold = 2
 
+        swat.options.cas.print_messages = True
         tblgrp = tbl['Cylinders'].groupby('Origin').nmiss()
         self.assertEqual(tblgrp.__class__.__name__, 'CASTable')
         self.assertEqual(len(tblgrp), 3)

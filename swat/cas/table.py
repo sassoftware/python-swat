@@ -137,7 +137,7 @@ def _get_unique(seq, lowercase=False):
     return [x for x in seq if not (x in seen or seen.add(x))]
 
 
-def _to_datastep_params(casout):
+def _to_datastep_params(casout, ignore=None):
     '''
     Convert object to data step parameters
 
@@ -145,6 +145,8 @@ def _to_datastep_params(casout):
     ----------
     casout : string or CASTable or dict
         The object to convert to a data step table specification
+    ignore : list-of-strings, optional
+        List of parameters to ignore
 
     Returns
     -------
@@ -164,6 +166,9 @@ def _to_datastep_params(casout):
     else:
         raise TypeError('Unrecognized type for casout definition: %s' % type(casout))
 
+    if ignore is None:
+        ignore = []
+
     outname = _quote(casout.get('name', _gen_table_name()))
     outlib = casout.get('caslib')
     outreplace = casout.get('replace')
@@ -171,13 +176,13 @@ def _to_datastep_params(casout):
     outcopies = casout.get('copies')
 
     options = []
-    if outlib:
+    if outlib and 'caslib' not in ignore:
         options.append('caslib=%s' % _quote(outlib))
-    if outreplace is not None:
+    if outreplace is not None and 'replace' not in ignore:
         options.append('replace=%s' % (outreplace and 'yes' or 'no'))
-    if outpromote is not None:
+    if outpromote is not None and 'promote' not in ignore:
         options.append('promote=%s' % (outpromote and 'yes' or 'no'))
-    if outcopies is not None:
+    if outcopies is not None and 'copies' not in ignore:
         options.append('copies=%s' % outcopies)
 
     if options:
@@ -234,7 +239,7 @@ def concat(objs, axis=0, join='outer', join_axes=None, ignore_index=False, keys=
         # Create data step code for concatenation
         code = []
         code.append('data %s;' % _to_datastep_params(casout))
-        code.append('    set %s;' % ' '.join(x.to_datastep_params() for x in views))
+        code.append('    set %s;' % ' '.join(x.to_input_datastep_params() for x in views))
         code.append('run;')
         print('\n'.join(code))
 
@@ -2287,6 +2292,17 @@ class CASTable(ParamManager, ActionParamManager):
         '''
         return _to_datastep_params(self)
 
+    def to_input_datastep_params(self):
+        '''
+        Create an input data step table specification
+
+        Returns
+        -------
+        :class:`CASTable`
+
+        '''
+        return _to_datastep_params(self, ignore=['replace', 'promote', 'copies'])
+
     #
     # Pandas DataFrame API
     #
@@ -4257,14 +4273,22 @@ class CASTable(ParamManager, ActionParamManager):
         elif stat == 'unique':
             out = self._retrieve('simple.freq', includemissing=not skipna,
                                  inputs=[inputs[0]], casout=casout, **kwargs)
-            return self._normalize_unique_casout(out['OutputCasTables']['casTable'][0],
-                                                 column=inputs[0])
+            return self._normalize_freq_casout(out['OutputCasTables']['casTable'][0],
+                                               column=inputs[0], stat='value')
 
+        # NOTE: Only works with a single column
         elif stat == 'nunique':
             out = self._retrieve('simple.distinct', includemissing=not skipna,
                                  inputs=[inputs[0]], casout=casout, **kwargs)
             return self._normalize_distinct_casout(out['OutputCasTables']['casTable'][0],
                                                    skipna=skipna)
+
+        # NOTE: Only works with a single column
+        elif stat == 'n':
+            out = self._retrieve('simple.freq', includemissing=not skipna,
+                                 inputs=[inputs[0]], casout=casout, **kwargs)
+            return self._normalize_freq_casout(out['OutputCasTables']['casTable'][0],
+                                               column=inputs[0], skipna=skipna)
 
         elif stat == 'nmiss':
             out = self._retrieve('simple.distinct',
@@ -4290,7 +4314,7 @@ class CASTable(ParamManager, ActionParamManager):
                                                              len(percentile_values) == 1))
 
         else:
-            summ_stats = ['css', 'cv', 'kurtosis', 'mean', 'n',
+            summ_stats = ['css', 'cv', 'kurtosis', 'mean',
                           'probt', 'skewness', 'std', 'stderr', 'sum',
                           't', 'tstat', 'uss', 'var']
 
@@ -4477,7 +4501,7 @@ class CASTable(ParamManager, ActionParamManager):
 
         return tbl
 
-    def _normalize_unique_casout(self, table, column):
+    def _normalize_freq_casout(self, table, column, stat='freq', skipna=True):
         '''
         Normalize freq output table to pandas-like structure
 
@@ -4485,6 +4509,10 @@ class CASTable(ParamManager, ActionParamManager):
         ----------
         table : CASTable
             Distinct output table
+        column : string
+            The name of the column
+        stat : string, optional
+            Specifies the statistic: 'value' or 'freq'
 
         Returns
         -------
@@ -4495,9 +4523,15 @@ class CASTable(ParamManager, ActionParamManager):
         if '_Charvar_' in table.columns:
             typecol = '_Charvar_'
 
-        out = self._normalize_bygroups(drop=['_Column_', '_Level_',
-                                             '_Frequency_', '_Fmtvar_'],
-                                       rename=['%s=%s' % (typecol, column)])
+        if stat == 'value':
+            out = self._normalize_bygroups(drop=['_Column_', '_Level_',
+                                                 '_Frequency_', '_Fmtvar_'],
+                                           rename=['%s=%s' % (typecol, column)])
+        else:
+            out = self._normalize_bygroups(drop=['_Column_', '_Level_',
+                                                 '_Fmtvar_'],
+                                           rename=['%s=%s' % (typecol, column)])
+
         cols, groups, raw_groups, fmt_groups, retain, keep, drop, rename = out
 
         dsout = self._retrieve('datastep.runcode', code=r'''
@@ -4507,11 +4541,21 @@ class CASTable(ParamManager, ActionParamManager):
                 %s
                 %s
             run;''' % (table.to_datastep_params(), retain,
-                       table.to_datastep_params(), drop, rename));
+                       table.to_input_datastep_params(), drop, rename))
 
-        tbl = dsout['OutputCasTables']['casTable'][0]
+        dsout = dsout['OutputCasTables']['casTable'][0]
 
-        return tbl
+        if skipna:
+            dsout = self._retrieve('datastep.runcode', code=r'''
+                data %s;
+                    set %s;
+                    if cmiss(of _all_) then delete;
+                run;''' % (dsout.to_datastep_params(),
+                           dsout.to_input_datastep_params()))
+
+            dsout = dsout['OutputCasTables']['casTable'][0]
+
+        return dsout
 
     def _normalize_distinct_casout(self, table, column='_NDis_', skipna=True):
         '''
@@ -4529,12 +4573,6 @@ class CASTable(ParamManager, ActionParamManager):
         '''
         self._loadactionset('transpose')
 
-        if skipna:
-            skipna = '    if cmiss(of _all_) then delete;\n' + \
-                     '    if nmiss(of _all_) then delete;\n'
-        else:
-            skipna = ''
-
         out = self._normalize_bygroups(drop=['_NAME_'])
         cols, groups, raw_groups, fmt_groups, retain, keep, drop, rename = out
 
@@ -4549,12 +4587,23 @@ class CASTable(ParamManager, ActionParamManager):
                 set %s;
                 %s
                 %s
-                %s
-            run;''' % (_quote(tbl), _quote(tbl), drop, rename, skipna));
+            run;''' % (_quote(tbl), _quote(tbl), drop, rename));
 
-        tbl = dsout['OutputCasTables']['casTable'][0]
+        dsout = dsout['OutputCasTables']['casTable'][0]
 
-        return tbl
+        if skipna:
+            dsout.params['replace'] = True
+
+            dsout = self.retrieve('datastep.runcode', code=r'''
+                data %s;
+                    set %s;
+                    if cmiss(of _all_) then delete;
+                run;''' % (dsout.to_datastep_params(),
+                           dsout.to_input_datastep_params()))
+
+            dsout = dsout['OutputCasTables']['casTable'][0]
+
+        return dsout
 
     def _normalize_topk_casout(self, table):
         '''
@@ -9768,7 +9817,7 @@ class CASColumn(CASTable):
         return out
 
     def value_counts(self, normalize=False, sort=True, ascending=False,
-                     bins=None, dropna=True):
+                     bins=None, dropna=True, casout=None):
         '''
         Return object containing counts of unique values
 
@@ -9794,6 +9843,9 @@ class CASColumn(CASTable):
         :class:`pandas.Series`
 
         '''
+        if self._use_casout_for_stat(casout):
+            return self._get_casout_stat('n', skipna=dropna, casout=casout)
+
         tmpname = str(uuid.uuid4())
         out = self._frequencies(includemissing=not dropna)
 
