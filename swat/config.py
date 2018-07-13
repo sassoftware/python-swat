@@ -263,6 +263,14 @@ register_option('cas.dataset.bygroup_collision_suffix', 'string', check_string, 
 register_option('cas.dataset.bygroup_as_index', 'boolean', check_boolean, True,
                 'If True, any by group columns are set as the DataFrame index.')
 
+register_option('cas.dataset.bygroup_casout_threshold', 'int', check_int, 25000,
+                'When using pandas DataFrame APIs for simple statistics (e.g. \n' +
+                'min, max, quantiles, etc.), if the number of By groupings is\n' +
+                'greater than this threshold, a CAS table of results is created\n' +
+                'rather than returning the results to the client.  Note that the\n' +
+                'number of by groups is only estimated based on the product of the\n' +
+                'cardinality of each by group variable.')
+
 #
 # Debugging options
 #
