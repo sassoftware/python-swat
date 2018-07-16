@@ -2684,7 +2684,7 @@ class CASTable(ParamManager, ActionParamManager):
 
     # Indexing, iteration
 
-    def head(self, n=5, columns=None, bygroup_as_index=True):
+    def head(self, n=5, columns=None, bygroup_as_index=True, casout=None):
         '''
         Retrieve first `n` rows
 
@@ -2708,10 +2708,12 @@ class CASTable(ParamManager, ActionParamManager):
         :class:`swat.SASDataFrame`
 
         '''
+        if self._use_casout_for_stat(casout):
+            return self._get_casout_slice(n, columns=True, ascending=True, casout=casout)
         return self.slice(start=0, stop=n, columns=columns,
                           bygroup_as_index=bygroup_as_index)
 
-    def tail(self, n=5, columns=None, bygroup_as_index=True):
+    def tail(self, n=5, columns=None, bygroup_as_index=True, casout=None):
         '''
         Retrieve last `n` rows
 
@@ -2735,10 +2737,13 @@ class CASTable(ParamManager, ActionParamManager):
         :class:`swat.SASDataFrame`
 
         '''
+        if self._use_casout_for_stat(casout):
+            raise NotImplemented('tail for casout is not implemented yet')
+            return self._get_casout_slice(n, columns=True, ascending=False, casout=casout)
         return self.slice(start=-n, stop=-1, columns=columns,
                           bygroup_as_index=bygroup_as_index)
 
-    def slice(self, start=0, stop=None, columns=None, bygroup_as_index=True):
+    def slice(self, start=0, stop=None, columns=None, bygroup_as_index=True, casout=None):
         '''
         Retrieve the specified rows
 
@@ -2765,6 +2770,10 @@ class CASTable(ParamManager, ActionParamManager):
         :class:`swat.SASDataFrame`
 
         '''
+        if self._use_casout_for_stat(casout):
+            return self._get_casout_slice(stop-start, columns=True, ascending=True,
+                                          casout=casout, start=start)
+
         from ..dataframe import concat
 
         tbl = self
@@ -2807,7 +2816,7 @@ class CASTable(ParamManager, ActionParamManager):
 
         return concat(out)
 
-    def nth(self, n, dropna=False, bygroup_as_index=True):
+    def nth(self, n, dropna=False, bygroup_as_index=True, casout=None):
         '''
         Return the nth row
 
@@ -2821,6 +2830,10 @@ class CASTable(ParamManager, ActionParamManager):
         :class:`pandas.DataFrame`
 
         '''
+        if self._use_casout_for_stat(casout):
+            return self._get_casout_slice(n, columns=True, ascending=True,
+                                          casout=casout, start=n)
+
         from ..dataframe import concat
         if not isinstance(n, items_types):
             n = [n]
@@ -3147,7 +3160,7 @@ class CASTable(ParamManager, ActionParamManager):
         '''
         view = self.to_view(name=_gen_table_name())
 
-        if casout is None:
+        if casout is None or casout is True:
             casout = {'name': _gen_table_name()}
         elif isinstance(casout, (text_types, binary_types)):
             casout = {'name': casout}
@@ -4874,7 +4887,103 @@ class CASTable(ParamManager, ActionParamManager):
         return self._topk_values('min', axis=axis, skipna=skipna, level=level,
                                  numeric_only=numeric_only, **kwargs)
 
-    def nlargest(self, n, columns, keep='first'):
+    def _get_casout_slice(self, n, columns=None, ascending=True,
+                          casout=None, start=None):
+        '''
+        Get a slice of a table (with by groups) and output to a CAS table
+
+        Parameters
+        ----------
+        n : int
+            The number of rows to return per by group
+        columns : string or list-of-strings, optional
+            Names of the columns to sort by
+        ascending : bool, optional
+            Should the sort order be ascending or descending?
+        casout : bool or string or CASTable or dict, optional
+            The CAS output table specification
+        single : bool, optional
+            Should `n` be interpretted as a range or single value? 
+
+        Returns
+        -------
+        :class:'CASTable' 
+
+        '''
+        if not self.has_groupby_vars():
+            raise ValueError('This method requires by groupings')
+
+        groups = self.get_groupby_vars()
+        sorts = [x['name'] for x in self._sortby]
+
+        if columns is None:
+            columns = sorts
+        elif columns is True:
+            columns = sorts = [x for x in self.columns if x not in sorts]
+
+        if not isinstance(columns, items_types):
+            columns = [columns]
+
+        out = self._normalize_bygroups()
+        cols, groups, raw_groups, fmt_groups, retain, keep, drop, rename = out
+
+        groups = [_nlit(x) for x in self.get_groupby_vars()]
+        sortby = [_nlit(x) for x in columns]
+
+        group_str = ' '.join(groups)
+        sortby_str = ' '.join(columns)
+        cond_str = ' or '.join(['first.%s' % x for x in groups])
+
+        if ascending:
+            sort_order = ''
+        else:
+            sort_order = 'descending '
+
+        if isinstance(casout, CASTable):
+            pass
+        elif isinstance(casout, dict):
+            casout = self.get_connection().CASTable(**casout)
+        elif isinstance(casout, six.string_types):
+            casout = self.get_connection().CASTable(casout)
+        else:
+            casout = self.get_connection().CASTable(_gen_table_name())
+
+        if start is None:
+            comp = '__count le %s' % int(n)
+        elif isinstance(n, items_types):
+            comp = '__count in (%s)' % ','.join('%s' % (int(x)+1) for x in n)
+        elif start == n:
+            comp = '__count eq %s' % int(n+1)
+        else:
+            comp = '__count ge %s and __count le %s' % (int(start+1), int(start+n))
+
+        casin = None
+        out = None
+
+        try:
+            casin = self.to_view()
+
+            out = self._retrieve('datastep.runcode', code=r'''
+                 data %s;
+                     %s
+                     set %s;
+                       by %s%s %s;
+                     if %s then __count = 0;
+                     __count + 1;
+                       if %s then output;
+                     drop __count;
+                   run;
+             ''' % (casout.to_datastep_params(), retain,
+                    casin.to_input_datastep_params(), sort_order, group_str, sortby_str,
+                      cond_str, comp))
+
+        finally:  
+            if casin is not None:
+                casin._retrieve('table.droptable')
+
+        return out['OutputCasTables']['casTable'][0]
+
+    def nlargest(self, n, columns, keep='first', casout=None):
         '''
         Return the `n` largest values ordered by `columns`
 
@@ -4897,9 +5006,13 @@ class CASTable(ParamManager, ActionParamManager):
         :class:`pandas.Series`
 
         '''
+        if self._use_casout_for_stat(casout):
+            raise NotImplementedError('nlargest is not implemented for casout yet')
+            return self._get_casout_slice(n, columns=columns,
+                                          ascending=False, casout=casout)
         return self.sort_values(columns, ascending=False).slice(0, n)
 
-    def nsmallest(self, n, columns, keep='first'):
+    def nsmallest(self, n, columns, keep='first', casout=None):
         '''
         Return the `n` smallest values ordered by `columns`
 
@@ -4922,6 +5035,9 @@ class CASTable(ParamManager, ActionParamManager):
         :class:`pandas.Series`
 
         '''
+        if self._use_casout_for_stat(casout):
+            return self._get_casout_slice(n, columns=columns,
+                                          ascending=True, casout=casout)
         return self.sort_values(columns, ascending=True).slice(0, n)
 
     def mode(self, axis=0, numeric_only=False, max_tie=100, skipna=True):
@@ -6188,6 +6304,10 @@ class CASTable(ParamManager, ActionParamManager):
         kwargs['tables'] = [self.to_table_params()]
         if not args and 'name' not in kwargs:
             kwargs['name'] = _gen_table_name()
+        if 'groupby' in kwargs['tables'][0]:
+            kwargs['tables'][0].pop('groupby', None)
+        groups = self.get_groupby_vars()
+        kwargs['tables'][0]['vars'] = groups + [x for x in self.columns if x not in groups]
         out = self._retrieve('table.view', *args, **kwargs)
         if 'caslib' in out and 'viewName' in out:
             conn = self.get_connection()
@@ -8947,21 +9067,34 @@ class CASColumn(CASTable):
         ''' Return a list of the column values '''
         return self._fetch().ix[:, 0].tolist()
 
-    def head(self, n=5, bygroup_as_index=True):
+    def head(self, n=5, bygroup_as_index=True, casout=None):
         ''' Return first `n` rows of the column in a Series '''
+        if self._use_casout_for_stat(casout):
+            return self._get_casout_slice(n, columns=True, ascending=True, casout=casout)
         return self.slice(start=0, stop=n, bygroup_as_index=bygroup_as_index)
 
-    def tail(self, n=5, bygroup_as_index=True):
+    def tail(self, n=5, bygroup_as_index=True, casout=None):
         ''' Return last `n` rows of the column in a Series '''
+        if self._use_casout_for_stat(casout):
+            raise NotImplemented('tail is not implement for casout yet')
+            return self._get_casout_slice(n, columns=True, ascending=True, casout=casout)
         return self.slice(start=-n, stop=-1, bygroup_as_index=True)
 
-    def slice(self, start=0, stop=None, bygroup_as_index=True):
+    def slice(self, start=0, stop=None, bygroup_as_index=True, casout=None):
         ''' Return from rows from `start` to `stop` in a Series '''
+        if self._use_casout_for_stat(casout):
+            if stop is None:
+                stop = len(self)
+            return self._get_casout_slice(stop-start, columns=True, ascending=True,
+                                          casout=casout, start=start)
         return CASTable.slice(self, start=start, stop=stop,
                               bygroup_as_index=bygroup_as_index)[self.name]
 
-    def nth(self, n, dropna=False, bygroup_as_index=True):
+    def nth(self, n, dropna=False, bygroup_as_index=True, casout=None):
         ''' Return the nth row '''
+        if self._use_casout_for_stat(casout):
+            return self._get_casout_slice(n, columns=True, ascending=True,
+                                          casout=casout, start=n)
         return CASTable.nth(self, n=n, bygroup_as_index=True)
 
     def add(self, other, level=None, fill_value=None, axis=0):
@@ -9644,7 +9777,7 @@ class CASColumn(CASTable):
 
         return self._get_summary_stat('sum')
 
-    def nlargest(self, n=5, keep='first'):
+    def nlargest(self, n=5, keep='first', casout=None):
         '''
         Return the n largest values
 
@@ -9658,9 +9791,13 @@ class CASColumn(CASTable):
         :class:`pandas.Series`
 
         '''
+        if self._use_casout_for_stat(casout):
+            raise NotImplementedError('nlargest is not implemented for casout yet')
+            return self._get_casout_slice(n, columns=[self.name],
+                                          ascending=False, casout=casout)
         return self.sort_values([self.name], ascending=False).slice(0, n)
 
-    def nsmallest(self, n=5, keep='first'):
+    def nsmallest(self, n=5, keep='first', casout=None):
         '''
         Return the n smallest values
 
@@ -9674,6 +9811,9 @@ class CASColumn(CASTable):
         :class:`pandas.Series`
 
         '''
+        if self._use_casout_for_stat(casout):
+            return self._get_casout_slice(n, columns=[self.name],
+                                          ascending=True, casout=casout)
         return self.sort_values([self.name], ascending=True).slice(0, n)
 
     def std(self, axis=None, skipna=None, level=None, ddof=1, casout=None):

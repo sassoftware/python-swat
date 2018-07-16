@@ -199,6 +199,17 @@ class TestByGroups(tm.TestCase):
                  'Make in ("Porsche", "BMW")').nlargest(2)
         self.assertTablesEqual(dfgrp.reset_index(), tblgrp, sortby=None)
 
+        #
+        # Test casout threshold
+        #
+        swat.options.cas.dataset.bygroup_casout_threshold = 2
+
+        with self.assertRaises(NotImplementedError):
+            tblgrp = tbl['MSRP'].groupby(['Make', 'Cylinders'], as_index=False).query(
+                     'Make in ("Porsche", "BMW")').nlargest(2)
+        # self.assertEqual(tblgrp.__class__.__name__, 'CASTable')
+        # self.assertTablesEqual(dfgrp.reset_index(), tblgrp, sortby=None)
+
     @unittest.skipIf(int(pd.__version__.split('.')[1]) <= 16, 'Need newer version of Pandas')
     def test_nlargest(self):
         df = self.get_cars_df()
@@ -220,6 +231,17 @@ class TestByGroups(tm.TestCase):
                       'Cylinders'], as_index=False).query('Make in ("Porsche", "BMW")').nlargest(2, columns=['MSRP'])
         self.assertTablesEqual(dfgrp.reset_index(), tblgrp, sortby=None)
 
+        #
+        # Test casout threshold
+        #
+        swat.options.cas.dataset.bygroup_casout_threshold = 2
+
+        with self.assertRaises(NotImplementedError):
+            tblgrp = tbl[['Model', 'MSRP', 'Horsepower']].groupby(['Make',
+                          'Cylinders'], as_index=False).query('Make in ("Porsche", "BMW")').nlargest(2, columns=['MSRP'])
+        # self.assertEqual(tblgrp.__class__.__name__, 'CASTable')
+        # self.assertTablesEqual(dfgrp.reset_index(), tblgrp, sortby=None)
+
     @unittest.skipIf(int(pd.__version__.split('.')[1]) <= 16, 'Need newer version of Pandas')
     def test_column_nsmallest(self):
         df = self.get_cars_df()
@@ -239,6 +261,16 @@ class TestByGroups(tm.TestCase):
 
         tblgrp = tbl['MSRP'].groupby(['Make', 'Cylinders'], as_index=False).query(
                  'Make in ("Porsche", "BMW")').nsmallest(2)
+        self.assertTablesEqual(dfgrp.reset_index(), tblgrp, sortby=None)
+
+        #
+        # Test casout threshold
+        #
+        swat.options.cas.dataset.bygroup_casout_threshold = 2
+
+        tblgrp = tbl['MSRP'].groupby(['Make', 'Cylinders'], as_index=False).query(
+                 'Make in ("Porsche", "BMW")').nsmallest(2)
+        self.assertEqual(tblgrp.__class__.__name__, 'CASTable')
         self.assertTablesEqual(dfgrp.reset_index(), tblgrp, sortby=None)
 
     @unittest.skipIf(int(pd.__version__.split('.')[1]) <= 16, 'Need newer version of Pandas')
@@ -262,6 +294,18 @@ class TestByGroups(tm.TestCase):
                       'Cylinders'], as_index=False).query('Make in ("Porsche", "BMW")').nsmallest(2, columns=['MSRP'])
         self.assertTablesEqual(dfgrp.reset_index(), tblgrp, sortby=None)
 
+        #
+        # Test casout threshold
+        #
+        swat.options.cas.dataset.bygroup_casout_threshold = 2
+
+        swat.options.cas.trace_actions = True
+        swat.options.cas.trace_ui_actions = True
+        tblgrp = tbl[['Model', 'MSRP', 'Horsepower']].groupby(['Make',
+                      'Cylinders'], as_index=False).query('Make in ("Porsche", "BMW")').nsmallest(2, columns=['MSRP'])
+        self.assertEqual(tblgrp.__class__.__name__, 'CASTable')
+        self.assertTablesEqual(dfgrp.reset_index(), tblgrp, sortby=None)
+
     @unittest.skipIf(int(pd.__version__.split('.')[1]) < 16, 'Need newer version of Pandas')
     def test_column_head(self):
         df = self.get_cars_df().sort_values(SORT_KEYS)
@@ -279,6 +323,16 @@ class TestByGroups(tm.TestCase):
         tblgrp = tbl['MSRP'].groupby('Origin', as_index=True).head()
         self.assertColsEqual(dfgrp, tblgrp, sort=None, include_index=False)
 
+        #
+        # Test casout threshold
+        #
+        swat.options.cas.dataset.bygroup_casout_threshold = 2
+
+        tblgrp = tbl['MSRP'].groupby('Origin').head(10)
+        self.assertEqual(tblgrp.__class__.__name__, 'CASTable')
+        self.assertEqual(list(tblgrp.columns), ['Origin', 'MSRP'])
+        self.assertEqual(len(tblgrp), 30)
+
     def test_head(self):
         df = self.get_cars_df().sort_values(SORT_KEYS)
         tbl = self.table.sort_values(SORT_KEYS)
@@ -290,6 +344,20 @@ class TestByGroups(tm.TestCase):
         dfgrp = df.groupby('Origin').head(10)
         tblgrp = tbl.groupby('Origin').head(10)
         self.assertTablesEqual(dfgrp, tblgrp, sortby=None)
+
+        #
+        # Test casout threshold
+        #
+        swat.options.cas.dataset.bygroup_casout_threshold = 2
+
+        tblgrp = tbl.groupby('Origin').head(10)
+        self.assertEqual(tblgrp.__class__.__name__, 'CASTable')
+        self.assertEqual(list(tblgrp.columns), ['Origin', 'Make', 'Model', 'Type',
+                                                'DriveTrain', 'MSRP', 'Invoice',
+                                                'EngineSize', 'Cylinders', 'Horsepower',
+                                                'MPG_City', 'MPG_Highway',
+                                                'Weight', 'Wheelbase', 'Length'])
+        self.assertEqual(len(tblgrp), 30)
 
     @unittest.skipIf(int(pd.__version__.split('.')[1]) < 16, 'Need newer version of Pandas')
     def test_column_tail(self):
@@ -337,6 +405,21 @@ class TestByGroups(tm.TestCase):
         tblgrp = tbl.groupby('Origin').slice(5, 9, bygroup_as_index=True)
         self.assertTablesEqual(dfgrp, tblgrp, sortby=None, include_index=True)
 
+        #
+        # Test casout threshold
+        #
+        swat.options.cas.dataset.bygroup_casout_threshold = 2
+
+        tblgrp = tbl.groupby('Origin').slice(5, 9)
+        self.assertEqual(tblgrp.__class__.__name__, 'CASTable')
+        self.assertEqual(list(tblgrp.columns), ['Origin', 'Make', 'Model', 'Type',
+                                                'DriveTrain', 'MSRP', 'Invoice',
+                                                'EngineSize', 'Cylinders',
+                                                'Horsepower', 'MPG_City',
+                                                'MPG_Highway', 'Weight',
+                                                'Wheelbase', 'Length'])
+        self.assertEqual(len(tblgrp), 12)
+
     @unittest.skipIf(int(pd.__version__.split('.')[1]) < 16, 'Need newer version of Pandas')
     def test_column_slice(self):
         df = self.get_cars_df().sort_values(SORT_KEYS)
@@ -354,6 +437,16 @@ class TestByGroups(tm.TestCase):
         tblgrp = tbl['MSRP'].groupby('Origin').slice(5, 9, bygroup_as_index=True)
         self.assertColsEqual(dfgrp, tblgrp, sort=None, include_index=True)
 
+        #
+        # Test casout threshold
+        #
+        swat.options.cas.dataset.bygroup_casout_threshold = 2
+
+        tblgrp = tbl['MSRP'].groupby('Origin').slice(5, 9)
+        self.assertEqual(tblgrp.__class__.__name__, 'CASTable')
+        self.assertEqual(list(tblgrp.columns), ['Origin', 'MSRP'])
+        self.assertEqual(len(tblgrp), 12)
+
     @unittest.skipIf(int(pd.__version__.split('.')[1]) < 16, 'Need newer version of Pandas')
     def test_column_nth(self):
         df = self.get_cars_df().sort_values(SORT_KEYS)
@@ -366,6 +459,16 @@ class TestByGroups(tm.TestCase):
         dfgrp = df.groupby('Origin')['MSRP'].nth([5, 7])
         tblgrp = tbl.groupby('Origin')['MSRP'].nth([5, 7])
         self.assertColsEqual(dfgrp, tblgrp, sort=True)
+
+        #
+        # Test casout threshold
+        #
+        swat.options.cas.dataset.bygroup_casout_threshold = 2
+
+        tblgrp = tbl.groupby('Origin')['MSRP'].nth([5, 7])
+        self.assertEqual(tblgrp.__class__.__name__, 'CASTable')
+        self.assertEqual(list(tblgrp.columns), ['Origin', 'MSRP'])
+        self.assertEqual(len(tblgrp), 6)
 
     def test_nth(self):
         df = self.get_cars_df().sort_values(SORT_KEYS)
@@ -380,6 +483,21 @@ class TestByGroups(tm.TestCase):
         dfgrp = df.groupby('Origin').nth([5, 7])[columns]
         tblgrp = tbl.groupby('Origin').nth([5, 7])
         self.assertTablesEqual(dfgrp, tblgrp, sortby=None, include_index=True)
+
+        #
+        # Test casout threshold
+        #
+        swat.options.cas.dataset.bygroup_casout_threshold = 2
+
+        tblgrp = tbl.groupby('Origin').nth([5, 7])
+        self.assertEqual(tblgrp.__class__.__name__, 'CASTable')
+        self.assertEqual(list(tblgrp.columns), ['Origin', 'Make', 'Model', 'Type',
+                                                'DriveTrain', 'MSRP', 'Invoice',
+                                                'EngineSize', 'Cylinders',
+                                                'Horsepower', 'MPG_City',
+                                                'MPG_Highway', 'Weight',
+                                                'Wheelbase', 'Length'])
+        self.assertEqual(len(tblgrp), 6)
 
     def test_column_unique(self):
         df = self.get_cars_df().sort_values(SORT_KEYS)
