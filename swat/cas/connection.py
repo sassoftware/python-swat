@@ -48,7 +48,7 @@ from .request import CASRequest
 from .response import CASResponse
 from .results import CASResults
 from .utils.params import ParamManager, ActionParamManager
-from .utils.misc import super_dir
+from .utils.misc import super_dir, any_file_exists
 
 # pylint: disable=W0212
 
@@ -216,6 +216,16 @@ class CAS(object):
     def __init__(self, hostname=None, port=None, username=None, password=None,
                  session=None, locale=None, nworkers=None, name=None,
                  authinfo=None, protocol=None, **kwargs):
+
+        # Check for explicitly specified authinfo files
+        if authinfo is not None:
+            if not any_file_exists(authinfo):
+                if isinstance(authinfo, items_types):
+                    raise OSError('None of the specified authinfo files '
+                                  'exist: %s' % ', '.join(authinfo))
+                else:
+                    raise OSError('The specified authinfo file does not '
+                                  'exist: %s' % authinfo) 
 
         # If a prototype exists, use it for the connection config
         prototype = kwargs.get('prototype')

@@ -23,6 +23,8 @@ Utilities for CAS modules
 
 from __future__ import print_function, division, absolute_import, unicode_literals
 
+import os
+
 
 def super_dir(cls, obj):
     '''
@@ -61,3 +63,26 @@ def super_dir(cls, obj):
         out.update(get_attrs(obj))
 
         return list(str(x).decode('utf8') for x in sorted(out) if not x.startswith('_'))
+
+
+def any_file_exists(files):
+    '''
+    Determine if any specified files actually exist
+
+    Parameters
+    ----------
+    files : string or list-of-strings or None
+        If string, the value is the filename.  If list, a boolean is returned
+        indicating if any of the files exist.
+
+    '''
+    if isinstance(files, (list, tuple, set)):
+        for item in files:
+            if os.path.isfile(item):
+                return True
+
+    elif os.path.isfile(files):
+        return True
+
+    return False
+
