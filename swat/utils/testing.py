@@ -304,7 +304,7 @@ def load_data(conn, path, server_type, casout=None, importoptions=None):
     out_lib = get_casout_lib(server_type)
 
     if casout is None:
-        casout = dict(caslib='casuser')
+        casout = dict(caslib=out_lib)
 
     if 'caslib' not in casout and 'casLib' not in casout:
         casout['caslib'] = out_lib
