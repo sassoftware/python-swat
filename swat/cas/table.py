@@ -2705,7 +2705,7 @@ class CASTable(ParamManager, ActionParamManager):
 
         Returns
         -------
-        :class:`swat.SASDataFrame`
+        :class:`SASDataFrame`
 
         '''
         if self._use_casout_for_stat(casout):
@@ -2734,7 +2734,7 @@ class CASTable(ParamManager, ActionParamManager):
 
         Returns
         -------
-        :class:`swat.SASDataFrame`
+        :class:`SASDataFrame`
 
         '''
         if self._use_casout_for_stat(casout):
@@ -2767,7 +2767,7 @@ class CASTable(ParamManager, ActionParamManager):
 
         Returns
         -------
-        :class:`swat.SASDataFrame`
+        :class:`SASDataFrame`
 
         '''
         if self._use_casout_for_stat(casout):
@@ -7840,7 +7840,7 @@ class CharacterColumnMethods(object):
 
         Raises
         ------
-        ``ValueError``
+        ValueError
             If the substring is not found in a data element
 
         '''

@@ -44,7 +44,7 @@ class SASFormatter(object):
     Create a locale-aware SAS value formatter
 
     This class is typically constructed by calling the :meth:`CAS.SASFormatter`
-    method.  When used in that way, the options for the :class:`SASFormatter'
+    method.  When used in that way, the options for the :class:`SASFormatter`
     match the :class:`CAS` settings.
 
     Parameters
