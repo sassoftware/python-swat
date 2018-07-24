@@ -19,13 +19,14 @@
 ''' Install the SAS Scripting Wrapper for Analytics Transfer (SWAT) module '''
 
 import glob
+import io
 import os
 from setuptools import setup, find_packages
 
 
 def get_file(fname):
-    with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), fname),
-              encoding='utf8') as infile:
+    with io.open(os.path.join(os.path.dirname(os.path.abspath(__file__)), fname),
+                 encoding='utf8') as infile:
         return infile.read()
 
 
