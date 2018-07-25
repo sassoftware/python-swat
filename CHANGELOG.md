@@ -1,6 +1,12 @@
 
 # Change Log
 
+## 1.4.0 - 2018-07-25
+
+- Automatic CAS table creation when large number of By groups are generated in some DataFrame methods
+- Debugging options for REST interface
+- Python 3.7 support
+
 ## 1.3.1 - 2018-06-04
 
 - Increase compatibility with older and newer versions of pandas
