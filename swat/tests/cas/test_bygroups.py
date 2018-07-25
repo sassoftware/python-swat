@@ -579,7 +579,7 @@ class TestByGroups(tm.TestCase):
 
         tblgrp = tbl['MSRP'].groupby(['Origin', 'Cylinders'], as_index=False).nunique()
         self.assertEqual(tblgrp.__class__.__name__, 'CASTable')
-        self.assertTablesEqual(dfgrp.reset_index(), tblgrp, sortby=None)
+        self.assertTablesEqual(dfgrp.reset_index(), tblgrp, sortby=['Origin', 'Cylinders', 'MSRP'])
 
     def test_nunique(self):
         tbl = self.table.sort_values(SORT_KEYS)
@@ -663,7 +663,7 @@ class TestByGroups(tm.TestCase):
 
         tblgrp = tbl['EngineSize'].groupby('Origin', as_index=False).max()
         self.assertEqual(tblgrp.__class__.__name__, 'CASTable')
-        self.assertTablesEqual(dfgrp.reset_index(), tblgrp, sortby=None)
+        self.assertTablesEqual(dfgrp.reset_index(), tblgrp, sortby=['Origin', 'EngineSize'])
 
     @unittest.skipIf(int(pd.__version__.split('.')[1]) < 16, 'Need newer version of Pandas')
     def test_max(self):
@@ -698,7 +698,7 @@ class TestByGroups(tm.TestCase):
         self.assertEqual(tblgrp.__class__.__name__, 'CASTable')
         # Drop Model since they get sorted differently
         self.assertTablesEqual(dfgrp.drop('Model', axis=1), tblgrp.drop('Model', axis=1),
-                               sortby=None, include_index=True)
+                               sortby=['Origin', 'Make', 'Type', 'DriveTrain'])
 
     def test_column_min(self):
         df = self.get_cars_df().sort_values(SORT_KEYS)
@@ -722,7 +722,7 @@ class TestByGroups(tm.TestCase):
 
         tblgrp = tbl['EngineSize'].groupby('Origin', as_index=False).min()
         self.assertEqual(tblgrp.__class__.__name__, 'CASTable')
-        self.assertTablesEqual(dfgrp.reset_index(), tblgrp, sortby=None)
+        self.assertTablesEqual(dfgrp.reset_index(), tblgrp, sortby=['Origin', 'EngineSize'])
 
     @unittest.skipIf(int(pd.__version__.split('.')[1]) < 16, 'Need newer version of Pandas')
     def test_min(self):
@@ -757,7 +757,7 @@ class TestByGroups(tm.TestCase):
         self.assertEqual(tblgrp.__class__.__name__, 'CASTable')
         # Drop Type since it gets sorted differently
         self.assertTablesEqual(dfgrp.drop('Type', axis=1), tblgrp.drop('Type', axis=1),
-                               sortby=None)
+                               sortby=['Origin', 'Make', 'Model'])
 
     def test_column_mean(self):
         df = self.get_cars_df().sort_values(SORT_KEYS)
@@ -781,7 +781,7 @@ class TestByGroups(tm.TestCase):
 
         tblgrp = tbl['EngineSize'].groupby('Origin', as_index=False).mean()
         self.assertEqual(tblgrp.__class__.__name__, 'CASTable')
-        self.assertTablesEqual(dfgrp.reset_index(), tblgrp, sortby=None, decimals=5)
+        self.assertTablesEqual(dfgrp.reset_index(), tblgrp, sortby=['Origin', 'EngineSize'], decimals=5)
 
     @unittest.skipIf(sys.version_info.major < 3, 'Need newer version of Python')
     def test_mean(self):
@@ -804,7 +804,7 @@ class TestByGroups(tm.TestCase):
         dfgrp = df.groupby('Origin', as_index=False).mean()
         tblgrp = tbl.groupby('Origin', as_index=False).mean()
         self.assertEqual(tblgrp.__class__.__name__, 'CASTable')
-        self.assertTablesEqual(dfgrp, tblgrp, sortby=None, decimals=5)
+        self.assertTablesEqual(dfgrp, tblgrp, sortby=['Origin', 'MSRP', 'Invoice'], decimals=5)
 
     def test_column_median(self):
         df = self.get_cars_df().sort_values(SORT_KEYS)
@@ -978,7 +978,7 @@ class TestByGroups(tm.TestCase):
 
         tblgrp = tbl['EngineSize'].groupby('Origin', as_index=False).sum()
         self.assertEqual(tblgrp.__class__.__name__, 'CASTable')
-        self.assertTablesEqual(dfgrp.reset_index(), tblgrp, sortby=None, decimals=5)
+        self.assertTablesEqual(dfgrp.reset_index(), tblgrp, sortby=['Origin', 'EngineSize'], decimals=5)
 
     def test_sum(self):
         df = self.get_cars_df().sort_values(SORT_KEYS)
@@ -1000,7 +1000,7 @@ class TestByGroups(tm.TestCase):
         dfgrp = df.groupby('Origin', as_index=False).sum()
         tblgrp = tbl.groupby('Origin', as_index=False).sum()
         self.assertEqual(tblgrp.__class__.__name__, 'CASTable')
-        self.assertTablesEqual(dfgrp, tblgrp, decimals=5, sortby=None)
+        self.assertTablesEqual(dfgrp, tblgrp, decimals=5, sortby=['Origin', 'MSRP', 'Invoice'])
 
     def test_column_std(self):
         df = self.get_cars_df().sort_values(SORT_KEYS)
@@ -1024,7 +1024,7 @@ class TestByGroups(tm.TestCase):
 
         tblgrp = tbl['EngineSize'].groupby('Origin', as_index=False).std()
         self.assertEqual(tblgrp.__class__.__name__, 'CASTable')
-        self.assertTablesEqual(dfgrp.reset_index(), tblgrp, sortby=None, decimals=5)
+        self.assertTablesEqual(dfgrp.reset_index(), tblgrp, sortby=['Origin', 'EngineSize'], decimals=5)
 
     def test_std(self):
         df = self.get_cars_df().sort_values(SORT_KEYS)
@@ -1046,7 +1046,7 @@ class TestByGroups(tm.TestCase):
         #dfgrp = df.groupby('Origin', as_index=False).std()
         tblgrp = tbl.groupby('Origin', as_index=False).std()
         self.assertEqual(tblgrp.__class__.__name__, 'CASTable')
-        self.assertTablesEqual(dfgrp.reset_index(), tblgrp, decimals=5, sortby=None)
+        self.assertTablesEqual(dfgrp.reset_index(), tblgrp, decimals=5, sortby=['Origin', 'MSRP', 'Invoice'])
 
     def test_column_var(self):
         df = self.get_cars_df().sort_values(SORT_KEYS)
@@ -1074,7 +1074,7 @@ class TestByGroups(tm.TestCase):
         # For some reason Pandas drops this column, but I think it should be there.
         tblgrp = tblgrp.drop('Origin', axis=1)
         self.assertEqual(tblgrp.__class__.__name__, 'CASTable')
-        self.assertTablesEqual(dfgrp, tblgrp, decimals=5, sortby=None)
+        self.assertTablesEqual(dfgrp, tblgrp, decimals=5, sortby=['EngineSize'])
 
     def test_var(self):
         df = self.get_cars_df().sort_values(SORT_KEYS)
@@ -1096,7 +1096,7 @@ class TestByGroups(tm.TestCase):
         dfgrp = df.groupby('Origin', as_index=False).var()
         tblgrp = tbl.groupby('Origin', as_index=False).var()
         self.assertEqual(tblgrp.__class__.__name__, 'CASTable')
-        self.assertTablesEqual(dfgrp, tblgrp, decimals=3, sortby=None)
+        self.assertTablesEqual(dfgrp, tblgrp, decimals=3, sortby=['Origin', 'MSRP', 'Invoice'])
 
     def test_column_nmiss(self):
         # TODO: Not supported by Pandas; need comparison values
@@ -1119,6 +1119,9 @@ class TestByGroups(tm.TestCase):
         self.assertEqual(len(tblgrp), 3)
 
         # Test character missing values
+        swat.options.cas.trace_actions = True
+        swat.options.cas.trace_ui_actions = True
+        swat.options.cas.print_messages = True
         tbl = self.table.replace({'Make': {'Buick': ''}})
 
         tblgrp = tbl.groupby('Origin')['Make'].nmiss()
@@ -1138,12 +1141,10 @@ class TestByGroups(tm.TestCase):
         #
         swat.options.cas.dataset.bygroup_casout_threshold = 2
 
-        swat.options.cas.print_messages = True
         tblgrp = tbl['Cylinders'].groupby('Origin').nmiss()
         self.assertEqual(tblgrp.__class__.__name__, 'CASTable')
         self.assertEqual(len(tblgrp), 3)
         tblgrp = tblgrp.to_frame().set_index('Origin')['Cylinders']
-        print(tblgrp)
         self.assertEqual(tblgrp.loc['Asia'], 2)
         self.assertEqual(tblgrp.loc['Europe'], 0)
         self.assertEqual(tblgrp.loc['USA'], 0)

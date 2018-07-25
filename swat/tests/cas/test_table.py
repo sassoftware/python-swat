@@ -3466,116 +3466,116 @@ class TestCASTable(tm.TestCase):
             self.table['Model'].dt.year
 
         # year
-        self.assertColsEqual(df.date.dt.year, tbl.date.dt.year)
-        self.assertColsEqual(df.time.dt.year, tbl.time.dt.year)
-        self.assertColsEqual(df.datetime.dt.year, tbl.datetime.dt.year)
+        self.assertColsEqual(df.date.dt.year, tbl.date.dt.year, sort=True)
+        self.assertColsEqual(df.time.dt.year, tbl.time.dt.year, sort=True)
+        self.assertColsEqual(df.datetime.dt.year, tbl.datetime.dt.year, sort=True)
 
         # month
-        self.assertColsEqual(df.date.dt.month, tbl.date.dt.month)
-        self.assertColsEqual(df.time.dt.month, tbl.time.dt.month)
-        self.assertColsEqual(df.datetime.dt.month, tbl.datetime.dt.month)
+        self.assertColsEqual(df.date.dt.month, tbl.date.dt.month, sort=True)
+        self.assertColsEqual(df.time.dt.month, tbl.time.dt.month, sort=True)
+        self.assertColsEqual(df.datetime.dt.month, tbl.datetime.dt.month, sort=True)
 
         # day
-        self.assertColsEqual(df.date.dt.day, tbl.date.dt.day)
-        self.assertColsEqual(df.time.dt.day, tbl.time.dt.day)
-        self.assertColsEqual(df.datetime.dt.day, tbl.datetime.dt.day)
+        self.assertColsEqual(df.date.dt.day, tbl.date.dt.day, sort=True)
+        self.assertColsEqual(df.time.dt.day, tbl.time.dt.day, sort=True)
+        self.assertColsEqual(df.datetime.dt.day, tbl.datetime.dt.day, sort=True)
 
         # hour
-        self.assertColsEqual(df.date.dt.hour, tbl.date.dt.hour)
-        self.assertColsEqual(df.time.dt.hour, tbl.time.dt.hour)
-        self.assertColsEqual(df.datetime.dt.hour, tbl.datetime.dt.hour)
+        self.assertColsEqual(df.date.dt.hour, tbl.date.dt.hour, sort=True)
+        self.assertColsEqual(df.time.dt.hour, tbl.time.dt.hour, sort=True)
+        self.assertColsEqual(df.datetime.dt.hour, tbl.datetime.dt.hour, sort=True)
 
         # minute
-        self.assertColsEqual(df.date.dt.minute, tbl.date.dt.minute)
-        self.assertColsEqual(df.time.dt.minute, tbl.time.dt.minute)
-        self.assertColsEqual(df.datetime.dt.minute, tbl.datetime.dt.minute)
+        self.assertColsEqual(df.date.dt.minute, tbl.date.dt.minute, sort=True)
+        self.assertColsEqual(df.time.dt.minute, tbl.time.dt.minute, sort=True)
+        self.assertColsEqual(df.datetime.dt.minute, tbl.datetime.dt.minute, sort=True)
 
         # second
-        self.assertColsEqual(df.date.dt.second, tbl.date.dt.second)
-        self.assertColsEqual(df.time.dt.second, tbl.time.dt.second)
-        self.assertColsEqual(df.datetime.dt.second, tbl.datetime.dt.second)
+        self.assertColsEqual(df.date.dt.second, tbl.date.dt.second, sort=True)
+        self.assertColsEqual(df.time.dt.second, tbl.time.dt.second, sort=True)
+        self.assertColsEqual(df.datetime.dt.second, tbl.datetime.dt.second, sort=True)
 
         # microsecond
         # TODO: Needs to be implemented yet
-        self.assertColsEqual(df.date.dt.microsecond, tbl.date.dt.microsecond)
-        self.assertColsEqual(df.time.dt.microsecond, tbl.time.dt.microsecond)
-        self.assertColsEqual(df.datetime.dt.microsecond, tbl.datetime.dt.microsecond)
+        self.assertColsEqual(df.date.dt.microsecond, tbl.date.dt.microsecond, sort=True)
+        self.assertColsEqual(df.time.dt.microsecond, tbl.time.dt.microsecond, sort=True)
+        self.assertColsEqual(df.datetime.dt.microsecond, tbl.datetime.dt.microsecond, sort=True)
 
         # nanosecond
         # NOTE: nanosecond precision is not supported
-        self.assertColsEqual(df.date.dt.nanosecond, tbl.date.dt.nanosecond)
-        self.assertColsEqual(df.time.dt.nanosecond, tbl.time.dt.nanosecond)
-        self.assertColsEqual(df.datetime.dt.nanosecond, tbl.datetime.dt.nanosecond)
+        self.assertColsEqual(df.date.dt.nanosecond, tbl.date.dt.nanosecond, sort=True)
+        self.assertColsEqual(df.time.dt.nanosecond, tbl.time.dt.nanosecond, sort=True)
+        self.assertColsEqual(df.datetime.dt.nanosecond, tbl.datetime.dt.nanosecond, sort=True)
 
         # week
-        self.assertColsEqual(df.date.dt.week, tbl.date.dt.week)
-        self.assertColsEqual(df.time.dt.week, tbl.time.dt.week)
-        self.assertColsEqual(df.datetime.dt.week, tbl.datetime.dt.week)
+        self.assertColsEqual(df.date.dt.week, tbl.date.dt.week, sort=True)
+        self.assertColsEqual(df.time.dt.week, tbl.time.dt.week, sort=True)
+        self.assertColsEqual(df.datetime.dt.week, tbl.datetime.dt.week, sort=True)
 
         # weekofyear
-        self.assertColsEqual(df.date.dt.weekofyear, tbl.date.dt.weekofyear)
-        self.assertColsEqual(df.time.dt.weekofyear, tbl.time.dt.weekofyear)
-        self.assertColsEqual(df.datetime.dt.weekofyear, tbl.datetime.dt.weekofyear)
+        self.assertColsEqual(df.date.dt.weekofyear, tbl.date.dt.weekofyear, sort=True)
+        self.assertColsEqual(df.time.dt.weekofyear, tbl.time.dt.weekofyear, sort=True)
+        self.assertColsEqual(df.datetime.dt.weekofyear, tbl.datetime.dt.weekofyear, sort=True)
 
         # dayofweek
-        self.assertColsEqual(df.date.dt.dayofweek, tbl.date.dt.dayofweek)
-        self.assertColsEqual(df.time.dt.dayofweek, tbl.time.dt.dayofweek)
-        self.assertColsEqual(df.datetime.dt.dayofweek, tbl.datetime.dt.dayofweek)
+        self.assertColsEqual(df.date.dt.dayofweek, tbl.date.dt.dayofweek, sort=True)
+        self.assertColsEqual(df.time.dt.dayofweek, tbl.time.dt.dayofweek, sort=True)
+        self.assertColsEqual(df.datetime.dt.dayofweek, tbl.datetime.dt.dayofweek, sort=True)
 
         # weekday
-        self.assertColsEqual(df.date.dt.weekday, tbl.date.dt.weekday)
-        self.assertColsEqual(df.time.dt.weekday, tbl.time.dt.weekday)
-        self.assertColsEqual(df.datetime.dt.weekday, tbl.datetime.dt.weekday)
+        self.assertColsEqual(df.date.dt.weekday, tbl.date.dt.weekday, sort=True)
+        self.assertColsEqual(df.time.dt.weekday, tbl.time.dt.weekday, sort=True)
+        self.assertColsEqual(df.datetime.dt.weekday, tbl.datetime.dt.weekday, sort=True)
 
         # dayofyear
-        self.assertColsEqual(df.date.dt.dayofyear, tbl.date.dt.dayofyear)
-        self.assertColsEqual(df.time.dt.dayofyear, tbl.time.dt.dayofyear)
-        self.assertColsEqual(df.datetime.dt.dayofyear, tbl.datetime.dt.dayofyear)
+        self.assertColsEqual(df.date.dt.dayofyear, tbl.date.dt.dayofyear, sort=True)
+        self.assertColsEqual(df.time.dt.dayofyear, tbl.time.dt.dayofyear, sort=True)
+        self.assertColsEqual(df.datetime.dt.dayofyear, tbl.datetime.dt.dayofyear, sort=True)
 
         # quarter
-        self.assertColsEqual(df.date.dt.quarter, tbl.date.dt.quarter)
-        self.assertColsEqual(df.time.dt.quarter, tbl.time.dt.quarter)
-        self.assertColsEqual(df.datetime.dt.quarter, tbl.datetime.dt.quarter)
+        self.assertColsEqual(df.date.dt.quarter, tbl.date.dt.quarter, sort=True)
+        self.assertColsEqual(df.time.dt.quarter, tbl.time.dt.quarter, sort=True)
+        self.assertColsEqual(df.datetime.dt.quarter, tbl.datetime.dt.quarter, sort=True)
 
         # is_month_start
-        self.assertColsEqual(df.date.dt.is_month_start, tbl.date.dt.is_month_start)
-        self.assertColsEqual(df.time.dt.is_month_start, tbl.time.dt.is_month_start)
-        self.assertColsEqual(df.datetime.dt.is_month_start, tbl.datetime.dt.is_month_start)
+        self.assertColsEqual(df.date.dt.is_month_start, tbl.date.dt.is_month_start, sort=True)
+        self.assertColsEqual(df.time.dt.is_month_start, tbl.time.dt.is_month_start, sort=True)
+        self.assertColsEqual(df.datetime.dt.is_month_start, tbl.datetime.dt.is_month_start, sort=True)
 
         # is_month_end
-        self.assertColsEqual(df.date.dt.is_month_end, tbl.date.dt.is_month_end)
-        self.assertColsEqual(df.time.dt.is_month_end, tbl.time.dt.is_month_end)
-        self.assertColsEqual(df.datetime.dt.is_month_end, tbl.datetime.dt.is_month_end)
+        self.assertColsEqual(df.date.dt.is_month_end, tbl.date.dt.is_month_end, sort=True)
+        self.assertColsEqual(df.time.dt.is_month_end, tbl.time.dt.is_month_end, sort=True)
+        self.assertColsEqual(df.datetime.dt.is_month_end, tbl.datetime.dt.is_month_end, sort=True)
 
         # is_quarter_start
-        self.assertColsEqual(df.date.dt.is_quarter_start, tbl.date.dt.is_quarter_start)
-        self.assertColsEqual(df.time.dt.is_quarter_start, tbl.time.dt.is_quarter_start)
-        self.assertColsEqual(df.datetime.dt.is_quarter_start, tbl.datetime.dt.is_quarter_start)
+        self.assertColsEqual(df.date.dt.is_quarter_start, tbl.date.dt.is_quarter_start, sort=True)
+        self.assertColsEqual(df.time.dt.is_quarter_start, tbl.time.dt.is_quarter_start, sort=True)
+        self.assertColsEqual(df.datetime.dt.is_quarter_start, tbl.datetime.dt.is_quarter_start, sort=True)
 
         # is_quarter_end
-        self.assertColsEqual(df.date.dt.is_quarter_end, tbl.date.dt.is_quarter_end)
-        self.assertColsEqual(df.time.dt.is_quarter_end, tbl.time.dt.is_quarter_end)
-        self.assertColsEqual(df.datetime.dt.is_quarter_end, tbl.datetime.dt.is_quarter_end)
+        self.assertColsEqual(df.date.dt.is_quarter_end, tbl.date.dt.is_quarter_end, sort=True)
+        self.assertColsEqual(df.time.dt.is_quarter_end, tbl.time.dt.is_quarter_end, sort=True)
+        self.assertColsEqual(df.datetime.dt.is_quarter_end, tbl.datetime.dt.is_quarter_end, sort=True)
 
         # is_year_start
-        self.assertColsEqual(df.date.dt.is_year_start, tbl.date.dt.is_year_start)
-        self.assertColsEqual(df.time.dt.is_year_start, tbl.time.dt.is_year_start)
-        self.assertColsEqual(df.datetime.dt.is_year_start, tbl.datetime.dt.is_year_start)
+        self.assertColsEqual(df.date.dt.is_year_start, tbl.date.dt.is_year_start, sort=True)
+        self.assertColsEqual(df.time.dt.is_year_start, tbl.time.dt.is_year_start, sort=True)
+        self.assertColsEqual(df.datetime.dt.is_year_start, tbl.datetime.dt.is_year_start, sort=True)
 
         # is_year_end
-        self.assertColsEqual(df.date.dt.is_year_end, tbl.date.dt.is_year_end)
-        self.assertColsEqual(df.time.dt.is_year_end, tbl.time.dt.is_year_end)
-        self.assertColsEqual(df.datetime.dt.is_year_end, tbl.datetime.dt.is_year_end)
+        self.assertColsEqual(df.date.dt.is_year_end, tbl.date.dt.is_year_end, sort=True)
+        self.assertColsEqual(df.time.dt.is_year_end, tbl.time.dt.is_year_end, sort=True)
+        self.assertColsEqual(df.datetime.dt.is_year_end, tbl.datetime.dt.is_year_end, sort=True)
 
         # daysinmonth
-        self.assertColsEqual(df.date.dt.daysinmonth, tbl.date.dt.daysinmonth)
-        self.assertColsEqual(df.time.dt.daysinmonth, tbl.time.dt.daysinmonth)
-        self.assertColsEqual(df.datetime.dt.daysinmonth, tbl.datetime.dt.daysinmonth)
+        self.assertColsEqual(df.date.dt.daysinmonth, tbl.date.dt.daysinmonth, sort=True)
+        self.assertColsEqual(df.time.dt.daysinmonth, tbl.time.dt.daysinmonth, sort=True)
+        self.assertColsEqual(df.datetime.dt.daysinmonth, tbl.datetime.dt.daysinmonth, sort=True)
 
         # days_in_month
-        self.assertColsEqual(df.date.dt.days_in_month, tbl.date.dt.days_in_month)
-        self.assertColsEqual(df.time.dt.days_in_month, tbl.time.dt.days_in_month)
-        self.assertColsEqual(df.datetime.dt.days_in_month, tbl.datetime.dt.days_in_month)
+        self.assertColsEqual(df.date.dt.days_in_month, tbl.date.dt.days_in_month, sort=True)
+        self.assertColsEqual(df.time.dt.days_in_month, tbl.time.dt.days_in_month, sort=True)
+        self.assertColsEqual(df.datetime.dt.days_in_month, tbl.datetime.dt.days_in_month, sort=True)
 
     @unittest.skipIf(pd_version >= (0, 21, 0), 'Deprecated in pandas')
     def test_from_csv(self):

@@ -458,13 +458,13 @@ class TestDataMsgHandlers(tm.TestCase):
         self.assertEqual(colinfo['Column'].tolist(),
                          'Make,Model,Type,Origin,DriveTrain,MSRP,Invoice,EngineSize,Cylinders,Horsepower,MPG_City,MPG_Highway,Weight,Wheelbase,Length'.split(','))
                          
-        self.assertEqual(list(tbl.head().itertuples(index=False)),
-            [('Dodge', 'Viper SRT-10 convertible 2dr', 'Sports', 'USA', 'Rear', 81795.0,
+        self.assertEqual(sorted(tuple(x) for x in tbl.head().itertuples(index=False)),
+            sorted([('Dodge', 'Viper SRT-10 convertible 2dr', 'Sports', 'USA', 'Rear', 81795.0,
               74451.0, '8.3', 10.0, 500.0, 12.0, 20.0, 3410.0, 99.0, 176.0), 
              ('Mercedes-Benz', 'CL600 2dr', 'Sedan', 'Europe', 'Rear', 128420.0, 119600.0,
               '5.5', 12.0, 493.0, 13.0, 19.0, 4473.0, 114.0, 196.0),
              ('Mercedes-Benz', 'SL600 convertible 2dr', 'Sports', 'Europe', 'Rear',
-              126670.0, 117854.0, '5.5', 12.0, 493.0, 13.0, 19.0, 4429.0, 101.0, 179.0)])
+              126670.0, 117854.0, '5.5', 12.0, 493.0, 13.0, 19.0, 4429.0, 101.0, 179.0)]))
 
         try: 
             os.remove(tmpf)

@@ -4963,7 +4963,7 @@ class CASTable(ParamManager, ActionParamManager):
         try:
             casin = self.to_view()
 
-            out = self._retrieve('datastep.runcode', code=r'''
+            out = self._retrieve('datastep.runcode', single='yes', code=r'''
                  data %s;
                      %s
                      set %s;
@@ -6160,12 +6160,14 @@ class CASTable(ParamManager, ActionParamManager):
         if casout is None:
             casout = {}
 
+        default_caslib = self.getsessopt('caslib').caslib
+
         if casout.get('caslib'):
             caslib = casout['caslib']
         elif inplace and 'caslib' in self.params:
             caslib = self.params['caslib']
         else:
-            caslib = self.getsessopt('caslib').caslib
+            caslib = default_caslib
 
         if casout.get('name'):
             newname = casout['name']
@@ -6179,7 +6181,7 @@ class CASTable(ParamManager, ActionParamManager):
         dscode = []
         dscode.append('data %s(caslib=%s);' % (_quote(newname), _quote(caslib)))
         dscode.append('    set %s(caslib=%s);' % (_quote(self.params.name),
-                                                  _quote(caslib)))
+                                                  _quote(self.params.get('caslib', default_caslib))))
         if isinstance(code, items_types):
             dscode.extend(code)
         else:
