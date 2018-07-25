@@ -51,7 +51,7 @@ setup(
         'requests',
     ],
     platforms='any',
-    python_requires='>=2.7,!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*',
+#   python_requires='>=2.7,!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*',
     classifiers=[
         'Development Status :: 5 - Production/Stable',
         'Environment :: Console',
