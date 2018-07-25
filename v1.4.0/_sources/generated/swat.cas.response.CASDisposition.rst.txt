@@ -1,0 +1,33 @@
+swat.cas.response.CASDisposition
+================================
+
+.. currentmodule:: swat.cas.response
+
+.. autoclass:: CASDisposition
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~CASDisposition.__init__
+      ~CASDisposition.to_dict
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~CASDisposition.debug
+      ~CASDisposition.reason
+      ~CASDisposition.severity
+      ~CASDisposition.status
+      ~CASDisposition.status_code
+   
+   

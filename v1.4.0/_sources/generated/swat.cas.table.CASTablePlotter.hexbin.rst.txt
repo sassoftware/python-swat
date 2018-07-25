@@ -1,0 +1,6 @@
+swat.cas.table.CASTablePlotter.hexbin
+=====================================
+
+.. currentmodule:: swat.cas.table
+
+.. automethod:: CASTablePlotter.hexbin

@@ -1,0 +1,6 @@
+swat.cas.table.CASTable.ix
+==========================
+
+.. currentmodule:: swat.cas.table
+
+.. autoattribute:: CASTable.ix

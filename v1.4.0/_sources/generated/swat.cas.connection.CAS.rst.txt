@@ -1,0 +1,69 @@
+swat.cas.connection.CAS
+=======================
+
+.. currentmodule:: swat.cas.connection
+
+.. autoclass:: CAS
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~CAS.CASTable
+      ~CAS.SASFormatter
+      ~CAS.__init__
+      ~CAS.add_results_hook
+      ~CAS.close
+      ~CAS.copy
+      ~CAS.del_results_hook
+      ~CAS.del_results_hooks
+      ~CAS.fork
+      ~CAS.get_action
+      ~CAS.get_action_class
+      ~CAS.get_action_names
+      ~CAS.get_actionset
+      ~CAS.get_actionset_names
+      ~CAS.has_action
+      ~CAS.has_actionset
+      ~CAS.invoke
+      ~CAS.json_normalize
+      ~CAS.load_path
+      ~CAS.read_clipboard
+      ~CAS.read_csv
+      ~CAS.read_excel
+      ~CAS.read_frame
+      ~CAS.read_fwf
+      ~CAS.read_gbq
+      ~CAS.read_hdf
+      ~CAS.read_html
+      ~CAS.read_json
+      ~CAS.read_pickle
+      ~CAS.read_sas
+      ~CAS.read_sql
+      ~CAS.read_sql_query
+      ~CAS.read_sql_table
+      ~CAS.read_stata
+      ~CAS.read_table
+      ~CAS.retrieve
+      ~CAS.session_context
+      ~CAS.terminate
+      ~CAS.upload
+      ~CAS.upload_file
+      ~CAS.upload_frame
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~CAS.sessions
+      ~CAS.trait_names
+   
+   

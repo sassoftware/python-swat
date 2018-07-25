@@ -1,0 +1,6 @@
+swat.cas.table.CASTable.to_pickle
+=================================
+
+.. currentmodule:: swat.cas.table
+
+.. automethod:: CASTable.to_pickle

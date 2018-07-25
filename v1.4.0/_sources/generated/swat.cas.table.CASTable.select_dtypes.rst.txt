@@ -1,0 +1,6 @@
+swat.cas.table.CASTable.select_dtypes
+=====================================
+
+.. currentmodule:: swat.cas.table
+
+.. automethod:: CASTable.select_dtypes

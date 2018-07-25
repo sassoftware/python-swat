@@ -1,0 +1,6 @@
+swat.cas.connection.CAS.load_path
+=================================
+
+.. currentmodule:: swat.cas.connection
+
+.. automethod:: CAS.load_path

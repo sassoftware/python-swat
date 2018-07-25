@@ -1,0 +1,6 @@
+swat.cas.table.CharacterColumnMethods.isdecimal
+===============================================
+
+.. currentmodule:: swat.cas.table
+
+.. automethod:: CharacterColumnMethods.isdecimal
