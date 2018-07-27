@@ -41,6 +41,10 @@ code.docutils > .pre {
 .rst-content dl:not(.docutils) dl dt .classifier-delimiter {
     display: none;
 }
+.rst-content dl:not(.docutils) dl dd strong {
+    font-weight: bold;
+    font-size: smaller;
+}
 '''
 
 
@@ -113,6 +117,11 @@ for file in html_files:
         txt = re.sub(r'swat\.SASDataFrame((\.\w+)?\.html)', r'swat.dataframe.SASDataFrame\1', txt)
         txt = re.sub(r'swat\.SASFormatter((\.\w+)?\.html)', r'swat.formatter.SASFormatter\1', txt)
         txt = re.sub(r'\w+\.unx\.sas\.com', r'mycompany.com', txt)
+
+        # Add line-breaks and formatting for known parameter details
+        txt = re.sub(r'\bDefault: ', r'<br/><strong class="param-meta">Default:</strong> ', txt, flags=re.I)
+        txt = re.sub(r'\bValid Values: ', r'<br/><strong class="param-meta">Valid Values:</strong> ', txt, flags=re.I)
+        txt = re.sub(r'\bNote: ', r'<br/><strong class="param-meta">Note:</strong> ', txt, flags=re.I)
 
     with open(file, 'w') as html_file:
         html_file.write(txt)

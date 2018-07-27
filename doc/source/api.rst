@@ -46,6 +46,7 @@ Session Management
    :toctree: generated/
 
    CAS.close
+   CAS.terminate
    CAS.copy
    CAS.fork
    CAS.session_context
