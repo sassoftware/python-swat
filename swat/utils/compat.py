@@ -23,6 +23,7 @@ Smooth out some differences between Python 2 and Python 3
 
 from __future__ import print_function, division, absolute_import, unicode_literals
 
+import collections
 import sys
 import numpy as np
 
@@ -35,7 +36,7 @@ if sys.version_info >= (3, 0):
     PY3 = True
     PY2 = False
     items_types = (list, tuple, set)
-    dict_types = (dict,)
+    dict_types = (dict, collections.MutableMapping)
     int32_types = (np.int32,)
     int64_types = (np.int64, int)
     int_types = int32_types + int64_types
@@ -53,7 +54,7 @@ else:
     PY3 = False
     PY2 = True
     items_types = (list, tuple, set)
-    dict_types = (dict,)
+    dict_types = (dict, collections.MutableMapping)
     int32_types = (np.int32, int)
     int64_types = (np.int64, long)    # noqa: F821
     int_types = int32_types + int64_types
