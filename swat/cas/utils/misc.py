@@ -78,10 +78,10 @@ def any_file_exists(files):
     '''
     if isinstance(files, (list, tuple, set)):
         for item in files:
-            if os.path.isfile(item):
+            if os.path.isfile(os.path.expanduser(item)):
                 return True
 
-    elif os.path.isfile(files):
+    elif os.path.isfile(os.path.expanduser(files)):
         return True
 
     return False
