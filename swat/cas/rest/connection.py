@@ -39,7 +39,7 @@ from ...config import options, get_option
 from ...exceptions import SWATError
 from ...utils.args import parsesoptions
 from ...utils.keyword import keywordify
-from ...utils.compat import (a2u, int_types, int32_types, int64_types,
+from ...utils.compat import (a2u, int_types, int32_types, int64_types, dict_types,
                              float64_types, items_types, int32, int64, float64)
 from ...utils.authinfo import query_authinfo
 
@@ -69,7 +69,7 @@ def _print_response(text):
 def _print_params(params, prefix=''):
     ''' Print parameters for tracing actions '''
     for key, value in sorted(six.iteritems(params)):
-        if isinstance(value, dict):
+        if isinstance(value, dict_types):
             _print_params(value, prefix='%s%s.' % (prefix, key))
         elif isinstance(value, items_types):
             _print_params_list(value, prefix='%s%s.' % (prefix, key))
@@ -81,7 +81,7 @@ def _print_params_list(plist, prefix=''):
     ''' Print parameter list for tracing actions '''
     if plist:
         for i, item in enumerate(plist):
-            if isinstance(item, dict):
+            if isinstance(item, dict_types):
                 _print_params(item, prefix='%s[%s].' % (prefix, i))
             elif isinstance(item, items_types):
                 _print_params_list(item, prefix='%s[%s].' % (prefix, i))
@@ -118,7 +118,7 @@ def _normalize_params(params):
             pass
         elif value is False:
             pass
-        elif isinstance(value, dict):
+        elif isinstance(value, dict_types):
             numkeys = [x for x in value.keys() if isinstance(x, int_types)]
             if not numkeys:
                 value = _normalize_params(value)
@@ -147,7 +147,7 @@ def _normalize_list(items):
     ''' Normalize objects using standard python types '''
     newitems = []
     for item in items:
-        if isinstance(item, dict):
+        if isinstance(item, dict_types):
             item = _normalize_params(item)
         elif isinstance(item, items_types):
             item = _normalize_list(item)
