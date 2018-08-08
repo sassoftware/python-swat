@@ -41,7 +41,8 @@ such as :meth:`pandas.DataFrame.head` to interact with the CAS table on the serv
    import os
    host = os.environ['CASHOST']
    port = os.environ['CASPORT']
-   userid = password = None
+   userid = os.environ.get('CASUSER', None)
+   password = os.environ.get('CASPASSWORD', None)
 
 .. ipython:: python
 

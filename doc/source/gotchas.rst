@@ -28,8 +28,8 @@ the Pandas API.  CAS actions will always return a :class:`CASResults` object
    import swat
    hostname = os.environ['CASHOST']
    port = os.environ['CASPORT']
-   username = None
-   password = None
+   username = os.environ.get('CASUSER', None)
+   password = os.environ.get('CASPASSWORD', None)
    conn = swat.CAS(hostname, port, username, password)
    tbl = conn.read_csv('https://raw.githubusercontent.com/'
                        'sassoftware/sas-viya-programming/master/data/cars.csv')

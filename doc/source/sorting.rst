@@ -20,7 +20,8 @@ back in a sorted form.
    import swat
    host = os.environ['CASHOST']
    port = os.environ['CASPORT']
-   username = password = None
+   username = os.environ.get('CASUSER', None)
+   password = os.environ.get('CASPASSWORD', None)
 
 .. ipython:: python
 

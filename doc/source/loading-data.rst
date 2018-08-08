@@ -34,8 +34,8 @@ rather than a :class:`pandas.DataFrame`.  Let's look at an example.
    import swat
    host = os.environ['CASHOST']
    port = os.environ['CASPORT']
-   username = None
-   password = None
+   username = os.environ.get('CASUSER', None)
+   password = os.environ.get('CASPASSWORD', None)
 
 In this example, we are pointing to a URL that references CSV data.  You could
 just as easily point to a local file.  Just keep in mind that when using a URL,
@@ -179,9 +179,9 @@ they are in.  Paths to files in a CASLib are always relative paths.  This is the
 recommended method for large data files.
 
 .. ipython:: python
+   :verbatim:
 
    cars = conn.load_path('data/cars.csv', caslib='casuser')
-   cars.head()
 
 
 Loading Data from Other Sources

@@ -40,8 +40,9 @@ o.query('`expr`')       Apply a filter to the data values
    import swat
    hostname = os.environ['CASHOST'] 
    port = os.environ['CASPORT'] 
-   username = password = None
-   conn = swat.CAS(hostname, port)
+   username = os.environ.get('CASUSER', None)
+   password = os.environ.get('CASPASSWORD', None)
+   conn = swat.CAS(hostname, port, username, password)
 
 
 The Basics
