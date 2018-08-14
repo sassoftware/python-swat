@@ -5115,6 +5115,12 @@ class TestCASTable(tm.TestCase):
         finally:
             tbl_out.droptable()
 
+    def test_with_params(self):
+        tbl = self.s.CASTable('foo')
+        tbl2 = tbl.with_params(replace=True, promote=True)
+        self.assertTrue(set(tbl2.to_params().keys()), set(['name']))
+        self.assertTrue(set(tbl2.to_params().keys()), set(['name', 'replace', 'promote']))
+
 
 if __name__ == '__main__':
     tm.runtests()

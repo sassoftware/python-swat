@@ -323,7 +323,8 @@ def load_data(conn, path, server_type, casout=None, importoptions=None):
     # If server version doesn't exist, upload local copy
     if 'tableName' not in res or not res['tableName']:
         # sys.stderr.write('NOTE: Uploading local data file.')
-        if 'win' in platform.system().lower():
+        plat = platform.system().lower()
+        if 'win' in plat and 'darwin' not in plat:
             res = conn.upload(os.path.join(os.path.dirname(st.__file__),
                                            path.replace('/', '\\')), casout=casout,
                               importoptions=importoptions)

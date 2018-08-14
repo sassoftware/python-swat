@@ -454,6 +454,14 @@ Serialization / IO / Conversion
    CASTable.to_string
    CASTable.to_clipboard
 
+Utilities
+~~~~~~~~~
+.. autosummary::
+   :toctree: generated/
+
+   CASTable.copy
+   CASTable.with_params
+
 
 CASColumn
 ---------

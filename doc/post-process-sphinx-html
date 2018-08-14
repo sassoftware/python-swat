@@ -79,10 +79,10 @@ for file in html_files:
                      r'<col[^>]*>\s*</colgroup>',
                      r'', txt)
 
-        txt = re.sub(r'<p[^>]*>Attributes</p>\s*<table[^>]*>\s*(?:\s*' +
-                     r'</?(?:colgroup|col|tbody|tr)[^>]*>\s*|\s*' +
-                     r'<td[^>]*>.*?</td>\s*)+\s*</table>\s*(</dd>\s*</dl>\s*</div>)',
-                     r'\1', txt)
+#       txt = re.sub(r'<p[^>]*>Attributes</p>\s*<table[^>]*>\s*(?:\s*' +
+#                    r'</?(?:colgroup|col|tbody|tr)[^>]*>\s*|\s*' +
+#                    r'<td[^>]*>.*?</td>\s*)+\s*</table>\s*(</dd>\s*</dl>\s*</div>)',
+#                    r'\1', txt)
 
         # Fix property rendering to look like normal attribute
         txt = re.sub(r'<code[^>]+>\s*<span class="pre">\s*(.+?)\s*</span>\s*</code>',

@@ -37,7 +37,7 @@ from .utils.params import ParamManager, ActionParamManager
 from .utils.misc import super_dir
 from ..config import get_option
 from ..exceptions import SWATError
-from ..utils import dict2kwargs, getattr_safe_property
+from ..utils import dict2kwargs, getattr_safe_property, xdict
 from ..utils.compat import (int_types, binary_types, text_types, items_types,
                             patch_pandas_sort, char_types, num_types)
 from ..utils.keyword import dekeywordify
@@ -241,7 +241,6 @@ def concat(objs, axis=0, join='outer', join_axes=None, ignore_index=False, keys=
         code.append('data %s;' % _to_datastep_params(casout))
         code.append('    set %s;' % ' '.join(x.to_input_datastep_params() for x in views))
         code.append('run;')
-        print('\n'.join(code))
 
         out = objs[0].get_connection().retrieve('datastep.runcode', code='\n'.join(code),
                                                 _apptag='UI', _messagelevel='error')
@@ -1293,6 +1292,27 @@ class CASTable(ParamManager, ActionParamManager):
         '''  Re-enable pandas features '''
         self._pandas_enabled = True
 
+    def with_params(self, **kwargs):
+        '''
+        Create copy of table with `kwargs` inserted as parameters
+
+        Note that any parameter names in `kwargs` that match existing
+        keys in the CASTable will be overridden.
+
+        Parameters
+        ----------
+        **kwargs : keyword parameters, optional
+            Parameters to insert into the CASTable copy
+
+        Returns
+        -------
+        :class:`CASTable`
+
+        '''
+        out = self.copy(deep=True)
+        out.params.update(kwargs)
+        return out
+
     def append_columns(self, *items, **kwargs):
         '''
         Append variable names to action inputs parameter
@@ -2157,6 +2177,22 @@ class CASTable(ParamManager, ActionParamManager):
             return dict(sortby=self._sortby, sastypes=False)
         return dict(sastypes=False)
 
+    def to_params(self):
+        '''
+        Return parameters of CASTable object
+
+        Returns
+        -------
+        dict
+
+        '''
+        out = {}
+        for key, value in six.iteritems(super(CASTable, self).to_params()):
+            if key.lower() in ['where', 'replace', 'promote'] and isinstance(self.params[key], xdict.xadict):
+                continue
+            out[key] = value
+        return out
+
     def to_table_params(self):
         '''
         Create a copy of the table parameters containing only input table parameters
@@ -2176,6 +2212,8 @@ class CASTable(ParamManager, ActionParamManager):
         if type(self).table_params:
             out = {}
             for key in self.params.keys():
+                if key.lower() in ['where', 'replace', 'promote'] and isinstance(self.params[key], xdict.xadict):
+                    continue
                 if key.lower() in type(self).table_params:
                     out[key] = copy.deepcopy(self.params[key])
             return out
@@ -2229,6 +2267,8 @@ class CASTable(ParamManager, ActionParamManager):
         if type(self).outtable_params:
             out = {}
             for key in self.params.keys():
+                if key.lower() in ['where', 'replace', 'promote'] and isinstance(self.params[key], xdict.xadict):
+                    continue
                 if key.lower() in type(self).outtable_params:
                     out[key] = copy.deepcopy(self.params[key])
             return out
@@ -3546,7 +3586,6 @@ class CASTable(ParamManager, ActionParamManager):
                              'date', 'time', 'datetime']:
                 code.append(fmt % (_nlit(name), _nlit(name), _nlit(name)))
 
-        print('\n'.join(code))
         return tbl._apply_datastep(code, inplace=True)
 
     def clip_lower(self, threshold, axis=None):
@@ -4336,7 +4375,6 @@ class CASTable(ParamManager, ActionParamManager):
 
             num_cols = self._get_dtypes(include='numeric')
             inputs = [x for x in inputs if x in num_cols]
-            print(inputs)
             out = self._retrieve('simple.summary', # includemissing=not skipna,
                                  inputs=inputs, casout=casout, **kwargs)
 
@@ -4501,7 +4539,7 @@ class CASTable(ParamManager, ActionParamManager):
         table.groupby(groups)._retrieve('transpose.transpose', id='_Column_',
                                         transpose=['_%s_' % stat],
                                         casout=dict(name=tbl))
-        print(retain)
+
         dsout = self._retrieve('datastep.runcode', code=r'''
             data %s;
                 %s
