@@ -83,7 +83,7 @@ def _gen_table_name():
 
 def _nlit(name, quote=False):
     ''' Return `name` as an nlit '''
-    if re.match(r'[A-Za-z_]\w*', name):
+    if re.match(r'^[A-Za-z_]\w*$', name):
         if quote:
             return '"%s"' % _escape_string(name)
         return name
