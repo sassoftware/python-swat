@@ -7467,7 +7467,7 @@ class CASTable(ParamManager, ActionParamManager):
         ----------
         key : string
             The name of the column.
-        value : :class:`CASColumn` or any
+        value : :class:`CASColumn` or string or numeric or bool
             The value of the column.
 
         '''
