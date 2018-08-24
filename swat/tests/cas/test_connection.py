@@ -24,7 +24,7 @@
 
 import numpy as np
 import os
-import pandas
+import pandas as pd
 import six
 import swat
 import swat.utils.testing as tm
@@ -330,7 +330,7 @@ class TestConnection(tm.TestCase):
         tbl.droptable()
 
         # DataFrame
-        df = pandas.read_csv(myFile)
+        df = pd.read_csv(myFile)
         tbl = self.s.upload(df, casout=dict(replace=True, name='cars'))['casTable']
 
         out = self.s.tableinfo()['TableInfo']
@@ -373,14 +373,53 @@ class TestConnection(tm.TestCase):
         if out is not None:
             self.assertFalse('CARS' in out['Name'].tolist())
 
-        tbl = self.s.upload_frame(pandas.read_csv(myFile), casout=dict(name='cars'))
+        tbl = self.s.upload_frame(pd.read_csv(myFile), casout=dict(name='cars'))
 
         out = self.s.tableinfo()['TableInfo']
         self.assertEqual(len(out), numtbls + 1)
         self.assertTrue('CARS' in out['Name'].tolist())
 
         with self.assertRaises(swat.SWATError):
-           self.s.upload_frame(pandas.read_csv(myFile), casout=dict(name='cars'))
+           self.s.upload_frame(pd.read_csv(myFile), casout=dict(name='cars'))
+
+        # Test data types
+        cars = pd.read_csv(myFile)
+        cars['Horsepower'] = cars['Horsepower'].astype('int32')
+        cars['MPG_City'] = cars['MPG_City'].astype('int32')
+        cars['MPG_Highway'] = cars['MPG_Highway'].astype('int32')
+
+        tbl = self.s.upload_frame(cars, casout=dict(name='cars', replace=True))
+
+        if 'csv-ints' in self.s.server_features:
+            self.assertEqual(tbl['Make'].dtype, 'varchar')
+            self.assertEqual(tbl['Model'].dtype, 'varchar')
+            self.assertEqual(tbl['Horsepower'].dtype, 'int32')
+            self.assertEqual(tbl['MPG_City'].dtype, 'int32')
+            self.assertEqual(tbl['MPG_Highway'].dtype, 'int32')
+        else:
+            self.assertEqual(tbl['Make'].dtype, 'varchar')
+            self.assertEqual(tbl['Model'].dtype, 'varchar')
+            self.assertEqual(tbl['Horsepower'].dtype, 'double')
+            self.assertEqual(tbl['MPG_City'].dtype, 'double')
+            self.assertEqual(tbl['MPG_Highway'].dtype, 'double')
+
+        # Test importoptions.vars=
+        tbl = self.s.upload_frame(cars, casout=dict(name='cars', replace=True),
+                                  importoptions=dict(vars=dict(Make=dict(type='char', length=20),
+                                                               Model=dict(type='char', length=40))))
+
+        if 'csv-ints' in self.s.server_features:
+            self.assertEqual(tbl['Make'].dtype, 'char')
+            self.assertEqual(tbl['Model'].dtype, 'char')
+            self.assertEqual(tbl['Horsepower'].dtype, 'int32')
+            self.assertEqual(tbl['MPG_City'].dtype, 'int32')
+            self.assertEqual(tbl['MPG_Highway'].dtype, 'int32')
+        else:
+            self.assertEqual(tbl['Make'].dtype, 'char')
+            self.assertEqual(tbl['Model'].dtype, 'char')
+            self.assertEqual(tbl['Horsepower'].dtype, 'double')
+            self.assertEqual(tbl['MPG_City'].dtype, 'double')
+            self.assertEqual(tbl['MPG_Highway'].dtype, 'double')
 
         tbl.droptable()
 
@@ -445,7 +484,7 @@ class TestConnection(tm.TestCase):
         
         myFile = os.path.join(os.path.dirname(st.__file__), 'datasources', 'cars.csv')
 
-        cars = pandas.io.parsers.read_csv(myFile)
+        cars = pd.io.parsers.read_csv(myFile)
 
         dmh = swat.datamsghandlers.CSV(myFile, nrecs=20)
 
@@ -661,6 +700,104 @@ class TestConnection(tm.TestCase):
         stbl = self.table.sort_values('MSRP')[['Make', 'Model', 'MSRP']]
         self.assertNotEqual(stbl.fetch(to=1, sortby='Make').Fetch.MSRP[0], 10280)
         self.assertEqual(stbl.fetch(to=1, sortby='Make').Fetch.Make[0], 'Acura')
+
+    def test_apply_importoptions_vars(self):
+        df = pd.DataFrame([[10, 'Hello', 'World']], columns=['foo', 'bar', 'baz'])
+        df['foo'] = df['foo'].astype('int32')
+        df_dtypes = self.s._extract_dtypes(df)
+
+        # importoptions= fully defined, dtypes won't override
+        importoptions = dict(vars=[dict(name='foo', type='double', format='best8'),
+                                   dict(name='bar', type='varchar'),
+                                   dict(name='baz', type='char')])
+
+        self.s._apply_importoptions_vars(importoptions, df_dtypes)
+
+        self.assertEqual(importoptions,
+                         dict(vars=[dict(name='foo', type='double', format='best8'),
+                                    dict(name='bar', type='varchar'),
+                                    dict(name='baz', type='char')]))
+
+        # importoptions= missing a column
+        importoptions = dict(vars=[dict(name='foo', type='double', format='best8'),
+                                   dict(),
+                                   dict(name='baz', type='char')])
+
+        self.s._apply_importoptions_vars(importoptions, df_dtypes)
+
+        self.assertEqual(importoptions,
+                         dict(vars=[dict(name='foo', type='double', format='best8'),
+                                    dict(name='bar', type='varchar'),
+                                    dict(name='baz', type='char')]))
+
+        # importoptions= missing a data type
+        importoptions = dict(vars=[dict(name='foo', format='best8'),
+                                   dict(name='bar'),
+                                   dict(name='baz', type='char')])
+
+        self.s._apply_importoptions_vars(importoptions, df_dtypes)
+
+        if 'csv-ints' in self.s.server_features:
+            self.assertEqual(importoptions,
+                             dict(vars=[dict(name='foo', type='int32', format='best8'),
+                                        dict(name='bar', type='varchar'),
+                                        dict(name='baz', type='char')]))
+        else:
+            self.assertEqual(importoptions,
+                             dict(vars=[dict(name='foo', type='double', format='best8'),
+                                        dict(name='bar', type='varchar'),
+                                        dict(name='baz', type='char')]))
+
+        # importoptions= missing columns at end
+        importoptions = dict(vars=[dict(name='foo', type='double', format='best8')])
+
+        self.s._apply_importoptions_vars(importoptions, df_dtypes)
+
+        self.assertEqual(importoptions,
+                         dict(vars=[dict(name='foo', type='double', format='best8'),
+                                    dict(name='bar', type='varchar'),
+                                    dict(name='baz', type='varchar')]))
+
+        # importoptions= dict fully defined, dtypes won't override
+        importoptions = dict(vars=dict(foo=dict(type='double', format='best8'),
+                                       bar=dict(type='varchar'),
+                                       baz=dict(type='char')))
+
+        self.s._apply_importoptions_vars(importoptions, df_dtypes)
+
+        self.assertEqual(importoptions,
+                         dict(vars=dict(foo=dict(type='double', format='best8'),
+                                        bar=dict(type='varchar'),
+                                        baz=dict(type='char'))))
+
+        # importoptions= dict missing dtypes
+        importoptions = dict(vars=dict(foo=dict(format='best8'),
+                                       bar=dict(),
+                                       baz=dict(type='char')))
+
+        self.s._apply_importoptions_vars(importoptions, df_dtypes)
+
+        if 'csv-ints' in self.s.server_features:
+            self.assertEqual(importoptions,
+                             dict(vars=dict(foo=dict(type='int32', format='best8'),
+                                            bar=dict(type='varchar'),
+                                            baz=dict(type='char'))))
+        else:
+            self.assertEqual(importoptions,
+                             dict(vars=dict(foo=dict(type='double', format='best8'),
+                                            bar=dict(type='varchar'),
+                                            baz=dict(type='char'))))
+
+        # importoptions= dict missing key
+        importoptions = dict(vars=dict(foo=dict(type='double', format='best8'),
+                                       baz=dict(type='char')))
+
+        self.s._apply_importoptions_vars(importoptions, df_dtypes)
+
+        self.assertEqual(importoptions,
+                         dict(vars=dict(foo=dict(type='double', format='best8'),
+                                        bar=dict(type='varchar'),
+                                        baz=dict(type='char'))))
 
 
 if __name__ == '__main__':

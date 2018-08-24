@@ -3108,7 +3108,10 @@ class TestCASTable(tm.TestCase):
         tbl = self.s.read_pickle(tmp.name)
 
         self.assertTablesEqual(df2, tbl, sortby=SORT_KEYS)
-        self.assertEqual(set(tbl.dtypes.unique()), set(['double', 'varchar']))
+        if 'csv-ints' in self.s.server_features:
+            self.assertEqual(set(tbl.dtypes.unique()), set(['double', 'int64', 'varchar']))
+        else:
+            self.assertEqual(set(tbl.dtypes.unique()), set(['double', 'varchar']))
 
         # Force addtable
         tbl = self.s.read_pickle(tmp.name, use_addtable=True)
@@ -3116,9 +3119,12 @@ class TestCASTable(tm.TestCase):
         self.assertTablesEqual(df, tbl, sortby=SORT_KEYS)
 
         if self.s._protocol in ['http', 'https']:
-           self.assertEqual(set(tbl.dtypes.unique()), set(['double', 'varchar']))
+            if 'csv-ints' in self.s.server_features:
+                self.assertEqual(set(tbl.dtypes.unique()), set(['double', 'int64', 'varchar']))
+            else:
+                self.assertEqual(set(tbl.dtypes.unique()), set(['double', 'varchar']))
         else:
-           self.assertEqual(set(tbl.dtypes.unique()), set(['double', 'int64', 'varchar']))
+            self.assertEqual(set(tbl.dtypes.unique()), set(['double', 'int64', 'varchar']))
 
         os.remove(tmp.name)
 
@@ -3131,7 +3137,10 @@ class TestCASTable(tm.TestCase):
         tbl = self.s.read_table(myFile)
 
         self.assertTablesEqual(df, tbl, sortby=SORT_KEYS)
-        self.assertEqual(set(tbl.dtypes.unique()), set(['double', 'varchar']))
+        if 'csv-ints' in self.s.server_features:
+            self.assertEqual(set(tbl.dtypes.unique()), set(['double', 'int64', 'varchar']))
+        else:
+            self.assertEqual(set(tbl.dtypes.unique()), set(['double', 'varchar']))
 
         # Force addtable
         tbl = self.s.read_table(myFile, use_addtable=True)
@@ -3139,9 +3148,12 @@ class TestCASTable(tm.TestCase):
         self.assertTablesEqual(df, tbl, sortby=SORT_KEYS)
 
         if self.s._protocol in ['http', 'https']:
-           self.assertEqual(set(tbl.dtypes.unique()), set(['double', 'varchar']))
+            if 'csv-ints' in self.s.server_features:
+                self.assertEqual(set(tbl.dtypes.unique()), set(['double', 'int64', 'varchar']))
+            else:
+                self.assertEqual(set(tbl.dtypes.unique()), set(['double', 'varchar']))
         else:
-           self.assertEqual(set(tbl.dtypes.unique()), set(['double', 'int64', 'varchar']))
+            self.assertEqual(set(tbl.dtypes.unique()), set(['double', 'int64', 'varchar']))
 
     def test_read_csv(self):
         import swat.tests as st
@@ -3152,7 +3164,10 @@ class TestCASTable(tm.TestCase):
         tbl = self.s.read_csv(myFile)
 
         self.assertTablesEqual(df, tbl, sortby=SORT_KEYS)
-        self.assertEqual(set(tbl.dtypes.unique()), set(['double', 'varchar']))
+        if 'csv-ints' in self.s.server_features:
+            self.assertEqual(set(tbl.dtypes.unique()), set(['double', 'int64', 'varchar']))
+        else:
+            self.assertEqual(set(tbl.dtypes.unique()), set(['double', 'varchar']))
 
         # Force addtable
         tbl = self.s.read_csv(myFile, use_addtable=True)
@@ -3160,9 +3175,12 @@ class TestCASTable(tm.TestCase):
         self.assertTablesEqual(df, tbl, sortby=SORT_KEYS)
 
         if self.s._protocol in ['http', 'https']:
-           self.assertEqual(set(tbl.dtypes.unique()), set(['double', 'varchar']))
+            if 'csv-ints' in self.s.server_features:
+                self.assertEqual(set(tbl.dtypes.unique()), set(['double', 'int64', 'varchar']))
+            else:
+                self.assertEqual(set(tbl.dtypes.unique()), set(['double', 'varchar']))
         else:
-           self.assertEqual(set(tbl.dtypes.unique()), set(['double', 'int64', 'varchar']))
+            self.assertEqual(set(tbl.dtypes.unique()), set(['double', 'int64', 'varchar']))
 
     def test_read_frame(self):
         import swat.tests as st
@@ -3173,7 +3191,10 @@ class TestCASTable(tm.TestCase):
         tbl = self.s.read_frame(df)
 
         self.assertTablesEqual(df, tbl, sortby=SORT_KEYS)
-        self.assertEqual(set(tbl.dtypes.unique()), set(['double', 'varchar']))
+        if 'csv-ints' in self.s.server_features:
+            self.assertEqual(set(tbl.dtypes.unique()), set(['double', 'int64', 'varchar']))
+        else:
+            self.assertEqual(set(tbl.dtypes.unique()), set(['double', 'varchar']))
 
         # Force addtable
         tbl = self.s.read_frame(df, use_addtable=True)
@@ -3181,9 +3202,12 @@ class TestCASTable(tm.TestCase):
         self.assertTablesEqual(df, tbl, sortby=SORT_KEYS)
 
         if self.s._protocol in ['http', 'https']:
-           self.assertEqual(set(tbl.dtypes.unique()), set(['double', 'varchar']))
+            if 'csv-ints' in self.s.server_features:
+                self.assertEqual(set(tbl.dtypes.unique()), set(['double', 'int64', 'varchar']))
+            else:
+                self.assertEqual(set(tbl.dtypes.unique()), set(['double', 'varchar']))
         else:
-           self.assertEqual(set(tbl.dtypes.unique()), set(['double', 'int64', 'varchar']))
+            self.assertEqual(set(tbl.dtypes.unique()), set(['double', 'int64', 'varchar']))
 
     def test_read_fwf(self):
         import swat.tests as st
@@ -3194,7 +3218,10 @@ class TestCASTable(tm.TestCase):
         tbl = self.s.read_fwf(myFile)
 
         self.assertTablesEqual(df, tbl, sortby=SORT_KEYS)
-        self.assertEqual(set(tbl.dtypes.unique()), set(['double', 'varchar']))
+        if 'csv-ints' in self.s.server_features:
+            self.assertEqual(set(tbl.dtypes.unique()), set(['double', 'int64', 'varchar']))
+        else:
+            self.assertEqual(set(tbl.dtypes.unique()), set(['double', 'varchar']))
 
         # Force addtable
         tbl = self.s.read_fwf(myFile, use_addtable=True)
@@ -3202,9 +3229,12 @@ class TestCASTable(tm.TestCase):
         self.assertTablesEqual(df, tbl, sortby=SORT_KEYS)
 
         if self.s._protocol in ['http', 'https']:
-           self.assertEqual(set(tbl.dtypes.unique()), set(['double', 'varchar']))
+            if 'csv-ints' in self.s.server_features:
+                self.assertEqual(set(tbl.dtypes.unique()), set(['double', 'int64', 'varchar']))
+            else:
+                self.assertEqual(set(tbl.dtypes.unique()), set(['double', 'varchar']))
         else:
-           self.assertEqual(set(tbl.dtypes.unique()), set(['double', 'int64', 'varchar']))
+            self.assertEqual(set(tbl.dtypes.unique()), set(['double', 'int64', 'varchar']))
 
 #   def test_read_clipboard(self):
 #       ???
@@ -3221,7 +3251,10 @@ class TestCASTable(tm.TestCase):
         tbl = self.s.read_excel(myFile)
 
         self.assertTablesEqual(df, tbl, sortby=SORT_KEYS)
-        self.assertEqual(set(tbl.dtypes.unique()), set(['double', 'varchar']))
+        if 'csv-ints' in self.s.server_features:
+            self.assertEqual(set(tbl.dtypes.unique()), set(['double', 'int64', 'varchar']))
+        else:
+            self.assertEqual(set(tbl.dtypes.unique()), set(['double', 'varchar']))
 
         # Force addtable
         tbl = self.s.read_excel(myFile, use_addtable=True)
@@ -3229,9 +3262,12 @@ class TestCASTable(tm.TestCase):
         self.assertTablesEqual(df, tbl, sortby=SORT_KEYS)
 
         if self.s._protocol in ['http', 'https']:
-           self.assertEqual(set(tbl.dtypes.unique()), set(['double', 'varchar']))
+            if 'csv-ints' in self.s.server_features:
+                self.assertEqual(set(tbl.dtypes.unique()), set(['double', 'int64', 'varchar']))
+            else:
+                self.assertEqual(set(tbl.dtypes.unique()), set(['double', 'varchar']))
         else:
-           self.assertEqual(set(tbl.dtypes.unique()), set(['double', 'int64', 'varchar']))
+            self.assertEqual(set(tbl.dtypes.unique()), set(['double', 'int64', 'varchar']))
 
 #   @unittest.skip('Freezes on addtable')
 #   def test_read_json(self):
@@ -3262,7 +3298,10 @@ class TestCASTable(tm.TestCase):
         tbl = self.s.read_html(myFile)[0]
 
         self.assertTablesEqual(df, tbl, sortby=SORT_KEYS)
-        self.assertEqual(set(tbl.dtypes.unique()), set(['double', 'varchar']))
+        if 'csv-ints' in self.s.server_features:
+            self.assertEqual(set(tbl.dtypes.unique()), set(['double', 'int64', 'varchar']))
+        else:
+            self.assertEqual(set(tbl.dtypes.unique()), set(['double', 'varchar']))
 
         # Force addtable
         tbl = self.s.read_html(myFile, use_addtable=True)[0]
@@ -3270,9 +3309,12 @@ class TestCASTable(tm.TestCase):
         self.assertTablesEqual(df, tbl, sortby=SORT_KEYS)
 
         if self.s._protocol in ['http', 'https']:
-           self.assertEqual(set(tbl.dtypes.unique()), set(['double', 'varchar']))
+            if 'csv-ints' in self.s.server_features:
+                self.assertEqual(set(tbl.dtypes.unique()), set(['double', 'int64', 'varchar']))
+            else:
+                self.assertEqual(set(tbl.dtypes.unique()), set(['double', 'varchar']))
         else:
-           self.assertEqual(set(tbl.dtypes.unique()), set(['double', 'int64', 'varchar']))
+            self.assertEqual(set(tbl.dtypes.unique()), set(['double', 'int64', 'varchar']))
 
     @unittest.skip('Need way to verify HDF installation')
     def test_read_hdf(self):
@@ -3292,7 +3334,10 @@ class TestCASTable(tm.TestCase):
         tbl = self.s.read_hdf(tmp.name, key='cars')
 
         self.assertTablesEqual(df2, tbl, sortby=SORT_KEYS)
-        self.assertEqual(set(tbl.dtypes.unique()), set(['double', 'varchar']))
+        if 'csv-ints' in self.s.server_features:
+            self.assertEqual(set(tbl.dtypes.unique()), set(['double', 'int64', 'varchar']))
+        else:
+            self.assertEqual(set(tbl.dtypes.unique()), set(['double', 'varchar']))
 
         # Force addtable
         tbl = self.s.read_hdf(tmp.name, use_addtable=True)
@@ -3300,9 +3345,12 @@ class TestCASTable(tm.TestCase):
         self.assertTablesEqual(df, tbl, sortby=SORT_KEYS)
 
         if self.s._protocol in ['http', 'https']:
-           self.assertEqual(set(tbl.dtypes.unique()), set(['double', 'varchar']))
+            if 'csv-ints' in self.s.server_features:
+                self.assertEqual(set(tbl.dtypes.unique()), set(['double', 'int64', 'varchar']))
+            else:
+                self.assertEqual(set(tbl.dtypes.unique()), set(['double', 'varchar']))
         else:
-           self.assertEqual(set(tbl.dtypes.unique()), set(['double', 'int64', 'varchar']))
+            self.assertEqual(set(tbl.dtypes.unique()), set(['double', 'int64', 'varchar']))
 
         os.remove(tmp.name)
 

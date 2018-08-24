@@ -23,6 +23,7 @@ Class for creating CAS sessions
 
 from __future__ import print_function, division, absolute_import, unicode_literals
 
+import collections
 import contextlib
 import copy
 import json
@@ -37,7 +38,7 @@ from ..exceptions import SWATError, SWATCASActionError, SWATCASActionRetry
 from ..utils.config import subscribe, get_option
 from ..clib import errorcheck
 from ..utils.compat import (a2u, a2n, int32, int64, float64, text_types,
-                            binary_types, items_types, int_types)
+                            binary_types, items_types, int_types, dict_types)
 from ..utils import getsoptions
 from ..utils.args import iteroptions
 from ..formatter import SASFormatter
@@ -388,10 +389,32 @@ class CAS(object):
                 num = num + 1
         self._id_generator = _id_generator()
 
+        self.server_version, self.server_features = self._get_server_features()
+
     def _gen_id(self):
         ''' Generate an ID unique to the session '''
         import numpy
         return numpy.base_repr(next(self._id_generator), 36)
+
+    def _get_server_features(self):
+        '''
+        Determine which features are available in the server
+
+        Returns
+        -------
+        set-of-strings
+
+        '''
+        out = set()
+
+        info = self.retrieve('builtins.serverstatus', _messagelevel='error',
+                             _apptag='UI')
+        version = tuple([int(x) for x in info['About']['Version'].split('.')][:2])
+
+#       if version >= (3, 4):
+#           out.add('csv-ints')
+
+        return version, out
 
     def _detect_protocol(self, hostname, port, protocol=None):
         '''
@@ -1147,6 +1170,110 @@ class CAS(object):
 
         return signature
 
+    def _extract_dtypes(self, df):
+        '''
+        Extract importoptions= style data types from the DataFrame
+
+        Parameters
+        ----------
+        df : pandas.DataFrame
+            The DataFrame to get types from
+        format : string, optional
+            The output format: dict or list
+
+        Returns
+        -------
+        OrderedDict
+
+        '''
+        out = collections.OrderedDict()
+
+        for key, value in df.dtypes.items():
+            value = value.name
+
+            if value == 'object':
+                value = 'varchar'
+
+            elif value.startswith('float'):
+                value = 'double'
+
+            elif value.endswith('int64'):
+                if 'csv-ints' in self.server_features:
+                    value = 'int64'
+                else:
+                    value = 'double'
+
+            elif value.startswith('int'):
+                if 'csv-ints' in self.server_features:
+                    value = 'int32'
+                else:
+                    value = 'double'
+
+            elif value.startswith('bool'):
+                if 'csv-ints' in self.server_features:
+                    value = 'int32'
+                else:
+                    value = 'double'
+
+            elif value.startswith('datetime'):
+                value = 'varchar'
+
+            else:
+                continue
+
+            out[key] = dict(type=value)
+
+        return out
+
+    def _apply_importoptions_vars(self, importoptions, df_dtypes):
+        '''
+        Merge in vars= parameters to importoptions=
+
+        Notes
+        -----
+        This method modifies the importoptions in-place.
+
+        Parameters
+        ----------
+        importoptions : dict
+            The importoptions= parameter
+        df_dtypes : dict or list
+            The DataFrame data types dictionary
+
+        '''
+        if 'vars' not in importoptions:
+            importoptions['vars'] = df_dtypes
+            return
+
+        vars = importoptions['vars']
+
+        # Merge options into dict vars
+        if isinstance(vars, dict_types):
+            for key, value in six.iteritems(df_dtypes):
+                if key in vars:
+                    for k, v in six.iteritems(value):
+                        vars[key].setdefault(k, v)
+                else:
+                    vars[key] = value
+
+        # Merge options into list vars
+        else:
+            df_dtypes_list = []
+            for key, value in six.iteritems(df_dtypes):
+                value = dict(value)
+                value['name'] = key
+                df_dtypes_list.append(value)
+
+            for i, item in enumerate(df_dtypes_list):
+                if i < len(vars):
+                    if not vars[i]:
+                        vars[i] = item
+                    else:
+                        for key, value in six.iteritems(item):
+                            vars[i].setdefault(key, value)
+                else:
+                    vars.append(item)
+
     def upload(self, data, importoptions=None, casout=None, **kwargs):
         '''
         Upload data from a local file into a CAS table
@@ -1207,6 +1334,7 @@ class CAS(object):
         '''
         delete = False
         name = None
+        df_dtypes = None
 
         for key, value in list(kwargs.items()):
             if importoptions is None and key.lower() == 'importoptions':
@@ -1224,6 +1352,7 @@ class CAS(object):
                 filename = tmp.name
                 name = os.path.splitext(os.path.basename(filename))[0]
                 data.to_csv(filename, encoding='utf-8', index=False)
+                df_dtypes = self._extract_dtypes(data)
 
         elif data.startswith('http://') or \
                 data.startswith('https://') or \
@@ -1256,6 +1385,7 @@ class CAS(object):
 
         if importoptions is None:
             importoptions = {}
+
         if isinstance(importoptions, (dict, ParamManager)) and \
                 'filetype' not in [x.lower() for x in importoptions.keys()]:
             ext = os.path.splitext(filename)[-1][1:].lower()
@@ -1263,7 +1393,11 @@ class CAS(object):
                 importoptions['filetype'] = filetype[ext]
             elif len(ext) == 3 and ext.endswith('sv'):
                 importoptions['filetype'] = 'csv'
+
         kwargs['importoptions'] = importoptions
+
+        if df_dtypes:
+            self._apply_importoptions_vars(importoptions, df_dtypes)
 
         if casout is None:
             casout = {}

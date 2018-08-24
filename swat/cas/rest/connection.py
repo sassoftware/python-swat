@@ -248,9 +248,9 @@ class REST_CASConnection(object):
         self._req_sess = requests.Session()
 
         if 'SSLCALISTLOC' in os.environ:
-            self._req_sess.verify = os.environ['SSLCALISTLOC']
+            self._req_sess.verify = os.path.expanduser(os.environ['SSLCALISTLOC'])
         elif 'CAS_CLIENT_SSL_CA_LIST' in os.environ:
-            self._req_sess.verify = os.environ['CAS_CLIENT_SSL_CA_LIST']
+            self._req_sess.verify = os.path.expanduser(os.environ['CAS_CLIENT_SSL_CA_LIST'])
 
         if os.environ.get('SSLREQCERT', 'y').lower().startswith('n'):
             self._req_sess.verify = False
@@ -526,13 +526,14 @@ class REST_CASConnection(object):
 
         while True:
             try:
+                url = urllib.parse.urljoin(self._current_baseurl,
+                                           'cas/sessions/%s/actions/table.upload' %
+                                           self._session)
+
                 if get_option('cas.debug.requests'):
                     _print_request('DELETE', url, self._req_sess.headers, data)
 
-                res = self._req_sess.put(
-                          urllib.parse.urljoin(self._current_baseurl,
-                                               'cas/sessions/%s/actions/table.upload' %
-                                               self._session), data=data)
+                res = self._req_sess.put(url, data=data)
 
                 if get_option('cas.debug.responses'):
                     _print_response(res.text)

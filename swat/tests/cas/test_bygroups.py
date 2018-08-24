@@ -50,8 +50,8 @@ class TestByGroups(tm.TestCase):
     def setUp(self):
         swat.reset_option()
         swat.options.cas.print_messages = False
-        swat.options.cas.trace_actions = False
-        swat.options.cas.trace_ui_actions = False
+#       swat.options.cas.trace_actions = False
+#       swat.options.cas.trace_ui_actions = False
         swat.options.interactive_mode = False
 
         self.s = swat.CAS(HOST, PORT, USER, PASSWD, protocol=PROTOCOL)
@@ -299,8 +299,6 @@ class TestByGroups(tm.TestCase):
         #
         swat.options.cas.dataset.bygroup_casout_threshold = 2
 
-        swat.options.cas.trace_actions = True
-        swat.options.cas.trace_ui_actions = True
         tblgrp = tbl[['Model', 'MSRP', 'Horsepower']].groupby(['Make',
                       'Cylinders'], as_index=False).query('Make in ("Porsche", "BMW")').nsmallest(2, columns=['MSRP'])
         self.assertEqual(tblgrp.__class__.__name__, 'CASTable')
@@ -1119,9 +1117,6 @@ class TestByGroups(tm.TestCase):
         self.assertEqual(len(tblgrp), 3)
 
         # Test character missing values
-        swat.options.cas.trace_actions = True
-        swat.options.cas.trace_ui_actions = True
-        swat.options.cas.print_messages = True
         tbl = self.table.replace({'Make': {'Buick': ''}})
 
         tblgrp = tbl.groupby('Origin')['Make'].nmiss()

@@ -36,7 +36,7 @@ class TestEcho(tm.TestCase):
         swat.reset_option()
         swat.options.cas.print_messages = False
         swat.options.interactive_mode = False
-        swat.options.trace_actions = True
+#       swat.options.trace_actions = True
 
         self.s = swat.CAS(HOST, PORT, USER, PASSWD, protocol=PROTOCOL)
 
