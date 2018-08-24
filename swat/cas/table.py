@@ -25,6 +25,7 @@ from __future__ import print_function, division, absolute_import, unicode_litera
 
 import copy
 import keyword
+import numbers
 import re
 import sys
 import uuid
@@ -7473,7 +7474,16 @@ class CASTable(ParamManager, ActionParamManager):
         computedvars = [key]
         computedvarsprogram = []
 
-        if isinstance(value, CASColumn):
+        if value is True:
+            computedvarsprogram.append('%s = 1; ' % key)
+
+        elif value is False:
+            computedvarsprogram.append('%s = 0; ' % key)
+
+        elif value is None:
+            computedvarsprogram.append('%s = .; ' % key)
+
+        elif isinstance(value, CASColumn):
             cexpr, cvars, cpgm = value._to_expression()
             computedvarsprogram.append(cpgm)
             computedvarsprogram.append('%s = %s; ' % (key, cexpr))
@@ -7481,8 +7491,14 @@ class CASTable(ParamManager, ActionParamManager):
         elif isinstance(value, (text_types, binary_types)):
             computedvarsprogram.append('%s = "%s"; ' % (key, _escape_string(value)))
 
+        elif isinstance(value, numbers.Number):
+            if pd.isnull(value):
+                computedvarsprogram.append('%s = .; ' % key)
+            else:
+                computedvarsprogram.append('%s = %s; ' % (key, value))
+
         else:
-            computedvarsprogram.append('%s = %s; ' % (key, value))
+            raise TypeError('Unrecognized type for column: %s' % type(value))
 
         self.append_computed_columns(computedvars, computedvarsprogram)
         self.append_columns(key)
