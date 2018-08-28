@@ -1188,7 +1188,7 @@ class CAS(object):
         '''
         out = collections.OrderedDict()
 
-        for key, value in df.dtypes.items():
+        for key, value in df.dtypes.iteritems():
             value = value.name
 
             if value == 'object':
