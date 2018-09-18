@@ -1,0 +1,33 @@
+swat.cas.datamsghandlers.Clipboard
+==================================
+
+.. currentmodule:: swat.cas.datamsghandlers
+
+.. autoclass:: Clipboard
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~Clipboard.__init__
+      ~Clipboard.finish
+      ~Clipboard.getone
+      ~Clipboard.getrow
+      ~Clipboard.send
+      ~Clipboard.write
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~Clipboard.args
+   
+   

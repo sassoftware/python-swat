@@ -1,6 +1,0 @@
-swat.cas.table.CASColumn.kurtosis
-=================================
-
-.. currentmodule:: swat.cas.table
-
-.. automethod:: CASColumn.kurtosis

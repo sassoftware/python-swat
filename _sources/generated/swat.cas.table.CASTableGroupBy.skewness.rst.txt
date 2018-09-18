@@ -1,6 +1,0 @@
-swat.cas.table.CASTableGroupBy.skewness
-=======================================
-
-.. currentmodule:: swat.cas.table
-
-.. automethod:: CASTableGroupBy.skewness
