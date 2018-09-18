@@ -9,6 +9,14 @@ What's New
 
 This document outlines features and improvements from each release.
 
+v1.5.0 (September 18, 2018)
+===========================
+
+- Windows support for binary CAS protocol
+- Added ``with_params`` method to ``CASTable`` to create one-off parameter object
+- Set appropriate column data types when uploading a ``DataFrame``
+
+
 v1.4.0 (July 25, 2018)
 ======================
 
