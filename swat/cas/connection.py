@@ -1221,7 +1221,7 @@ class CAS(object):
             else:
                 continue
 
-            out[key] = dict(type=value)
+            out['%s' % key] = dict(type=value)
 
         return out
 
