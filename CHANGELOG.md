@@ -1,6 +1,12 @@
 
 # Change Log
 
+## 1.5.0 - 2018-09-18
+
+- Windows support for binary CAS protocol
+- Added `with_params` method to `CASTable` to create one-off parameter object
+- Set appropriate column data types when uploading a `DataFrame`
+
 ## 1.4.0 - 2018-07-25
 
 - Automatic CAS table creation when large number of By groups are generated in some DataFrame methods
