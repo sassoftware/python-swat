@@ -24,12 +24,18 @@ Initialization of SWAT options
 from __future__ import print_function, division, absolute_import, unicode_literals
 
 import functools
+import warnings
 from .clib import InitializeTK
 from .utils.config import (register_option, check_boolean, check_int, get_option,
                            set_option, reset_option, describe_option, check_url,
                            SWATOptionError, check_string, options, get_suboptions,
                            get_default, check_float, option_context)
 from .utils.compat import a2n
+
+
+class OptionWarning(UserWarning):
+    ''' Warning class for all option warnings '''
+
 
 #
 # TK options
@@ -234,10 +240,23 @@ register_option('cas.dataset.index_adjustment', 'int', check_int, -1,
                 'This can be used to adjust SAS 1-based index data sets to\n' +
                 '0-based Pandas DataFrames.')
 
-register_option('cas.dataset.max_rows_fetched', 'int', check_int, 10000,
+
+def check_max_rows_fetched(val):
+    ''' Check the max_rows_fetched value and print warning '''
+    warnings.warn('max_rows_fetched does not affect explicit calls to the '
+                  'table.fetch action, only hidden fetches in methods such '
+                  'as head, tail, plot, etc.', OptionWarning)
+    return check_int(val)
+
+
+register_option('cas.dataset.max_rows_fetched', 'int', check_max_rows_fetched, 10000,
                 'The maximum number of rows to fetch with methods that use\n' +
                 'the table.fetch action in the background (i.e. the head, tail,\n' +
-                'values, etc. of CASTable).')
+                'values, etc. of CASTable).\n'
+                'NOTE: This does not affect explicit calls to the table.fetch action.\n'
+                '      Using the maxrows=, to=, and from= action parameters will\n'
+                '      return any number of rows, but in batches (e.g., Fetch1, \n'
+                '      Fetch2, etc.).')
 
 register_option('cas.dataset.bygroup_columns', 'string',
                 functools.partial(check_string,

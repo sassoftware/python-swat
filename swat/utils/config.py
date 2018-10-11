@@ -684,7 +684,10 @@ def register_option(key, typedesc, validator, default, doc, environ=None):
     None
 
     '''
-    _config[key] = SWATOption(key, typedesc, validator, default, doc, environ=environ)
+    import warnings
+    with warnings.catch_warnings():
+        warnings.simplefilter('ignore')
+        _config[key] = SWATOption(key, typedesc, validator, default, doc, environ=environ)
 
 
 class AttrOption(object):
