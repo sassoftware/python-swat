@@ -26,7 +26,7 @@ package gives you access to the best of both worlds.
 
 To access the CAS binary protocol (recommended), you need the following:
 
-* **64-bit** Python 2.7.x or 3.4+ on Linux (see shared library notes below)
+* **64-bit** Python 2.7.x or 3.4+ on Windows or Linux (see shared library notes below)
 
 The binary protocol requires pre-compiled components found in the
 `pip` installer only.  These pieces are not available as source code and
@@ -38,9 +38,6 @@ and data formatting features.
 To access the CAS REST interface only, you can use the pure Python code
 which runs in Python 2.7/3.4+ on all platforms.  While not as fast as the
 binary protocol, the pure Python interface is more portable.
-
-If you do not have `pip` installed, you can use `easy_install pip` to add
-it to your current Python installation.
 
 ## Linux Library Dependencies
 
@@ -60,7 +57,13 @@ install SWAT.
 
 # Installation
 
-SWAT can be installed from the
+SWAT can be installed using `pip` or `conda` (if you are using Anaconda)::
+
+    pip install swat
+    
+    conda install -c sas-institute swat
+    
+You can also install from the files on the 
 [SWAT project releases page](https://github.com/sassoftware/python-swat/releases).
 Simply locate the file for your platform and install it using `pip` as 
 follows:
@@ -84,6 +87,11 @@ you can import swat and create a connection::
 
     >>> import swat
     >>> conn = swat.CAS(host, port, username, password)
+    
+If you get an error message about the **TCP/IP negClientSSL support routine**, you 
+likely have an issue with your SSL certificate configuration.  See the 
+[Encryption](https://sassoftware.github.io/python-swat/encryption.html) documentation
+for more information.
 
 If that is successful, you should be able to run an action on the
 CAS server::
