@@ -1278,7 +1278,6 @@ class CAS(object):
         '''
         Upload data from a local file into a CAS table
 
-        This method is a thin wrapper around the `table.upload` CAS action.
         The primary difference between this data loader and the other data
         loaders on this class is that, in this case, the parsing of the data
         is done on the server.  This method simply uploads the file as
@@ -1308,11 +1307,11 @@ class CAS(object):
             or a URL.  DataFrames will be converted to CSV before
             uploading.
         importoptions : dict, optional
-            Import options for the table.upload action.
+            Import options for the ``table.loadtable`` action.
         casout : dict, optional
-            Output table definition for the `table.upload` action.
+            Output table definition for the ``table.loadtable`` action.
         **kwargs : keyword arguments, optional
-            Additional parameters to the `table.upload` action.
+            Additional parameters to the ``table.loadtable`` action.
 
         Examples
         --------
@@ -1375,7 +1374,7 @@ class CAS(object):
             filename = data
             name = os.path.splitext(os.path.basename(filename))[0]
 
-        # TODO: Populate docstring with table.upload action help
+        # TODO: Populate docstring with table.loadtable action help
         filetype = {
             'sav': 'spss',
             'xlsx': 'excel',
@@ -1436,11 +1435,11 @@ class CAS(object):
             or a URL.  DataFrames will be converted to CSV before
             uploading.
         importoptions : dict, optional
-            Import options for the table.upload action.
+            Import options for the ``table.loadtable`` action.
         casout : dict, optional
-            Output table definition for the `table.upload` action.
+            Output table definition for the ``table.loadtable`` action.
         **kwargs : keyword arguments, optional
-            Additional parameters to the `table.upload` action.
+            Additional parameters to the ``table.loadtable`` action.
 
         Returns
         -------
@@ -1472,11 +1471,11 @@ class CAS(object):
         data : :class:`pandas.DataFrame`
             DataFrames will be converted to CSV before uploading.
         importoptions : dict, optional
-            Import options for the table.upload action.
+            Import options for the ``table.loadtable`` action.
         casout : dict, optional
-            Output table definition for the `table.upload` action.
+            Output table definition for the ``table.loadtable`` action.
         **kwargs : keyword arguments, optional
-            Additional parameters to the `table.upload` action.
+            Additional parameters to the ``table.loadtable`` action.
 
         Returns
         -------
