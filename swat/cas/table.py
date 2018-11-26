@@ -9254,11 +9254,17 @@ class CASColumn(CASTable):
                                  add_length=True)
         return self._compute('radd', '({other}) + ({value})', other=other)
 
+    def __radd__(self, other):
+        return self.radd(other)
+
     def rsub(self, other, level=None, fill_value=None, axis=0):
         ''' Subtraction of CASColumn and other, element-wise '''
         if self._is_character():
             raise AttributeError('rsub')
         return self._compute('rsub', '({other}) - ({value})', other=other)
+
+    def __rsub__(self, other):
+        return self.rsub(other)
 
     def rmul(self, other, level=None, fill_value=None, axis=0):
         ''' Multiplication of CASColumn and other, element-wise '''
@@ -9266,11 +9272,17 @@ class CASColumn(CASTable):
             return self.str.repeat(other)
         return self._compute('rmul', '({other}) * ({value})', other=other)
 
+    def __rmul__(self, other):
+        return self.rmul(other)
+
     def rdiv(self, other, level=None, fill_value=None, axis=0):
         ''' Floating division of CASColumn and other, element-wise '''
         if self._is_character():
             raise AttributeError('rdiv')
         return self._compute('rdiv', '({other}) / ({value})', other=other)
+
+    def __rdiv__(self, other):
+        return self.rdiv(other)
 
     def rtruediv(self, other, level=None, fill_value=None, axis=0):
         ''' Floating division of CASColumn and other, element-wise '''
@@ -9278,11 +9290,17 @@ class CASColumn(CASTable):
             raise AttributeError('rtruediv')
         return self._compute('rtruediv', '({other}) / ({value})', other=other)
 
+    def __rtruediv__(self, other):
+        return self.rtruediv(other)
+
     def rfloordiv(self, other, level=None, fill_value=None, axis=0):
         ''' Integer division of CASColumn and other, element-wise '''
         if self._is_character():
             raise AttributeError('floordiv')
         return self._compute('div', 'floor(({other}) / ({value}))', other=other)
+
+    def __rfloordiv__(self, other):
+        return self.rfloordiv(other)
 
     def rmod(self, other, level=None, fill_value=None, axis=0):
         ''' Modulo of CASColumn and other, element-wise '''
@@ -9290,11 +9308,17 @@ class CASColumn(CASTable):
             raise AttributeError('rmod')
         return self._compute('rmod', 'mod({other}, {value})', other=other)
 
+    def __rmod__(self, other):
+        return self.rmod(other)
+
     def rpow(self, other, level=None, fill_value=None, axis=0):
         ''' Exponential power of CASColumn and other, element-wise '''
         if self._is_character():
             raise AttributeError('rpow')
         return self._compute('rpow', '({other})**({value})', other=other)
+
+    def __rpow__(self, other):
+        return self.rpow(other)
 
     def round(self, decimals=0, out=None):
         ''' Round each value of the CASColumn to the given number of decimals '''

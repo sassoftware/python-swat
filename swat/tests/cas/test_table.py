@@ -2714,6 +2714,8 @@ class TestCASTable(tm.TestCase):
         tblout = (tbl['MSRP'].pow(-tbl['EngineSize']/10))
         assertItemsAlmostEqual(dfout, tblout, 2)
 
+        self.assertColsEqual(123.45 + df['MSRP'], 123.45 + tbl['MSRP'])
+        self.assertColsEqual(-123.45 + df['MSRP'], -123.45 + tbl['MSRP'])
         self.assertColsEqual((df['MSRP'].radd(123.45)),
                            (tbl['MSRP'].radd(123.45)))
         self.assertColsEqual((df['MSRP'].radd(-123.45)),
@@ -2724,6 +2726,8 @@ class TestCASTable(tm.TestCase):
         self.assertColsEqual((df['MSRP'].radd(-df['EngineSize'])),
                            (tbl['MSRP'].radd(-tbl['EngineSize'])))
 
+        self.assertColsEqual(123.45 - df['MSRP'], 123.45 - tbl['MSRP'])
+        self.assertColsEqual(-123.45 - df['MSRP'], -123.45 - tbl['MSRP'])
         self.assertColsEqual((df['MSRP'].rsub(123.45)),
                            (tbl['MSRP'].rsub(123.45)))
         self.assertColsEqual((df['MSRP'].rsub(-123.45)),
@@ -2734,6 +2738,8 @@ class TestCASTable(tm.TestCase):
         self.assertColsEqual((df['MSRP'].rsub(-df['EngineSize'])),
                            (tbl['MSRP'].rsub(-tbl['EngineSize'])))
 
+        assertItemsAlmostEqual(123.45 * df['MSRP'],  123.45 * tbl['MSRP'])
+        assertItemsAlmostEqual(-123.45 * df['MSRP'], -123.45 * tbl['MSRP'])
         assertItemsAlmostEqual((df['MSRP'].rmul(123.45)),
                                (tbl['MSRP'].rmul(123.45)))
         assertItemsAlmostEqual((df['MSRP'].rmul(-123.45)),
@@ -2744,6 +2750,8 @@ class TestCASTable(tm.TestCase):
         assertItemsAlmostEqual((df['MSRP'].rmul(-df['EngineSize'])),
                                (tbl['MSRP'].rmul(-tbl['EngineSize'])))
 
+        assertItemsAlmostEqual(123.45 / df['MSRP'], 123.45 / tbl['MSRP'])
+        assertItemsAlmostEqual(-123.45 / df['MSRP'], -123.45 / tbl['MSRP'])
         assertItemsAlmostEqual((df['MSRP'].rdiv(123.45)),
                                (tbl['MSRP'].rdiv(123.45)))
         assertItemsAlmostEqual((df['MSRP'].rdiv(-123.45)),
@@ -2752,6 +2760,9 @@ class TestCASTable(tm.TestCase):
                                (tbl['MSRP'].rtruediv(123.45)))
         assertItemsAlmostEqual((df['MSRP'].rtruediv(-123.45)),
                                (tbl['MSRP'].rtruediv(-123.45)))
+
+        assertItemsAlmostEqual(123.45 // df['MSRP'], 123.45 // tbl['MSRP'])
+        assertItemsAlmostEqual(-123.45 // df['MSRP'], -123.45 // tbl['MSRP'])
         assertItemsAlmostEqual((df['MSRP'].rfloordiv(123.45)),
                                (tbl['MSRP'].rfloordiv(123.45)))
         assertItemsAlmostEqual((df['MSRP'].rfloordiv(-123.45)),
@@ -2770,6 +2781,10 @@ class TestCASTable(tm.TestCase):
         assertItemsAlmostEqual((df['MSRP'].rfloordiv(-df['EngineSize'])),
                                (tbl['MSRP'].rfloordiv(-tbl['EngineSize'])))
 
+        dfout = (123.45 % df['MSRP'])
+        tblout = (123.45 % tbl['MSRP'])
+        assertItemsAlmostEqual(dfout, tblout, 4)
+
         dfout = (df['MSRP'].rmod(123.45))
         tblout = (tbl['MSRP'].rmod(123.45))
         assertItemsAlmostEqual(dfout, tblout, 4)
@@ -2787,6 +2802,10 @@ class TestCASTable(tm.TestCase):
         tblout = ((tbl['MSRP'].rmod(-tbl['EngineSize'])).head(100) + tbl['MSRP'].head(100)).tolist()
         for dfo, tblo in zip(sorted(dfout), sorted(tblout)):
             self.assertAlmostEqual(dfo, tblo, 4)
+
+        dfout = (0.12345 ** df['MSRP'])
+        tblout = (0.12345 ** tbl['MSRP'])
+        assertItemsAlmostEqual(dfout, tblout, 4)
 
         dfout = (df['MSRP'].rpow(0.12345))
         tblout = (tbl['MSRP'].rpow(0.12345))
@@ -2889,6 +2908,9 @@ class TestCASTable(tm.TestCase):
         with self.assertRaises(AttributeError):
             tbl['Make'].pow(tbl['Model'])
 
+        self.assertColsEqual('Foo' + df['Make'], 'Foo' + tbl['Make'])
+        self.assertColsEqual((df['Make'].radd(df['Model'].str.strip())),
+                           (tbl['Make'].radd(tbl['Model'].str.strip())))
         self.assertColsEqual((df['Make'].radd('Foo')),
                            (tbl['Make'].radd('Foo')))
         self.assertColsEqual((df['Make'].radd(df['Model'].str.strip())),
@@ -2899,6 +2921,7 @@ class TestCASTable(tm.TestCase):
         with self.assertRaises(AttributeError):
             tbl['Make'].rsub(tbl['Model'])
 
+        self.assertColsEqual(3 * df['Make'], 3 * tbl['Make'])
         self.assertColsEqual((df['Make'].rmul(3)),
                            (tbl['Make'].rmul(3)))
         self.assertColsEqual((df['Make'].rmul(df['EngineSize'].astype('int'))),
