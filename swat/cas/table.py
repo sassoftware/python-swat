@@ -34,6 +34,7 @@ import weakref
 import numpy as np
 import pandas as pd
 import six
+from .utils.datetime import sas2python_datetime
 from .utils.params import ParamManager, ActionParamManager
 from .utils.misc import super_dir
 from ..config import get_option
@@ -2380,6 +2381,28 @@ class CASTable(ParamManager, ActionParamManager):
     def next(self):
         ''' Return next item in the iteration '''
         return StopIteration
+
+    def exists(self):
+        ''' Return True if table exists in the server '''
+        return self._retrieve('table.tableexists')['exists'] > 0
+
+    @getattr_safe_property
+    def last_modified_date(self):
+        ''' Return the last modified date of the table in the server '''
+        modtime = self._retrieve('table.tableinfo')['TableInfo']['ModTime'][0]
+        return sas2python_datetime(modtime)
+
+    @getattr_safe_property
+    def last_accessed_date(self):
+        ''' Return the last access date of the table in the server '''
+        acctime = self._retrieve('table.tableinfo')['TableInfo']['AccessTime'][0]
+        return sas2python_datetime(acctime)
+
+    @getattr_safe_property
+    def created_date(self):
+        ''' Return the created date of the table in the server '''
+        cretime = self._retrieve('table.tableinfo')['TableInfo']['CreateTime'][0]
+        return sas2python_datetime(cretime)
 
     @getattr_safe_property
     def _numcolumns(self):
