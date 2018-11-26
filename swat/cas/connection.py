@@ -28,6 +28,7 @@ import contextlib
 import copy
 import json
 import os
+import random
 import re
 import weakref
 import six
@@ -389,7 +390,7 @@ class CAS(object):
                 num = num + 1
         self._id_generator = _id_generator()
 
-        self.server_version, self.server_features = self._get_server_features()
+        self.server_type, self.server_version, self.server_features = self._get_server_features()
 
     def _gen_id(self):
         ''' Generate an ID unique to the session '''
@@ -410,11 +411,12 @@ class CAS(object):
         info = self.retrieve('builtins.serverstatus', _messagelevel='error',
                              _apptag='UI')
         version = tuple([int(x) for x in info['About']['Version'].split('.')][:2])
+        stype = info['About']['System']['OS Name'].lower()
 
 #       if version >= (3, 4):
 #           out.add('csv-ints')
 
-        return version, out
+        return stype, version, out
 
     def _detect_protocol(self, hostname, port, protocol=None):
         '''
@@ -3084,6 +3086,95 @@ class CAS(object):
 
         '''
         return self._read_any('read_stata', filepath_or_buffer, casout=casout, **kwargs)
+
+    def path_to_caslib(self, path, name=None, **kwargs):
+        '''
+        Return a caslib name for a given path
+
+        If a caslib does not exist for the current path or for a parent
+        path, a new caslib will be created.
+
+        Parameters
+        ----------
+        path : string
+            The absolute path to the desired caslib directory
+        name : string, optional
+            The name to give to the caslib, if a new one is created
+        kwargs : keyword-parameter, optional
+            Additional parameters to use when creating a new caslib
+
+        Returns
+        -------
+        ( caslib-name, relative-path )
+            The return value is a two-element tuple.  The first element
+            is the name of the caslib.  The second element is the relative
+            path to the requested directory from the caslib.  The second
+            element will be blank if the given path matches a caslib,
+            or a new caslib is created.
+
+        '''
+        if not name:
+            name = 'Caslib_%x' % random.randint(0,1e9)
+
+        activeonadd_key = None
+        subdirectories_key = None
+        datasource_key = None
+
+        for key, value in kwargs.items():
+            if key.lower() == 'activeonadd':
+                activeonadd_key = key
+            elif key.lower() == 'subdirectories':
+                subdirectories_key = key
+            elif key.lower() == 'datasource':
+                datasource_key = key
+
+        if not activeonadd_key:
+            activeonadd_key = 'activeonadd'
+            kwargs[activeonadd_key] = False
+        if not subdirectories_key:
+            subdirectories_key = 'subdirectories'
+            kwargs[subdirectories_key] = True
+        if not datasource_key:
+            datasource_key = 'datasource'
+            kwargs[datasource_key] = dict(srctype='path')
+
+        is_windows = self.server_type.startswith('win')
+
+        if is_windows:
+            sep = '\\'
+            normpath = path.lower()
+        else:
+            sep = '/'
+            normpath = path
+
+        if normpath.endswith(sep):
+            normpath = normpath[:-1]
+
+        info = self.retrieve('table.caslibinfo',
+                             _messagelevel='error')['CASLibInfo']
+
+        for libname, item, subdirs in zip(info['Name'], info['Path'],
+                                          info['Subdirs']):
+            if item.endswith(sep):
+                item = item[:-1]
+            if is_windows:
+                item = item.lower()
+            if item == normpath:
+                if bool(subdirs) != bool(kwargs[subdirectories_key]):
+                    raise SWATError('caslib exists, but subdirectories flag differs')
+                return libname, ''
+            elif normpath.startswith(item):
+                if bool(subdirs) != bool(kwargs[subdirectories_key]):
+                    raise SWATError('caslib exists, but subdirectories flag differs')
+                return libname, path[len(item)+1:]
+
+        out = self.retrieve('table.addcaslib', _messagelevel='error',
+                            name=name, path=path, **kwargs)
+
+        if out.severity > 1:
+            raise SWATError(out.status)
+
+        return name, ''
 
 
 def getone(connection, datamsghandler=None):
