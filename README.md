@@ -1,5 +1,6 @@
 
 # SAS Scripting Wrapper for Analytics Transfer (SWAT)
+## Overview
 
 The **SAS SWAT** package is a Python interface to the **SAS Cloud Analytic 
 Services (CAS)** engine (the centerpiece of the 
@@ -21,8 +22,9 @@ With the best-of-breed **SAS** analytics in the cloud and the use of
 Python and its large collection of open source packages, the **SWAT**
 package gives you access to the best of both worlds.
 
+To view updates to this project see the [Change Log](https://github.com/sassoftware/python-swat/blob/master/CHANGELOG.md).
 
-## Requirements
+# Prerequisites
 
 To access the CAS binary protocol (recommended), you need the following:
 
@@ -135,13 +137,15 @@ CAS server::
 
     >>> conn.close()
 
+# Contributing 
+The [Contributor Agreement](https://github.com/sassoftware/python-swat/blob/master/ContributorAgreement.txt) details on how contributions can be made to the project. The [Contributing](https://github.com/sassoftware/python-swat/blob/master/CONTRIBUTING.md) includes instructions and rules as it relates to making contributions on the project. 
 
-# Resources
+# Licensing 
+The [LICENSE.md](https://github.com/sassoftware/python-swat/blob/master/LICENSE.md) states how this package is released and licensed. 
 
-[SAS SWAT](http://github.com/sassoftware/python-swat/)
-
-[Python](http://www.python.org/)
-
-[SAS Viya](http://www.sas.com/en_us/software/viya.html)
+# Additional Resources
+- [SAS SWAT](http://github.com/sassoftware/python-swat/)
+- [Python](http://www.python.org/)
+- [SAS Viya](http://www.sas.com/en_us/software/viya.html)
 
 Copyright SAS Institute
