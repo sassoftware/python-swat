@@ -144,8 +144,11 @@ The [Contributor Agreement](https://github.com/sassoftware/python-swat/blob/mast
 The [LICENSE.md](https://github.com/sassoftware/python-swat/blob/master/LICENSE.md) states how this package is released and licensed. 
 
 # Additional Resources
-- [SAS SWAT](http://github.com/sassoftware/python-swat/)
+- [Python-SWAT API Documentation](https://sassoftware.github.io/python-swat/)
+- [SAS Viya Documentation](https://support.sas.com/documentation/onlinedoc/viya/index.html)
+- [Q&A Support](https://communities.sas.com/t5/SAS-Viya-Coders-Library/tkb-p/cas%40tkb)
 - [Python](http://www.python.org/)
 - [SAS Viya](http://www.sas.com/en_us/software/viya.html)
+
 
 Copyright SAS Institute
