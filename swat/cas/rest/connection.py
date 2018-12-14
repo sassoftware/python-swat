@@ -138,7 +138,7 @@ def _normalize_params(params):
             value = float64(value)
         elif isinstance(value, blob):
             b64data = base64.b64encode(value)
-            value = dict(_blob=True, data=a2u(b64data), length=len(b64data))
+            value = dict(_blob=True, data=a2u(b64data), length=len(value))
         out[key] = value
     return out
 
