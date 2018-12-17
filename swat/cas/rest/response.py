@@ -40,6 +40,19 @@ def camel2underscore(text):
     return re.sub(r'^_([A-Z])', r'\1', re.sub(r'([A-Z])', r'_\1', text)).lower()
 
 
+def decrement_index(match):
+    ''' Decrement number in group 2 '''
+    return '%s%d%s' % (match.group(1), int(match.group(2)) - 1, match.group(3))
+
+
+def process_parameter_indexes(status_code, msg):
+    ''' Decrement parameter index values '''
+    # Only process parameter error messages
+    if int(status_code / 10000) == 272:
+        return re.sub(r'(\w+\[)(\d+)(\])', decrement_index, msg)
+    return msg
+
+
 class REST_CASResponse(object):
     '''
     Create a CASResponse object
@@ -82,7 +95,9 @@ class REST_CASResponse(object):
 
         def getNextMessage(self):
             ''' Iterator for getting next message '''
+            status_code = self._disposition['status_code']
             for item in self._messages:
+                item = process_parameter_indexes(status_code, item)
                 if options.cas.print_messages:
                     print(item)
                 yield item
