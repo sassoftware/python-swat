@@ -4216,8 +4216,11 @@ class TestCASTable(tm.TestCase):
         # Just run this to make sure it doesn't blow up
         view.head()
 
-        with self.assertRaises(swat.SWATError):
-            sortview.head()
+        if self.server_version < (3, 5):
+            with self.assertRaises(swat.SWATError):
+                sortview.head()
+        else:
+            sortview.head()        
 
     def test_to_frame_ordering(self):
         df = self.get_cars_df().sort_values(SORT_KEYS)
