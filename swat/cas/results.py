@@ -28,7 +28,6 @@ import pprint
 import re
 import six
 import pandas as pd
-import pandas.core.common as pdcom
 from ..dataframe import SASDataFrame, concat
 from ..notebook.zeppelin import show as z_show
 from ..utils.compat import OrderedDict
@@ -88,8 +87,17 @@ class RendererMixin(object):
            HTML representation of CASResults object
 
         '''
-        if pdcom.in_qtconsole():
-            return None
+        try:
+            import IPython
+            from pandas.io.formats import console
+            from distutils.version import LooseVersion
+        except ImportError:
+            pass
+        else:
+            if LooseVersion(IPython.__version__) < LooseVersion('3.0'):
+                if console.in_qtconsole():
+                    # 'HTML output is disabled in QtConsole'
+                    return None
 
         if not pd.get_option('display.notebook.repr_html'):
             return None
