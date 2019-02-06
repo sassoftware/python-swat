@@ -87,7 +87,9 @@ you can import swat and create a connection::
 
     >>> import swat
     >>> conn = swat.CAS(host, port, username, password)
-    
+
+Note the default port for the Python SWAT connection is 5570.
+
 If you get an error message about the **TCP/IP negClientSSL support routine**, you 
 likely have an issue with your SSL certificate configuration.  See the 
 [Encryption](https://sassoftware.github.io/python-swat/encryption.html) documentation
