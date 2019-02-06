@@ -212,7 +212,14 @@ class REST_CASConnection(object):
             self._hostname = []
             self._port = []
             for host in hostname:
+                path = ''
+                # If host contains a path, split them apart first
+                if '/' in host:
+                    host, path = host.split('/', 1)
+                # Rebuild URL from pieces
                 self._baseurl.append('%s://%s:%d' % (protocol, host, port))
+                if path:
+                    self._baseurl[-1] = self._baseurl[-1] + '/' + path
                 self._hostname.append(host)
                 self._port.append(port)
 
