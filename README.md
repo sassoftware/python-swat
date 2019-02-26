@@ -152,5 +152,3 @@ The [LICENSE.md](https://github.com/sassoftware/python-swat/blob/master/LICENSE.
 - [Python](http://www.python.org/)
 - [SAS Viya](http://www.sas.com/en_us/software/viya.html)
 
-
-Copyright SAS Institute
