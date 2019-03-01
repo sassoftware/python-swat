@@ -1,6 +1,14 @@
 
 # Change Log
 
+## 1.5.1 - 2019-03-01
+
+- Fix Authinfo matching when using base URLs in REST interface
+- Fix compatibility with pandas 0.24
+- Fix blob parameters in REST interface
+- Add `CASTable.last_modified_date`, `CASTable.last_accessed_date`, and `CASTable.created_date` properties
+- Add reverse operator methods to `CASColumn`
+
 ## 1.5.0 - 2018-09-18
 
 - Windows support for binary CAS protocol

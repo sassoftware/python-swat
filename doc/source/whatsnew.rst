@@ -9,6 +9,17 @@ What's New
 
 This document outlines features and improvements from each release.
 
+1.5.1 (March 1, 2019)
+=====================
+
+- Fix Authinfo matching when using base URLs in REST interface
+- Fix compatibility with pandas 0.24
+- Fix blob parameters in REST interface
+- Add ``CASTable.last_modified_date``, ``CASTable.last_accessed_date``, and ``CASTable.created_date`` prop
+erties
+- Add reverse operator methods to `CASColumn`
+
+
 v1.5.0 (September 18, 2018)
 ===========================
 
