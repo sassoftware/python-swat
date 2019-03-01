@@ -90,4 +90,4 @@ from .exceptions import SWATError, SWATOptionError, SWATCASActionError    # noqa
 # SAS Formatter
 from .formatter import SASFormatter    # noqa: E402
 
-__version__ = '1.5.1'
+__version__ = '1.5.2-dev'
