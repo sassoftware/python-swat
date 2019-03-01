@@ -1,0 +1,6 @@
+swat.cas.table.DatetimeColumnMethods.days\_in\_month
+====================================================
+
+.. currentmodule:: swat.cas.table
+
+.. autoattribute:: DatetimeColumnMethods.days_in_month

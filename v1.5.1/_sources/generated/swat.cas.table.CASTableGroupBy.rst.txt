@@ -1,0 +1,63 @@
+swat.cas.table.CASTableGroupBy
+==============================
+
+.. currentmodule:: swat.cas.table
+
+.. autoclass:: CASTableGroupBy
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~CASTableGroupBy.__init__
+      ~CASTableGroupBy.css
+      ~CASTableGroupBy.cv
+      ~CASTableGroupBy.describe
+      ~CASTableGroupBy.get_group
+      ~CASTableGroupBy.get_groupby_vars
+      ~CASTableGroupBy.head
+      ~CASTableGroupBy.kurt
+      ~CASTableGroupBy.kurtosis
+      ~CASTableGroupBy.max
+      ~CASTableGroupBy.mean
+      ~CASTableGroupBy.median
+      ~CASTableGroupBy.min
+      ~CASTableGroupBy.mode
+      ~CASTableGroupBy.nlargest
+      ~CASTableGroupBy.nmiss
+      ~CASTableGroupBy.nsmallest
+      ~CASTableGroupBy.nth
+      ~CASTableGroupBy.nunique
+      ~CASTableGroupBy.probt
+      ~CASTableGroupBy.quantile
+      ~CASTableGroupBy.query
+      ~CASTableGroupBy.skew
+      ~CASTableGroupBy.skewness
+      ~CASTableGroupBy.slice
+      ~CASTableGroupBy.std
+      ~CASTableGroupBy.stderr
+      ~CASTableGroupBy.sum
+      ~CASTableGroupBy.tail
+      ~CASTableGroupBy.to_frame
+      ~CASTableGroupBy.to_series
+      ~CASTableGroupBy.tvalue
+      ~CASTableGroupBy.unique
+      ~CASTableGroupBy.uss
+      ~CASTableGroupBy.value_counts
+      ~CASTableGroupBy.var
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~CASTableGroupBy.plot
+   
+   

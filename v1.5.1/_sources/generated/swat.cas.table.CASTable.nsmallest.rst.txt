@@ -1,0 +1,6 @@
+swat.cas.table.CASTable.nsmallest
+=================================
+
+.. currentmodule:: swat.cas.table
+
+.. automethod:: CASTable.nsmallest

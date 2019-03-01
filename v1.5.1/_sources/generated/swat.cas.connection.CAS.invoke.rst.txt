@@ -1,0 +1,6 @@
+swat.cas.connection.CAS.invoke
+==============================
+
+.. currentmodule:: swat.cas.connection
+
+.. automethod:: CAS.invoke

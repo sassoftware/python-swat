@@ -1,0 +1,6 @@
+swat.cas.table.CASTable.from\_dict
+==================================
+
+.. currentmodule:: swat.cas.table
+
+.. automethod:: CASTable.from_dict

@@ -1,0 +1,6 @@
+swat.cas.table.CASColumn.quantile
+=================================
+
+.. currentmodule:: swat.cas.table
+
+.. automethod:: CASColumn.quantile

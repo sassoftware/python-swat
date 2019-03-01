@@ -1,0 +1,6 @@
+swat.cas.table.CASColumn.groupby
+================================
+
+.. currentmodule:: swat.cas.table
+
+.. automethod:: CASColumn.groupby
