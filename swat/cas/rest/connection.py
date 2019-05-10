@@ -114,7 +114,9 @@ def _normalize_params(params):
     out = {}
     for key, value in params.items():
         key = keywordify(key)
-        if value is True:
+        if value is None:
+            continue
+        elif value is True:
             pass
         elif value is False:
             pass
