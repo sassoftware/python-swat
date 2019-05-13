@@ -515,7 +515,7 @@ class REST_CASConnection(object):
                                        'cas/sessions/%s' % self._session)
 
             if get_option('cas.debug.requests'):
-                _print_requests('DELETE', url, self._req_sess.headers)
+                _print_request('DELETE', url, self._req_sess.headers)
 
             res = self._req_sess.delete(url, data=b'')
 
