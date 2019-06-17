@@ -29,6 +29,7 @@ import os
 import re
 import requests
 import six
+import ssl
 import sys
 from six.moves import urllib
 from .message import REST_CASMessage
@@ -159,6 +160,15 @@ def _normalize_list(items):
     return newitems
 
 
+class SSLContextAdapter(requests.adapters.HTTPAdapter):
+    """HTTPAdapter that uses the default SSL context on the machine."""
+
+    def init_poolmanager(self, connections, maxsize, block=requests.adapters.DEFAULT_POOLBLOCK, **pool_kwargs):
+        context = ssl.create_default_context()
+        pool_kwargs['ssl_context'] = context
+        return super(SSLContextAdapter, self).init_poolmanager(connections, maxsize, block, **pool_kwargs)
+
+
 class REST_CASConnection(object):
     '''
     Create a REST CAS connection
@@ -260,6 +270,8 @@ class REST_CASConnection(object):
             self._req_sess.verify = os.path.expanduser(os.environ['SSLCALISTLOC'])
         elif 'CAS_CLIENT_SSL_CA_LIST' in os.environ:
             self._req_sess.verify = os.path.expanduser(os.environ['CAS_CLIENT_SSL_CA_LIST'])
+        elif 'REQUESTS_CA_BUNDLE' not in os.environ:
+            self._req_sess.mount('https://', SSLContextAdapter())
 
         if os.environ.get('SSLREQCERT', 'y').lower().startswith('n'):
             self._req_sess.verify = False
