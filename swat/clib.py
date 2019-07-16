@@ -70,10 +70,14 @@ def _import_pyswat():
                          'platform-dependent install file, or use the REST interface '
                          'as an alternative.')
 
-    # Make sure the correct libssl.so is used
-    libssl = list(sorted(glob.glob(os.path.join(sys.prefix, 'lib', 'libssl.so*'))))
-    if libssl:
-        os.environ['TKESSL_OPENSSL_LIB'] = libssl[-1]
+    if not os.environ.get('TKESSL_OPENSSL_LIB', '').strip():
+        # Make sure the correct libssl.so is used
+        libssl = list(sorted(glob.glob(os.path.join('/usr/lib64/libssl.so.10')))) + \
+                 list(sorted(glob.glob(os.path.join('/usr/lib64/libssl.so.1.0*')))) + \
+                 list(sorted(glob.glob(os.path.join(sys.prefix, 'lib', 'libssl.so.10')))) + \
+                 list(sorted(glob.glob(os.path.join(sys.prefix, 'lib', 'libssl.so.1.0*'))))
+        if libssl:
+            os.environ['TKESSL_OPENSSL_LIB'] = libssl[-1]
 
     # Try to import the C extension
     try:
