@@ -2529,6 +2529,26 @@ class CASTable(ParamManager, ActionParamManager):
         out.name = None
         return out
 
+    def get(self, key, default=None):
+        '''
+        Get item from object for given key (ex: DataFrame column)
+        
+        Returns default value if not found.
+
+        Parameters
+        ----------
+        key : object
+        
+        Returns
+        -------
+        value : same type as items contained in object
+        
+        '''
+        try:
+            return self[key]
+        except (KeyError, ValueError, IndexError):
+            return default
+
     def get_dtype_counts(self):
         ''' Retrieve the frequency of CAS table column data types '''
         return self.dtypes.value_counts().sort_index()
@@ -4907,7 +4927,7 @@ class CASTable(ParamManager, ActionParamManager):
         '''
         if self._use_casout_for_stat(casout):
             return self._get_casout_stat('median', axis=axis, skipna=skipna, level=level,
-                                         numeric_only=numeric_only, casout=casout, 
+                                         numeric_only=numeric_only, casout=casout,
                                          **kwargs)
         return self.quantile(0.5, axis=axis, interpolation='nearest')
 
@@ -4944,7 +4964,7 @@ class CASTable(ParamManager, ActionParamManager):
         '''
         if self._use_casout_for_stat(casout):
             return self._get_casout_stat('min', axis=axis, skipna=skipna, level=level,
-                                         numeric_only=numeric_only, casout=casout, 
+                                         numeric_only=numeric_only, casout=casout,
                                          **kwargs)
         return self._topk_values('min', axis=axis, skipna=skipna, level=level,
                                  numeric_only=numeric_only, **kwargs)
@@ -5039,7 +5059,7 @@ class CASTable(ParamManager, ActionParamManager):
                     casin.to_input_datastep_params(), sort_order, group_str, sortby_str,
                       cond_str, comp))
 
-        finally:  
+        finally:
             if casin is not None:
                 casin._retrieve('table.droptable')
 
@@ -5253,7 +5273,7 @@ class CASTable(ParamManager, ActionParamManager):
 
         if self._use_casout_for_stat(casout):
             return self._get_casout_stat('percentile', axis=axis,
-                                         numeric_only=numeric_only, casout=casout, 
+                                         numeric_only=numeric_only, casout=casout,
                                          percentile_values=q,
                                          **kwargs)
 
