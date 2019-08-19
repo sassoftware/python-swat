@@ -31,6 +31,7 @@ import pandas as pd
 
 UUID_RE = r'^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$'
 
+RE_TYPE = type(re.compile(r''))
 
 class TestCase(unittest.TestCase):
     ''' TestCase with SWAT Customizations '''
@@ -55,9 +56,14 @@ class TestCase(unittest.TestCase):
 
     def assertContainsMessage(self, results, expectedMsg):
         ''' See if expected message is in results '''
-        for i in range(len(results.messages)):
-            if expectedMsg in results.messages[i]:
-                return
+        if isinstance(expectedMsg, RE_TYPE):
+            for msg in results.messages:
+                if expectedMsg.match(msg):
+                    return
+        else:
+            for i in range(len(results.messages)):
+                if expectedMsg in results.messages[i]:
+                    return
         raise ValueError('Expected message not found: ' + expectedMsg)
 
     def replaceNaN(self, row, nan):
