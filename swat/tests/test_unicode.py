@@ -152,7 +152,7 @@ class TestUnicode(tm.TestCase):
     def test_unicode_list_params(self):
         r = self.s.echo(**{u'a': [1, 2, 3], 
                            u'\u2603': [1.1, 2.3, 4], 
-                           u'foo': [u'\u2603', u'\u2600', u'\2680']})
+                           u'foo': [u'\u2603', u'\u2600', u'\u2680']})
 
         self.assertTrue(has_same_items(r.keys(), [u'a', u'foo', u'\u2603']))
 
@@ -162,8 +162,8 @@ class TestUnicode(tm.TestCase):
         self.assertEqual(r[u'\u2603'], [1.1, 2.3, 4])
 
         self.assertTrue(all(isinstance(x, unicode) for x in r[u'foo']))
-        self.assertEqual(r[u'foo'], [u'\u2603', u'\u2600', u'\2680'])
-        self.assertEqual(r['foo'], [u'\u2603', u'\u2600', u'\2680'])
+        self.assertEqual(r[u'foo'], [u'\u2603', u'\u2600', u'\u2680'])
+        self.assertEqual(r['foo'], [u'\u2603', u'\u2600', u'\u2680'])
 
     def test_unicode_tuple_params(self):
         r = self.s.echo(**{u'a': (1, 2, 3), 
@@ -184,7 +184,7 @@ class TestUnicode(tm.TestCase):
     def test_unicode_set_params(self):
         r = self.s.echo(**{u'a': set([1, 2, 3]), 
                            u'\u2603': set([1.1, 2.3, 4]),
-                           u'foo': set([u'\u2603', u'\u2600', u'\2680'])})
+                           u'foo': set([u'\u2603', u'\u2600', u'\u2680'])})
 
         self.assertTrue(has_same_items(r.keys(), [u'a', u'foo', u'\u2603']))
 
@@ -194,12 +194,12 @@ class TestUnicode(tm.TestCase):
         self.assertTrue(has_same_items(r[u'\u2603'], [1.1, 2.3, 4]))
 
         self.assertTrue(all(isinstance(x, unicode) for x in r[u'foo']))
-        self.assertTrue(has_same_items(r[u'foo'], [u'\u2603', u'\u2600', u'\2680']))
-        self.assertTrue(has_same_items(r['foo'], [u'\u2603', u'\u2600', u'\2680']))
+        self.assertTrue(has_same_items(r[u'foo'], [u'\u2603', u'\u2600', u'\u2680']))
+        self.assertTrue(has_same_items(r['foo'], [u'\u2603', u'\u2600', u'\u2680']))
 
     def test_unicode_dict_params(self):
         r = self.s.echo(**{u'a': {u'x':1, u'y':2, u'z':3},
-                           u'\u2603': {u'\u2600':1.1, u'\2680':2.3, u'\2690':4}})
+                           u'\u2603': {u'\u2600':1.1, u'\u2680':2.3, u'\u2690':4}})
 
         self.assertTrue(has_same_items(r.keys(), [u'a', u'\u2603']))
 
@@ -208,7 +208,7 @@ class TestUnicode(tm.TestCase):
         self.assertEqual(r['a'], {u'x':1, u'y':2, u'z':3})
 
         self.assertTrue(all(isinstance(x, unicode) for x in r[u'\u2603'].keys()))
-        self.assertEqual(r[u'\u2603'], {u'\u2600':1.1, u'\2680':2.3, u'\2690':4})
+        self.assertEqual(r[u'\u2603'], {u'\u2600':1.1, u'\u2680':2.3, u'\u2690':4})
 
     def test_byte_params(self):
         if self.s._protocol in ['http', 'https']:
@@ -256,8 +256,12 @@ class TestUnicode(tm.TestCase):
         self.assertEqual(data.ix[:,'Int32'][0], 42)
         self.assertIn(type(data.ix[:,'Int32'][0]), [np.int32, np.int64])
 
-        self.assertEqual(data.ix[:,'Int64'][0], 9223372036854775807)
-        self.assertTrue(isinstance(data.ix[:,'Int64'][0], np.int64))
+        # REST interface can sometimes overflow the JSON float
+        if np.isnan(data.ix[:,'Int64'][0]):
+            self.assertEqual(type(data.ix[:,'Int64'][0]), np.float64)
+        else:
+            self.assertEqual(data.ix[:,'Int64'][0], 9223372036854775807)
+            self.assertEqual(type(data.ix[:,'Int64'][0]), np.int64)
 
         self.assertEqual(data.ix[:,'Date'][0], datetime.date(1963, 5, 19))
         self.assertEqual(type(data.ix[:,'Date'][0]), datetime.date)

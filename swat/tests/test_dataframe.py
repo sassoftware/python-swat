@@ -156,9 +156,12 @@ class TestDataFrame(tm.TestCase):
         self.assertIn(type(data.ix[:,'Int32'][0]), [np.int32, np.int64])
         self.assertIn(dtype_from_var(data.Int32[0]), ['int32', 'int64'])
 
-        self.assertEqual(data.ix[:,'Int64'][0], 9223372036854775807)
-        self.assertEqual(type(data.ix[:,'Int64'][0]), np.int64)
-        self.assertEqual(dtype_from_var(data.Int64[0]), 'int64')
+        # REST interface can sometimes overflow the JSON float
+        if np.isnan(data.ix[:,'Int64'][0]):
+            self.assertEqual(type(data.ix[:,'Int64'][0]), np.float64)
+        else:
+            self.assertEqual(data.ix[:,'Int64'][0], 9223372036854775807)
+            self.assertEqual(type(data.ix[:,'Int64'][0]), np.int64)
 
         self.assertEqual(data.ix[:,'Date'][0], datetime.date(1963, 5, 19))
         self.assertEqual(type(data.ix[:,'Date'][0]), datetime.date)
