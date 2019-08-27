@@ -929,16 +929,19 @@ class TestByGroups(tm.TestCase):
     def test_quantile(self):
         df = self.get_cars_df().sort_values(SORT_KEYS)
         tbl = self.table.sort_values(SORT_KEYS)
+        numerics = ['MSRP', 'Invoice', 'EngineSize', 'Cylinders',
+                    'Horsepower', 'MPG_City', 'MPG_Highway',
+                    'Weight', 'Wheelbase', 'Length']
 
-        dfgrp = df.groupby('Origin').quantile()[['MSRP', 'Invoice', 'EngineSize', 'Cylinders',
-                                                 'Horsepower', 'MPG_City', 'MPG_Highway',
-                                                 'Weight', 'Wheelbase', 'Length']]
+        dfgrp = df.groupby('Origin')[numerics].quantile()
         tblgrp = tbl.groupby('Origin').quantile()
         self.assertTablesEqual(dfgrp, tblgrp, sortby=None, include_index=True)
 
-        dfgrp = df.groupby('Origin', as_index=False).quantile()
+        dfgrp = df.groupby('Origin', as_index=False)[numerics].quantile()
         tblgrp = tbl.groupby('Origin', as_index=False).quantile()
-        # For some reason Pandas drops this column, but I think it should be there.
+        # For some reason some versions of Pandas drop this column, but I think it should be there.
+        try: dfgrp = dfgrp.drop('Origin', axis=1)
+        except: pass
         tblgrp = tblgrp.drop('Origin', axis=1)
         self.assertTablesEqual(dfgrp, tblgrp, sortby=None)
 
@@ -947,9 +950,11 @@ class TestByGroups(tm.TestCase):
         #
         swat.options.cas.dataset.bygroup_casout_threshold = 2
 
-        dfgrp = df.groupby('Origin', as_index=False).quantile()
+        dfgrp = df.groupby('Origin', as_index=False)[numerics].quantile()
         tblgrp = tbl.groupby('Origin', as_index=False).quantile()
-        # For some reason Pandas drops this column, but I think it should be there.
+        # For some reason some versions of Pandas drop this column, but I think it should be there.
+        try: dfgrp = dfgrp.drop('Origin', axis=1)
+        except: pass
         tblgrp = tblgrp.drop('Origin', axis=1)
         self.assertEqual(tblgrp.__class__.__name__, 'CASTable')
         self.assertTablesEqual(dfgrp, tblgrp, sortby=None)

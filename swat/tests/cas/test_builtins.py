@@ -376,7 +376,7 @@ class TestBuiltins(tm.TestCase):
         self.assertNotEqual(r, None)          
         self.assertTrue(r['protocol'] in ['http', 'https'])
         if self.s._protocol in ['http', 'https']:        
-            self.assertEqual(str(r['port']), os.environ['CASPORT'])
+            self.assertEqual(str(int(r['port'])), os.environ['CASPORT'])
         # 02/20/2016: bosout: Documentation indicates the action should return virtualHost.
         # However, that is not being returned. Developers notified. Comment out until we know more.
         #self.assertNotEqual(r['virtualHost'], None)

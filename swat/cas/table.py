@@ -2364,7 +2364,7 @@ class CASTable(ParamManager, ActionParamManager):
     @getattr_safe_property
     def _numrows(self):
         ''' Return number of rows in the table '''
-        return self.copy(exclude='groupby')._retrieve('simple.numrows')['numrows']
+        return int(self.copy(exclude='groupby')._retrieve('simple.numrows')['numrows'])
 
     def __len__(self):
         if self._pandas_enabled:
