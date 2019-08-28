@@ -316,7 +316,7 @@ class TestCASResults(tm.TestCase):
         self.assertTrue('[ByGroup1.Topk]' in sout)
         self.assertTrue('[ByGroup2.Topk]' in sout)
         self.assertTrue('[ByGroup3.Topk]' in sout)
-        self.assertTrue('+ Elapsed: ' in sout)
+        self.assertTrue('+ Elapsed: ' in sout or '+ Mem: ' in sout)
 
     def test_render_html(self):
         out = self.table.groupby('Origin').topk()
