@@ -7,7 +7,7 @@ Installation
 The SWAT package is installed using the ``pip`` command.  The requirements
 for using the binary protocol of CAS (recommended) are as follows.
 
-* **64-bit** Python 2.7 or 3.4-3.6 on Linux
+* **64-bit** Python 2.7 or 3.4+ on Linux or Windows
 
 See additional shared library notes below.
 
