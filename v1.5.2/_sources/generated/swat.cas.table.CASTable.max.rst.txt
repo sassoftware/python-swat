@@ -1,0 +1,6 @@
+swat.cas.table.CASTable.max
+===========================
+
+.. currentmodule:: swat.cas.table
+
+.. automethod:: CASTable.max
