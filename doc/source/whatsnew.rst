@@ -9,6 +9,14 @@ What's New
 
 This document outlines features and improvements from each release.
 
+1.5.2 (September 9, 2019)
+=========================
+
+- Fix issue with nulls in REST parameters
+- Add fallback default configuration for SSL
+- Add ``CASTable.get`` method
+
+
 1.5.1 (March 1, 2019)
 =====================
 

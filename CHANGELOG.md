@@ -1,6 +1,12 @@
 
 # Change Log
 
+## 1.5.2 - 2019-09-09
+
+- Fix issue with nulls in REST parameters
+- Add fallback default configuration for SSL
+- Add `CASTable.get` method
+
 ## 1.5.1 - 2019-03-01
 
 - Fix Authinfo matching when using base URLs in REST interface
