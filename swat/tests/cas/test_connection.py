@@ -799,6 +799,27 @@ class TestConnection(tm.TestCase):
                                         bar=dict(type='varchar'),
                                         baz=dict(type='char'))))
 
+    def test_has_action(self):
+        self.assertTrue(self.s.has_action('table.loadtable'))
+        self.assertTrue(self.s.has_action('table.LoadTable'))
+        self.assertTrue(self.s.has_action('table.loadTable'))
+
+        self.assertTrue(self.s.has_action('loadtable'))
+        self.assertTrue(self.s.has_action('LoadTable'))
+        self.assertTrue(self.s.has_action('loadTable'))
+
+        self.assertFalse(self.s.has_action('table.unknownAction'))
+        self.assertFalse(self.s.has_action('table.unknownaction'))
+
+    def test_has_actionset(self):
+        self.assertTrue(self.s.has_actionset('table'))
+        self.assertTrue(self.s.has_actionset('Table'))
+        self.assertTrue(self.s.has_actionset('builtins'))
+        self.assertTrue(self.s.has_actionset('BuiltIns'))
+
+        self.assertFalse(self.s.has_actionset('unknownActionSet'))
+        self.assertFalse(self.s.has_actionset('unknownactionset'))
+
 
 if __name__ == '__main__':
    import xmlrunner
