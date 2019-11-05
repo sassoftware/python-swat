@@ -573,7 +573,7 @@ class CAS(object):
         boolean
 
         '''
-        return name in self._action_classes
+        return name.lower() in self._action_classes
 
     def has_actionset(self, name):
         '''
@@ -589,7 +589,7 @@ class CAS(object):
         boolean
 
         '''
-        return name in self._actionset_classes
+        return name.lower() in self._actionset_classes
 
     def get_action(self, name):
         '''
