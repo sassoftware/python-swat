@@ -1345,6 +1345,9 @@ class CAS(object):
                 casout = value
                 del kwargs[key]
 
+        if importoptions is None:
+            importoptions = {}
+
         import pandas as pd
         if isinstance(data, pd.DataFrame):
             import tempfile
@@ -1352,8 +1355,10 @@ class CAS(object):
                 delete = True
                 filename = tmp.name
                 name = os.path.splitext(os.path.basename(filename))[0]
-                data.to_csv(filename, encoding='utf-8', index=False)
+                data.to_csv(filename, encoding='utf-8', index=False, sep=',',
+                            decimal='.', line_terminator='\r\n')
                 df_dtypes = self._extract_dtypes(data)
+                importoptions['locale'] = 'EN-us'
 
         elif data.startswith('http://') or \
                 data.startswith('https://') or \
@@ -1383,9 +1388,6 @@ class CAS(object):
             'sashdat': 'hdat',
             'sas7bdat': 'basesas',
         }
-
-        if importoptions is None:
-            importoptions = {}
 
         if isinstance(importoptions, (dict, ParamManager)) and \
                 'filetype' not in [x.lower() for x in importoptions.keys()]:
