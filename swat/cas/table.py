@@ -256,7 +256,7 @@ def concat(objs, axis=0, join='outer', join_axes=None, ignore_index=False, keys=
             except Exception:
                 pass
 
-    return out['OutputCasTables'].ix[0, 'casTable']
+    return out['OutputCasTables'].iloc[0]['casTable']
 
 
 def merge(left, right, how='inner', on=None, left_on=None, right_on=None,
@@ -540,7 +540,7 @@ def merge(left, right, how='inner', on=None, left_on=None, right_on=None,
         if right_view is not None:
             right_view._retrieve('table.droptable')
 
-    return out['OutputCasTables'].ix[0, 'casTable']
+    return out['OutputCasTables'].iloc[0]['casTable']
 
 
 class CASTableAccessor(object):
@@ -1617,7 +1617,7 @@ class CASTable(ParamManager, ActionParamManager):
             pass
 
         if not column._columns:
-            column._columns = [column._columninfo.ix[0, 'Column']]
+            column._columns = [column._columninfo.iloc[0]['Column']]
 
         return column
 
@@ -2417,7 +2417,7 @@ class CASTable(ParamManager, ActionParamManager):
         computedvars = self.get_param('computedvars', [])
         if computedvars and not isinstance(computedvars, items_types):
             computedvars = [computedvars]
-        return tblinfo.ix[0, 'Columns'] + len(computedvars)
+        return tblinfo.iloc[0]['Columns'] + len(computedvars)
 
     @getattr_safe_property
     def columns(self):
@@ -6279,7 +6279,7 @@ class CASTable(ParamManager, ActionParamManager):
         if inplace:
             return self
 
-        tbl = out['OutputCasTables'].ix[0, 'casTable']
+        tbl = out['OutputCasTables'].iloc[0]['casTable']
 
         out = copy.deepcopy(self)
 
@@ -6659,7 +6659,7 @@ class CASTable(ParamManager, ActionParamManager):
                                 output=dict(casout=dict(name=_gen_table_name(),
                                                         replace=True),
                                             copyvars=columns),
-                                **params)['OutputCasTables'].ix[0, 'casTable']
+                                **params)['OutputCasTables'].iloc[0]['casTable']
 
         if stratify_by:
             del samptbl.params['groupby']
@@ -7613,11 +7613,11 @@ class CASTable(ParamManager, ActionParamManager):
 
         # tbl[rowslice]
         if isinstance(key, slice):
-            return self.ix[key]
+            return self.iloc[key]
 
         # col[row]
         if is_column and isinstance(key, int_types):
-            return self.ix[key]
+            return self.iloc[key]
 
         # Everything else
         raise KeyError(key)
@@ -9040,7 +9040,7 @@ class CASColumn(CASTable):
     @getattr_safe_property
     def values(self):
         ''' Return column data as :func:`numpy.ndarray` '''
-        return self._fetch().ix[:, 0].values
+        return self._fetch().iloc[:, 0].values
 
     @getattr_safe_property
     def shape(self):
@@ -9164,7 +9164,7 @@ class CASColumn(CASTable):
 
     def tolist(self):
         ''' Return a list of the column values '''
-        return self._fetch().ix[:, 0].tolist()
+        return self._fetch().iloc[:, 0].tolist()
 
     def head(self, n=5, bygroup_as_index=True, casout=None):
         ''' Return first `n` rows of the column in a Series '''
@@ -9711,7 +9711,7 @@ class CASColumn(CASTable):
 
         '''
         return CASTable.describe(self, percentiles=percentiles, include=include,
-                                 exclude=exclude, stats=stats).ix[:, 0]
+                                 exclude=exclude, stats=stats).iloc[:, 0]
 
     def _get_summary_stat(self, name):
         '''

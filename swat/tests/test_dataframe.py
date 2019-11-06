@@ -106,20 +106,20 @@ class TestDataFrame(tm.TestCase):
         data = self.s.fetch(table=swat.table(tablename, caslib=self.srcLib), sastypes=False)['Fetch']
 
         for i in range(15):
-           self.assertEqual(data.ix[:,'_Min_'][i], data.ix[:,'myArray1'][i])
-           self.assertEqual(data.ix[:,'_Max_'][i], data.ix[:,'myArray2'][i])
-           self.assertEqual(data.ix[:,'_N_'][i], data.ix[:,'myArray3'][i])
-           self.assertEqual(data.ix[:,'_NMiss_'][i], data.ix[:,'myArray4'][i])
-           self.assertEqual(data.ix[:,'_Mean_'][i], data.ix[:,'myArray5'][i])
-           self.assertEqual(data.ix[:,'_Sum_'][i], data.ix[:,'myArray6'][i])
-           self.assertEqual(data.ix[:,'_Std_'][i], data.ix[:,'myArray7'][i])
-           self.assertEqual(data.ix[:,'_StdErr_'][i], data.ix[:,'myArray8'][i])
-           self.assertEqual(data.ix[:,'_Var_'][i], data.ix[:,'myArray9'][i])
-           self.assertEqual(data.ix[:,'_USS_'][i], data.ix[:,'myArray10'][i])
-           self.assertEqual(data.ix[:,'_CSS_'][i], data.ix[:,'myArray11'][i])
-           self.assertEqual(data.ix[:,'_CV_'][i], data.ix[:,'myArray12'][i])
-           self.assertEqual(data.ix[:,'_T_'][i], data.ix[:,'myArray13'][i])
-           self.assertEqual(data.ix[:,'_PRT_'][i], data.ix[:,'myArray14'][i])
+           self.assertEqual(data['_Min_'].iloc[i], data['myArray1'].iloc[i])
+           self.assertEqual(data['_Max_'].iloc[i], data['myArray2'].iloc[i])
+           self.assertEqual(data['_N_'].iloc[i], data['myArray3'].iloc[i])
+           self.assertEqual(data['_NMiss_'].iloc[i], data['myArray4'].iloc[i])
+           self.assertEqual(data['_Mean_'].iloc[i], data['myArray5'].iloc[i])
+           self.assertEqual(data['_Sum_'].iloc[i], data['myArray6'].iloc[i])
+           self.assertEqual(data['_Std_'].iloc[i], data['myArray7'].iloc[i])
+           self.assertEqual(data['_StdErr_'].iloc[i], data['myArray8'].iloc[i])
+           self.assertEqual(data['_Var_'].iloc[i], data['myArray9'].iloc[i])
+           self.assertEqual(data['_USS_'].iloc[i], data['myArray10'].iloc[i])
+           self.assertEqual(data['_CSS_'].iloc[i], data['myArray11'].iloc[i])
+           self.assertEqual(data['_CV_'].iloc[i], data['myArray12'].iloc[i])
+           self.assertEqual(data['_T_'].iloc[i], data['myArray13'].iloc[i])
+           self.assertEqual(data['_PRT_'].iloc[i], data['myArray14'].iloc[i])
 
         self.s.droptable(caslib=self.srcLib, table=tablename)
 
@@ -134,62 +134,62 @@ class TestDataFrame(tm.TestCase):
 
         data = out['Fetch']
 
-        self.assertEqual(data.ix[:,'Double'][0], 42.42)
-        self.assertEqual(type(data.ix[:,'Double'][0]), np.float64)
-        self.assertEqual(dtype_from_var(data.Double[0]), 'double')
+        self.assertEqual(data['Double'].iloc[0], 42.42)
+        self.assertEqual(type(data['Double'].iloc[0]), np.float64)
+        self.assertEqual(dtype_from_var(data.Double.iloc[0]), 'double')
 
-        self.assertEqual(data.ix[:,'Char'][0], u'AbC\u2782\u2781\u2780')
+        self.assertEqual(data['Char'].iloc[0], u'AbC\u2782\u2781\u2780')
         if six.PY3:
-            self.assertEqual(type(data.ix[:,'Char'][0]), str)
+            self.assertEqual(type(data['Char'].iloc[0]), str)
         else:
-            self.assertEqual(type(data.ix[:,'Char'][0]), unicode)
-        self.assertEqual(dtype_from_var(data.Char[0]), 'varchar')
+            self.assertEqual(type(data['Char'].iloc[0]), unicode)
+        self.assertEqual(dtype_from_var(data.Char.iloc[0]), 'varchar')
 
-        self.assertEqual(data.ix[:,'Varchar'][0], u'This is a test of the Emergency Broadcast System. This is only a test. BEEEEEEEEEEEEEEEEEEP WHAAAA SCREEEEEEEEEEEECH. \u2789\u2788\u2787\u2786\u2785\u2784\u2783\u2782\u2781\u2780 Blastoff!')
+        self.assertEqual(data['Varchar'].iloc[0], u'This is a test of the Emergency Broadcast System. This is only a test. BEEEEEEEEEEEEEEEEEEP WHAAAA SCREEEEEEEEEEEECH. \u2789\u2788\u2787\u2786\u2785\u2784\u2783\u2782\u2781\u2780 Blastoff!')
         if six.PY3:
-            self.assertEqual(type(data.ix[:,'Varchar'][0]), str)
+            self.assertEqual(type(data['Varchar'].iloc[0]), str)
         else:
-            self.assertEqual(type(data.ix[:,'Varchar'][0]), unicode)
-        self.assertEqual(dtype_from_var(data.Varchar[0]), 'varchar')
+            self.assertEqual(type(data['Varchar'].iloc[0]), unicode)
+        self.assertEqual(dtype_from_var(data.Varchar.iloc[0]), 'varchar')
 
-        self.assertEqual(data.ix[:,'Int32'][0], 42)
-        self.assertIn(type(data.ix[:,'Int32'][0]), [np.int32, np.int64])
-        self.assertIn(dtype_from_var(data.Int32[0]), ['int32', 'int64'])
+        self.assertEqual(data['Int32'].iloc[0], 42)
+        self.assertIn(type(data['Int32'].iloc[0]), [np.int32, np.int64])
+        self.assertIn(dtype_from_var(data.Int32.iloc[0]), ['int32', 'int64'])
 
         # REST interface can sometimes overflow the JSON float
-        if np.isnan(data.ix[:,'Int64'][0]):
-            self.assertEqual(type(data.ix[:,'Int64'][0]), np.float64)
+        if np.isnan(data['Int64'].iloc[0]):
+            self.assertEqual(type(data['Int64'].iloc[0]), np.float64)
         else:
-            self.assertEqual(data.ix[:,'Int64'][0], 9223372036854775807)
-            self.assertEqual(type(data.ix[:,'Int64'][0]), np.int64)
+            self.assertEqual(data['Int64'].iloc[0], 9223372036854775807)
+            self.assertEqual(type(data['Int64'].iloc[0]), np.int64)
 
-        self.assertEqual(data.ix[:,'Date'][0], datetime.date(1963, 5, 19))
-        self.assertEqual(type(data.ix[:,'Date'][0]), datetime.date)
-        #self.assertEqual(type(data.ix[:,'Date'][0]), datetime.Date)
-        self.assertEqual(dtype_from_var(data.Date[0]), 'date')
+        self.assertEqual(data['Date'].iloc[0], datetime.date(1963, 5, 19))
+        self.assertEqual(type(data['Date'].iloc[0]), datetime.date)
+        #self.assertEqual(type(data['Date'].iloc[0]), datetime.Date)
+        self.assertEqual(dtype_from_var(data.Date.iloc[0]), 'date')
 
-        self.assertEqual(data.ix[:,'Time'][0], datetime.time(11, 12, 13, 141516))
-        self.assertEqual(type(data.ix[:,'Time'][0]), datetime.time)
-        #self.assertEqual(type(data.ix[:,'Time'][0]), datetime.Time)
-        self.assertEqual(dtype_from_var(data.Time[0]), 'time')
+        self.assertEqual(data['Time'].iloc[0], datetime.time(11, 12, 13, 141516))
+        self.assertEqual(type(data['Time'].iloc[0]), datetime.time)
+        #self.assertEqual(type(data['Time'].iloc[0]), datetime.Time)
+        self.assertEqual(dtype_from_var(data.Time.iloc[0]), 'time')
 
-        self.assertEqual(data.ix[:,'Datetime'][0], pd.to_datetime('1963-05-19 11:12:13.141516'))
-        self.assertEqual(type(data.ix[:,'Datetime'][0]), pd.Timestamp)
-        #self.assertEqual(type(data.ix[:,'Datetime'][0]), datetime.Datetime)
-        self.assertEqual(dtype_from_var(data.Datetime[0]), 'datetime')
+        self.assertEqual(data['Datetime'].iloc[0], pd.to_datetime('1963-05-19 11:12:13.141516'))
+        self.assertEqual(type(data['Datetime'].iloc[0]), pd.Timestamp)
+        #self.assertEqual(type(data['Datetime'].iloc[0]), datetime.Datetime)
+        self.assertEqual(dtype_from_var(data.Datetime.iloc[0]), 'datetime')
 
-        self.assertEqual(data.ix[:,'DecSext'][0], '12345678901234567890.123456789')
+        self.assertEqual(data['DecSext'].iloc[0], '12345678901234567890.123456789')
         if six.PY3:
-            self.assertEqual(type(data.ix[:,'DecSext'][0]), str)
+            self.assertEqual(type(data['DecSext'].iloc[0]), str)
         else:
-            self.assertEqual(type(data.ix[:,'DecSext'][0]), unicode)
-        #self.assertEqual(type(data.ix[:,'DecSext'][0]), Decimal)
+            self.assertEqual(type(data['DecSext'].iloc[0]), unicode)
+        #self.assertEqual(type(data['DecSext'].iloc[0]), Decimal)
 
-        #self.assertEqual(data.ix[:,'Varbinary'][0], '???')
-        #self.assertEqual(type(data.ix[:,'Varbinary'][0]), bytes)
+        #self.assertEqual(data['Varbinary'].iloc[0], '???')
+        #self.assertEqual(type(data['Varbinary'].iloc[0]), bytes)
 
-        #self.assertEqual(data.ix[:,'Binary'][0], '???')
-        #self.assertEqual(type(data.ix[:,'Binary'][0]), bytes)
+        #self.assertEqual(data['Binary'].iloc[0], '???')
+        #self.assertEqual(type(data['Binary'].iloc[0]), bytes)
 
         self.assertEqual(dtype_from_var(b''), 'varbinary')
 

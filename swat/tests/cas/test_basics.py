@@ -232,12 +232,12 @@ class TestBasics(tm.TestCase):
 
         data = summ
 
-        self.assertEqual(data.ix[:,'Column'].tolist(), 
+        self.assertEqual(data['Column'].tolist(), 
                          ['MSRP','Invoice','EngineSize','Cylinders',
                           'Horsepower','MPG_City','MPG_Highway','Weight','Wheelbase','Length'])
-        self.assertEqual(data.ix[:,'Min'].tolist(), 
+        self.assertEqual(data['Min'].tolist(), 
                          [10280.0, 9875.0, 1.3, 3.0, 73.0, 10.0, 12.0, 1850.0, 89.0, 143.0])
-        self.assertEqual(data.ix[:,'NMiss'].tolist(),
+        self.assertEqual(data['NMiss'].tolist(),
                          [0.0, 0.0, 0.0, 2.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
 
     def test_alltypes(self):
@@ -248,59 +248,59 @@ class TestBasics(tm.TestCase):
 
         data = out['Fetch']
 
-        self.assertEqual(data.ix[:,'Double'][0], 42.42)
-        self.assertEqual(type(data.ix[:,'Double'][0]), np.float64)
+        self.assertEqual(data['Double'].iloc[0], 42.42)
+        self.assertEqual(type(data['Double'].iloc[0]), np.float64)
 
-        self.assertEqual(data.ix[:,'Char'][0], u'AbC\u2782\u2781\u2780')
+        self.assertEqual(data['Char'].iloc[0], u'AbC\u2782\u2781\u2780')
         if (sys.version_info >= (3, 0)):
-            self.assertEqual(type(data.ix[:,'Char'][0]), type('aString'))
+            self.assertEqual(type(data['Char'].iloc[0]), type('aString'))
         else:
-            self.assertEqual(type(data.ix[:,'Char'][0]), unicode)
+            self.assertEqual(type(data['Char'].iloc[0]), unicode)
 
-        self.assertEqual(data.ix[:,'Varchar'][0],
+        self.assertEqual(data['Varchar'].iloc[0],
                          u'This is a test of the Emergency Broadcast System. This is only a test. BEEEEEEEEEEEEEEEEEEP WHAAAA SCREEEEEEEEEEEECH. \u2789\u2788\u2787\u2786\u2785\u2784\u2783\u2782\u2781\u2780 Blastoff!')
         if (sys.version_info >= (3, 0)):
-            self.assertEqual(type(data.ix[:,'Varchar'][0]), type('aString'))
+            self.assertEqual(type(data['Varchar'].iloc[0]), type('aString'))
         else:
-            self.assertEqual(type(data.ix[:,'Varchar'][0]), unicode)
+            self.assertEqual(type(data['Varchar'].iloc[0]), unicode)
 
-        self.assertEqual(data.ix[:,'Int32'][0], 42)
-        self.assertIn(type(data.ix[:,'Int32'][0]), [np.int32, np.int64])
+        self.assertEqual(data['Int32'].iloc[0], 42)
+        self.assertIn(type(data['Int32'].iloc[0]), [np.int32, np.int64])
 
         # REST interface can sometimes overflow the JSON float
-        if np.isnan(data.ix[:,'Int64'][0]):
-            self.assertEqual(type(data.ix[:,'Int64'][0]), np.float64)
+        if np.isnan(data['Int64'].iloc[0]):
+            self.assertEqual(type(data['Int64'].iloc[0]), np.float64)
         else:
-            self.assertEqual(data.ix[:,'Int64'][0], 9223372036854775807)
-            self.assertEqual(type(data.ix[:,'Int64'][0]), np.int64)
+            self.assertEqual(data['Int64'].iloc[0], 9223372036854775807)
+            self.assertEqual(type(data['Int64'].iloc[0]), np.int64)
 
-        self.assertEqual(data.ix[:,'Date'][0], datetime.date(1963, 5, 19))
-        self.assertEqual(type(data.ix[:,'Date'][0]), datetime.date)
-        #self.assertEqual(type(data.ix[:,'Date'][0]), datetime.Date)
+        self.assertEqual(data['Date'].iloc[0], datetime.date(1963, 5, 19))
+        self.assertEqual(type(data['Date'].iloc[0]), datetime.date)
+        #self.assertEqual(type(data['Date'].iloc[0]), datetime.Date)
 
-        self.assertEqual(data.ix[:,'Time'][0], datetime.time(11, 12, 13, 141516))
-        self.assertEqual(type(data.ix[:,'Time'][0]), datetime.time)
-        #self.assertEqual(type(data.ix[:,'Time'][0]), datetime.Time)
+        self.assertEqual(data['Time'].iloc[0], datetime.time(11, 12, 13, 141516))
+        self.assertEqual(type(data['Time'].iloc[0]), datetime.time)
+        #self.assertEqual(type(data['Time'].iloc[0]), datetime.Time)
 
-        self.assertEqual(data.ix[:,'Datetime'][0], pandas.to_datetime('1963-05-19 11:12:13.141516'))
-        self.assertEqual(type(data.ix[:,'Datetime'][0]), pandas.Timestamp)
-        #self.assertEqual(type(data.ix[:,'Datetime'][0]), datetime.Datetime)
+        self.assertEqual(data['Datetime'].iloc[0], pandas.to_datetime('1963-05-19 11:12:13.141516'))
+        self.assertEqual(type(data['Datetime'].iloc[0]), pandas.Timestamp)
+        #self.assertEqual(type(data['Datetime'].iloc[0]), datetime.Datetime)
 
-        self.assertEqual(data.ix[:,'DecSext'][0], '12345678901234567890.123456789')
+        self.assertEqual(data['DecSext'].iloc[0], '12345678901234567890.123456789')
         if (sys.version_info >= (3, 0)):
-            self.assertEqual(type(data.ix[:,'DecSext'][0]), type('aString'))
+            self.assertEqual(type(data['DecSext'].iloc[0]), type('aString'))
         else:
-            self.assertEqual(type(data.ix[:,'DecSext'][0]), unicode)
-        #self.assertEqual(type(data.ix[:,'DecSext'][0]), Decimal)
+            self.assertEqual(type(data['DecSext'].iloc[0]), unicode)
+        #self.assertEqual(type(data['DecSext'].iloc[0]), Decimal)
 
-        self.assertEqual(type(data.ix[:,'Binary'][0]), bytes)
-        self.assertTrue(len(data.ix[:,'Binary'][0]) > 0)
+        self.assertEqual(type(data['Binary'].iloc[0]), bytes)
+        self.assertTrue(len(data['Binary'].iloc[0]) > 0)
 
-        self.assertEqual(type(data.ix[:,'Varbinary'][0]), bytes)
+        self.assertEqual(type(data['Varbinary'].iloc[0]), bytes)
         #import binascii
-        #print(len(data.ix[:,'Varbinary'][0]))
-        #print(binascii.hexlify(data.ix[:,'Varbinary'][0]))
-        self.assertTrue(len(data.ix[:,'Varbinary'][0]) > 0)
+        #print(len(data['Varbinary'].iloc[0]))
+        #print(binascii.hexlify(data['Varbinary'].iloc[0]))
+        self.assertTrue(len(data['Varbinary'].iloc[0]) > 0)
 
     def test_array_types(self):
         r = load_data(self.s, 'datasources/summary_array.sashdat', self.server_type)
@@ -313,20 +313,20 @@ class TestBasics(tm.TestCase):
         data = out['Fetch']
 
         for i in range(15):
-           self.assertEqual(data.ix[:,'_Min_'][i], data.ix[:,'myArray1'][i])
-           self.assertEqual(data.ix[:,'_Max_'][i], data.ix[:,'myArray2'][i])
-           self.assertEqual(data.ix[:,'_N_'][i], data.ix[:,'myArray3'][i])
-           self.assertEqual(data.ix[:,'_NMiss_'][i], data.ix[:,'myArray4'][i])
-           self.assertEqual(data.ix[:,'_Mean_'][i], data.ix[:,'myArray5'][i])
-           self.assertEqual(data.ix[:,'_Sum_'][i], data.ix[:,'myArray6'][i])
-           self.assertEqual(data.ix[:,'_Std_'][i], data.ix[:,'myArray7'][i])
-           self.assertEqual(data.ix[:,'_StdErr_'][i], data.ix[:,'myArray8'][i])
-           self.assertEqual(data.ix[:,'_Var_'][i], data.ix[:,'myArray9'][i])
-           self.assertEqual(data.ix[:,'_USS_'][i], data.ix[:,'myArray10'][i])
-           self.assertEqual(data.ix[:,'_CSS_'][i], data.ix[:,'myArray11'][i])
-           self.assertEqual(data.ix[:,'_CV_'][i], data.ix[:,'myArray12'][i])
-           self.assertEqual(data.ix[:,'_T_'][i], data.ix[:,'myArray13'][i])
-           self.assertEqual(data.ix[:,'_PRT_'][i], data.ix[:,'myArray14'][i])
+           self.assertEqual(data['_Min_'].iloc[i], data['myArray1'].iloc[i])
+           self.assertEqual(data['_Max_'].iloc[i], data['myArray2'].iloc[i])
+           self.assertEqual(data['_N_'].iloc[i], data['myArray3'].iloc[i])
+           self.assertEqual(data['_NMiss_'].iloc[i], data['myArray4'].iloc[i])
+           self.assertEqual(data['_Mean_'].iloc[i], data['myArray5'].iloc[i])
+           self.assertEqual(data['_Sum_'].iloc[i], data['myArray6'].iloc[i])
+           self.assertEqual(data['_Std_'].iloc[i], data['myArray7'].iloc[i])
+           self.assertEqual(data['_StdErr_'].iloc[i], data['myArray8'].iloc[i])
+           self.assertEqual(data['_Var_'].iloc[i], data['myArray9'].iloc[i])
+           self.assertEqual(data['_USS_'].iloc[i], data['myArray10'].iloc[i])
+           self.assertEqual(data['_CSS_'].iloc[i], data['myArray11'].iloc[i])
+           self.assertEqual(data['_CV_'].iloc[i], data['myArray12'].iloc[i])
+           self.assertEqual(data['_T_'].iloc[i], data['myArray13'].iloc[i])
+           self.assertEqual(data['_PRT_'].iloc[i], data['myArray14'].iloc[i])
 
         self.s.droptable(caslib=self.srcLib, table=tablename)
 
@@ -407,17 +407,17 @@ class TestBasics(tm.TestCase):
         out = self.s.tableinfo(caslib=srcLib, table='cars')
         data = out['TableInfo']
 
-        self.assertEqual(data.ix[:,'Name'][0], 'CARS')
-        self.assertEqual(data.ix[:,'Rows'][0], 428)
-        self.assertEqual(data.ix[:,'Columns'][0], 15)
+        self.assertEqual(data['Name'].iloc[0], 'CARS')
+        self.assertEqual(data['Rows'].iloc[0], 428)
+        self.assertEqual(data['Columns'].iloc[0], 15)
 
         out = self.s.columninfo(table=self.s.CASTable('cars', caslib=srcLib))
         data = out['ColumnInfo']
 
         self.assertEqual(len(data), 15)
-        self.assertEqual(data.ix[:,'Column'].tolist(),
+        self.assertEqual(data['Column'].tolist(),
                          'Make,Model,Type,Origin,DriveTrain,MSRP,Invoice,EngineSize,Cylinders,Horsepower,MPG_City,MPG_Highway,Weight,Wheelbase,Length'.split(','))
-        self.assertEqual(data.ix[:,'Type'].tolist(), ['varchar', 'varchar', 'varchar', 'varchar', 'varchar', 'int64', 'int64', 'double', 'int64', 'int64', 'int64', 'int64', 'int64', 'int64', 'int64'])
+        self.assertEqual(data['Type'].tolist(), ['varchar', 'varchar', 'varchar', 'varchar', 'varchar', 'int64', 'int64', 'double', 'int64', 'int64', 'int64', 'int64', 'int64', 'int64', 'int64'])
 
         self.assertTablesEqual(cars, self.s.CASTable('cars', caslib=srcLib), sortby=SORT_KEYS)
 
@@ -446,7 +446,7 @@ class TestBasics(tm.TestCase):
         userdata = tbl.histogram(responsefunc=myfunc, vars={'mpg_highway','mpg_city'})
 
         self.assertEqual(sorted(userdata.keys()), ['BinDetails'])
-        self.assertEqual(userdata['BinDetails'].ix[:,'Variable'].tolist(),
+        self.assertEqual(userdata['BinDetails']['Variable'].tolist(),
                          [u'MPG_City']*11 + [u'MPG_Highway']*12)
 
     def test_resultfunc(self):
@@ -463,7 +463,7 @@ class TestBasics(tm.TestCase):
         userdata = tbl.histogram(resultfunc=myfunc, vars={'mpg_highway','mpg_city'})
 
         self.assertEqual(sorted(userdata.keys()), ['BinDetails'])
-        self.assertEqual(userdata['BinDetails'].ix[:,'Variable'].tolist(),
+        self.assertEqual(userdata['BinDetails']['Variable'].tolist(),
                          [u'MPG_City']*11 + [u'MPG_Highway']*12)
 
     def test_attrs(self):        

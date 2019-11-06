@@ -493,9 +493,9 @@ class TestConnection(tm.TestCase):
 
         out = tbl.tableinfo()['TableInfo']
 
-        self.assertEqual(out.ix[:,'Name'][0], 'CARS')
-        self.assertEqual(out.ix[:,'Rows'][0], 428)
-        self.assertEqual(out.ix[:,'Columns'][0], 15)
+        self.assertEqual(out['Name'].iloc[0], 'CARS')
+        self.assertEqual(out['Rows'].iloc[0], 428)
+        self.assertEqual(out['Columns'].iloc[0], 15)
 
     def test_responsefunc(self):
         self.s.loadactionset(actionset='datapreprocess')
@@ -512,7 +512,7 @@ class TestConnection(tm.TestCase):
         userdata = tbl.histogram(responsefunc=myfunc, vars={'mpg_highway','mpg_city'})
 
         self.assertEqual(sorted(userdata.keys()), ['BinDetails'])
-        self.assertEqual(userdata['BinDetails'].ix[:,'Variable'].tolist(), [u'MPG_City']*11 + [u'MPG_Highway']*12)
+        self.assertEqual(userdata['BinDetails']['Variable'].tolist(), [u'MPG_City']*11 + [u'MPG_Highway']*12)
 
     def test_resultfunc(self):
         self.s.loadactionset(actionset='datapreprocess')
@@ -528,7 +528,7 @@ class TestConnection(tm.TestCase):
         userdata = tbl.histogram(resultfunc=myfunc, vars={'mpg_highway','mpg_city'})
 
         self.assertEqual(sorted(userdata.keys()), ['BinDetails'])
-        self.assertEqual(userdata['BinDetails'].ix[:,'Variable'].tolist(), [u'MPG_City']*11 + [u'MPG_Highway']*12)
+        self.assertEqual(userdata['BinDetails']['Variable'].tolist(), [u'MPG_City']*11 + [u'MPG_Highway']*12)
 
     def test_action_class(self):
         self.s.loadactionset('simple')

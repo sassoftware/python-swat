@@ -380,7 +380,7 @@ def get_cas_host_type(conn):
     ostype = out['About']['System']['OS Family']
     stype = 'mpp'
     htype = 'nohdfs'
-    if out['server'].ix[0, 'nodes'] == 1:
+    if out['server'].iloc[0]['nodes'] == 1:
         stype = 'smp'
     if ostype.startswith('LIN'):
         ostype = 'linux'

@@ -285,14 +285,14 @@ class TestBuiltins(tm.TestCase):
         self.assertEqual(list(r.keys())[0], 'setinfo')
         setinfo = r['setinfo']
         # Get the actionset column
-        actionsets = setinfo.ix[:,'actionset'].tolist()
+        actionsets = setinfo['actionset'].tolist()
         self.assertIn('builtins', actionsets)
         
         r = self.s.actionsetinfo(all=True) 
         self.assertEqual(list(r.keys())[0], 'setinfo')
         setinfo = r['setinfo']
         # Get the actionset column
-        allactionsets = setinfo.ix[:,'actionset'].tolist()
+        allactionsets = setinfo['actionset'].tolist()
         self.assertIn('builtins', allactionsets)
         self.assertNotIn('unknown', allactionsets)
         self.assertTrue(len(allactionsets) > len(actionsets))

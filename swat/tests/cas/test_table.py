@@ -1137,7 +1137,7 @@ class TestCASTable(tm.TestCase):
                 ['cv', 'tvalue', 'probt', 'css'])
 
         # Test all character data
-        chardf = df.ix[:, ['Make', 'Model', 'Type', 'Origin']]
+        chardf = df[['Make', 'Model', 'Type', 'Origin']]
         chardfdesc = chardf.describe()
         chardesc = self.table.datastep('keep Make Model Type Origin').describe()
 
@@ -1220,7 +1220,7 @@ class TestCASTable(tm.TestCase):
         self.assertEqual(df['MSRP'].max(), tbl['MSRP'].max())
 
         # Only character columns
-        chardf = df.ix[:, ['Make', 'Model', 'Type', 'Origin']]
+        chardf = df[['Make', 'Model', 'Type', 'Origin']]
         out = tbl.datastep('keep Make Model Type Origin').max().tolist()
         self.assertEqual(out, ['Volvo', ' Z4 convertible 3.0i 2dr', 'Wagon', 'USA'])
 
@@ -1347,7 +1347,7 @@ class TestCASTable(tm.TestCase):
         self.assertEqual(out, dfout)
 
         # Only character columns
-        chardf = df.ix[:, ['Make', 'Model', 'Type', 'Origin']]
+        chardf = df[['Make', 'Model', 'Type', 'Origin']]
         out = tbl.datastep('keep Make Model Type Origin').min().tolist()
         self.assertEqual(out, ['Acura', ' 3.5 RL 4dr', 'Hybrid', 'Asia'])
 
@@ -2074,7 +2074,7 @@ class TestCASTable(tm.TestCase):
         tbl = self.table.sort_values(SORT_KEYS)
 
         # Row indexes
-#       self.assertEqual(df.ix[0].tolist(), tbl.ix[0].tolist())
+#       self.assertEqual(df[0].tolist(), tbl.ix[0].tolist())
 #       self.assertEqual(df.ix[5].tolist(), tbl.ix[5].tolist())
 #       self.assertEqual(df.ix[149].tolist(), tbl.ix[149].tolist())
 

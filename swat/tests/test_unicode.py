@@ -244,46 +244,46 @@ class TestUnicode(tm.TestCase):
 
         data = out['Fetch']
 
-        self.assertEqual(data.ix[:,'Double'][0], 42.42)
-        self.assertEqual(type(data.ix[:,'Double'][0]), np.float64)
+        self.assertEqual(data['Double'].iloc[0], 42.42)
+        self.assertEqual(type(data['Double'].iloc[0]), np.float64)
 
-        self.assertEqual(data.ix[:,'Char'][0], u'AbC\u2782\u2781\u2780')
-        self.assertTrue(isinstance(data.ix[:,'Char'][0], unicode))
+        self.assertEqual(data['Char'].iloc[0], u'AbC\u2782\u2781\u2780')
+        self.assertTrue(isinstance(data['Char'].iloc[0], unicode))
 
-        self.assertEqual(data.ix[:,'Varchar'][0], u'This is a test of the Emergency Broadcast System. This is only a test. BEEEEEEEEEEEEEEEEEEP WHAAAA SCREEEEEEEEEEEECH. \u2789\u2788\u2787\u2786\u2785\u2784\u2783\u2782\u2781\u2780 Blastoff!')
-        self.assertTrue(isinstance(data.ix[:,'Varchar'][0], unicode))
+        self.assertEqual(data['Varchar'].iloc[0], u'This is a test of the Emergency Broadcast System. This is only a test. BEEEEEEEEEEEEEEEEEEP WHAAAA SCREEEEEEEEEEEECH. \u2789\u2788\u2787\u2786\u2785\u2784\u2783\u2782\u2781\u2780 Blastoff!')
+        self.assertTrue(isinstance(data['Varchar'].iloc[0], unicode))
 
-        self.assertEqual(data.ix[:,'Int32'][0], 42)
-        self.assertIn(type(data.ix[:,'Int32'][0]), [np.int32, np.int64])
+        self.assertEqual(data['Int32'].iloc[0], 42)
+        self.assertIn(type(data['Int32'].iloc[0]), [np.int32, np.int64])
 
         # REST interface can sometimes overflow the JSON float
-        if np.isnan(data.ix[:,'Int64'][0]):
-            self.assertEqual(type(data.ix[:,'Int64'][0]), np.float64)
+        if np.isnan(data['Int64'].iloc[0]):
+            self.assertEqual(type(data['Int64'].iloc[0]), np.float64)
         else:
-            self.assertEqual(data.ix[:,'Int64'][0], 9223372036854775807)
-            self.assertEqual(type(data.ix[:,'Int64'][0]), np.int64)
+            self.assertEqual(data['Int64'].iloc[0], 9223372036854775807)
+            self.assertEqual(type(data['Int64'].iloc[0]), np.int64)
 
-        self.assertEqual(data.ix[:,'Date'][0], datetime.date(1963, 5, 19))
-        self.assertEqual(type(data.ix[:,'Date'][0]), datetime.date)
-        #self.assertEqual(type(data.ix[:,'Date'][0]), datetime.Date)
+        self.assertEqual(data['Date'].iloc[0], datetime.date(1963, 5, 19))
+        self.assertEqual(type(data['Date'].iloc[0]), datetime.date)
+        #self.assertEqual(type(data['Date'].iloc[0]), datetime.Date)
 
-        self.assertEqual(data.ix[:,'Time'][0], datetime.time(11, 12, 13, 141516))
-        self.assertTrue(isinstance(data.ix[:,'Time'][0], datetime.time))
-        #self.assertEqual(type(data.ix[:,'Time'][0]), datetime.Time)
+        self.assertEqual(data['Time'].iloc[0], datetime.time(11, 12, 13, 141516))
+        self.assertTrue(isinstance(data['Time'].iloc[0], datetime.time))
+        #self.assertEqual(type(data['Time'].iloc[0]), datetime.Time)
 
-        self.assertEqual(data.ix[:,'Datetime'][0], pd.to_datetime('1963-05-19 11:12:13.141516'))
-        self.assertTrue(isinstance(data.ix[:,'Datetime'][0], pd.Timestamp))
-        #self.assertEqual(type(data.ix[:,'Datetime'][0]), datetime.Datetime)
+        self.assertEqual(data['Datetime'].iloc[0], pd.to_datetime('1963-05-19 11:12:13.141516'))
+        self.assertTrue(isinstance(data['Datetime'].iloc[0], pd.Timestamp))
+        #self.assertEqual(type(data['Datetime'].iloc[0]), datetime.Datetime)
 
-        self.assertEqual(data.ix[:,'DecSext'][0], '12345678901234567890.123456789')
-        self.assertTrue(isinstance(data.ix[:,'DecSext'][0], unicode))
-        #self.assertEqual(type(data.ix[:,'DecSext'][0]), Decimal)
+        self.assertEqual(data['DecSext'].iloc[0], '12345678901234567890.123456789')
+        self.assertTrue(isinstance(data['DecSext'].iloc[0], unicode))
+        #self.assertEqual(type(data['DecSext'].iloc[0]), Decimal)
 
-        #self.assertEqual(data.ix[:,'Varbinary'][0], '???')
-        #self.assertEqual(type(data.ix[:,'Varbinary'][0]), bytes)
+        #self.assertEqual(data['Varbinary'].iloc[0], '???')
+        #self.assertEqual(type(data['Varbinary'].iloc[0]), bytes)
 
-        #self.assertEqual(data.ix[:,'Binary'][0], '???')
-        #self.assertEqual(type(data.ix[:,'Binary'][0]), bytes)
+        #self.assertEqual(data['Binary'].iloc[0], '???')
+        #self.assertEqual(type(data['Binary'].iloc[0]), bytes)
 
 
 if __name__ == '__main__':
