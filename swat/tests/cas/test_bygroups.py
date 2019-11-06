@@ -538,19 +538,22 @@ class TestByGroups(tm.TestCase):
         self.assertEqual(sorted(dfgrp.loc['USA']['MSRP']),
                          sorted(tblgrp.loc['USA']['MSRP']))
 
-    def test_unique(self):
-        tbl = self.table.sort_values(SORT_KEYS)
+#
+# There is now a simple.unique action that overrides this behavior.
+#
+#   def test_unique(self):
+#       tbl = self.table.sort_values(SORT_KEYS)
 
-        with self.assertRaises(AttributeError):
-            tbl.groupby('Origin').unique()
+#       with self.assertRaises(AttributeError):
+#           tbl.groupby('Origin').unique()
 
-        #
-        # Test casout threshold
-        #
-        swat.options.cas.dataset.bygroup_casout_threshold = 2
+#       #
+#       # Test casout threshold
+#       #
+#       swat.options.cas.dataset.bygroup_casout_threshold = 2
 
-        with self.assertRaises(AttributeError):
-            tbl.groupby('Origin').unique()
+#       with self.assertRaises(AttributeError):
+#           tbl.groupby('Origin').unique()
 
     def test_column_nunique(self):
         df = self.get_cars_df().sort_values(SORT_KEYS)

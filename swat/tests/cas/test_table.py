@@ -4412,16 +4412,16 @@ class TestCASTable(tm.TestCase):
         pcolinfo = out.casTable.columninfo()['ColumnInfo'].set_index('Column').T
         self.assertTablesEqual(colinfo, pcolinfo)
 
-        colinfo = colinfo.drop('ID').drop('Label')
+        colinfo = colinfo.drop('ID', errors='ignore').drop('Label', errors='ignore')
 
         out = tbl[['Model', 'MSRP']].partition(casout=dict(name='test_partition_table', replace=True))
         pcolinfo = out.casTable.columninfo()['ColumnInfo'].set_index('Column').T
-        pcolinfo = pcolinfo.drop('ID')
+        pcolinfo = pcolinfo.drop('ID', errors='ignore').drop('Label', errors='ignore')
         self.assertTablesEqual(colinfo[['Model', 'MSRP']], pcolinfo)
 
         out = tbl[['Two', 'Model', 'One', 'MSRP']].partition(casout=dict(name='test_partition_table', replace=True))
         pcolinfo = out.casTable.columninfo()['ColumnInfo'].set_index('Column').T
-        pcolinfo = pcolinfo.drop('ID')
+        pcolinfo = pcolinfo.drop('ID', errors='ignore').drop('Label', errors='ignore')
         self.assertTablesEqual(colinfo[['Two', 'Model', 'One', 'MSRP']], pcolinfo)
 
     def test_reset_index(self):
