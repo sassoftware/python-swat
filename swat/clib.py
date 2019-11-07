@@ -137,7 +137,12 @@ def InitializeTK(*args, **kwargs):
     ''' Initialize the TK subsystem (importing _pyswat as needed) '''
     if _pyswat is None:
         _import_pyswat()
-    return _pyswat.InitializeTK(*args, **kwargs)
+    out = _pyswat.InitializeTK(*args, **kwargs)
+    # Override TKPATH after initialization so that other TK applications
+    # won't be affected.
+    if sys.platform.lower().startswith('win') and 'TKPATH' not in os.environ:
+        os.environ['TKPATH'] = os.pathsep
+    return out
 
 
 def errorcheck(expr, obj):
