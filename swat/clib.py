@@ -25,6 +25,7 @@ from __future__ import print_function, division, absolute_import, unicode_litera
 
 import glob
 import os
+import platform
 import sys
 from .utils.compat import PY3, WIDE_CHARS, a2u
 from .exceptions import SWATError
@@ -137,11 +138,24 @@ def InitializeTK(*args, **kwargs):
     ''' Initialize the TK subsystem (importing _pyswat as needed) '''
     if _pyswat is None:
         _import_pyswat()
-    out = _pyswat.InitializeTK(*args, **kwargs)
-    # Override TKPATH after initialization so that other TK applications
-    # won't be affected.
-    if sys.platform.lower().startswith('win') and 'TKPATH' not in os.environ:
-        os.environ['TKPATH'] = os.pathsep
+
+    # Patch ppc linux path
+    set_tkpath_env = 'ppc' in platform.machine() and 'TKPATH' not in os.environ
+    if set_tkpath_env and args:
+        os.environ['TKPATH'] = args[0]
+
+    try:
+        out = _pyswat.InitializeTK(*args, **kwargs)
+
+    finally:
+        if set_tkpath_env:
+            del os.environ['TKPATH']
+
+        # Override TKPATH after initialization so that other TK applications
+        # won't be affected (Windows only).
+        if sys.platform.lower().startswith('win') and 'TKPATH' not in os.environ:
+            os.environ['TKPATH'] = os.pathsep
+
     return out
 
 
