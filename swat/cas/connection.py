@@ -1355,8 +1355,8 @@ class CAS(object):
                 delete = True
                 filename = tmp.name
                 name = os.path.splitext(os.path.basename(filename))[0]
-                data.to_csv(filename, encoding='utf-8', index=False, sep=',',
-                            decimal='.', line_terminator='\r\n')
+                data.to_csv(filename, encoding='utf-8', index=False, sep=a2n(',', 'utf-8'),
+                            decimal=a2n('.', 'utf-8'), line_terminator=a2n('\r\n', 'utf-8'))
                 df_dtypes = self._extract_dtypes(data)
                 importoptions['locale'] = 'EN-us'
 
