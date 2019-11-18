@@ -86,7 +86,7 @@ class SASFormatter(object):
             _sw_error = clib.SW_CASError(a2n(self._soptions))
             self._sw_formatter = errorcheck(
                 clib.SW_CASFormatter(a2n(self._soptions), _sw_error), _sw_error)
-        except:
+        except Exception:
             pass
 
     def format(self, value, sasfmt=None, width=12):
@@ -231,7 +231,7 @@ class SASFormatter(object):
         a = m.group(2).strip()
         b = m.group(3).strip() or '0'
         if commas:
-           a = ','
+            a = ','
         out = a2u(('{:' + a + '.' + b + 'f}').format(value).strip())
         if name in ['dollar', 'nldollar', 'mny', 'nlmny']:
             return '$' + out

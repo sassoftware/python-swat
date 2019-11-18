@@ -367,8 +367,8 @@ def merge(left, right, how='inner', on=None, left_on=None, right_on=None,
     left_rename = ' rename=(%s=__by_var%s)' % (_nlit(left_on), left_rename)
     right_rename = ' rename=(%s=__by_var%s)' % (_nlit(right_on), right_rename)
 
-    columns = ' '.join([_nlit(left_map[x]) for x in left_columns] +
-                       [_nlit(right_map[x]) for x in right_columns])
+    columns = ' '.join([_nlit(left_map[x]) for x in left_columns]
+                     + [_nlit(right_map[x]) for x in right_columns])
 
     left_missval = '.'
     right_missval = '.'
@@ -491,7 +491,8 @@ def merge(left, right, how='inner', on=None, left_on=None, right_on=None,
                         '        delete;'
                         '    end;')
         elif how in ['outer-minus-inner']:
-            code.append('    if (__in_left and ^__in_right) or (^__in_left and __in_right) then do;'
+            code.append('    if (__in_left and ^__in_right) or '
+                        '       (^__in_left and __in_right) then do;'
                         '        if __in_left then do;'
                         '            %(left_on)s = __by_var;'
                         '        end;'
@@ -1625,7 +1626,7 @@ class CASTable(ParamManager, ActionParamManager):
         try:
             conn = self.get_connection()
             return list(sorted(list(self._dir) + list(conn.get_action_names())))
-        except:
+        except Exception:
             pass
         return list(sorted(self._dir))
 
@@ -1633,7 +1634,7 @@ class CASTable(ParamManager, ActionParamManager):
         try:
             conn = self.get_connection()
             return list(sorted(conn.get_action_names()))
-        except:
+        except Exception:
             pass
         return []
 
@@ -2190,7 +2191,8 @@ class CASTable(ParamManager, ActionParamManager):
         '''
         out = {}
         for key, value in six.iteritems(super(CASTable, self).to_params()):
-            if key.lower() in ['where', 'replace', 'promote'] and isinstance(self.params[key], xdict.xadict):
+            if key.lower() in ['where', 'replace', 'promote'] \
+                    and isinstance(self.params[key], xdict.xadict):
                 continue
             out[key] = value
         return out
@@ -2214,7 +2216,8 @@ class CASTable(ParamManager, ActionParamManager):
         if type(self).table_params:
             out = {}
             for key in self.params.keys():
-                if key.lower() in ['where', 'replace', 'promote'] and isinstance(self.params[key], xdict.xadict):
+                if key.lower() in ['where', 'replace', 'promote'] \
+                        and isinstance(self.params[key], xdict.xadict):
                     continue
                 if key.lower() in type(self).table_params:
                     out[key] = copy.deepcopy(self.params[key])
@@ -2269,7 +2272,8 @@ class CASTable(ParamManager, ActionParamManager):
         if type(self).outtable_params:
             out = {}
             for key in self.params.keys():
-                if key.lower() in ['where', 'replace', 'promote'] and isinstance(self.params[key], xdict.xadict):
+                if key.lower() in ['where', 'replace', 'promote'] \
+                        and isinstance(self.params[key], xdict.xadict):
                     continue
                 if key.lower() in type(self).outtable_params:
                     out[key] = copy.deepcopy(self.params[key])
@@ -2500,9 +2504,10 @@ class CASTable(ParamManager, ActionParamManager):
         if n is None:
             n = get_option('cas.dataset.max_rows_fetched')
             if self._numrows > n:
-                warnings.warn(('Data downloads are limited to %d rows.  To change this limit, '
-                               'set swat.options.cas.dataset.max_rows_fetched to the desired limit.')
-                               % n, RuntimeWarning)
+                warnings.warn(('Data downloads are limited to %d rows.  '
+                               'To change this limit, set '
+                               'swat.options.cas.dataset.max_rows_fetched '
+                               'to the desired limit.') % n, RuntimeWarning)
         tbl = self.copy()
         tbl._intersect_columns(columns, inplace=True)
         return tbl._fetch(to=n).values
@@ -2532,17 +2537,17 @@ class CASTable(ParamManager, ActionParamManager):
     def get(self, key, default=None):
         '''
         Get item from object for given key (ex: DataFrame column)
-        
+
         Returns default value if not found.
 
         Parameters
         ----------
         key : object
-        
+
         Returns
         -------
         value : same type as items contained in object
-        
+
         '''
         try:
             return self[key]
@@ -2822,7 +2827,7 @@ class CASTable(ParamManager, ActionParamManager):
 
         '''
         if self._use_casout_for_stat(casout):
-            raise NotImplemented('tail for casout is not implemented yet')
+            raise NotImplementedError('tail for casout is not implemented yet')
             return self._get_casout_slice(n, columns=True, ascending=False, casout=casout)
         return self.slice(start=-n, stop=-1, columns=columns,
                           bygroup_as_index=bygroup_as_index)
@@ -2855,7 +2860,7 @@ class CASTable(ParamManager, ActionParamManager):
 
         '''
         if self._use_casout_for_stat(casout):
-            return self._get_casout_slice(stop-start, columns=True, ascending=True,
+            return self._get_casout_slice(stop - start, columns=True, ascending=True,
                                           casout=casout, start=start)
 
         from ..dataframe import concat
@@ -4110,8 +4115,7 @@ class CASTable(ParamManager, ActionParamManager):
         if pd_version >= (0, 21, 0):
             from pandas.api.types import CategoricalDtype
             out[tmpname] = out[tmpname].astype(CategoricalDtype(
-                                                   categories=categories,
-                                                   ordered=True))
+                categories=categories, ordered=True))
         else:
             out[tmpname] = out[tmpname].astype('category',
                                                categories=categories,
@@ -4401,13 +4405,13 @@ class CASTable(ParamManager, ActionParamManager):
             if not isinstance(percentile_values, (list, tuple, set)):
                 percentile_values = [percentile_values]
 
-            out = self._retrieve('percentile.percentile', # includemissing=not skipna,
+            out = self._retrieve('percentile.percentile',  # includemissing=not skipna,
                                  inputs=inputs, values=percentile_values,
                                  casout=casout, **kwargs)
 
-            return self._normalize_percentile_casout(out['OutputCasTables']['casTable'][0],
-                                                     single=(stat == 'median' or
-                                                             len(percentile_values) == 1))
+            return self._normalize_percentile_casout(
+                    out['OutputCasTables']['casTable'][0],
+                    single=(stat == 'median' or len(percentile_values) == 1))
 
         else:
             summ_stats = ['css', 'cv', 'kurtosis', 'mean',
@@ -4419,10 +4423,11 @@ class CASTable(ParamManager, ActionParamManager):
 
             num_cols = self._get_dtypes(include='numeric')
             inputs = [x for x in inputs if x in num_cols]
-            out = self._retrieve('simple.summary', # includemissing=not skipna,
+            out = self._retrieve('simple.summary',  # includemissing=not skipna,
                                  inputs=inputs, casout=casout, **kwargs)
 
-            return self._normalize_summary_casout(out['OutputCasTables']['casTable'][0], stat)
+            return self._normalize_summary_casout(
+                    out['OutputCasTables']['casTable'][0], stat)
 
     def _normalize_bygroups(self, drop=None, rename=None):
         '''
@@ -4480,14 +4485,15 @@ class CASTable(ParamManager, ActionParamManager):
         elif bygroup_columns == 'both':
             if bygroup_formatted_suffix != '_f':
                 for i, item in enumerate(fmt_groups):
-                    newname = _nlit(re.sub(r'_f$', bygroup_formatted_suffix, fmt_groups[i]))
+                    newname = _nlit(re.sub(r'_f$', bygroup_formatted_suffix,
+                                           fmt_groups[i]))
                     rename.append('%s=%s' % (_nlit(fmt_groups[i]), newname))
                     keep.append(raw_groups[i])
                     keep.append(newname)
                     cols.append(newname)
             else:
-                    keep.extend(groups)
-                    cols.append(groups)
+                keep.extend(groups)
+                cols.append(groups)
 
         for col in list(self.columns):
             if col not in groups:
@@ -4543,7 +4549,7 @@ class CASTable(ParamManager, ActionParamManager):
                 set %s;
                 %s
                 %s
-            run;''' % (dstbl, retain, dstbl, drop, rename));
+            run;''' % (dstbl, retain, dstbl, drop, rename))
 
         tbl = dsout['OutputCasTables']['casTable'][0]
 
@@ -4590,7 +4596,7 @@ class CASTable(ParamManager, ActionParamManager):
                 set %s;
                 %s
                 %s
-            run;''' % (_quote(tbl), retain, _quote(tbl), drop, rename));
+            run;''' % (_quote(tbl), retain, _quote(tbl), drop, rename))
 
         tbl = dsout['OutputCasTables']['casTable'][0]
 
@@ -4682,7 +4688,7 @@ class CASTable(ParamManager, ActionParamManager):
                 set %s;
                 %s
                 %s
-            run;''' % (_quote(tbl), _quote(tbl), drop, rename));
+            run;''' % (_quote(tbl), _quote(tbl), drop, rename))
 
         dsout = dsout['OutputCasTables']['casTable'][0]
 
@@ -4768,7 +4774,7 @@ class CASTable(ParamManager, ActionParamManager):
                     set %s;
                     %s
                     %s
-                run;''' % (_quote(out_tbl), _quote(char_tbl), drop, rename));
+                run;''' % (_quote(out_tbl), _quote(char_tbl), drop, rename))
             out_tbl = dsout['OutputCasTables']['casTable'][0]
 
         elif num_tbl:
@@ -4777,7 +4783,7 @@ class CASTable(ParamManager, ActionParamManager):
                     set %s;
                     %s
                     %s
-                run;''' % (_quote(out_tbl), _quote(num_tbl), drop, rename));
+                run;''' % (_quote(out_tbl), _quote(num_tbl), drop, rename))
             out_tbl = dsout['OutputCasTables']['casTable'][0]
 
         if char_tbl:
@@ -4812,8 +4818,8 @@ class CASTable(ParamManager, ActionParamManager):
 #           num_groups = out['HighCardinalityDetails']['CardinalityEstimate'].product()
 
             if num_groups > get_option('cas.dataset.bygroup_casout_threshold'):
-                warnings.warn('The number of potential by groupings is greater than ' +
-                              'cas.dataset.bygroup_casout_threshold.  The results will ' +
+                warnings.warn('The number of potential by groupings is greater than '
+                              'cas.dataset.bygroup_casout_threshold.  The results will '
                               'be written to a CAS table.', RuntimeWarning)
                 return True
 
@@ -4985,11 +4991,11 @@ class CASTable(ParamManager, ActionParamManager):
         casout : bool or string or CASTable or dict, optional
             The CAS output table specification
         single : bool, optional
-            Should `n` be interpretted as a range or single value? 
+            Should `n` be interpretted as a range or single value?
 
         Returns
         -------
-        :class:'CASTable' 
+        :class:'CASTable'
 
         '''
         if not self.has_groupby_vars():
@@ -5010,7 +5016,6 @@ class CASTable(ParamManager, ActionParamManager):
         cols, groups, raw_groups, fmt_groups, retain, keep, drop, rename = out
 
         groups = [_nlit(x) for x in self.get_groupby_vars()]
-        sortby = [_nlit(x) for x in columns]
 
         group_str = ' '.join(groups)
         sortby_str = ' '.join(columns)
@@ -5033,11 +5038,11 @@ class CASTable(ParamManager, ActionParamManager):
         if start is None:
             comp = '__count le %s' % int(n)
         elif isinstance(n, items_types):
-            comp = '__count in (%s)' % ','.join('%s' % (int(x)+1) for x in n)
+            comp = '__count in (%s)' % ','.join('%s' % (int(x) + 1) for x in n)
         elif start == n:
-            comp = '__count eq %s' % int(n+1)
+            comp = '__count eq %s' % int(n + 1)
         else:
-            comp = '__count ge %s and __count le %s' % (int(start+1), int(start+n))
+            comp = '__count ge %s and __count le %s' % (int(start + 1), int(start + n))
 
         casin = None
         out = None
@@ -5056,8 +5061,8 @@ class CASTable(ParamManager, ActionParamManager):
                      drop __count;
                    run;
              ''' % (casout.to_datastep_params(), retain,
-                    casin.to_input_datastep_params(), sort_order, group_str, sortby_str,
-                      cond_str, comp))
+                    casin.to_input_datastep_params(), sort_order, group_str,
+                    sortby_str, cond_str, comp))
 
         finally:
             if casin is not None:
@@ -6262,8 +6267,9 @@ class CASTable(ParamManager, ActionParamManager):
 
         dscode = []
         dscode.append('data %s(caslib=%s);' % (_quote(newname), _quote(caslib)))
-        dscode.append('    set %s(caslib=%s);' % (_quote(self.params.name),
-                                                  _quote(self.params.get('caslib', default_caslib))))
+        dscode.append('    set %s(caslib=%s);' %
+                       (_quote(self.params.name),
+                        _quote(self.params.get('caslib', default_caslib))))
         if isinstance(code, items_types):
             dscode.extend(code)
         else:
@@ -6577,9 +6583,11 @@ class CASTable(ParamManager, ActionParamManager):
             max_rows_fetched = get_option('cas.dataset.max_rows_fetched')
             kwargs['to'] = min(from_ + max_rows_fetched, MAX_INT64_INDEX)
             if self._numrows > max_rows_fetched:
-                warnings.warn(('Data downloads are limited to %d rows.  To change this limit, '
-                               'set swat.options.cas.dataset.max_rows_fetched to the desired limit.')
-                               % max_rows_fetched, RuntimeWarning)
+                warnings.warn(('Data downloads are limited to %d rows.  '
+                               'To change this limit, set '
+                               'swat.options.cas.dataset.max_rows_fetched '
+                               'to the desired limit.') % max_rows_fetched,
+                               RuntimeWarning)
 
         # Compute sample percentage as needed
         if sample_pct is None and sample:
@@ -6607,8 +6615,7 @@ class CASTable(ParamManager, ActionParamManager):
 
         # Sort based on 'Fetch#' key.  This will be out of order in REST.
         values = [x[1] for x in sorted(tbl._retrieve('table.fetch', **kwargs).items(),
-                                       key=lambda x: int(x[0].replace('Fetch', '') or
-                                                         '0'))]
+                  key=lambda x: int(x[0].replace('Fetch', '') or '0'))]
         out = df.concat(values)
 
         if tbl is not self:
@@ -7773,7 +7780,7 @@ class CharacterColumnMethods(object):
 
         '''
         return self._compute('capitalize',
-                             'upcase(substr({value}, 1, 1)) || ' +
+                             'upcase(substr({value}, 1, 1)) || '
                              'lowcase(substr({value}, 2))',
                              add_length=True)
 
@@ -8373,7 +8380,7 @@ class CharacterColumnMethods(object):
 
         '''
         return self._compute('isnumeric',
-                             r"prxmatch('/^\s*(0?\.\d+|\d+(\.\d*)?)\s*$/', " +
+                             r"prxmatch('/^\s*(0?\.\d+|\d+(\.\d*)?)\s*$/', "
                              r'{value}) > 0')
 
 #   def soundslike(self, arg):
@@ -8842,7 +8849,7 @@ class DatetimeColumnMethods(object):
         self._column = column
         self._dtype = column.dtype
         if self._dtype not in ['date', 'datetime', 'time']:
-            raise TypeError('datetime methods are only usable on CAS dates, ' +
+            raise TypeError('datetime methods are only usable on CAS dates, '
                             'times, and datetimes')
 
     def _compute(self, *args, **kwargs):
@@ -9175,7 +9182,7 @@ class CASColumn(CASTable):
     def tail(self, n=5, bygroup_as_index=True, casout=None):
         ''' Return last `n` rows of the column in a Series '''
         if self._use_casout_for_stat(casout):
-            raise NotImplemented('tail is not implement for casout yet')
+            raise NotImplementedError('tail is not implement for casout yet')
             return self._get_casout_slice(n, columns=True, ascending=True, casout=casout)
         return self.slice(start=-n, stop=-1, bygroup_as_index=True)
 
@@ -9184,7 +9191,7 @@ class CASColumn(CASTable):
         if self._use_casout_for_stat(casout):
             if stop is None:
                 stop = len(self)
-            return self._get_casout_slice(stop-start, columns=True, ascending=True,
+            return self._get_casout_slice(stop - start, columns=True, ascending=True,
                                           casout=casout, start=start)
         return CASTable.slice(self, start=start, stop=stop,
                               bygroup_as_index=bygroup_as_index)[self.name]
@@ -10701,8 +10708,7 @@ class CASTableGroupBy(object):
         '''
         if self._as_index:
             return self._table.value_counts(*args, **kwargs)
-        return self._table.value_counts(*args, **kwargs).reset_index(
-                   self.get_groupby_vars())
+        return self._table.value_counts(*args, **kwargs).reset_index(self.get_groupby_vars())
 
     def max(self, *args, **kwargs):
         '''
@@ -10996,8 +11002,7 @@ class CASTableGroupBy(object):
         '''
         if self._as_index:
             return self._table.nlargest(*args, **kwargs)
-        return self._table.nlargest(*args, **kwargs).reset_index(
-                   self.get_groupby_vars())
+        return self._table.nlargest(*args, **kwargs).reset_index(self.get_groupby_vars())
 
     def nsmallest(self, *args, **kwargs):
         '''
@@ -11011,8 +11016,7 @@ class CASTableGroupBy(object):
         '''
         if self._as_index:
             return self._table.nsmallest(*args, **kwargs)
-        return self._table.nsmallest(*args, **kwargs).reset_index(
-                   self.get_groupby_vars())
+        return self._table.nsmallest(*args, **kwargs).reset_index(self.get_groupby_vars())
 
     def query(self, *args, **kwargs):
         '''

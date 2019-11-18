@@ -525,8 +525,8 @@ def python2cas_timestamp(pyts):
     if isinstance(delta, type(pd.NaT)):
         # TODO: Change when integers support missing values
         return 0
-    return int64((delta.days * 24 * 60 * 60 * 10**6) +
-                 (delta.seconds * 10**6) + delta.microseconds)
+    return int64((delta.days * 24 * 60 * 60 * 10**6)
+                 + (delta.seconds * 10**6) + delta.microseconds)
 
 
 python2cas_datetime = python2cas_timestamp
@@ -552,8 +552,8 @@ def python2cas_time(pytm):
         CAS time
 
     '''
-    return int64(pytm.hour * (60 * 60 * 10**6) + (pytm.minute * 60 * 10**6) +
-                 (pytm.second * 10**6) + pytm.microsecond)
+    return int64(pytm.hour * (60 * 60 * 10**6) + (pytm.minute * 60 * 10**6)
+                 + (pytm.second * 10**6) + pytm.microsecond)
 
 
 def python2cas_date(pydt):

@@ -928,8 +928,8 @@ class SASDataFrame(pd.DataFrame):
 
             # Set the index level order
             if nlevels:
-                dframe = dframe.reorder_levels(list(range(nlevels, nlevels + bylevels)) +
-                                               list(range(nlevels)))
+                dframe = dframe.reorder_levels(list(range(nlevels, nlevels + bylevels))
+                                               + list(range(nlevels)))
 
         else:
             attrs['ByGroupMode'] = 'columns'

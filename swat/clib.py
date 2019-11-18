@@ -25,6 +25,7 @@ from __future__ import print_function, division, absolute_import, unicode_litera
 
 import glob
 import os
+import struct
 import sys
 from .utils.compat import PY3, WIDE_CHARS, a2u
 from .exceptions import SWATError
@@ -38,10 +39,7 @@ def _import_pyswat():
     ''' Import version-specific _pyswat package '''
     global _pyswat
 
-    import glob
     import importlib
-    import os
-    import sys
 
     platform = 'linux'
     if sys.platform.lower().startswith('win'):
@@ -73,9 +71,9 @@ def _import_pyswat():
     if not os.environ.get('TKESSL_OPENSSL_LIB', '').strip():
         # Make sure the correct libssl.so is used
         libssl = list(sorted(glob.glob(os.path.join('/usr/lib64/libssl.so.10')))) + \
-                 list(sorted(glob.glob(os.path.join('/usr/lib64/libssl.so.1.0*')))) + \
-                 list(sorted(glob.glob(os.path.join(sys.prefix, 'lib', 'libssl.so.10')))) + \
-                 list(sorted(glob.glob(os.path.join(sys.prefix, 'lib', 'libssl.so.1.0*'))))
+            list(sorted(glob.glob(os.path.join('/usr/lib64/libssl.so.1.0*')))) + \
+            list(sorted(glob.glob(os.path.join(sys.prefix, 'lib', 'libssl.so.10')))) + \
+            list(sorted(glob.glob(os.path.join(sys.prefix, 'lib', 'libssl.so.1.0*'))))
         if libssl:
             os.environ['TKESSL_OPENSSL_LIB'] = libssl[-1]
 

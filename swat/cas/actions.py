@@ -641,14 +641,14 @@ class CASAction(ParamManager):
         param_names = [prm.lower() for prm in pkeys]
 
         # __init__ and action methods
-        funcargs = '**mergedefined(_self_._get_default_params(), ' + \
-                   '{%s}, kwargs)' % callargs
-        six.exec_(('''def __init__(_self_, %s):''' +
-                   '''    CASAction.__init__(_self_, %s)''')
-                  % (sig, funcargs), _globals, _locals)
-        six.exec_(('''def __call__(_self_, %s):''' +
-                   '''    return CASAction.__call__(_self_, %s)''')
-                  % (sig, funcargs), _globals, _locals)
+        funcargs = ('**mergedefined(_self_._get_default_params(), '
+                    + '{%s}, kwargs)') % callargs
+        six.exec_(('''def __init__(_self_, %s):'''
+                   + '''    CASAction.__init__(_self_, %s)''')
+                     % (sig, funcargs), _globals, _locals)
+        six.exec_(('''def __call__(_self_, %s):'''
+                   + '''    return CASAction.__call__(_self_, %s)''')
+                     % (sig, funcargs), _globals, _locals)
 
         # Generate documentation
         all_params = []

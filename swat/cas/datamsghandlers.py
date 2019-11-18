@@ -328,10 +328,10 @@ class CASDataMsgHandler(object):
                                                                 datetime.datetime)):
                     value = python2cas_datetime(value)
             if vrtype == 'CHAR' or vtype in ['VARCHAR', 'CHAR', 'BINARY', 'VARBINARY']:
-                if vtype in ['BINARY', 'VARBINARY'] and \
-                        hasattr(self._sw_databuffer, 'setBinaryFromBase64'):
+                if vtype in ['BINARY', 'VARBINARY'] \
+                        and hasattr(self._sw_databuffer, 'setBinaryFromBase64'):
                     if isinstance(value, (binary_types, text_types)):
-                        errorcheck(self._sw_databuffer\
+                        errorcheck(self._sw_databuffer
                                         .setBinaryFromBase64(row, offset,
                                             a2n(base64.b64encode(
                                                     a2b(transformer(value))))),
@@ -353,9 +353,9 @@ class CASDataMsgHandler(object):
                 if pd.isnull(value):
                     value = get_option('cas.missing.%s' % vtype.lower())
                     warnings.warn(('Missing value found in 32-bit '
-                                   'integer-based column \'%s\'.\n' % v['name']) +
-                                  ('Substituting cas.missing.%s option value (%s).' %
-                                   (vtype.lower(), value)),
+                                   + 'integer-based column \'%s\'.\n' % v['name'])
+                                   + ('Substituting cas.missing.%s option value (%s).' %
+                                      (vtype.lower(), value)),
                                   RuntimeWarning)
                 if length > 4:
                     for i in range(int64(length / 4)):
@@ -370,9 +370,9 @@ class CASDataMsgHandler(object):
                 if pd.isnull(value):
                     value = get_option('cas.missing.%s' % vtype.lower())
                     warnings.warn(('Missing value found in 64-bit '
-                                   'integer-based column \'%s\'.\n' % v['name']) +
-                                  ('Substituting cas.missing.%s option value (%s).' %
-                                   (vtype.lower(), value)),
+                                   + 'integer-based column \'%s\'.\n' % v['name'])
+                                   + ('Substituting cas.missing.%s option value (%s).' %
+                                      (vtype.lower(), value)),
                                   RuntimeWarning)
                 if length > 8:
                     for i in range(int64(length / 8)):

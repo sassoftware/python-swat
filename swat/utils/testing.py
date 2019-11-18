@@ -33,6 +33,7 @@ UUID_RE = r'^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$'
 
 RE_TYPE = type(re.compile(r''))
 
+
 class TestCase(unittest.TestCase):
     ''' TestCase with SWAT Customizations '''
 
@@ -263,20 +264,20 @@ def _read_casrc(path):
 
     try:
         cashost = str(lg.cashost)
-    except:
+    except Exception:
         sys.sterr.write('ERROR: Could not access cashost setting\n')
         sys.exit(1)
 
     try:
         casport = int(lg.casport)
-    except:
+    except Exception:
         sys.sterr.write('ERROR: Could not access casport setting\n')
         sys.exit(1)
 
     try:
         if lg.casprotocol:
             casprotocol = str(lg.casprotocol)
-    except:
+    except Exception:
         pass
 
     return cashost, casport, casprotocol
