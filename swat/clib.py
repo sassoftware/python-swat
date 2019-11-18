@@ -79,6 +79,12 @@ def _import_pyswat():
         if libssl:
             os.environ['TKESSL_OPENSSL_LIB'] = libssl[-1]
 
+    if struct.calcsize('P') < 8:
+        raise RuntimeError('A 64-bit build of Python is required for the '
+                           'binary protocol.  You can either install a 64-bit '
+                           'version of Python, or use the REST interface as '
+                           'an alternative.')
+
     # Try to import the C extension
     try:
         _pyswat = importlib.import_module('.lib.%s.%s' % (platform, libname),
