@@ -25,7 +25,7 @@ from __future__ import print_function, division, absolute_import, unicode_litera
 
 import glob
 import os
-import platform
+import struct
 import sys
 from .utils.compat import PY3, WIDE_CHARS, a2u
 from .exceptions import SWATError
@@ -39,10 +39,7 @@ def _import_pyswat():
     ''' Import version-specific _pyswat package '''
     global _pyswat
 
-    import glob
     import importlib
-    import os
-    import sys
 
     platform = 'linux'
     if sys.platform.lower().startswith('win'):
@@ -74,11 +71,17 @@ def _import_pyswat():
     if not os.environ.get('TKESSL_OPENSSL_LIB', '').strip():
         # Make sure the correct libssl.so is used
         libssl = list(sorted(glob.glob(os.path.join('/usr/lib64/libssl.so.10')))) + \
-                 list(sorted(glob.glob(os.path.join('/usr/lib64/libssl.so.1.0*')))) + \
-                 list(sorted(glob.glob(os.path.join(sys.prefix, 'lib', 'libssl.so.10')))) + \
-                 list(sorted(glob.glob(os.path.join(sys.prefix, 'lib', 'libssl.so.1.0*'))))
+            list(sorted(glob.glob(os.path.join('/usr/lib64/libssl.so.1.0*')))) + \
+            list(sorted(glob.glob(os.path.join(sys.prefix, 'lib', 'libssl.so.10')))) + \
+            list(sorted(glob.glob(os.path.join(sys.prefix, 'lib', 'libssl.so.1.0*'))))
         if libssl:
             os.environ['TKESSL_OPENSSL_LIB'] = libssl[-1]
+
+    if struct.calcsize('P') < 8:
+        raise RuntimeError('A 64-bit build of Python is required for the '
+                           'binary protocol.  You can either install a 64-bit '
+                           'version of Python, or use the REST interface as '
+                           'an alternative.')
 
     # Try to import the C extension
     try:
@@ -138,24 +141,11 @@ def InitializeTK(*args, **kwargs):
     ''' Initialize the TK subsystem (importing _pyswat as needed) '''
     if _pyswat is None:
         _import_pyswat()
-
-    # Patch ppc linux path
-    set_tkpath_env = 'ppc' in platform.machine() and 'TKPATH' not in os.environ
-    if set_tkpath_env and args:
-        os.environ['TKPATH'] = args[0]
-
-    try:
-        out = _pyswat.InitializeTK(*args, **kwargs)
-
-    finally:
-        if set_tkpath_env:
-            del os.environ['TKPATH']
-
-        # Override TKPATH after initialization so that other TK applications
-        # won't be affected (Windows only).
-        if sys.platform.lower().startswith('win') and 'TKPATH' not in os.environ:
-            os.environ['TKPATH'] = os.pathsep
-
+    out = _pyswat.InitializeTK(*args, **kwargs)
+    # Override TKPATH after initialization so that other TK applications
+    # won't be affected.
+    if sys.platform.lower().startswith('win') and 'TKPATH' not in os.environ:
+        os.environ['TKPATH'] = os.pathsep
     return out
 
 

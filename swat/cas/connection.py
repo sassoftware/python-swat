@@ -227,7 +227,7 @@ class CAS(object):
                                   'exist: %s' % ', '.join(authinfo))
                 else:
                     raise OSError('The specified authinfo file does not '
-                                  'exist: %s' % authinfo) 
+                                  'exist: %s' % authinfo)
 
         # If a prototype exists, use it for the connection config
         prototype = kwargs.get('prototype')
@@ -243,14 +243,14 @@ class CAS(object):
                 port = cf.get_option('cas.port')
 
             # Detect protocol
-            if (isinstance(hostname, items_types) and
-                    (hostname[0].startswith('http:') or
-                     hostname[0].startswith('https:'))):
+            if (isinstance(hostname, items_types)
+                    and (hostname[0].startswith('http:')
+                         or hostname[0].startswith('https:'))):
                 protocol = hostname[0].split(':', 1)[0]
 
-            elif (isinstance(hostname, six.string_types) and
-                  (hostname.startswith('http:') or
-                   hostname.startswith('https:'))):
+            elif (isinstance(hostname, six.string_types)
+                  and (hostname.startswith('http:')
+                       or hostname.startswith('https:'))):
                 protocol = hostname.split(':', 1)[0]
 
             else:
@@ -279,8 +279,8 @@ class CAS(object):
             # Create a new connection
             else:
                 # Set up hostnames
-                if (protocol not in ['http', 'https'] and
-                        isinstance(hostname, items_types)):
+                if (protocol not in ['http', 'https']
+                        and isinstance(hostname, items_types)):
                     hostname = a2n(' '.join(a2n(x) for x in hostname if x))
                 elif isinstance(hostname, six.string_types):
                     hostname = a2n(hostname)
@@ -390,7 +390,9 @@ class CAS(object):
                 num = num + 1
         self._id_generator = _id_generator()
 
-        self.server_type, self.server_version, self.server_features = self._get_server_features()
+        (self.server_type,
+         self.server_version,
+         self.server_features) = self._get_server_features()
 
     def _gen_id(self):
         ''' Generate an ID unique to the session '''
@@ -455,17 +457,17 @@ class CAS(object):
                         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                         sock.settimeout(10)
                         sock.connect((host, port))
-                        sock.send(('GET /cas HTTP/1.1\r\n' +
-                                   ('Host: %s\r\n' % host) +
-                                   'Connection: close\r\n' +
-                                   'User-Agent: Python-SWAT\r\n' +
-                                   'Cache-Control: no-cache\r\n\r\n').encode('utf8'))
+                        sock.send(('GET /cas HTTP/1.1\r\n'
+                                   + ('Host: %s\r\n' % host)
+                                   + 'Connection: close\r\n'
+                                   + 'User-Agent: Python-SWAT\r\n'
+                                   + 'Cache-Control: no-cache\r\n\r\n').encode('utf8'))
 
                         if sock.recv(4).decode('utf-8').lower() == 'http':
                             protocol = ptype
                             break
 
-                    except Exception as err:
+                    except Exception:
                         pass
 
                     finally:
@@ -1096,8 +1098,7 @@ class CAS(object):
             if isinstance(kwargs['table'], CASTable):
                 kwargs['table'] = kwargs['table'].to_table_params()
             if isinstance(kwargs['table'], dict):
-                if caslib and 'caslib' not in kwargs and \
-                       kwargs['table'].get('caslib'):
+                if caslib and 'caslib' not in kwargs and kwargs['table'].get('caslib'):
                     kwargs['caslib'] = kwargs['table']['caslib']
                 kwargs['table'] = kwargs['table']['name']
 
@@ -1355,8 +1356,10 @@ class CAS(object):
                 delete = True
                 filename = tmp.name
                 name = os.path.splitext(os.path.basename(filename))[0]
-                data.to_csv(filename, encoding='utf-8', index=False, sep=a2n(',', 'utf-8'),
-                            decimal=a2n('.', 'utf-8'), line_terminator=a2n('\r\n', 'utf-8'))
+                data.to_csv(filename, encoding='utf-8',
+                            index=False, sep=a2n(',', 'utf-8'),
+                            decimal=a2n('.', 'utf-8'),
+                            line_terminator=a2n('\r\n', 'utf-8'))
                 df_dtypes = self._extract_dtypes(data)
                 importoptions['locale'] = 'EN-us'
 
@@ -1423,7 +1426,7 @@ class CAS(object):
         if delete:
             try:
                 os.remove(filename)
-            except:
+            except Exception:
                 pass
 
         return self._get_results([(CASResponse(resp, connection=self), self)])
@@ -1867,12 +1870,12 @@ class CAS(object):
         name = name.lower()
 
         # Check cache for actionset and action classes
-        if (atype in [None, 'actionset'] and name in self._actionset_classes and
-                self._actionset_classes[name] is not None):
+        if (atype in [None, 'actionset'] and name in self._actionset_classes
+                and self._actionset_classes[name] is not None):
             return self._actionset_classes[name]()
 
-        if (atype in [None, 'action'] and name in self._action_classes and
-                self._action_classes[name] is not None):
+        if (atype in [None, 'action'] and name in self._action_classes
+                and self._action_classes[name] is not None):
             if class_requested:
                 return self._action_classes[name]
             return self._action_classes[name]()
@@ -3116,7 +3119,7 @@ class CAS(object):
 
         '''
         if not name:
-            name = 'Caslib_%x' % random.randint(0,1e9)
+            name = 'Caslib_%x' % random.randint(0, 1e9)
 
         activeonadd_key = None
         subdirectories_key = None
@@ -3168,7 +3171,7 @@ class CAS(object):
             elif normpath.startswith(item):
                 if bool(subdirs) != bool(kwargs[subdirectories_key]):
                     raise SWATError('caslib exists, but subdirectories flag differs')
-                return libname, path[len(item)+1:]
+                return libname, path[len(item) + 1:]
 
         out = self.retrieve('table.addcaslib', _messagelevel='error',
                             name=name, path=path, **kwargs)
