@@ -1,0 +1,6 @@
+swat.functions.merge
+====================
+
+.. currentmodule:: swat.functions
+
+.. autofunction:: merge
