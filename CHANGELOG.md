@@ -1,6 +1,13 @@
 
 # Change Log
 
+## 1.6.0 - 2019-11-21
+
+- Fix letter-casing in `has_action` and `has_actionset` methods
+- Remove usage of deprecated `ix` accessor
+- Explicitly specify column and line delimiters and locale in uploaded CSV files
+- Fix TKPATH issues in Windows and PPC
+
 ## 1.5.2 - 2019-09-09
 
 - Fix issue with nulls in REST parameters

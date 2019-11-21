@@ -9,6 +9,15 @@ What's New
 
 This document outlines features and improvements from each release.
 
+1.6.0 - (November 21, 2019)
+===========================
+
+- Fix letter-casing in ``has_action`` and ``has_actionset`` methods
+- Remove usage of deprecated ``ix`` accessor
+- Explicitly specify column and line delimiters and locale in uploaded CSV files
+- Fix TKPATH issues in Windows and PPC
+
+
 1.5.2 (September 9, 2019)
 =========================
 
