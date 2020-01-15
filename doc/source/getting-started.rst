@@ -259,7 +259,7 @@ considered two different hosts.
 Here is an exmaple for a user named 'user01' and password '!s3cret' on host 
 'cas.my-company.com' and port 12354::
 
-    host cas.my-company.com port 12354 username user01 password !s3cret
+    host cas.my-company.com port 12354 user user01 password !s3cret
 
 By default, the authinfo files are looked for in your home directory under the name
 ``.authinfo``.  You can also use the name ``.netrc`` which is the name of an older
