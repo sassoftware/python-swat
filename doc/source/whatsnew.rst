@@ -9,7 +9,7 @@ What's New
 
 This document outlines features and improvements from each release.
 
-1.6.0 - (November 21, 2019)
+1.6.0 (November 21, 2019)
 ===========================
 
 - Fix letter-casing in ``has_action`` and ``has_actionset`` methods
