@@ -415,9 +415,7 @@ class SASDataFrame(pd.DataFrame):
         self.label = a2u(label)
         self.title = a2u(title)
         # TODO: Should attrs be walked and converted to unicode?
-        self.attrs = attrs
-        if self.attrs is None:
-            self.attrs = {}
+        self.attrs = attrs or {}
         self.formatter = formatter
         if self.formatter is None:
             self.formatter = SASFormatter()
