@@ -17,7 +17,7 @@ system administrator on how to acquire an account.
 
 To connect to a CAS server, you simply import SWAT and use the :class:`swat.CAS` class
 to create a connection.  This has a couple of different forms.  The most
-basic is to pass the hostname, port, userid, and password.
+basic is to pass the hostname, port, username, and password.
 
 .. ipython:: python
    :suppress:
@@ -25,13 +25,13 @@ basic is to pass the hostname, port, userid, and password.
    import os 
    host = os.environ['CASHOST']
    port = os.environ['CASPORT']
-   userid = os.environ.get('CASUSER', None)
+   username = os.environ.get('CASUSER', None)
    password = os.environ.get('CASPASSWORD', None)
 
 .. ipython:: python
 
    import swat
-   conn = swat.CAS(host, port, userid, password)
+   conn = swat.CAS(host, port, username, password)
 
 However, if you are using a REST connection to CAS, a URL is the more natural
 way to specify a host, port, and protocol.
@@ -40,9 +40,9 @@ way to specify a host, port, and protocol.
    :verbatim:
 
    conn = swat.CAS('https://my-cas-host.com:443/cas-shared-default-http/',
-                   userid='...', password='...')
+                   username='...', password='...')
 
-Notice that in the URL case, ``userid`` and ``password``, must be specified
+Notice that in the URL case, ``username`` and ``password``, must be specified
 as keyword parameters since the ``port`` parameter is being skipped.  Also,
 in this case we are using a proxy server that requires the base path
 of 'cas-shared-default-http'.  If you are connecting directly to a CAS
