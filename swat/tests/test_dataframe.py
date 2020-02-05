@@ -609,6 +609,8 @@ class TestDataFrame(tm.TestCase):
         self.assertEqual(list(both.columns), columns)
         self.assertEqual(both.index.values[0], ('Asia', 'Asia', 4, '4'))
 
+        # raise ValueError('done')
+
         #
         # None to any
         #

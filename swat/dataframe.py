@@ -830,21 +830,19 @@ class SASDataFrame(pd.DataFrame):
         if not self.attrs.get('ByVar1'):
             return dframe
 
-        attrs = dframe.attrs
-
         # 'attributes', 'index', or 'columns'
-        attrs.setdefault('ByGroupMode', 'attributes')
+        dframe.attrs.setdefault('ByGroupMode', 'attributes')
 
         # 'none', 'raw', 'formatted', or 'both'
-        attrs.setdefault('ByGroupColumns', 'none')
+        dframe.attrs.setdefault('ByGroupColumns', 'none')
 
         # Short circuit if possible
-        if bygroup_columns == attrs['ByGroupColumns']:
-            if attrs['ByGroupMode'] == 'attributes':
+        if bygroup_columns == dframe.attrs['ByGroupColumns']:
+            if dframe.attrs['ByGroupMode'] == 'attributes':
                 return dframe
-            if bygroup_as_index and attrs['ByGroupMode'] == 'index':
+            if bygroup_as_index and dframe.attrs['ByGroupMode'] == 'index':
                 return dframe
-            if not bygroup_as_index and attrs['ByGroupMode'] == 'columns':
+            if not bygroup_as_index and dframe.attrs['ByGroupMode'] == 'columns':
                 return dframe
 
         # Get the names of all of the By variables
@@ -856,40 +854,40 @@ class SASDataFrame(pd.DataFrame):
         while True:
             byvar = 'ByVar%d' % i
 
-            if byvar not in attrs:
+            if byvar not in dframe.attrs:
                 break
 
-            byvars.append(attrs[byvar])
-            byvals.append(attrs[byvar + 'Value'])
-            byvalsfmt.append(attrs[byvar + 'ValueFormatted'])
+            byvars.append(dframe.attrs[byvar])
+            byvals.append(dframe.attrs[byvar + 'Value'])
+            byvalsfmt.append(dframe.attrs[byvar + 'ValueFormatted'])
 
-            attrs.pop(byvar + 'Formatted', None)
+            dframe.attrs.pop(byvar + 'Formatted', None)
 
             numbycols = numbycols + 1
-            if attrs['ByGroupColumns'] == 'both':
+            if dframe.attrs['ByGroupColumns'] == 'both':
                 numbycols = numbycols + 1
 
             i = i + 1
 
         # Drop existing indexes
-        if attrs['ByGroupMode'] == 'index':
+        if dframe.attrs['ByGroupMode'] == 'index':
             dframe = dframe.reset_index(level=list(range(numbycols)), drop=True)
 
         # Drop existing columns
-        elif attrs['ByGroupMode'] == 'columns':
+        elif dframe.attrs['ByGroupMode'] == 'columns':
             dframe = dframe.iloc[:, :numbycols]
 
-        # Bail out of we are doing attributes
+        # Bail out if we are doing attributes
         if bygroup_columns == 'none':
-            attrs['ByGroupMode'] = 'attributes'
-            attrs['ByGroupColumns'] = 'none'
+            dframe.attrs['ByGroupMode'] = 'attributes'
+            dframe.attrs['ByGroupColumns'] = 'none'
             return dframe
 
         # Construct By group columns
-        attrs['ByGroupColumns'] = bygroup_columns
+        dframe.attrs['ByGroupColumns'] = bygroup_columns
 
         if bygroup_as_index:
-            attrs['ByGroupMode'] = 'index'
+            dframe.attrs['ByGroupMode'] = 'index'
             nlevels = len([x for x in dframe.index.names if x])
             appendlevels = nlevels > 0
             bylevels = 0
@@ -897,8 +895,8 @@ class SASDataFrame(pd.DataFrame):
             i = 1
             for byname, byval, byvalfmt in zip(byvars, byvals, byvalsfmt):
                 bykey = 'ByVar%d' % i
-                bylabel = attrs.get(bykey + 'Label')
-                sasfmt = attrs.get(bykey + 'Format')
+                bylabel = dframe.attrs.get(bykey + 'Label')
+                sasfmt = dframe.attrs.get(bykey + 'Format')
                 sasfmtwidth = split_format(sasfmt).width
                 if bygroup_columns in ['both', 'raw']:
                     dframe = dframe.set_index(pd.Series(data=[byval] * len(dframe),
@@ -930,15 +928,15 @@ class SASDataFrame(pd.DataFrame):
                                                + list(range(nlevels)))
 
         else:
-            attrs['ByGroupMode'] = 'columns'
+            dframe.attrs['ByGroupMode'] = 'columns'
             allcolnames = list(dframe.columns)
             bycols = []
 
             i = 1
             for byname, byval, byvalfmt in zip(byvars, byvals, byvalsfmt):
                 bykey = 'ByVar%d' % i
-                bylabel = attrs.get(bykey + 'Label')
-                sasfmt = attrs.get(bykey + 'Format')
+                bylabel = dframe.attrs.get(bykey + 'Label')
+                sasfmt = dframe.attrs.get(bykey + 'Format')
                 sasfmtwidth = split_format(sasfmt).width
                 if bygroup_columns in ['both', 'raw']:
                     if byname in allcolnames:

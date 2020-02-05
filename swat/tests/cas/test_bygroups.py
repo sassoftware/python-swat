@@ -26,6 +26,7 @@ import copy
 import numpy as np
 import os
 import pandas as pd
+import re
 import six
 import swat
 import swat.utils.testing as tm
@@ -35,6 +36,9 @@ import unittest
 from swat.utils.compat import patch_pandas_sort
 
 patch_pandas_sort()
+
+pd_version = tuple([int(x) for x in re.match(r'^(\d+)\.(\d+)\.(\d+)',
+                                             pd.__version__).groups()])
 
 # Pick sort keys that will match across SAS and Pandas sorting orders
 SORT_KEYS = ['Origin', 'MSRP', 'Horsepower', 'Model']
@@ -178,7 +182,7 @@ class TestByGroups(tm.TestCase):
         self.assertEqual(dfgrp.get_group(('Acura', 22)).to_csv(index=False),
                          tblgrp.get_group(('Acura', 22)).to_csv(index=False))
 
-    @unittest.skipIf(int(pd.__version__.split('.')[1]) <= 16, 'Need newer version of Pandas')
+    @unittest.skipIf(pd_version[:2] <= (0, 16), 'Need newer version of Pandas')
     def test_column_nlargest(self):
         df = self.get_cars_df()
         tbl = self.table
@@ -210,7 +214,7 @@ class TestByGroups(tm.TestCase):
         # self.assertEqual(tblgrp.__class__.__name__, 'CASTable')
         # self.assertTablesEqual(dfgrp.reset_index(), tblgrp, sortby=None)
 
-    @unittest.skipIf(int(pd.__version__.split('.')[1]) <= 16, 'Need newer version of Pandas')
+    @unittest.skipIf(pd_version[:2] <= (0, 16), 'Need newer version of Pandas')
     def test_nlargest(self):
         df = self.get_cars_df()
         tbl = self.table
@@ -242,7 +246,7 @@ class TestByGroups(tm.TestCase):
         # self.assertEqual(tblgrp.__class__.__name__, 'CASTable')
         # self.assertTablesEqual(dfgrp.reset_index(), tblgrp, sortby=None)
 
-    @unittest.skipIf(int(pd.__version__.split('.')[1]) <= 16, 'Need newer version of Pandas')
+    @unittest.skipIf(pd_version[:2] <= (0, 16), 'Need newer version of Pandas')
     def test_column_nsmallest(self):
         df = self.get_cars_df()
         tbl = self.table
@@ -273,7 +277,7 @@ class TestByGroups(tm.TestCase):
         self.assertEqual(tblgrp.__class__.__name__, 'CASTable')
         self.assertTablesEqual(dfgrp.reset_index(), tblgrp, sortby=None)
 
-    @unittest.skipIf(int(pd.__version__.split('.')[1]) <= 16, 'Need newer version of Pandas')
+    @unittest.skipIf(pd_version[:2] <= (0, 16), 'Need newer version of Pandas')
     def test_nsmallest(self):
         df = self.get_cars_df()
         tbl = self.table
@@ -304,7 +308,7 @@ class TestByGroups(tm.TestCase):
         self.assertEqual(tblgrp.__class__.__name__, 'CASTable')
         self.assertTablesEqual(dfgrp.reset_index(), tblgrp, sortby=None)
 
-    @unittest.skipIf(int(pd.__version__.split('.')[1]) < 16, 'Need newer version of Pandas')
+    @unittest.skipIf(pd_version < (0, 16, 0), 'Need newer version of Pandas')
     def test_column_head(self):
         df = self.get_cars_df().sort_values(SORT_KEYS)
         tbl = self.table.sort_values(SORT_KEYS)
@@ -357,7 +361,7 @@ class TestByGroups(tm.TestCase):
                                                 'Weight', 'Wheelbase', 'Length'])
         self.assertEqual(len(tblgrp), 30)
 
-    @unittest.skipIf(int(pd.__version__.split('.')[1]) < 16, 'Need newer version of Pandas')
+    @unittest.skipIf(pd_version < (0, 16, 0), 'Need newer version of Pandas')
     def test_column_tail(self):
         df = self.get_cars_df().sort_values(SORT_KEYS)
         tbl = self.table.sort_values(SORT_KEYS)
@@ -386,7 +390,7 @@ class TestByGroups(tm.TestCase):
         tblgrp = tbl.groupby('Origin').tail(10)
         self.assertTablesEqual(dfgrp, tblgrp, sortby=None)
 
-    @unittest.skipIf(int(pd.__version__.split('.')[1]) < 16, 'Need newer version of Pandas')
+    @unittest.skipIf(pd_version < (0, 16, 0), 'Need newer version of Pandas')
     def test_slice(self):
         df = self.get_cars_df().sort_values(SORT_KEYS)
         tbl = self.table.sort_values(SORT_KEYS)
@@ -418,7 +422,7 @@ class TestByGroups(tm.TestCase):
                                                 'Wheelbase', 'Length'])
         self.assertEqual(len(tblgrp), 12)
 
-    @unittest.skipIf(int(pd.__version__.split('.')[1]) < 16, 'Need newer version of Pandas')
+    @unittest.skipIf(pd_version < (0, 16, 0), 'Need newer version of Pandas')
     def test_column_slice(self):
         df = self.get_cars_df().sort_values(SORT_KEYS)
         tbl = self.table.sort_values(SORT_KEYS)
@@ -445,7 +449,7 @@ class TestByGroups(tm.TestCase):
         self.assertEqual(list(tblgrp.columns), ['Origin', 'MSRP'])
         self.assertEqual(len(tblgrp), 12)
 
-    @unittest.skipIf(int(pd.__version__.split('.')[1]) < 16, 'Need newer version of Pandas')
+    @unittest.skipIf(pd_version < (0, 16, 0), 'Need newer version of Pandas')
     def test_column_nth(self):
         df = self.get_cars_df().sort_values(SORT_KEYS)
         tbl = self.table.sort_values(SORT_KEYS)
@@ -596,7 +600,7 @@ class TestByGroups(tm.TestCase):
         with self.assertRaises(AttributeError):
             tbl.groupby('Origin').nunique()
 
-    @unittest.skipIf(int(pd.__version__.split('.')[1]) <= 16, 'Need newer version of Pandas')
+    @unittest.skipIf(pd_version[:2] <= (0, 16), 'Need newer version of Pandas')
     def test_column_value_counts(self):
         df = self.get_cars_df().sort_values(SORT_KEYS)
         tbl = self.table.sort_values(SORT_KEYS)
@@ -666,7 +670,8 @@ class TestByGroups(tm.TestCase):
         self.assertEqual(tblgrp.__class__.__name__, 'CASTable')
         self.assertTablesEqual(dfgrp.reset_index(), tblgrp, sortby=['Origin', 'EngineSize'])
 
-    @unittest.skipIf(int(pd.__version__.split('.')[1]) < 16, 'Need newer version of Pandas')
+    @unittest.skipIf(pd_version < (0, 16, 0), 'Need newer version of Pandas')
+    @unittest.skipIf(pd_version >= (1, 0, 0), 'Raises AssertionError in Pandas 1')
     def test_max(self):
         df = self.get_cars_df().sort_values(SORT_KEYS)
         tbl = self.table.sort_values(SORT_KEYS)
@@ -725,7 +730,8 @@ class TestByGroups(tm.TestCase):
         self.assertEqual(tblgrp.__class__.__name__, 'CASTable')
         self.assertTablesEqual(dfgrp.reset_index(), tblgrp, sortby=['Origin', 'EngineSize'])
 
-    @unittest.skipIf(int(pd.__version__.split('.')[1]) < 16, 'Need newer version of Pandas')
+    @unittest.skipIf(pd_version < (0, 16, 0), 'Need newer version of Pandas')
+    @unittest.skipIf(pd_version >= (1, 0, 0), 'Raises AssertionError in Pandas 1')
     def test_min(self):
         df = self.get_cars_df().sort_values(SORT_KEYS)
         tbl = self.table.sort_values(SORT_KEYS)
@@ -854,7 +860,7 @@ class TestByGroups(tm.TestCase):
         self.assertEqual(tblgrp.__class__.__name__, 'CASTable')
         self.assertTablesEqual(dfgrp, tblgrp, sortby=None)
 
-    @unittest.skipIf(int(pd.__version__.split('.')[1]) < 16, 'Need newer version of Pandas')
+    @unittest.skipIf(pd_version < (0, 16, 0), 'Need newer version of Pandas')
     def test_column_mode(self):
         df = self.get_cars_df().sort_values(SORT_KEYS)
         tbl = self.table.sort_values(SORT_KEYS)
@@ -880,7 +886,7 @@ class TestByGroups(tm.TestCase):
         tblgrp = tbl['EngineSize'].query('Origin ^= "USA"').groupby('Origin', as_index=False).mode()
         self.assertTablesEqual(dfgrp.reset_index(level=0), tblgrp, sortby=None)
 
-    @unittest.skipIf(int(pd.__version__.split('.')[1]) < 16, 'Need newer version of Pandas')
+    @unittest.skipIf(pd_version < (0, 16, 0), 'Need newer version of Pandas')
     def test_mode(self):
         df = self.get_cars_df().sort_values(SORT_KEYS)
         tbl = self.table.sort_values(SORT_KEYS)
@@ -1438,7 +1444,7 @@ class TestByGroups(tm.TestCase):
         self.assertEqual(tblgrp.__class__.__name__, 'CASTable')
         self.assertEqual(len(tblgrp), 3)
 
-    @unittest.skipIf(int(pd.__version__.split('.')[1]) < 16, 'Need newer version of Pandas')
+    @unittest.skipIf(pd_version < (0, 16, 0), 'Need newer version of Pandas')
     def test_column_describe(self):
         df = self.get_cars_df().sort_values(SORT_KEYS)
         tbl = self.table.sort_values(SORT_KEYS)
@@ -1464,7 +1470,7 @@ class TestByGroups(tm.TestCase):
 #       tblgrp = tblgrp.drop('Origin', axis=1)
 #       self.assertTablesEqual(dfgrp, tblgrp, sortby=False, decimals=5)
 
-    @unittest.skipIf(int(pd.__version__.split('.')[1]) < 16, 'Need newer version of Pandas')
+    @unittest.skipIf(pd_version < (0, 16, 0), 'Need newer version of Pandas')
     def test_describe(self):
         df = self.get_cars_df().sort_values(SORT_KEYS)
         tbl = self.table.sort_values(SORT_KEYS)
@@ -1481,7 +1487,7 @@ class TestByGroups(tm.TestCase):
         tblgrp = tblgrp.drop('Origin', axis=1)
         self.assertTablesEqual(dfgrp, tblgrp, sortby=None, decimals=5)
 
-    @unittest.skipIf(int(pd.__version__.split('.')[1]) < 16, 'Need newer version of Pandas')
+    @unittest.skipIf(pd_version < (0, 16, 0), 'Need newer version of Pandas')
     def test_column_to_frame(self):
         tbl = self.table.sort_values(SORT_KEYS)
 
@@ -1497,7 +1503,7 @@ class TestByGroups(tm.TestCase):
         self.assertEqual(len(tblgrp), 428)
         self.assertEqual(tblgrp.index.names, [None])
 
-    @unittest.skipIf(int(pd.__version__.split('.')[1]) < 16, 'Need newer version of Pandas')
+    @unittest.skipIf(pd_version < (0, 16, 0), 'Need newer version of Pandas')
     def test_to_frame(self):
         tbl = self.table.sort_values(SORT_KEYS)
 
@@ -1509,7 +1515,7 @@ class TestByGroups(tm.TestCase):
         self.assertEqual(len(tblgrp), 428)
         self.assertEqual(tblgrp.index.names, [None])
 
-    @unittest.skipIf(int(pd.__version__.split('.')[1]) < 16, 'Need newer version of Pandas')
+    @unittest.skipIf(pd_version < (0, 16, 0), 'Need newer version of Pandas')
     def test_column_to_series(self):
         tbl = self.table.sort_values(SORT_KEYS)
 
@@ -1521,7 +1527,7 @@ class TestByGroups(tm.TestCase):
         self.assertEqual(len(tblgrp), 428)
         self.assertEqual(tblgrp.index.names, ['Origin'])
 
-    @unittest.skipIf(int(pd.__version__.split('.')[1]) < 16, 'Need newer version of Pandas')
+    @unittest.skipIf(pd_version < (0, 16, 0), 'Need newer version of Pandas')
     def test_to_series(self):
         tbl = self.table.sort_values(SORT_KEYS)
 

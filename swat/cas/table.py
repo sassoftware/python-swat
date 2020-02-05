@@ -3822,9 +3822,14 @@ class CASTable(ParamManager, ActionParamManager):
         out = out.unstack()
 
         if len(out.index.names) > 1:
-            out = out.set_index(pd.MultiIndex(levels=out.index.levels,
-                                              labels=out.index.labels,
-                                              names=out.index.names[:-1] + [None]))
+            if pd_version >= (1, 0, 0):
+                out = out.set_index(pd.MultiIndex(levels=out.index.levels,
+                                                  codes=out.index.codes,
+                                                  names=out.index.names[:-1] + [None]))
+            else:
+                out = out.set_index(pd.MultiIndex(levels=out.index.levels,
+                                                  labels=out.index.labels,
+                                                  names=out.index.names[:-1] + [None]))
         else:
             out.index.name = None
 
@@ -4266,7 +4271,7 @@ class CASTable(ParamManager, ActionParamManager):
             else:
                 minmax.rename(columns=dict(CharVar='value', Column='column'),
                               inplace=True)
-            minmax = minmax.loc[:, groups + ['stat', 'column', 'value']]
+            minmax = minmax.reindex(columns=groups + ['stat', 'column', 'value'])
             if skipna:
                 minmax.dropna(inplace=True)
             if 'min' not in stats:
@@ -4275,12 +4280,12 @@ class CASTable(ParamManager, ActionParamManager):
                 minmax = minmax.set_index('stat').drop('max').reset_index()
             minmax.set_index(groups + ['stat', 'column'], inplace=True)
             if groups:
-                minmax.drop(groups, level=-1, inplace=True)
+                minmax.drop(groups, level=-1, inplace=True, errors='ignore')
             minmax = minmax.unstack()
             minmax.index.name = None
             minmax.columns.names = [None] * len(minmax.columns.names)
             minmax.columns = minmax.columns.droplevel()
-            minmax = minmax.loc[:, columns]
+            minmax = minmax.reindex(columns=columns)
 
         # Unique
         unique = None
@@ -4291,17 +4296,17 @@ class CASTable(ParamManager, ActionParamManager):
             unique = pd.concat(unique)
             unique.loc[:, 'unique'] = 'unique'
             unique.rename(columns=dict(N='value', Column='column'), inplace=True)
-            unique = unique.loc[:, groups + ['unique', 'column', 'value']]
+            unique = unique.reindex(columns=groups + ['unique', 'column', 'value'])
             if skipna:
                 unique.dropna(inplace=True)
             unique.set_index(groups + ['unique', 'column'], inplace=True)
             if groups:
-                unique.drop(groups, level=-1, inplace=True)
+                unique.drop(groups, level=-1, inplace=True, errors='ignore')
             unique = unique.unstack()
             unique.index.name = None
             unique.columns.names = [None] * len(unique.columns.names)
             unique.columns = unique.columns.droplevel()
-            unique = unique.loc[:, columns]
+            unique = unique.reindex(columns=columns)
 
         out = pd.concat(x for x in [unique, minmax] if x is not None)
         out = out.sort_index(ascending=([True] * len(groups)) + [False])

@@ -493,7 +493,9 @@ class TestCASTable(tm.TestCase):
         self.assertEqual(type(data.dtypes), type(tbl.dtypes))
         self.assertEqual(type(data.dtypes.index), type(tbl.dtypes.index))
         self.assertEqual(data.dtypes.index.tolist(), columns)
-        self.assertEqual(data.ftypes.index.tolist(), columns)
+
+        if pd_version[0] < 1:
+            self.assertEqual(data.ftypes.index.tolist(), columns)
 
     def test_type_counts(self):
         # alltypes
@@ -689,12 +691,12 @@ class TestCASTable(tm.TestCase):
         ndim = self.table['Model'].head(n=10000).ndim
         self.assertEqual(self.table['Model'].ndim, ndim)
 
-    @unittest.skipIf(int(pd.__version__.split('.')[1]) <= 14, 'Need newer version of Pandas')
+    @unittest.skipIf(pd_version <= (0, 14, 0), 'Need newer version of Pandas')
     def test_size(self):
         size = self.table.head(n=10000).size
         self.assertEqual(self.table.size, size)
 
-    @unittest.skipIf(int(pd.__version__.split('.')[1]) <= 14, 'Need newer version of Pandas')
+    @unittest.skipIf(pd_version <= (0, 14, 0), 'Need newer version of Pandas')
     def test_column_size(self):
         size = self.table['Model'].head(n=10000).size
         self.assertEqual(self.table['Model'].size, size)
@@ -1019,7 +1021,7 @@ class TestCASTable(tm.TestCase):
         self.assertEqual(count.index.tolist(), dfcount.index.tolist())
         self.assertEqual(count.tolist(), dfcount.tolist())
 
-    @unittest.skipIf(int(pd.__version__.split('.')[1]) <= 14, 'Need newer version of Pandas')
+    @unittest.skipIf(pd_version <= (0, 14, 0), 'Need newer version of Pandas')
     def test_describe(self):
 #       if self.server_type == 'windows.smp':
 #           tm.TestCase.skipTest(self, 'Skip on WX6 until defect S1240339 fixed')
@@ -1190,7 +1192,7 @@ class TestCASTable(tm.TestCase):
         self.assertColsEqual(tbl2.describe(include='all').loc['count'],
                              df2.describe(include='all').loc['count'])
 
-    @unittest.skipIf(int(pd.__version__.split('.')[1]) < 16, 'Need newer version of Pandas')
+    @unittest.skipIf(pd_version < (0, 16, 0), 'Need newer version of Pandas')
     def test_max(self):
 #       if self.server_type == 'windows.smp':
 #           tm.TestCase.skipTest(self, 'Skip on WX6 until defect S1240339 fixed')
@@ -1230,9 +1232,10 @@ class TestCASTable(tm.TestCase):
         grp = tbl.groupby(['Make', 'Cylinders'])
 
         # Pandas uses a different sort order for Type
-        dfmax = dfgrp.max().drop('Type', axis=1).drop('Model', axis=1)
-        max = grp.max().drop('Type', axis=1).drop('Model', axis=1)
-        self.assertEqual(dfmax[:30].to_csv(), max[:30].to_csv())
+        if pd_version < (1, 0, 0):
+            dfmax = dfgrp.max().drop('Type', axis=1).drop('Model', axis=1)
+            max = grp.max().drop('Type', axis=1).drop('Model', axis=1)
+            self.assertEqual(dfmax[:30].to_csv(), max[:30].to_csv())
 
         # Column max
         self.assertEqual(dfgrp['Origin'].max().tolist()[:40], grp['Origin'].max().tolist()[:40])
@@ -1321,7 +1324,7 @@ class TestCASTable(tm.TestCase):
 #       dfkurt = dfkurt[[x for x in self.table.columns if x in dfskew.columns]]
 #       self.assertTablesEqual(kurt, dfkurt, precision=4)
 
-    @unittest.skipIf(int(pd.__version__.split('.')[1]) < 16, 'Need newer version of Pandas')
+    @unittest.skipIf(pd_version < (0, 16, 0), 'Need newer version of Pandas')
     def test_min(self):
 #       if self.server_type == 'windows.smp':
 #           tm.TestCase.skipTest(self, 'Skip on WX6 until defect S1240339 fixed')
@@ -1361,9 +1364,10 @@ class TestCASTable(tm.TestCase):
         grp = tbl.groupby(['Make', 'Cylinders'])
 
         # Pandas uses a different sort order for Type
-        dfmin = dfgrp.min().drop('Type', axis=1)
-        min = grp.min().drop('Type', axis=1)
-        self.assertEqual(dfmin[:30].to_csv(), min[:30].to_csv())
+        if pd_version < (1, 0, 0):
+            dfmin = dfgrp.min().drop('Type', axis=1)
+            min = grp.min().drop('Type', axis=1)
+            self.assertEqual(dfmin[:30].to_csv(), min[:30].to_csv())
 
         # Column min
         self.assertEqual(dfgrp['Model'].min().tolist()[:40], grp['Model'].min().tolist()[:40])
@@ -1429,7 +1433,7 @@ class TestCASTable(tm.TestCase):
 
         self.assertEqual(dfmed.tolist(), tblmed.tolist())
 
-    @unittest.skipIf(int(pd.__version__.split('.')[1]) < 18, 'Need newer version of Pandas')
+    @unittest.skipIf(pd_version < (0, 18, 0), 'Need newer version of Pandas')
     @unittest.skipIf(tuple([int(x) for x in np.__version__.split('.')[:2]]) < (1, 9), 'Need newer version of numpy')
     def test_quantile(self):
         df = self.get_cars_df()
@@ -2069,6 +2073,7 @@ class TestCASTable(tm.TestCase):
 #       with self.assertRaises(TypeError):
 #           tbl.iloc['Make']
 
+    @unittest.skipIf(pd_version >= (1, 0, 0), 'Need newer version of Pandas')
     def test_ix(self):
         df = self.get_cars_df().sort_values(SORT_KEYS)
         tbl = self.table.sort_values(SORT_KEYS)
@@ -2150,6 +2155,7 @@ class TestCASTable(tm.TestCase):
         self.assertTablesEqual(df.ix[:, :'MSRP'], tbl.ix[:, :'MSRP'], sortby=None)
         self.assertTablesEqual(df.ix[:, :], tbl.ix[:, :], sortby=None)
 
+    @unittest.skipIf(pd_version >= (1, 0, 0), 'Need newer version of Pandas')
     def test_column_ix(self):
         df = self.get_cars_df().sort_values(['Make', 'Model'])
         df.index = range(len(df))
@@ -2275,7 +2281,7 @@ class TestCASTable(tm.TestCase):
 #       self.assertAlmostEqual(tbl['MSRP'].sas.tnoct().head(1)[0], -0.0)
         self.assertAlmostEqual(tbl['MSRP'].sas.trigamma().head(1)[0], 9.7280996080681686e-05)
 
-    @unittest.skipIf(int(pd.__version__.split('.')[1]) <= 16, 'Need newer version of Pandas')
+    @unittest.skipIf(pd_version <= (0, 16, 0), 'Need newer version of Pandas')
     def test_str_methods(self):
         df = self.get_cars_df()
         tbl = self.table
@@ -2987,10 +2993,11 @@ class TestCASTable(tm.TestCase):
         self.assertColsEqual(df['MSRP'].clip(40000, 50000),
                            tbl['MSRP'].clip(40000, 50000))
 
-        self.assertColsEqual(df['MSRP'].clip_lower(40000),
-                           tbl['MSRP'].clip_lower(40000))
-        self.assertColsEqual(df['MSRP'].clip_upper(40000),
-                           tbl['MSRP'].clip_upper(40000))
+        if pd_version < (1, 0, 0):
+            self.assertColsEqual(df['MSRP'].clip_lower(40000),
+                               tbl['MSRP'].clip_lower(40000))
+            self.assertColsEqual(df['MSRP'].clip_upper(40000),
+                               tbl['MSRP'].clip_upper(40000))
 
         self.assertAlmostEqual(df['MSRP'].corr(df['Invoice']),
                                tbl['MSRP'].corr(tbl['Invoice']), 4)
@@ -3122,7 +3129,7 @@ class TestCASTable(tm.TestCase):
                                 casout=dict(replace=True))
         self.assertTablesEqual(df, cars)
 
-    @unittest.skipIf(int(pd.__version__.split('.')[1]) <= 16, 'Need newer version of Pandas')
+    @unittest.skipIf(pd_version <= (0, 16, 0), 'Need newer version of Pandas')
     def test_read_pickle(self):
         df = self.get_cars_df(all_doubles=False)
 
@@ -3318,7 +3325,7 @@ class TestCASTable(tm.TestCase):
 
 #       self.assertTablesEqual(df, tbl)
 
-    @unittest.skipIf(int(pd.__version__.split('.')[1]) <= 16, 'Need newer version of Pandas')
+    @unittest.skipIf(pd_version <= (0, 16, 0), 'Need newer version of Pandas')
     def test_read_html(self):
         import swat.tests as st
 
@@ -3406,7 +3413,7 @@ class TestCASTable(tm.TestCase):
 
         self.assertTablesEqual(dff, tblf, sortby=None)
 
-    @unittest.skipIf(int(pd.__version__.split('.')[1]) <= 17, 'Need newer version of Pandas')
+    @unittest.skipIf(pd_version <= (0, 17, 0), 'Need newer version of Pandas')
     def test_column_to_xarray(self):
         try:
             import xarray
@@ -3453,7 +3460,7 @@ class TestCASTable(tm.TestCase):
 
         self.assertEqual(dfj, tblj)
 
-    @unittest.skipIf(int(pd.__version__.split('.')[1]) <= 17, 'Need newer version of Pandas')
+    @unittest.skipIf(pd_version <= (0, 17, 0), 'Need newer version of Pandas')
     def test_column_to_string(self):
         df = self.get_cars_df(all_doubles=False)
         tbl = self.table
@@ -3517,7 +3524,7 @@ class TestCASTable(tm.TestCase):
 #       self.assertTrue(tbl3 is None)
 #       self.assertEqual(set(df.Model.tolist()), set(tbl.Model.tolist()))
 
-    @unittest.skipIf(int(pd.__version__.split('.')[1]) <= 14, 'Need newer version of Pandas')
+    @unittest.skipIf(pd_version <= (0, 14, 0), 'Need newer version of Pandas')
     def test_dt_methods(self):
         if self.s._protocol in ['http', 'https']:
             tm.TestCase.skipTest(self, 'REST does not support data messages')
@@ -3957,6 +3964,7 @@ class TestCASTable(tm.TestCase):
 
         os.remove(tmp.name)
 
+    @unittest.skipIf(pd_version >= (1, 0, 0), 'Need newer version of Pandas')
     def test_to_msgpack(self):
         df = self.get_cars_df()
         df.index = range(len(df))
@@ -4976,11 +4984,12 @@ class TestCASTable(tm.TestCase):
         self.assertTablesEqual(df.clip(lower=-10, upper=15).sort_values(cols),
                                tbl.clip(lower=-10, upper=15).sort_values(cols))
 
-        self.assertTablesEqual(df.clip_lower(-5).sort_values(cols),
-                               tbl.clip_lower(-5).sort_values(cols))
+        if pd_version < (1, 0, 0):
+            self.assertTablesEqual(df.clip_lower(-5).sort_values(cols),
+                                   tbl.clip_lower(-5).sort_values(cols))
 
-        self.assertTablesEqual(df.clip_upper(30).sort_values(cols),
-                               tbl.clip_upper(30).sort_values(cols))
+            self.assertTablesEqual(df.clip_upper(30).sort_values(cols),
+                                   tbl.clip_upper(30).sort_values(cols))
 
     def _get_merge_data(self):
         import swat.tests as st
