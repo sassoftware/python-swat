@@ -1,0 +1,33 @@
+swat.cas.datamsghandlers.CASDataMsgHandler
+==========================================
+
+.. currentmodule:: swat.cas.datamsghandlers
+
+.. autoclass:: CASDataMsgHandler
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~CASDataMsgHandler.__init__
+      ~CASDataMsgHandler.finish
+      ~CASDataMsgHandler.getone
+      ~CASDataMsgHandler.getrow
+      ~CASDataMsgHandler.send
+      ~CASDataMsgHandler.write
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~CASDataMsgHandler.args
+   
+   

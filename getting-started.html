@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Getting Started &mdash; SWAT 1.6.0 documentation</title>
+  <title>Getting Started &mdash; SWAT 1.6.1 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="SWAT 1.6.0 documentation" href="index.html"/>
+    <link rel="top" title="SWAT 1.6.1 documentation" href="index.html"/>
         <link rel="next" title="Workflows" href="workflows.html"/>
         <link rel="prev" title="What’s New" href="whatsnew.html"/> 
 
@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                1.6.0
+                1.6.1
               </div>
             
           
@@ -166,20 +166,20 @@ User names and passwords can be implemented in various ways, so you may need to 
 system administrator on how to acquire an account.</p>
 <p>To connect to a CAS server, you simply import SWAT and use the <strong>swat.CAS</strong> class
 to create a connection.  This has a couple of different forms.  The most
-basic is to pass the hostname, port, userid, and password.</p>
+basic is to pass the hostname, port, username, and password.</p>
 <div class="highlight-ipython notranslate"><div class="highlight"><pre><span></span><span class="gp">In [1]: </span><span class="kn">import</span> <span class="nn">swat</span>
 
-<span class="gp">In [2]: </span><span class="n">conn</span> <span class="o">=</span> <span class="n">swat</span><span class="o">.</span><span class="n">CAS</span><span class="p">(</span><span class="n">host</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="n">userid</span><span class="p">,</span> <span class="n">password</span><span class="p">)</span>
+<span class="gp">In [2]: </span><span class="n">conn</span> <span class="o">=</span> <span class="n">swat</span><span class="o">.</span><span class="n">CAS</span><span class="p">(</span><span class="n">host</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="n">username</span><span class="p">,</span> <span class="n">password</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>However, if you are using a REST connection to CAS, a URL is the more natural
 way to specify a host, port, and protocol.</p>
 <div class="highlight-ipython notranslate"><div class="highlight"><pre><span></span><span class="gp">In [3]: </span><span class="n">conn</span> <span class="o">=</span> <span class="n">swat</span><span class="o">.</span><span class="n">CAS</span><span class="p">(</span><span class="s1">&#39;https://my-cas-host.com:443/cas-shared-default-http/&#39;</span><span class="p">,</span>
-<span class="gp">   ...: </span>                <span class="n">userid</span><span class="o">=</span><span class="s1">&#39;...&#39;</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="s1">&#39;...&#39;</span><span class="p">)</span>
+<span class="gp">   ...: </span>                <span class="n">username</span><span class="o">=</span><span class="s1">&#39;...&#39;</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="s1">&#39;...&#39;</span><span class="p">)</span>
 <span class="gp">   ...: </span>
 </pre></div>
 </div>
-<p>Notice that in the URL case, <strong>userid</strong> and <strong>password</strong>, must be specified
+<p>Notice that in the URL case, <strong>username</strong> and <strong>password</strong>, must be specified
 as keyword parameters since the <strong>port</strong> parameter is being skipped.  Also,
 in this case we are using a proxy server that requires the base path
 of ‘cas-shared-default-http’.  If you are connecting directly to a CAS
@@ -198,8 +198,8 @@ server, this is typically not required.</p>
 <span class="go"> {&#39;CAS&#39;: &#39;Cloud Analytic Services&#39;,</span>
 <span class="go">  &#39;Copyright&#39;: &#39;Copyright © 2014-2018 SAS Institute Inc. All Rights Reserved.&#39;,</span>
 <span class="go">  &#39;Documentation&#39;: &#39;http://mycompany.com:8080/job/Actions_ref_doc/ws/casaref/index.html&#39;,</span>
-<span class="go">  &#39;ServerTime&#39;: &#39;2019-11-21T14:52:44Z&#39;,</span>
-<span class="go">  &#39;System&#39;: {&#39;Hostname&#39;: &#39;cas04&#39;,</span>
+<span class="go">  &#39;ServerTime&#39;: &#39;2020-02-10T16:46:34Z&#39;,</span>
+<span class="go">  &#39;System&#39;: {&#39;Hostname&#39;: &#39;cas06&#39;,</span>
 <span class="go">   &#39;Linux Distribution&#39;: &#39;Red Hat Enterprise Linux Server release 6.6 (Santiago)&#39;,</span>
 <span class="go">   &#39;Model Number&#39;: &#39;x86_64&#39;,</span>
 <span class="go">   &#39;OS Family&#39;: &#39;LIN X64&#39;,</span>
@@ -226,9 +226,9 @@ server, this is typically not required.</p>
 <span class="go"> Node Status</span>
 <span class="go"> </span>
 <span class="go">     name        role  uptime  running  stalled</span>
-<span class="go"> 0  cas04  controller   0.512        0        0</span>
+<span class="go"> 0  cas06  controller   0.487        0        0</span>
 
-<span class="go">+ Elapsed: 0.00115s, mem: 0.305mb</span>
+<span class="go">+ Elapsed: 0.000931s, mem: 0.305mb</span>
 </pre></div>
 </div>
 </div>
@@ -244,7 +244,7 @@ use the standard way of accessing keys.</p>
 <span class="go">Node Status</span>
 
 <span class="go">    name        role  uptime  running  stalled</span>
-<span class="go">0  cas04  controller   0.512        0        0</span>
+<span class="go">0  cas06  controller   0.487        0        0</span>
 </pre></div>
 </div>
 <p>In addition, you can access the keys as attributes.  This convenience was added
@@ -257,7 +257,7 @@ want to use the syntax above for actual programs.</p>
 <span class="go">Node Status</span>
 
 <span class="go">    name        role  uptime  running  stalled</span>
-<span class="go">0  cas04  controller   0.512        0        0</span>
+<span class="go">0  cas06  controller   0.487        0        0</span>
 </pre></div>
 </div>
 <p>The types of the result keys can vary as well.  In this case, the ‘About’ key holds
@@ -306,8 +306,8 @@ a <strong>CASTable</strong> object.</p>
 <div class="highlight-ipython notranslate"><div class="highlight"><pre><span></span><span class="gp">In [12]: </span><span class="n">tbl</span> <span class="o">=</span> <span class="n">conn</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;https://raw.githubusercontent.com/&#39;</span>
 <span class="gp">   ....: </span>                    <span class="s1">&#39;sassoftware/sas-viya-programming/master/data/cars.csv&#39;</span><span class="p">)</span>
 <span class="gp">   ....: </span>
-<span class="go"><br/><strong class="param-meta">Note:</strong> Cloud Analytic Services made the uploaded file available as table TMP52ZSDEHY in caslib CASUSER(castest).</span>
-<span class="go"><br/><strong class="param-meta">Note:</strong> The table TMP52ZSDEHY has been created in caslib CASUSER(castest) from binary data uploaded to Cloud Analytic Services.</span>
+<span class="go"><br/><strong class="param-meta">Note:</strong> Cloud Analytic Services made the uploaded file available as table TMPTYJ5HNN5 in caslib CASUSER(castest).</span>
+<span class="go"><br/><strong class="param-meta">Note:</strong> The table TMPTYJ5HNN5 has been created in caslib CASUSER(castest) from binary data uploaded to Cloud Analytic Services.</span>
 </pre></div>
 </div>
 <p><strong>CASTable</strong> objects are essentially client-side views of the table of data
@@ -349,7 +349,7 @@ do that first.</p>
 <span class="go"> </span>
 <span class="go"> [10 rows x 17 columns]</span>
 
-<span class="go">+ Elapsed: 0.0182s, user: 0.016s, sys: 0.005s, mem: 5.46mb</span>
+<span class="go">+ Elapsed: 0.0187s, user: 0.014s, sys: 0.008s, mem: 5.46mb</span>
 </pre></div>
 </div>
 <p>In addition, you can also call the <strong>summary</strong> action directly on the <strong>CASTable</strong>
@@ -376,7 +376,7 @@ object.  It will automatically populate the <strong>table=</strong> parameter.</
 <span class="go"> </span>
 <span class="go"> [10 rows x 17 columns]</span>
 
-<span class="go">+ Elapsed: 0.0179s, user: 0.014s, sys: 0.006s, mem: 5.46mb</span>
+<span class="go">+ Elapsed: 0.0165s, user: 0.014s, sys: 0.005s, mem: 5.45mb</span>
 </pre></div>
 </div>
 <p>Again, the output is a <strong>CASResults</strong> object (a subclass of a Python dictionary),
@@ -406,7 +406,7 @@ have to take care of those issues before you can load them.</p>
 
 <span class="go"> &#39;percentile&#39;</span>
 
-<span class="go">+ Elapsed: 0.000685s, user: 0.001s, mem: 0.204mb</span>
+<span class="go">+ Elapsed: 0.00056s, user: 0.001s, mem: 0.204mb</span>
 </pre></div>
 </div>
 <p>Once you load an action set, its actions will be automatically added as methods
@@ -450,7 +450,7 @@ that connection.</p>
 <span class="go"> 28       Length  50.0    187.00        1.0</span>
 <span class="go"> 29       Length  75.0    194.00        1.0</span>
 
-<span class="go">+ Elapsed: 0.0477s, user: 0.092s, sys: 0.018s, mem: 14.6mb</span>
+<span class="go">+ Elapsed: 0.0661s, user: 0.098s, sys: 0.015s, mem: 15.6mb</span>
 </pre></div>
 </div>
 <p>Note that the <strong>percentile</strong> action set has an action called <strong>percentile</strong> in it.
@@ -595,7 +595,7 @@ of a file explicitly using the <strong>authinfo=</strong> parameter.</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'1.6.0',
+            VERSION:'1.6.1',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

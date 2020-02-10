@@ -1,0 +1,6 @@
+swat.cas.table.CASTable.shape
+=============================
+
+.. currentmodule:: swat.cas.table
+
+.. autoattribute:: CASTable.shape

@@ -1,0 +1,33 @@
+swat.cas.datamsghandlers.PandasDataFrame
+========================================
+
+.. currentmodule:: swat.cas.datamsghandlers
+
+.. autoclass:: PandasDataFrame
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~PandasDataFrame.__init__
+      ~PandasDataFrame.finish
+      ~PandasDataFrame.getone
+      ~PandasDataFrame.getrow
+      ~PandasDataFrame.send
+      ~PandasDataFrame.write
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~PandasDataFrame.args
+   
+   

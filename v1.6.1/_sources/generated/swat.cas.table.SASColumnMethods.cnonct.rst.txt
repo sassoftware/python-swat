@@ -1,0 +1,6 @@
+swat.cas.table.SASColumnMethods.cnonct
+======================================
+
+.. currentmodule:: swat.cas.table
+
+.. automethod:: SASColumnMethods.cnonct

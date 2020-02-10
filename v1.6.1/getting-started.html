@@ -1,0 +1,625 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Getting Started &mdash; SWAT 1.6.1 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+    <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+
+  
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
+    <link rel="top" title="SWAT 1.6.1 documentation" href="index.html"/>
+        <link rel="next" title="Workflows" href="workflows.html"/>
+        <link rel="prev" title="What’s New" href="whatsnew.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> SWAT
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.6.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="whatsnew.html">What’s New</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Getting Started</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#running-cas-actions">Running CAS Actions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#handling-the-output">Handling the Output</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#simple-statistics">Simple Statistics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#loading-cas-action-sets">Loading CAS Action Sets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#cas-tables-as-dataframes">CAS Tables as DataFrames</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#closing-the-connection">Closing the Connection</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#authentication">Authentication</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="workflows.html">Workflows</a></li>
+<li class="toctree-l1"><a class="reference internal" href="binary-vs-rest.html">Binary vs. REST</a></li>
+<li class="toctree-l1"><a class="reference internal" href="encryption.html">Encryption (SSL)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="loading-data.html">Loading Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="table-vs-dataframe.html">CASTable vs. DataFrame vs. SASDataFrame</a></li>
+<li class="toctree-l1"><a class="reference internal" href="indexing.html">Indexing and Data Selection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bygroups.html">Handling By Groups</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sorting.html">Sorting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gotchas.html">Programming Gotchas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="troubleshooting.html">Troubleshooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sas-tk.html">SAS TK</a></li>
+<li class="toctree-l1"><a class="reference internal" href="licenses.html">Licenses</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="index.html">SWAT</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+ 
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+      
+    <li>Getting Started</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/getting-started.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="getting-started">
+<h1>Getting Started<a class="headerlink" href="#getting-started" title="Permalink to this headline">¶</a></h1>
+<p>Before you can use the SWAT package, you will need a running CAS server.  The SWAT package
+can connect to either the binary port or the HTTP port.  If you have the option of either,
+the binary protocol will give you better performance.</p>
+<p>Other than the CAS host and port, you just need a user name and password to connect.
+User names and passwords can be implemented in various ways, so you may need to see your
+system administrator on how to acquire an account.</p>
+<p>To connect to a CAS server, you simply import SWAT and use the <strong>swat.CAS</strong> class
+to create a connection.  This has a couple of different forms.  The most
+basic is to pass the hostname, port, username, and password.</p>
+<div class="highlight-ipython notranslate"><div class="highlight"><pre><span></span><span class="gp">In [1]: </span><span class="kn">import</span> <span class="nn">swat</span>
+
+<span class="gp">In [2]: </span><span class="n">conn</span> <span class="o">=</span> <span class="n">swat</span><span class="o">.</span><span class="n">CAS</span><span class="p">(</span><span class="n">host</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="n">username</span><span class="p">,</span> <span class="n">password</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>However, if you are using a REST connection to CAS, a URL is the more natural
+way to specify a host, port, and protocol.</p>
+<div class="highlight-ipython notranslate"><div class="highlight"><pre><span></span><span class="gp">In [3]: </span><span class="n">conn</span> <span class="o">=</span> <span class="n">swat</span><span class="o">.</span><span class="n">CAS</span><span class="p">(</span><span class="s1">&#39;https://my-cas-host.com:443/cas-shared-default-http/&#39;</span><span class="p">,</span>
+<span class="gp">   ...: </span>                <span class="n">username</span><span class="o">=</span><span class="s1">&#39;...&#39;</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="s1">&#39;...&#39;</span><span class="p">)</span>
+<span class="gp">   ...: </span>
+</pre></div>
+</div>
+<p>Notice that in the URL case, <strong>username</strong> and <strong>password</strong>, must be specified
+as keyword parameters since the <strong>port</strong> parameter is being skipped.  Also,
+in this case we are using a proxy server that requires the base path
+of ‘cas-shared-default-http’.  If you are connecting directly to a CAS
+server, this is typically not required.</p>
+<p>Now that we have a connection to CAS, we can run some actions on it.</p>
+<div class="section" id="running-cas-actions">
+<h2>Running CAS Actions<a class="headerlink" href="#running-cas-actions" title="Permalink to this headline">¶</a></h2>
+<p>To test your connection, you can run the <strong>serverstatus</strong> action.</p>
+<div class="highlight-ipython notranslate"><div class="highlight"><pre><span></span><span class="gp">In [4]: </span><span class="n">out</span> <span class="o">=</span> <span class="n">conn</span><span class="o">.</span><span class="n">serverstatus</span><span class="p">()</span>
+<span class="go"><br/><strong class="param-meta">Note:</strong> Grid node action status report: 1 nodes, 7 total actions executed.</span>
+
+<span class="gp">In [5]: </span><span class="n">out</span>
+<span class="go">                                                                         Out[5]: </span>
+<span class="go">[About]</span>
+
+<span class="go"> {&#39;CAS&#39;: &#39;Cloud Analytic Services&#39;,</span>
+<span class="go">  &#39;Copyright&#39;: &#39;Copyright © 2014-2018 SAS Institute Inc. All Rights Reserved.&#39;,</span>
+<span class="go">  &#39;Documentation&#39;: &#39;http://mycompany.com:8080/job/Actions_ref_doc/ws/casaref/index.html&#39;,</span>
+<span class="go">  &#39;ServerTime&#39;: &#39;2020-02-10T16:46:34Z&#39;,</span>
+<span class="go">  &#39;System&#39;: {&#39;Hostname&#39;: &#39;cas06&#39;,</span>
+<span class="go">   &#39;Linux Distribution&#39;: &#39;Red Hat Enterprise Linux Server release 6.6 (Santiago)&#39;,</span>
+<span class="go">   &#39;Model Number&#39;: &#39;x86_64&#39;,</span>
+<span class="go">   &#39;OS Family&#39;: &#39;LIN X64&#39;,</span>
+<span class="go">   &#39;OS Name&#39;: &#39;Linux&#39;,</span>
+<span class="go">   &#39;OS Release&#39;: &#39;2.6.32-504.12.2.el6.x86_64&#39;,</span>
+<span class="go">   &#39;OS Version&#39;: &#39;#1 SMP Sun Feb 1 12:14:02 EST 2015&#39;},</span>
+<span class="go">  &#39;Version&#39;: &#39;3.05&#39;,</span>
+<span class="go">  &#39;VersionLong&#39;: &#39;V.03.05M0D11062019&#39;,</span>
+<span class="go">  &#39;license&#39;: {&#39;expires&#39;: &#39;26Dec2019:00:00:00&#39;,</span>
+<span class="go">   &#39;gracePeriod&#39;: 62,</span>
+<span class="go">   &#39;site&#39;: &#39;SAS Institute Inc.&#39;,</span>
+<span class="go">   &#39;siteNum&#39;: 1,</span>
+<span class="go">   &#39;warningPeriod&#39;: 31}}</span>
+
+<span class="go">[server]</span>
+
+<span class="go"> Server Status</span>
+<span class="go"> </span>
+<span class="go">    nodes  actions</span>
+<span class="go"> 0      1        7</span>
+
+<span class="go">[nodestatus]</span>
+
+<span class="go"> Node Status</span>
+<span class="go"> </span>
+<span class="go">     name        role  uptime  running  stalled</span>
+<span class="go"> 0  cas06  controller   0.487        0        0</span>
+
+<span class="go">+ Elapsed: 0.000931s, mem: 0.305mb</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="handling-the-output">
+<h2>Handling the Output<a class="headerlink" href="#handling-the-output" title="Permalink to this headline">¶</a></h2>
+<p>All CAS actions return a <strong>CASResults</strong> object.  This is simply an ordered
+Python dictionary with a few extra methods and attributes added.  In the output
+above, you’ll see the keys of the dictionary surrounded in square brackets.  They
+are ‘About’, ‘server’, and ‘nodestatus’.  Since this is a dictionary, you can just
+use the standard way of accessing keys.</p>
+<div class="highlight-ipython notranslate"><div class="highlight"><pre><span></span><span class="gp">In [6]: </span><span class="n">out</span><span class="p">[</span><span class="s1">&#39;nodestatus&#39;</span><span class="p">]</span>
+<span class="gh">Out[6]: </span><span class="go"></span>
+<span class="go">Node Status</span>
+
+<span class="go">    name        role  uptime  running  stalled</span>
+<span class="go">0  cas06  controller   0.487        0        0</span>
+</pre></div>
+</div>
+<p>In addition, you can access the keys as attributes.  This convenience was added
+to keep your code looking a bit cleaner.  However, be aware that if the name of a
+key collides with a standard Python attribute or method, you’ll get that attribute
+or method instead.  So this form is fine for interactive programming, but you may
+want to use the syntax above for actual programs.</p>
+<div class="highlight-ipython notranslate"><div class="highlight"><pre><span></span><span class="gp">In [7]: </span><span class="n">out</span><span class="o">.</span><span class="n">nodestatus</span>
+<span class="gh">Out[7]: </span><span class="go"></span>
+<span class="go">Node Status</span>
+
+<span class="go">    name        role  uptime  running  stalled</span>
+<span class="go">0  cas06  controller   0.487        0        0</span>
+</pre></div>
+</div>
+<p>The types of the result keys can vary as well.  In this case, the ‘About’ key holds
+a dictionary.  The ‘server’ and ‘nodestatus’ keys hold <strong>SASDataFrame</strong> objects
+(a subclass of <a class="reference external" href="https://pandas.pydata.org/pandas-docs/version/0.19.2/generated/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v0.19.2)"><strong>pandas.DataFrame</strong></a>).</p>
+<div class="highlight-ipython notranslate"><div class="highlight"><pre><span></span><span class="gp">In [8]: </span><span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">out</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+<span class="gp">   ...: </span>    <span class="k">print</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
+<span class="gp">   ...: </span>
+<span class="go">About &lt;class &#39;dict&#39;&gt;</span>
+<span class="go">server &lt;class &#39;swat.SASDataFrame&#39;&gt;</span>
+<span class="go">nodestatus &lt;class &#39;swat.SASDataFrame&#39;&gt;</span>
+</pre></div>
+</div>
+<p>Since the values in the result are standard Python (and pandas) objects, you can
+work with them as you normally do.</p>
+<div class="highlight-ipython notranslate"><div class="highlight"><pre><span></span><span class="gp">In [9]: </span><span class="n">out</span><span class="o">.</span><span class="n">nodestatus</span><span class="o">.</span><span class="n">role</span>
+<span class="gh">Out[9]: </span><span class="go"></span>
+<span class="go">0    controller</span>
+<span class="go">Name: role, dtype: object</span>
+
+<span class="gp">In [10]: </span><span class="n">out</span><span class="o">.</span><span class="n">About</span><span class="p">[</span><span class="s1">&#39;Version&#39;</span><span class="p">]</span>
+<span class="go">                                                   Out[10]: &#39;3.05&#39;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="simple-statistics">
+<h2>Simple Statistics<a class="headerlink" href="#simple-statistics" title="Permalink to this headline">¶</a></h2>
+<p>We can’t have a getting started section without doing some sort of statistical
+analysis.  First, we need to see what CAS action sets are loaded.  We can get a
+listing of all of the action sets and actions using the <strong>help</strong> CAS action.  If you
+run <strong>help</strong> without any arguments, it will display all of the loaded actions and
+their descriptions.  Rather than printing that large listing, we’ll specifically
+ask for the <cite>simple</cite> action set since we already know that’s the one we want.</p>
+<div class="highlight-ipython notranslate"><div class="highlight"><pre><span></span><span class="gp">In [11]: </span><span class="n">conn</span><span class="o">.</span><span class="n">help</span><span class="p">(</span><span class="n">actionset</span><span class="o">=</span><span class="s1">&#39;simple&#39;</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>Let’s start with the <strong>summary</strong> action.  Of course, we first need to load some data.
+The simplest way to load data is to do it from the client side.  Note that while this
+is the simplest way, it’s probably not the best way for large data sets.  Those should
+be loaded from the server side if possible.</p>
+<p>The <strong>CAS.read_csv()</strong> method works just like the <strong>pandas.read_csv()</strong> function.
+In fact, <strong>CAS.read_csv()</strong> uses <strong>pandas.read_csv()</strong> in the background.
+When <strong>pandas.read_csv()</strong> finishes parsing the CSV file into a <a class="reference external" href="https://pandas.pydata.org/pandas-docs/version/0.19.2/generated/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v0.19.2)"><strong>pandas.DataFrame</strong></a>,
+it gets uploaded to a CAS table by <strong>CAS.read_csv()</strong>.  The returned object is
+a <strong>CASTable</strong> object.</p>
+<div class="highlight-ipython notranslate"><div class="highlight"><pre><span></span><span class="gp">In [12]: </span><span class="n">tbl</span> <span class="o">=</span> <span class="n">conn</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;https://raw.githubusercontent.com/&#39;</span>
+<span class="gp">   ....: </span>                    <span class="s1">&#39;sassoftware/sas-viya-programming/master/data/cars.csv&#39;</span><span class="p">)</span>
+<span class="gp">   ....: </span>
+<span class="go"><br/><strong class="param-meta">Note:</strong> Cloud Analytic Services made the uploaded file available as table TMPTYJ5HNN5 in caslib CASUSER(castest).</span>
+<span class="go"><br/><strong class="param-meta">Note:</strong> The table TMPTYJ5HNN5 has been created in caslib CASUSER(castest) from binary data uploaded to Cloud Analytic Services.</span>
+</pre></div>
+</div>
+<p><strong>CASTable</strong> objects are essentially client-side views of the table of data
+in the CAS server.  You can interact with them using CAS actions as well as many
+of the <a class="reference external" href="https://pandas.pydata.org/pandas-docs/version/0.19.2/generated/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v0.19.2)"><strong>pandas.DataFrame</strong></a> methods and attributes.  The <a class="reference external" href="https://pandas.pydata.org/pandas-docs/version/0.19.2/generated/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v0.19.2)"><strong>pandas.DataFrame</strong></a>
+API is mirrored as much as possible, the only difference is that behind-the-scenes
+the real work is being done by CAS.</p>
+<p>If you don’t want the difficult-to-read generated name for a table, you can specify one
+using the <strong>casout=</strong> parameter.</p>
+<div class="highlight-ipython notranslate"><div class="highlight"><pre><span></span><span class="gp">In [13]: </span><span class="n">tbl</span> <span class="o">=</span> <span class="n">conn</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;https://raw.githubusercontent.com/&#39;</span>
+<span class="gp">   ....: </span>                    <span class="s1">&#39;sassoftware/sas-viya-programming/master/data/cars.csv&#39;</span><span class="p">,</span>
+<span class="gp">   ....: </span>                    <span class="n">casout</span><span class="o">=</span><span class="s1">&#39;cars&#39;</span><span class="p">)</span>
+<span class="gp">   ....: </span>
+<span class="go"><br/><strong class="param-meta">Note:</strong> Cloud Analytic Services made the uploaded file available as table CARS in caslib CASUSER(castest).</span>
+<span class="go"><br/><strong class="param-meta">Note:</strong> The table CARS has been created in caslib CASUSER(castest) from binary data uploaded to Cloud Analytic Services.</span>
+</pre></div>
+</div>
+<p>Since we started down this path with the intent to use the <strong>summary</strong> action, let’s
+do that first.</p>
+<div class="highlight-ipython notranslate"><div class="highlight"><pre><span></span><span class="gp">In [14]: </span><span class="n">out</span> <span class="o">=</span> <span class="n">conn</span><span class="o">.</span><span class="n">summary</span><span class="p">(</span><span class="n">table</span><span class="o">=</span><span class="n">tbl</span><span class="p">)</span>
+
+<span class="gp">In [15]: </span><span class="n">out</span>
+<span class="gh">Out[15]: </span><span class="go"></span>
+<span class="go">[Summary]</span>
+
+<span class="go"> Descriptive Statistics for CARS</span>
+<span class="go"> </span>
+<span class="go">         Column      Min       Max    ...              ProbT  Skewness   Kurtosis</span>
+<span class="go"> 0         MSRP  10280.0  192465.0    ...      4.160412e-127  2.798099  13.879206</span>
+<span class="go"> 1      Invoice   9875.0  173560.0    ...      2.684398e-128  2.834740  13.946164</span>
+<span class="go"> 2   EngineSize      1.3       8.3    ...      3.133745e-209  0.708152   0.541944</span>
+<span class="go"> 3    Cylinders      3.0      12.0    ...      1.515569e-251  0.592785   0.440378</span>
+<span class="go"> 4   Horsepower     73.0     500.0    ...      4.185344e-216  0.930331   1.552159</span>
+<span class="go"> 5     MPG_City     10.0      60.0    ...      1.866284e-257  2.782072  15.791147</span>
+<span class="go"> 6  MPG_Highway     12.0      66.0    ...      1.665621e-292  1.252395   6.045611</span>
+<span class="go"> 7       Weight   1850.0    7190.0    ...      5.812547e-294  0.891824   1.688789</span>
+<span class="go"> 8    Wheelbase     89.0     144.0    ...       0.000000e+00  0.962287   2.133649</span>
+<span class="go"> 9       Length    143.0     238.0    ...       0.000000e+00  0.181977   0.614725</span>
+<span class="go"> </span>
+<span class="go"> [10 rows x 17 columns]</span>
+
+<span class="go">+ Elapsed: 0.0187s, user: 0.014s, sys: 0.008s, mem: 5.46mb</span>
+</pre></div>
+</div>
+<p>In addition, you can also call the <strong>summary</strong> action directly on the <strong>CASTable</strong>
+object.  It will automatically populate the <strong>table=</strong> parameter.</p>
+<div class="highlight-ipython notranslate"><div class="highlight"><pre><span></span><span class="gp">In [16]: </span><span class="n">out</span> <span class="o">=</span> <span class="n">tbl</span><span class="o">.</span><span class="n">summary</span><span class="p">()</span>
+
+<span class="gp">In [17]: </span><span class="n">out</span>
+<span class="gh">Out[17]: </span><span class="go"></span>
+<span class="go">[Summary]</span>
+
+<span class="go"> Descriptive Statistics for CARS</span>
+<span class="go"> </span>
+<span class="go">         Column      Min       Max    ...              ProbT  Skewness   Kurtosis</span>
+<span class="go"> 0         MSRP  10280.0  192465.0    ...      4.160412e-127  2.798099  13.879206</span>
+<span class="go"> 1      Invoice   9875.0  173560.0    ...      2.684398e-128  2.834740  13.946164</span>
+<span class="go"> 2   EngineSize      1.3       8.3    ...      3.133745e-209  0.708152   0.541944</span>
+<span class="go"> 3    Cylinders      3.0      12.0    ...      1.515569e-251  0.592785   0.440378</span>
+<span class="go"> 4   Horsepower     73.0     500.0    ...      4.185344e-216  0.930331   1.552159</span>
+<span class="go"> 5     MPG_City     10.0      60.0    ...      1.866284e-257  2.782072  15.791147</span>
+<span class="go"> 6  MPG_Highway     12.0      66.0    ...      1.665621e-292  1.252395   6.045611</span>
+<span class="go"> 7       Weight   1850.0    7190.0    ...      5.812547e-294  0.891824   1.688789</span>
+<span class="go"> 8    Wheelbase     89.0     144.0    ...       0.000000e+00  0.962287   2.133649</span>
+<span class="go"> 9       Length    143.0     238.0    ...       0.000000e+00  0.181977   0.614725</span>
+<span class="go"> </span>
+<span class="go"> [10 rows x 17 columns]</span>
+
+<span class="go">+ Elapsed: 0.0165s, user: 0.014s, sys: 0.005s, mem: 5.45mb</span>
+</pre></div>
+</div>
+<p>Again, the output is a <strong>CASResults</strong> object (a subclass of a Python dictionary),
+so we can pull off the keys we want (there is only one in this case).  This key contains
+a <strong>SASDataFrame</strong>, but since it’s a subclass of <a class="reference external" href="https://pandas.pydata.org/pandas-docs/version/0.19.2/generated/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v0.19.2)"><strong>pandas.DataFrame</strong></a>,
+you can do all of the standard DataFrame operations on it.</p>
+<div class="highlight-ipython notranslate"><div class="highlight"><pre><span></span><span class="gp">In [18]: </span><span class="n">summ</span> <span class="o">=</span> <span class="n">out</span><span class="o">.</span><span class="n">Summary</span>
+
+<span class="gp">In [19]: </span><span class="n">summ</span> <span class="o">=</span> <span class="n">summ</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s1">&#39;Column&#39;</span><span class="p">)</span>
+
+<span class="gp">In [20]: </span><span class="n">summ</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="s1">&#39;Cylinders&#39;</span><span class="p">,</span> <span class="s1">&#39;Max&#39;</span><span class="p">]</span>
+<span class="gh">Out[20]: </span><span class="go">12.0</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="loading-cas-action-sets">
+<h2>Loading CAS Action Sets<a class="headerlink" href="#loading-cas-action-sets" title="Permalink to this headline">¶</a></h2>
+<p>While CAS comes with a few pre-loaded action sets, you will likely want to load
+action sets with other capabilities such as percentiles, Data step, SQL, or even
+machine learning.  Most action sets will require a license to run them, so you’ll
+have to take care of those issues before you can load them.</p>
+<p>The action used to load action sets is called <strong>loadactionset</strong>.</p>
+<div class="highlight-ipython notranslate"><div class="highlight"><pre><span></span><span class="gp">In [21]: </span><span class="n">conn</span><span class="o">.</span><span class="n">loadactionset</span><span class="p">(</span><span class="s1">&#39;percentile&#39;</span><span class="p">)</span>
+<span class="go"><br/><strong class="param-meta">Note:</strong> Added action set &#39;percentile&#39;.</span>
+<span class="gh">Out[21]: </span><span class="go"></span>
+<span class="go">[actionset]</span>
+
+<span class="go"> &#39;percentile&#39;</span>
+
+<span class="go">+ Elapsed: 0.00056s, user: 0.001s, mem: 0.204mb</span>
+</pre></div>
+</div>
+<p>Once you load an action set, its actions will be automatically added as methods
+to the <strong>CAS</strong> connection and any <strong>CASTable</strong> objects associated with
+that connection.</p>
+<div class="highlight-ipython notranslate"><div class="highlight"><pre><span></span><span class="gp">In [22]: </span><span class="n">tbl</span><span class="o">.</span><span class="n">percentile</span><span class="p">()</span>
+<span class="gh">Out[22]: </span><span class="go"></span>
+<span class="go">[Percentile]</span>
+
+<span class="go"> Percentiles for CARS</span>
+<span class="go"> </span>
+<span class="go">        Variable  Pctl     Value  Converged</span>
+<span class="go"> 0          MSRP  25.0  20329.50        1.0</span>
+<span class="go"> 1          MSRP  50.0  27635.00        1.0</span>
+<span class="go"> 2          MSRP  75.0  39215.00        1.0</span>
+<span class="go"> 3       Invoice  25.0  18851.00        1.0</span>
+<span class="go"> 4       Invoice  50.0  25294.50        1.0</span>
+<span class="go"> 5       Invoice  75.0  35732.50        1.0</span>
+<span class="go"> 6    EngineSize  25.0      2.35        1.0</span>
+<span class="go"> 7    EngineSize  50.0      3.00        1.0</span>
+<span class="go"> 8    EngineSize  75.0      3.90        1.0</span>
+<span class="go"> 9     Cylinders  25.0      4.00        1.0</span>
+<span class="go"> 10    Cylinders  50.0      6.00        1.0</span>
+<span class="go"> 11    Cylinders  75.0      6.00        1.0</span>
+<span class="go"> 12   Horsepower  25.0    165.00        1.0</span>
+<span class="go"> 13   Horsepower  50.0    210.00        1.0</span>
+<span class="go"> 14   Horsepower  75.0    255.00        1.0</span>
+<span class="go"> 15     MPG_City  25.0     17.00        1.0</span>
+<span class="go"> 16     MPG_City  50.0     19.00        1.0</span>
+<span class="go"> 17     MPG_City  75.0     21.50        1.0</span>
+<span class="go"> 18  MPG_Highway  25.0     24.00        1.0</span>
+<span class="go"> 19  MPG_Highway  50.0     26.00        1.0</span>
+<span class="go"> 20  MPG_Highway  75.0     29.00        1.0</span>
+<span class="go"> 21       Weight  25.0   3103.00        1.0</span>
+<span class="go"> 22       Weight  50.0   3474.50        1.0</span>
+<span class="go"> 23       Weight  75.0   3978.50        1.0</span>
+<span class="go"> 24    Wheelbase  25.0    103.00        1.0</span>
+<span class="go"> 25    Wheelbase  50.0    107.00        1.0</span>
+<span class="go"> 26    Wheelbase  75.0    112.00        1.0</span>
+<span class="go"> 27       Length  25.0    178.00        1.0</span>
+<span class="go"> 28       Length  50.0    187.00        1.0</span>
+<span class="go"> 29       Length  75.0    194.00        1.0</span>
+
+<span class="go">+ Elapsed: 0.0661s, user: 0.098s, sys: 0.015s, mem: 15.6mb</span>
+</pre></div>
+</div>
+<p>Note that the <strong>percentile</strong> action set has an action called <strong>percentile</strong> in it.
+you can call the action either as <strong>tbl.percentile</strong> or <strong>tbl.percentile.percentile</strong>.</p>
+</div>
+<div class="section" id="cas-tables-as-dataframes">
+<h2>CAS Tables as DataFrames<a class="headerlink" href="#cas-tables-as-dataframes" title="Permalink to this headline">¶</a></h2>
+<p>As we mentioned previously, <strong>CASTable</strong> objects implement many of the
+<a class="reference external" href="https://pandas.pydata.org/pandas-docs/version/0.19.2/generated/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v0.19.2)"><strong>pandas.DataFrame</strong></a> methods and properties.  This means that you can use the
+familiar <a class="reference external" href="https://pandas.pydata.org/pandas-docs/version/0.19.2/generated/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v0.19.2)"><strong>pandas.DataFrame</strong></a> API, but use it on data that is far too large
+for pandas to handle.  Here are a few simple examples.</p>
+<div class="highlight-ipython notranslate"><div class="highlight"><pre><span></span><span class="gp">In [23]: </span><span class="n">tbl</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+<span class="gh">Out[23]: </span><span class="go"></span>
+<span class="go">Selected Rows from Table CARS</span>
+
+<span class="go">    Make           Model   Type   ...    Weight Wheelbase  Length</span>
+<span class="go">0  Acura             MDX    SUV   ...    4451.0     106.0   189.0</span>
+<span class="go">1  Acura  RSX Type S 2dr  Sedan   ...    2778.0     101.0   172.0</span>
+<span class="go">2  Acura         TSX 4dr  Sedan   ...    3230.0     105.0   183.0</span>
+<span class="go">3  Acura          TL 4dr  Sedan   ...    3575.0     108.0   186.0</span>
+<span class="go">4  Acura      3.5 RL 4dr  Sedan   ...    3880.0     115.0   197.0</span>
+
+<span class="go">[5 rows x 15 columns]</span>
+</pre></div>
+</div>
+<div class="highlight-ipython notranslate"><div class="highlight"><pre><span></span><span class="gp">In [24]: </span><span class="n">tbl</span><span class="o">.</span><span class="n">describe</span><span class="p">()</span>
+<span class="gh">Out[24]: </span><span class="go"></span>
+<span class="go">                MSRP        Invoice     ...       Wheelbase      Length</span>
+<span class="go">count     428.000000     428.000000     ...      428.000000  428.000000</span>
+<span class="go">mean    32774.855140   30014.700935     ...      108.154206  186.362150</span>
+<span class="go">std     19431.716674   17642.117750     ...        8.311813   14.357991</span>
+<span class="go">min     10280.000000    9875.000000     ...       89.000000  143.000000</span>
+<span class="go">25%     20329.500000   18851.000000     ...      103.000000  178.000000</span>
+<span class="go">50%     27635.000000   25294.500000     ...      107.000000  187.000000</span>
+<span class="go">75%     39215.000000   35732.500000     ...      112.000000  194.000000</span>
+<span class="go">max    192465.000000  173560.000000     ...      144.000000  238.000000</span>
+
+<span class="go">[8 rows x 10 columns]</span>
+</pre></div>
+</div>
+<div class="highlight-ipython notranslate"><div class="highlight"><pre><span></span><span class="gp">In [25]: </span><span class="n">tbl</span><span class="p">[[</span><span class="s1">&#39;MSRP&#39;</span><span class="p">,</span> <span class="s1">&#39;Invoice&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">describe</span><span class="p">(</span><span class="n">percentiles</span><span class="o">=</span><span class="p">[</span><span class="mf">0.3</span><span class="p">,</span> <span class="mf">0.7</span><span class="p">])</span>
+<span class="gh">Out[25]: </span><span class="go"></span>
+<span class="go">                MSRP        Invoice</span>
+<span class="go">count     428.000000     428.000000</span>
+<span class="go">mean    32774.855140   30014.700935</span>
+<span class="go">std     19431.716674   17642.117750</span>
+<span class="go">min     10280.000000    9875.000000</span>
+<span class="go">30%     22000.000000   20284.000000</span>
+<span class="go">50%     27635.000000   25294.500000</span>
+<span class="go">70%     35940.000000   32997.000000</span>
+<span class="go">max    192465.000000  173560.000000</span>
+</pre></div>
+</div>
+<p>For more information about <strong>CASTable</strong>, see the <a class="reference internal" href="api.html#api"><span class="std std-ref">API Reference</span></a>.</p>
+</div>
+<div class="section" id="closing-the-connection">
+<h2>Closing the Connection<a class="headerlink" href="#closing-the-connection" title="Permalink to this headline">¶</a></h2>
+<p>When you are finished with the connection, it’s always a good idea to
+close it.</p>
+<div class="highlight-ipython notranslate"><div class="highlight"><pre><span></span><span class="gp">In [26]: </span><span class="n">conn</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="authentication">
+<h2>Authentication<a class="headerlink" href="#authentication" title="Permalink to this headline">¶</a></h2>
+<p>While it is possible to put your username and password in the <strong>CAS</strong> constructor,
+it’s generally not a good idea to have a password in your code.  To get around this issue,
+the <strong>CAS</strong> class supports authinfo files.  Authinfo files are a a file used to
+store username and password information for specified hostname and port.  They are
+protected by file permissions so that only you can read them.  This allows you to set
+and protect your passwords in one place and have them used by all of your programs.</p>
+<p>The format of the file is as follows:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">host</span> <span class="n">HOST</span> <span class="n">user</span> <span class="n">USERNAME</span> <span class="n">password</span> <span class="n">PASSWORD</span> <span class="n">port</span> <span class="n">PORT</span>
+</pre></div>
+</div>
+<p><strong>machine</strong> is a synonym for <strong>host</strong>, <strong>login</strong> and <strong>account</strong> are
+synonyms for <strong>user</strong>, and <strong>protocol</strong> is a synonym for <strong>port</strong>.</p>
+<p>You can specify as many of the <strong>host</strong> lines as possible.  The <strong>port</strong> field
+is optional.  If it is left off, all ports will use the same password.
+Hostnames much match the hostname used in the <strong>CAS</strong> constructor exactly.  It does
+not do any DNS expanding of the names.  So ‘host1’ and ‘host1.my-company.com’ are
+considered two different hosts.</p>
+<p>Here is an exmaple for a user named ‘user01’ and password ‘!s3cret’ on host
+‘cas.my-company.com’ and port 12354:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>host cas.my-company.com port 12354 user user01 password !s3cret
+</pre></div>
+</div>
+<p>By default, the authinfo files are looked for in your home directory under the name
+<strong>.authinfo</strong>.  You can also use the name <strong>.netrc</strong> which is the name of an older
+specification that authinfo was based on.</p>
+<p>The permissions on the file must be readable and writable by the owner only.  This
+is done with the following command:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">chmod</span> <span class="mi">0600</span> <span class="o">~/.</span><span class="n">authinfo</span>
+</pre></div>
+</div>
+<p>If you don’t want to use an authinfo in your home directory, you can specify the name
+of a file explicitly using the <strong>authinfo=</strong> parameter.</p>
+<div class="highlight-ipython notranslate"><div class="highlight"><pre><span></span><span class="gp">In [27]: </span><span class="n">conn</span> <span class="o">=</span> <span class="n">swat</span><span class="o">.</span><span class="n">CAS</span><span class="p">(</span><span class="s1">&#39;cas.my-company.com&#39;</span><span class="p">,</span> <span class="mi">12354</span><span class="p">,</span> <span class="n">authinfo</span><span class="o">=</span><span class="s1">&#39;/path/to/authinfo.txt&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="workflows.html" class="btn btn-neutral float-right" title="Workflows" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="whatsnew.html" class="btn btn-neutral" title="What’s New" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016 SAS Institute Inc. All Rights Reserved..
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'1.6.1',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

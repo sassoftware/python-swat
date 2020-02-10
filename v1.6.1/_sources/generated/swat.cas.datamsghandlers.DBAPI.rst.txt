@@ -1,0 +1,33 @@
+swat.cas.datamsghandlers.DBAPI
+==============================
+
+.. currentmodule:: swat.cas.datamsghandlers
+
+.. autoclass:: DBAPI
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~DBAPI.__init__
+      ~DBAPI.finish
+      ~DBAPI.getone
+      ~DBAPI.getrow
+      ~DBAPI.send
+      ~DBAPI.write
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~DBAPI.args
+   
+   
