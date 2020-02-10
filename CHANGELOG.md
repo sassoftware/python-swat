@@ -1,6 +1,10 @@
 
 # Change Log
 
+## 1.6.1 - 2020-02-10
+
+- Add pandas v1.0.0 support
+
 ## 1.6.0 - 2019-11-21
 
 - Fix letter-casing in `has_action` and `has_actionset` methods

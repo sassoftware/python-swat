@@ -9,8 +9,13 @@ What's New
 
 This document outlines features and improvements from each release.
 
+1.6.1 (February 10, 2020)
+=========================
+
+- Add pandas v1.0.0 support
+
 1.6.0 (November 21, 2019)
-===========================
+=========================
 
 - Fix letter-casing in ``has_action`` and ``has_actionset`` methods
 - Remove usage of deprecated ``ix`` accessor
