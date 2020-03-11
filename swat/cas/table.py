@@ -1354,7 +1354,7 @@ class CASTable(ParamManager, ActionParamManager):
 
     def append_computedvars(self, *items, **kwargs):
         '''
-        Append variable names to tbl.computedvars parameter
+        Append variable names to computedvars parameter
 
         Parameters
         ----------
@@ -1390,7 +1390,7 @@ class CASTable(ParamManager, ActionParamManager):
 
     def append_groupby(self, *items, **kwargs):
         '''
-        Append variable names to tbl.groupby parameter
+        Append variable names to groupby parameter
 
         Parameters
         ----------
@@ -1424,7 +1424,7 @@ class CASTable(ParamManager, ActionParamManager):
 
     def append_computedvarsprogram(self, *items, **kwargs):
         '''
-        Append code to tbl.computedvarsprogram parameter
+        Append code to computedvarsprogram parameter
 
         Parameters
         ----------
@@ -2482,7 +2482,7 @@ class CASTable(ParamManager, ActionParamManager):
 
     def as_matrix(self, columns=None, n=None):
         '''
-        Convert the CASTable to its Numpy-array representation
+        Represent CASTable as a Numpy array 
 
         Parameters
         ----------
@@ -2650,7 +2650,7 @@ class CASTable(ParamManager, ActionParamManager):
 
     def select_dtypes(self, include=None, exclude=None, inplace=False):
         '''
-        Return a subset :class:`CASTable` including/excluding columns based on data type
+        Return a subset CASTable including/excluding columns based on data type
 
         Parameters
         ----------
@@ -2728,7 +2728,7 @@ class CASTable(ParamManager, ActionParamManager):
 
     def copy(self, deep=True, exclude=None):
         '''
-        Make a copy of the `CASTable` object
+        Make a copy of the CASTable object
 
         Parameters
         ----------
@@ -2970,7 +2970,7 @@ class CASTable(ParamManager, ActionParamManager):
 
     @getattr_safe_property
     def iloc(self):
-        ''' Integer location based indexing for selection by position '''
+        ''' Integer-based indexer for selecting by position '''
         if isinstance(self, CASColumn):
             raise NotImplementedError('The `iloc` attribute is not implemented, '
                                       'but the attribute is reserved.')
@@ -3028,7 +3028,7 @@ class CASTable(ParamManager, ActionParamManager):
 
     def iteritems(self):
         '''
-        Iterate over column names and :class:`CASColumn` objects
+        Iterate over column names and CASColumn objects
 
         Yields
         ------
@@ -3162,7 +3162,7 @@ class CASTable(ParamManager, ActionParamManager):
         return out.at[out.index.values[0], col]
 
     def lookup(self, row_labels, col_labels):
-        ''' Retrieve values indicated by row_labels, col_labels positions '''
+        ''' Retrieve values indicated by `row_labels`, `col_labels` positions '''
         data = []
         for row, col in zip(row_labels, col_labels):
             data.append(self.get_value(row, col))
@@ -3229,7 +3229,7 @@ class CASTable(ParamManager, ActionParamManager):
 
     def datastep(self, code, casout=None, *args, **kwargs):
         '''
-        Execute Data step code against the CAS table
+        Execute Data step code against the table
 
         Parameters
         ----------
@@ -3506,7 +3506,7 @@ class CASTable(ParamManager, ActionParamManager):
 
     def all(self, axis=None, bool_only=None, skipna=True, level=None, **kwargs):
         '''
-        Return whether all elements in the column are True
+        Return True for each column with only True elements
 
         Parameters
         ----------
@@ -3515,7 +3515,7 @@ class CASTable(ParamManager, ActionParamManager):
         bool_only : bool, optional
             Not supported.
         skipna : bool, optional
-            Should missing values be skipped?  If False, and the entire
+            When set to True, skips missing values. When False and the entire
             column is missing, the result will also be a missing.
         level : int, optional
             Not supported.
@@ -3555,7 +3555,7 @@ class CASTable(ParamManager, ActionParamManager):
 
     def any(self, axis=None, bool_only=None, skipna=True, level=None, **kwargs):
         '''
-        Return whether any elements in the column are True
+        Return True for each column with at least one True element
 
         Parameters
         ----------
@@ -3564,7 +3564,7 @@ class CASTable(ParamManager, ActionParamManager):
         bool_only : bool, optional
             Not supported.
         skipna : bool, optional
-            Should missing values be included?  If not, and the entire
+            When set to True, skips missing values. When False and the entire
             column is missing, the result will also be a missing.
         level : int, optional
             Not supported.
@@ -5700,7 +5700,7 @@ class CASTable(ParamManager, ActionParamManager):
 
     def drop(self, labels, axis=0, level=None, inplace=False, errors='raise'):
         '''
-        Return a new :class:`CASTable` object with the specified columns removed
+        Return a new CASTable object with the specified columns removed
 
         Parameters
         ----------
@@ -5821,7 +5821,7 @@ class CASTable(ParamManager, ActionParamManager):
     def sample(self, n=None, frac=None, replace=False, weights=None,
                random_state=None, axis=None, stratify_by=None, **kwargs):
         '''
-        Returns a random sample of the CAS table rows
+        Returns a random sample of the table rows
 
         Parameters
         ----------
@@ -6310,7 +6310,7 @@ class CASTable(ParamManager, ActionParamManager):
     def sort_values(self, by, axis=0, ascending=True, inplace=False,
                     kind='quicksort', na_position='last'):
         '''
-        Specify sort parameters for data in a CAS table
+        Specify sort parameters for data in a CASTable
 
         Parameters
         ----------
@@ -6319,7 +6319,7 @@ class CASTable(ParamManager, ActionParamManager):
         axis : int, optional
             Not implemented.
         ascending : boolean or list-of-booleans, optional
-            Sort ascending or descending.  Specify a list of booleanss
+            Sort ascending or descending.  Specify a list of booleans
             if sort orders are not all one type.
         inplace : boolean, optional
             If True, the sort order is embedded into the CASTable
@@ -6738,7 +6738,7 @@ class CASTable(ParamManager, ActionParamManager):
     @getattr_safe_property
     def plot(self):
         '''
-        Make plots of the data in the CAS table
+        Plot the data in the table
 
         This method requires all of the data in the CAS table to be
         fetched to the **client side**.  The data is then plotted using
@@ -6960,7 +6960,7 @@ class CASTable(ParamManager, ActionParamManager):
     def info(self, verbose=None, buf=None, max_cols=None,
              memory_usage=None, null_counts=None):
         '''
-        Print summary of :class:`CASTable` information
+        Print summary of CASTable information
 
         Parameters
         ----------
@@ -7028,7 +7028,7 @@ class CASTable(ParamManager, ActionParamManager):
     def to_frame(self, sample_pct=None, sample_seed=None, sample=False,
                  stratify_by=None, **kwargs):
         '''
-        Retrieve entire table as a :class:`SASDataFrame`
+        Retrieve entire table as a SASDataFrame
 
         Parameters
         ----------
@@ -7080,7 +7080,7 @@ class CASTable(ParamManager, ActionParamManager):
 
     def to_xarray(self, *args, **kwargs):
         '''
-        Return an :func:`numpy.xarray` from the CAS table
+        Represent table data as a numpy.xarray
 
         This method creates an object on the **client side**.  This means
         that **all of the data in the table must all be fetched**.
@@ -7103,7 +7103,7 @@ class CASTable(ParamManager, ActionParamManager):
 
     def to_pickle(self, *args, **kwargs):
         '''
-        Pickle (serialize) the CAS table data
+        Pickle (serialize) the table data
 
         This method writes a file on the **client side**.  This means
         that **all of the data in the table must all be fetched**.
@@ -7126,7 +7126,7 @@ class CASTable(ParamManager, ActionParamManager):
 
     def to_csv(self, *args, **kwargs):
         '''
-        Write CAS table data to comma separated values (CSV)
+        Write table data to comma-separated values (CSV)
 
         This method writes a file on the **client side**.  This means
         that **all of the data in the table must all be fetched**.
@@ -7149,7 +7149,7 @@ class CASTable(ParamManager, ActionParamManager):
 
     def to_hdf(self, *args, **kwargs):
         '''
-        Write CAS table data to HDF
+        Write table data to HDF
 
         This method writes a file on the **client side**.  This means
         that **all of the data in the table must all be fetched**.
@@ -7172,7 +7172,7 @@ class CASTable(ParamManager, ActionParamManager):
 
     def to_sql(self, *args, **kwargs):
         '''
-        Write CAS table records to SQL database
+        Write table records to SQL database
 
         This method depends on data on the **client side**.  This means
         that **all of the data in the table must all be fetched**.
@@ -7195,7 +7195,7 @@ class CASTable(ParamManager, ActionParamManager):
 
     def to_dict(self, *args, **kwargs):
         '''
-        Convert CAS table data to a Python dictionary
+        Convert table data to a Python dictionary
 
         This method writes an object on the **client side**.  This means
         that **all of the data in the table must all be fetched**.
@@ -7222,7 +7222,7 @@ class CASTable(ParamManager, ActionParamManager):
 
     def to_excel(self, *args, **kwargs):
         '''
-        Write CAS table data to an Excel spreadsheet
+        Write table data to an Excel spreadsheet
 
         This method writes a file on the **client side**.  This means
         that **all of the data in the table must all be fetched**.
@@ -7245,7 +7245,7 @@ class CASTable(ParamManager, ActionParamManager):
 
     def to_json(self, *args, **kwargs):
         '''
-        Convert the CAS table data to a JSON string
+        Convert the table data to a JSON string
 
         This method writes a file on the **client side**.  This means
         that **all of the data in the table must all be fetched**.
@@ -7268,7 +7268,7 @@ class CASTable(ParamManager, ActionParamManager):
 
     def to_html(self, *args, **kwargs):
         '''
-        Render the CAS table data to an HTML table
+        Render the table data to an HTML table
 
         This method writes a file on the **client side**.  This means
         that **all of the data in the table must all be fetched**.
@@ -7291,7 +7291,7 @@ class CASTable(ParamManager, ActionParamManager):
 
     def to_latex(self, *args, **kwargs):
         '''
-        Render the CAS table data to a LaTeX tabular environment
+        Render the table data to a LaTeX tabular environment
 
         This method writes a file on the **client side**.  This means
         that **all of the data in the table must all be fetched**.
@@ -7314,7 +7314,7 @@ class CASTable(ParamManager, ActionParamManager):
 
     def to_stata(self, *args, **kwargs):
         '''
-        Write CAS table data to Stata file
+        Write table data to Stata file
 
         This method writes a file on the **client side**.  This means
         that **all of the data in the table must all be fetched**.
@@ -7337,7 +7337,7 @@ class CASTable(ParamManager, ActionParamManager):
 
     def to_msgpack(self, *args, **kwargs):
         '''
-        Write CAS table data to msgpack object
+        Write table data to msgpack object
 
         This method writes a file on the **client side**.  This means
         that **all of the data in the table must all be fetched**.
@@ -7360,7 +7360,7 @@ class CASTable(ParamManager, ActionParamManager):
 
     def to_gbq(self, *args, **kwargs):
         '''
-        Write CAS table data to a Google BigQuery table
+        Write table data to a Google BigQuery table
 
         This method depends on data on the **client side**.  This means
         that **all of the data in the table must all be fetched**.
@@ -7383,7 +7383,7 @@ class CASTable(ParamManager, ActionParamManager):
 
     def to_records(self, *args, **kwargs):
         '''
-        Convert CAS table data to record array
+        Convert table data to record array
 
         This method writes objects on the **client side**.  This means
         that **all of the data in the table must all be fetched**.
@@ -7410,7 +7410,7 @@ class CASTable(ParamManager, ActionParamManager):
 
     def to_sparse(self, *args, **kwargs):
         '''
-        Convert CAS table data to SparseDataFrame
+        Convert table data to SparseDataFrame
 
         This method writes an object on the **client side**.  This means
         that **all of the data in the table must all be fetched**.
@@ -7437,7 +7437,7 @@ class CASTable(ParamManager, ActionParamManager):
 
     def to_dense(self, *args, **kwargs):
         '''
-        Return dense representation of CAS table data
+        Return dense representation of table data
 
         This method writes an object on the **client side**.  This means
         that **all of the data in the table must all be fetched**.
@@ -7464,7 +7464,7 @@ class CASTable(ParamManager, ActionParamManager):
 
     def to_string(self, *args, **kwargs):
         '''
-        Render the CAS table to a console-friendly tabular output
+        Render the table to a console-friendly tabular output
 
         This method writes a string on the **client side**.  This means
         that **all of the data in the table must all be fetched**.
@@ -7491,7 +7491,7 @@ class CASTable(ParamManager, ActionParamManager):
 
     def to_clipboard(self, *args, **kwargs):
         '''
-        Write the CAS table data to the clipboard
+        Write the table data to the clipboard
 
         This method writes the clipboard on the **client side**.  This means
         that **all of the data in the table must all be fetched**.
@@ -7742,7 +7742,7 @@ class CASTable(ParamManager, ActionParamManager):
         return out
 
     def has_groupby_vars(self):
-        ''' Does the table have By group variables configured? '''
+        ''' Return True if the table has By group variables configured '''
         return self.has_param('groupby') and self.get_param('groupby')
 
 
@@ -9202,7 +9202,7 @@ class CASColumn(CASTable):
                               bygroup_as_index=bygroup_as_index)[self.name]
 
     def nth(self, n, dropna=False, bygroup_as_index=True, casout=None):
-        ''' Return the nth row '''
+        ''' Return the `n`th row '''
         if self._use_casout_for_stat(casout):
             return self._get_casout_slice(n, columns=True, ascending=True,
                                           casout=casout, start=n)
