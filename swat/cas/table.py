@@ -126,7 +126,7 @@ def _get_unique(seq, lowercase=False):
     Parameters
     ----------
     lowercase : boolean
-        Should values be compared in a case-insensitive way?
+        If true, compare elements in a case-insensitive way
 
     Returns
     -------
@@ -301,8 +301,7 @@ def merge(left, right, how='inner', on=None, left_on=None, right_on=None,
     copy : boolean, optional
         Not supported.
     indicator : boolean or string, optional
-        Should a column be created that indicates which table the
-        key came from?  If True, a column named '_merge' will be
+        If True, a column named '_merge' will be
         created with the values: 'left_only', 'right_only', or
         'both'.  If False, no column is created.  If a string is
         specified, a column is created using that name containing
@@ -2659,7 +2658,7 @@ class CASTable(ParamManager, ActionParamManager):
         exclude : list-of-strings, optional
             List of data type names to exclude from result
         inplace : boolean, optional
-            Should the table be modified in place?
+            If True, the table is modified in place
 
         Notes
         -----
@@ -2733,7 +2732,7 @@ class CASTable(ParamManager, ActionParamManager):
         Parameters
         ----------
         deep : boolean, optional
-            Should all list / dict-type objects be deep copied?
+            If True, all lists and dict-type objects are deep copied
         exclude : list-of-strings, optional
             Parameters that should be excluded (top-level only).
 
@@ -2784,7 +2783,7 @@ class CASTable(ParamManager, ActionParamManager):
         columns : list-of-strings, optional
             A subset of columns to return.
         bygroup_as_index : boolean
-            If By groups are specified, should they be converted to an index?
+            When By groups are specified, if bygroup_as_index is True, By groups are converted to an index
 
         Notes
         -----
@@ -2813,7 +2812,7 @@ class CASTable(ParamManager, ActionParamManager):
         columns : list-of-strings, optional
             A subset of columns to return.
         bygroup_as_index : boolean
-            If By groups are specified, should they be converted to an index?
+            When By groups are specified, if bygroup_as_index is True, By groups are converted to an index
 
         Notes
         -----
@@ -2846,7 +2845,7 @@ class CASTable(ParamManager, ActionParamManager):
         columns : list-of-strings, optional
             A subset of columns to return.
         bygroup_as_index : boolean
-            If By groups are specified, should they be converted to an index?
+            When By groups are specified, if bygroup_as_index is True, By groups are converted to an index
 
         Notes
         -----
@@ -3425,7 +3424,7 @@ class CASTable(ParamManager, ActionParamManager):
         casout : dict, optional
             The CAS output table definition
         inplace : bool, optional
-            Should the output table be overwritten?
+            If True, the output table is overwritten
             NOTE: If `prefix` or `suffix` are used, this option is only
                   used to determine the table's base name.
         prefix : string, optional
@@ -4332,11 +4331,11 @@ class CASTable(ParamManager, ActionParamManager):
         axis : int, optional
             Unsupported
         skipna : bool, optional
-            Should missing values be dropped?
+            If True, missing values are dropped
         level : int, optional
             Unsupported
         numeric_only : bool, optional
-            Should just the numeric variables be used?
+            If True, just the numeric variables will be used
         percentile_values : list-of-floats, optional
             The list of percentiles to compute
 
@@ -4523,8 +4522,8 @@ class CASTable(ParamManager, ActionParamManager):
         table : CASTable
             Percentile output table
         single : bool, optional
-            Is this a single quantile computation?  If so, the quantile column
-            is dropped.
+            If True, this is a single quantile computation and the quantile column
+            is dropped
 
         Returns
         -------
@@ -4992,11 +4991,11 @@ class CASTable(ParamManager, ActionParamManager):
         columns : string or list-of-strings, optional
             Names of the columns to sort by
         ascending : bool, optional
-            Should the sort order be ascending or descending?
+            If True, the sort order is ascending
         casout : bool or string or CASTable or dict, optional
             The CAS output table specification
         single : bool, optional
-            Should `n` be interpretted as a range or single value?
+            If True, `n` is interpretted as a single value
 
         Returns
         -------
@@ -5889,8 +5888,8 @@ class CASTable(ParamManager, ActionParamManager):
         subset : list-of-strings, optional
             Not supported
         inplace : boolean, optional
-            Should the table be modified in place, or should a new
-            table be created?
+            If True, the table modified in place. If False, a new
+            table is created.
 
         Returns
         -------
@@ -5938,8 +5937,8 @@ class CASTable(ParamManager, ActionParamManager):
         axis : int or string, optional
             Not supported.   The axis is always 'columns'.
         inplace : boolean, optional
-            Should the data be modified in-place, or should a new table
-            be created?
+            If True, the data is modified in place. If False, a new table
+            be created.
         limit : int, optional
             Not supported
         downcast : dict, optional
@@ -6007,7 +6006,7 @@ class CASTable(ParamManager, ActionParamManager):
             Values to use as replacements.  If a dict is specified, it takes
             the same form as a dictionary in the `to_replace=` parameter.
         inplace : boolean, optional
-            Should the table be modified in-place, or should a new table be created?
+            If True, the table is modified in-place. If False, a new table is created.
         limit : int, optional
             Not supported
         regex : boolean or same types as `to_replace`, optional
@@ -6236,7 +6235,7 @@ class CASTable(ParamManager, ActionParamManager):
         code : string or list-of-strings
             The date step code to apply
         inplace : boolean, optional
-            Should the table be modified in-place?
+            If True, the table is modified in place
         casout : dict, optional
             The output table specification
         prefix : string, optional
@@ -6485,8 +6484,7 @@ class CASTable(ParamManager, ActionParamManager):
         copy : boolean, optional
             Not supported.
         indicator : boolean or string, optional
-            Should a column be created that indicates which table the
-            key came from?  If True, a column named '_merge' will be
+            If True, a column named '_merge' will be
             created with the values: 'left_only', 'right_only', or
             'both'.  If False, no column is created.  If a string is
             specified, a column is created using that name containing
@@ -6547,7 +6545,7 @@ class CASTable(ParamManager, ActionParamManager):
         Parameters
         ----------
         grouped : bool, optional
-            Should the output DataFrame be returned as By groups?
+            If True, the output DataFrame is returned as By groups.
         sample_pct : int, optional
             Percentage of original data set to return as samples
         sample_seed : int, optional
@@ -6965,15 +6963,15 @@ class CASTable(ParamManager, ActionParamManager):
         Parameters
         ----------
         verbose : boolean, optional
-            Should the full summary be printed?
+            If True, the full summary is printed
         buf : writeable file-like object
             Where the summary is printed to.
         max_cols : int, optional
             The maximum number of columns to include in the summary.
         memory_usage : boolean, optional
-            Should the memory usage be displayed?
+            If True, the memory usage is displayed
         null_counts : boolean, optional
-            Should missing values be displayed?
+            If True, missing values will be displayed
 
         See Also
         --------
@@ -7648,9 +7646,9 @@ class CASTable(ParamManager, ActionParamManager):
         level : int, optional
             Not implemented.
         as_index : boolean, optional
-            Should the grouping variables be set as index levels?
+            If True, the grouping variables are set as index levels
         sort : boolean, optional
-            Should output be sorted by group keys?
+            If True, output will be sorted by group keys.
         squeeze : boolean, optional
             Not implemented.
 
@@ -7798,20 +7796,20 @@ class CharacterColumnMethods(object):
 
     def contains(self, pat, case=True, flags=0, na=np.nan, regex=True):
         '''
-        Does the value contain the specified pattern?
+        Indicates wheter the value contains the specified pattern.
 
         Parameters
         ----------
         pat : string or :class:`CASColumn`
             The pattern to search for.
         case : boolean, optional
-            Should pattern matching be case-sensitive?
+            If True, the pattern matching is case-sensitive.
         flags : int, optional
             Regular expression matching flags.
         na : string, optional
             Not implemented.
         regex : boolean, optional
-            Should the pattern be treated as a regular expression?
+            If True, the pattern is treated as a regular expression
 
         See Also
         --------
@@ -7865,20 +7863,20 @@ class CharacterColumnMethods(object):
 
     def endswith(self, pat, case=True, flags=0, na=np.nan, regex=True):
         '''
-        Does the table column end with the given pattern?
+        Indicates whether the table column ends with the given pattern.
 
         Parameters
         ----------
         pat : string or :class:`CASColumn`
             The string to search for.
         case : boolean, optional
-            Should the pattern matching be case-sensitive?
+            If True, the pattern matching is case-sensitive.
         flags : int, optional
             Regular expression flags.
         na : string, optional
             Not implemented.
         regex : boolean, optional
-            Should the pattern be considered a regular expression?
+            If True, the pattern is considered a regular expression.
 
         See Also
         --------
@@ -8047,7 +8045,7 @@ class CharacterColumnMethods(object):
         n : int, optional
             The maximum number of replacements.
         case : boolean, optional
-            Should the pattern matching be case-insensitive?
+            If True, the pattern matching is case-sensitive.
         flags : int, optional
             Regular expression flags.
 
@@ -8176,20 +8174,20 @@ class CharacterColumnMethods(object):
 
     def startswith(self, pat, case=True, flags=0, na=np.nan, regex=True):
         '''
-        Does the table column start with the given pattern?
+        Indicates wheter the table column start with the given pattern.
 
         Parameters
         ----------
         pat : string or :class:`CASColumn`
             The pattern to search for.
         case : boolean, optional
-            Should the matching be case-sensitive?
+            If True, the matching is case-sensitive.
         flags : int, optional
             Regular expression flags.
         na : string, optional
             Not implemented.
         regex : boolean, optional
-            Is the pattern a regular expression?
+            If True, the pattern is considered a regular expression.
 
         See Also
         --------
@@ -8253,7 +8251,7 @@ class CharacterColumnMethods(object):
 
     def isalnum(self):
         '''
-        Does the value contain only alphanumeric characters?
+        Indicates whether the value contains only alphanumeric characters.
 
         See Also
         --------
@@ -8268,7 +8266,7 @@ class CharacterColumnMethods(object):
 
     def isalpha(self):
         '''
-        Does the value contain only alpha characters?
+        Indicates whether the value contains only alpha characters.
 
         See Also
         --------
@@ -8283,7 +8281,7 @@ class CharacterColumnMethods(object):
 
     def isdigit(self):
         '''
-        Does the value contain only digits?
+        Indicates wheter the value contains only digits.
 
         See Also
         --------
@@ -8298,7 +8296,7 @@ class CharacterColumnMethods(object):
 
     def isspace(self):
         '''
-        Does the value contain only whitespace?
+        Indicates whether the value contains only whitespace.
 
         See Also
         --------
@@ -8313,7 +8311,7 @@ class CharacterColumnMethods(object):
 
     def islower(self):
         '''
-        Does the value contain only lowercase characters?
+        Indicates whether the value contain only lowercase characters?
 
         See Also
         --------
@@ -8328,7 +8326,7 @@ class CharacterColumnMethods(object):
 
     def isupper(self):
         '''
-        Does the value contain only uppercase characters?
+        Does the value contains only uppercase characters.
 
         See Also
         --------
@@ -8343,7 +8341,7 @@ class CharacterColumnMethods(object):
 
     def istitle(self):
         '''
-        Is the value equivalent to the title representation?
+        Indicates whether the value is equivalent to the title representation.
 
         See Also
         --------
@@ -8358,7 +8356,7 @@ class CharacterColumnMethods(object):
 
     def isnumeric(self):
         '''
-        Does the value contain a numeric representation?
+        Indicates whether the value contains a numeric representation.
 
         See Also
         --------
@@ -8373,7 +8371,7 @@ class CharacterColumnMethods(object):
 
     def isdecimal(self):
         '''
-        Does the value contain a decimal representation?
+        Indicates whether the value contains a decimal representation.
 
         See Also
         --------
@@ -9132,9 +9130,9 @@ class CASColumn(CASTable):
         axis : int, optional
             Not implemented.
         ascending : boolean, optional
-            Should the sort order be ascending?
+            If True, the order sort is ascending. If False, order sort is descending.
         inplace : boolean, optional
-            Should the :class:`CASColumn` be modified in place?
+            If True, the :class:`CASColumn` is modified in place.
         kind : string, optional
             Not implemented.
         na_position : string, optional
@@ -9473,8 +9471,8 @@ class CASColumn(CASTable):
         dtype : string, optional
             The output data type for the computed value
         eval_values : boolean, optional
-            Should the values of CASColumn / Series values be evaluated
-            before being substituted?
+            If True, the values of CASColumn / Series will be evaluated
+            before being substituted
 
         Returns
         -------
