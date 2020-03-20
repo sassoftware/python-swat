@@ -9604,7 +9604,7 @@ class CASColumn(CASTable):
         return col._numrows == numrows
 
     def any(self, axis=None, bool_only=None, skipna=None, level=None, **kwargs):
-        ''' Return whether any elements are True '''
+        ''' Return True for each column with one or more element treated as True '''
         col = self.copy()
         if self._is_character():
             col.append_where('lengthn(%s) ^= 0' % _nlit(col.name))
