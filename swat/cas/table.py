@@ -2783,7 +2783,7 @@ class CASTable(ParamManager, ActionParamManager):
         columns : list-of-strings, optional
             A subset of columns to return.
         bygroup_as_index : boolean
-            When By groups are specified, if bygroup_as_index is True, By groups are converted to an index
+            When by_group_index is True, By groups are converted to an index if they exist
 
         Notes
         -----
@@ -2812,8 +2812,8 @@ class CASTable(ParamManager, ActionParamManager):
         columns : list-of-strings, optional
             A subset of columns to return.
         bygroup_as_index : boolean
-            When By groups are specified, if bygroup_as_index is True, By groups are converted to an index
-
+            When by_group_index is True, By groups are converted to an index if they exist
+            
         Notes
         -----
         Since CAS tables can be distributed across a grid of computers,
@@ -2845,8 +2845,8 @@ class CASTable(ParamManager, ActionParamManager):
         columns : list-of-strings, optional
             A subset of columns to return.
         bygroup_as_index : boolean
-            When By groups are specified, if bygroup_as_index is True, By groups are converted to an index
-
+            When by_group_index is True, By groups are converted to an index if they exist
+            
         Notes
         -----
         Since CAS tables can be distributed across a grid of computers,
@@ -3424,7 +3424,7 @@ class CASTable(ParamManager, ActionParamManager):
         casout : dict, optional
             The CAS output table definition
         inplace : bool, optional
-            If True, the output table is overwritten
+            If True, the output table is overwritten if it exists
             NOTE: If `prefix` or `suffix` are used, this option is only
                   used to determine the table's base name.
         prefix : string, optional
@@ -3505,7 +3505,7 @@ class CASTable(ParamManager, ActionParamManager):
 
     def all(self, axis=None, bool_only=None, skipna=True, level=None, **kwargs):
         '''
-        Return True for each column with only True elements
+        Return True for each column with only elements that evaluate to True
 
         Parameters
         ----------
@@ -7796,7 +7796,7 @@ class CharacterColumnMethods(object):
 
     def contains(self, pat, case=True, flags=0, na=np.nan, regex=True):
         '''
-        Indicates wheter the value contains the specified pattern.
+        Indicates whether the value contains the specified pattern
 
         Parameters
         ----------
@@ -7863,7 +7863,7 @@ class CharacterColumnMethods(object):
 
     def endswith(self, pat, case=True, flags=0, na=np.nan, regex=True):
         '''
-        Indicates whether the table column ends with the given pattern.
+        Indicates whether the table column ends with the given pattern
 
         Parameters
         ----------
@@ -8174,7 +8174,7 @@ class CharacterColumnMethods(object):
 
     def startswith(self, pat, case=True, flags=0, na=np.nan, regex=True):
         '''
-        Indicates wheter the table column start with the given pattern.
+        Indicates whether the table column start with the given pattern
 
         Parameters
         ----------
@@ -8251,7 +8251,7 @@ class CharacterColumnMethods(object):
 
     def isalnum(self):
         '''
-        Indicates whether the value contains only alphanumeric characters.
+        Indicates whether the value contains only alphanumeric characters
 
         See Also
         --------
@@ -8266,7 +8266,7 @@ class CharacterColumnMethods(object):
 
     def isalpha(self):
         '''
-        Indicates whether the value contains only alpha characters.
+        Indicates whether the value contains only alpha characters
 
         See Also
         --------
@@ -8281,7 +8281,7 @@ class CharacterColumnMethods(object):
 
     def isdigit(self):
         '''
-        Indicates wheter the value contains only digits.
+        Indicates whether the value contains only digits
 
         See Also
         --------
@@ -8296,7 +8296,7 @@ class CharacterColumnMethods(object):
 
     def isspace(self):
         '''
-        Indicates whether the value contains only whitespace.
+        Indicates whether the value contains only whitespace
 
         See Also
         --------
@@ -8311,7 +8311,7 @@ class CharacterColumnMethods(object):
 
     def islower(self):
         '''
-        Indicates whether the value contain only lowercase characters?
+        Indicates whether the value contain only lowercase characters
 
         See Also
         --------
@@ -8326,7 +8326,7 @@ class CharacterColumnMethods(object):
 
     def isupper(self):
         '''
-        Does the value contains only uppercase characters.
+        Indicates whether the value contains only uppercase characters
 
         See Also
         --------
@@ -8341,7 +8341,7 @@ class CharacterColumnMethods(object):
 
     def istitle(self):
         '''
-        Indicates whether the value is equivalent to the title representation.
+        Indicates whether the value is equivalent to the title representation
 
         See Also
         --------
@@ -8356,7 +8356,7 @@ class CharacterColumnMethods(object):
 
     def isnumeric(self):
         '''
-        Indicates whether the value contains a numeric representation.
+        Indicates whether the value contains a numeric representation
 
         See Also
         --------
@@ -8371,7 +8371,7 @@ class CharacterColumnMethods(object):
 
     def isdecimal(self):
         '''
-        Indicates whether the value contains a decimal representation.
+        Indicates whether the value contains a decimal representation
 
         See Also
         --------
