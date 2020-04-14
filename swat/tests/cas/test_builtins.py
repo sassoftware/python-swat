@@ -143,7 +143,7 @@ class TestBuiltins(tm.TestCase):
             # we don't have proper credentials for addnode, .etc
             self.assertIn( r.status, ['Error parsing action parameters.',
                            "Authorization",
-                           "Nodes cannot be added when the server is running in SMP mode."] )
+                           "Nodes cannot be added when the server is running with in SMP mode."] )
 
         r = self.s.addnode(salt='controller', node=['pepper'])
         self.assertContainsMessage(r, "ERROR: The action stopped due to errors.")
