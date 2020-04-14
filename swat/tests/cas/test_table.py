@@ -478,6 +478,9 @@ class TestCASTable(tm.TestCase):
 
         srcLib = self.srcLib
         out = self.s.loadactionset(actionset='actionTest')
+        if out.severity != 0:
+            self.skipTest("actionTest failed to load")
+
         out = self.s.alltypes(casout=dict(caslib=srcLib, name='typestable'))
 
         tbl = self.s.CASTable('typestable', caslib=srcLib)
@@ -508,6 +511,9 @@ class TestCASTable(tm.TestCase):
 
         srcLib = self.srcLib
         out = self.s.loadactionset(actionset='actionTest')
+        if out.severity != 0:
+            self.skipTest("actionTest failed to load")
+
         out = self.s.alltypes(casout=dict(caslib=srcLib, name='typestable'))
 
         tbl = self.s.CASTable('typestable', caslib=srcLib)
@@ -552,6 +558,9 @@ class TestCASTable(tm.TestCase):
     def test_select_dtypes(self):
         srcLib = self.srcLib
         out = self.s.loadactionset(actionset='actionTest')
+        if out.severity != 0:
+            self.skipTest("actionTest failed to load")
+
         out = self.s.alltypes(casout=dict(caslib=srcLib, name='typestable'))
 
         tbl = self.s.CASTable('typestable', caslib=srcLib)

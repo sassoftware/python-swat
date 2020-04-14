@@ -835,7 +835,7 @@ class TestByGroups(tm.TestCase):
 
         tblgrp = tbl['EngineSize'].groupby('Origin', as_index=False).median()
         self.assertEqual(tblgrp.__class__.__name__, 'CASTable')
-        self.assertTablesEqual(dfgrp.reset_index(), tblgrp, sortby=None)
+        self.assertTablesEqual(dfgrp.reset_index(), tblgrp, sortby=['Origin'])
 
     @unittest.skipIf(sys.version_info.major < 3, 'Need newer version of Python')
     def test_median(self):
@@ -858,7 +858,7 @@ class TestByGroups(tm.TestCase):
         dfgrp = df.groupby('Origin', as_index=False).median()
         tblgrp = tbl.groupby('Origin', as_index=False).median()
         self.assertEqual(tblgrp.__class__.__name__, 'CASTable')
-        self.assertTablesEqual(dfgrp, tblgrp, sortby=None)
+        self.assertTablesEqual(dfgrp, tblgrp, sortby=['Origin'])
 
     @unittest.skipIf(pd_version < (0, 16, 0), 'Need newer version of Pandas')
     def test_column_mode(self):
@@ -932,7 +932,7 @@ class TestByGroups(tm.TestCase):
 
         tblgrp = tbl['EngineSize'].groupby('Origin', as_index=False).quantile()
         self.assertEqual(tblgrp.__class__.__name__, 'CASTable')
-        self.assertTablesEqual(dfgrp.reset_index(), tblgrp, sortby=None)
+        self.assertTablesEqual(dfgrp.reset_index(), tblgrp, sortby=['Origin'])
 
     @unittest.skipIf(sys.version_info.major < 3, 'Need newer version of Python')
     def test_quantile(self):
@@ -966,7 +966,7 @@ class TestByGroups(tm.TestCase):
         except: pass
         tblgrp = tblgrp.drop('Origin', axis=1)
         self.assertEqual(tblgrp.__class__.__name__, 'CASTable')
-        self.assertTablesEqual(dfgrp, tblgrp, sortby=None)
+        self.assertTablesEqual(dfgrp, tblgrp, sortby=['EngineSize'])
 
     def test_column_sum(self):
         df = self.get_cars_df().sort_values(SORT_KEYS)
