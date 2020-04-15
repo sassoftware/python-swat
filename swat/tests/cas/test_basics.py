@@ -243,6 +243,9 @@ class TestBasics(tm.TestCase):
     def test_alltypes(self):
         srcLib = tm.get_casout_lib(self.server_type)
         out = self.s.loadactionset(actionset='actionTest')
+        if out.severity != 0:
+            self.skipTest("actionTest failed to load")
+
         out = self.s.alltypes(casout=dict(caslib=srcLib, name='typestable'))
         out = self.s.fetch(table=self.s.CASTable('typestable', caslib=srcLib), sastypes=False)
 
@@ -331,6 +334,10 @@ class TestBasics(tm.TestCase):
         self.s.droptable(caslib=self.srcLib, table=tablename)
 
     def test_multiple_connection_retrieval(self):
+        out = self.s.loadactionset(actionset='actionTest')
+        if out.severity != 0:
+            self.skipTest("actionTest failed to load")
+
         f = self.s.fork(3)
 
         self.assertEqual(len(f), 3)
@@ -476,85 +483,6 @@ class TestBasics(tm.TestCase):
         self.assertEqual(out.attrs['Action'], 'summary')
         self.assertEqual(out.attrs['Actionset'], 'simple')
         self.assertNotEqual(out.attrs['CreateTime'], 0)
-        
-    def test_epdf_server_options_are_hidden(self):
-        # Verify datafeeder options are hidden
-        
-        # Hidden arguments are not visible in optimized images even when showHidden=True;
-        box = os.environ.get('SDSBOX', 'LAXNO').upper()
-        if (box == 'LAXNO' ) | (box == 'LAXDO') | (box == 'WX6NO') | (box == 'WX6DO'):
-            # Do nothing in an optimized image
-            return
-
-        # Load the Server Properties actionSet that contains the datafeeder options
-        r = self.s.builtins.loadactionset(actionset='configuration')
-        if r.severity != 0:
-            self.pp.pprint(r.messages)
-            self.assertEquals( r.status, None )
-
-        # List the actionSet and include all hidden actions. 
-        # The setServOpt is supposed to be hidden but get and list are not. 
-        out = self.s.builtins.help(actionSet='configuration', showHidden=True)
-        cfg = out['configuration']
-        self.assertTrue(cfg is not None)
-        self.assertEqual(len(cfg.columns), 2)
-        self.assertGreaterEqual(len(cfg), 3)
-        self.assertEqual(cfg.columns[0], 'name')
-        self.assertEqual(cfg.columns[1], 'description')
-        item = cfg.iloc[0].tolist()
-        self.assertTrue(item == ['setServOpt','sets a server option'] or
-                        item == ['setServOpts','sets a server option'])
-        self.assertEqual(cfg.iloc[1].tolist(),
-                         ['getServOpt','displays the value of a server option'])
-        self.assertEqual(cfg.iloc[2].tolist(),
-                         ['listServOpts','Displays the server options and server values'])
-        
-        # List a hidden action 
-        act = self.s.builtins.help(action='setServOpt', showHidden=True)
-        has_set_serv_opts = False
-        if not act:
-            act = self.s.builtins.help(action='setServOpts', showHidden=True)
-            self.assertTrue(act is not None)
-            self.assertTrue(act['setServOpts'])
-            has_set_serv_opts = True
-        else:
-            self.assertTrue(act is not None)
-            self.assertTrue(act['setServOpt'])
-        
-        # 03/09/2016: bosout: Didn't expect hidden action to be returned. Developers notified.
-        # Comment out until we know what to expect.
-        #
-        # Try to list a hidden action when hidden ones are not supposed to be shown
-        act = self.s.builtins.help(action='setServOpt', showHidden=False)
-        #self.assertTrue(act is None) 
-            
-        # Expect non-hidden actions to be returned       
-        act = self.s.builtins.help(action='getServOpt', showHidden=False)
-        self.assertTrue(act is not None)
-        self.assertTrue(act['getServOpt'])
-        
-        act = self.s.builtins.help(action='listServOpts', showHidden=False)
-        self.assertTrue(act is not None)
-        self.assertTrue(act['listServOpts'])         
-        
-        # See if we can set a hidden datafeeder option
-        if has_set_serv_opts:
-            out = self.s.configuration.setServOpts(epdfsslusesni="NO")
-            self.assertEqual( out.status, "Error parsing action parameters." )
-        else:
-            with self.assertRaises(AttributeError):
-                self.s.configuration.setServOpts(epdfsslusesni="NO")
-        
-        # See if we can get a hidden datafeeder option
-        with self.assertRaises(AttributeError):
-            self.s.configuration.getServOpts(name='epdfsslusesni')
-        
-        # See if hidden datafeeder options appear in the option list. 
-        opts = self.s.configuration.listServOpts()
-        self.assertTrue(opts is not None)                      
-        
-        # Verify the datafeeder options don't appear since they are hidden
-        self.assertFalse('NOTE:    int32 nThreads=0 (0 <= value <= 64),' in opts.messages)
 
 
 if __name__ == '__main__':

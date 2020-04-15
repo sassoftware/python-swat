@@ -239,6 +239,9 @@ class TestUnicode(tm.TestCase):
     def test_alltypes(self):         
         srcLib = tm.get_casout_lib(self.server_type)
         out = self.s.loadactionset(actionset='actionTest')
+        if out.severity != 0:
+            self.skipTest("actionTest failed to load")
+
         out = self.s.alltypes(casout=dict(caslib=srcLib, name='typestable'))
         out = self.s.fetch(table=self.s.CASTable('typestable', caslib=srcLib), sastypes=False)
 

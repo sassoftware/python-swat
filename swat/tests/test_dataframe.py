@@ -129,6 +129,9 @@ class TestDataFrame(tm.TestCase):
         srcLib = tm.get_casout_lib(self.server_type)
 
         out = self.s.loadactionset(actionset='actionTest')
+        if out.severity != 0:
+            self.skipTest("actionTest failed to load")
+
         out = self.s.alltypes(casout=dict(caslib=srcLib, name='typestable'))
         out = self.s.fetch(table=self.s.CASTable('typestable', caslib=srcLib), sastypes=False)
 
@@ -265,10 +268,10 @@ class TestDataFrame(tm.TestCase):
         headers = [x.string for x in htbl.thead.find_all('th')]
         self.assertEqual(headers, thstr)
 
-        index = [x.string for x in htbl.tbody.find_all('th')]
+        index = [x.string for x in htbl.tbody.find_all('tr')]
         data = [x.string for x in htbl.tbody.find_all('td')]
         self.assertEqual(len(index), 20)
-        self.assertEqual(len(data), 300)
+        self.assertTrue( (len(data)==300) | (len(data)==320) )
 
         self.assertFalse(re.search(r'\d+ rows x \d+ columns', html))
 
@@ -285,10 +288,10 @@ class TestDataFrame(tm.TestCase):
         headers = [x.string for x in htbl.thead.find_all('th')]
         self.assertEqual(headers, thstr)
 
-        index = [x.string for x in htbl.tbody.find_all('th')]
+        index = [x.string for x in htbl.tbody.find_all('tr')]
         data = [x.string for x in htbl.tbody.find_all('td')]
         self.assertEqual(len(index), 20)
-        self.assertEqual(len(data), 300)
+        self.assertTrue( (len(data)==300) | (len(data)==320) )
 
         self.assertFalse(re.search(r'\d+ rows x \d+ columns', html))
 
@@ -309,10 +312,10 @@ class TestDataFrame(tm.TestCase):
         headers = [x.string for x in htbl.thead.find_all('th')]
         self.assertEqual(headers, thstr)
 
-        index = [x.string for x in htbl.tbody.find_all('th')]
+        index = [x.string for x in htbl.tbody.find_all('tr')]
         data = [x.string for x in htbl.tbody.find_all('td')]
         self.assertEqual(len(index), 5)
-        self.assertEqual(len(data), 75)
+        self.assertTrue( (len(data)==75) | (len(data)==80) )
         self.assertTrue(data.count('...'), len(out.columns))
 
         self.assertTrue(re.search(r'\d+ rows \S \d+ columns', html))
@@ -352,10 +355,10 @@ class TestDataFrame(tm.TestCase):
         headers = [x.string for x in htbl.thead.find_all('th')]
         self.assertEqual(headers, thstr)
 
-        index = [x.string for x in htbl.tbody.find_all('th')]
+        index = [x.string for x in htbl.tbody.find_all('tr')]
         data = [x.string for x in htbl.tbody.find_all('td')]
         self.assertEqual(len(index), 20)
-        self.assertEqual(len(data), 300)
+        self.assertTrue( (len(data)==300) | (len(data)==320) )
 
         self.assertFalse(re.search(r'\d+ rows x \d+ columns', html))
 
@@ -563,6 +566,9 @@ class TestDataFrame(tm.TestCase):
         srcLib = tm.get_casout_lib(self.server_type)
 
         out = self.s.loadactionset(actionset='actionTest')
+        if out.severity != 0:
+            self.skipTest("actionTest failed to load")
+
         out = self.s.alltypes(casout=dict(caslib=srcLib, name='typestable'))
         out = self.s.fetch(table=self.s.CASTable('typestable', caslib=srcLib,
                                  varlist=['Double', 'Char', 'Varchar', 'Int32',

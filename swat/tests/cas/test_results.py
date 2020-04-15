@@ -111,7 +111,7 @@ class TestCASResults(tm.TestCase):
                  'Std', 'StdErr', 'Var', 'USS', 'CSS', 'CV', 'TValue', 'ProbT'])
 
         caption = [x.string for x in htbl.find_all('caption')]
-        index = [x.string for x in htbl.tbody.find_all('th')]
+        index = [x.string for x in htbl.tbody.find_all('tr')]
         data = [x.string for x in htbl.tbody.find_all('td')]
         self.assertEqual(len(caption), 1)
         self.assertEqual(len(index), 10)

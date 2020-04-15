@@ -571,6 +571,10 @@ class TestConnection(tm.TestCase):
         self.assertTrue(s1 is not s2)
 
     def test_multiple_connection_retrieval(self):
+        out = self.s.loadactionset(actionset='actionTest')
+        if out.severity != 0:
+            self.skipTest("actionTest failed to load")
+
         f = self.s.fork(3)
 
         self.assertEqual(len(f), 3)
@@ -630,7 +634,9 @@ class TestConnection(tm.TestCase):
 
     @unittest.skip('Timeouts don\'t seem to work in the event watcher')
     def test_timeout(self):
-        self.s.loadactionset('actiontest')
+        out = self.s.loadactionset('actiontest')
+        if out.severity != 0:
+            self.skipTest("actionTest failed to load")
 
         sleep = self.s.Testsleep(duration=10000)
 
