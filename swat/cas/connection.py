@@ -55,6 +55,7 @@ from .utils.misc import super_dir, any_file_exists
 # pylint: disable=W0212
 
 RETRY_ACTION_CODE = 0x280034
+SESSION_ABORTED_CODE = 0x2D51AC
 
 
 def _option_handler(key, value):
@@ -1753,6 +1754,10 @@ class CAS(object):
 
                 if response.disposition.status_code == RETRY_ACTION_CODE:
                     raise SWATCASActionRetry(response.disposition.status)
+                elif response.disposition.status_code == SESSION_ABORTED_CODE:
+                    # Any new requests sent to the session will never return, so just close the connection now
+                    self.close()
+                    raise SWATCASActionError(response.disposition.status, response, conn)
 
                 if responsefunc is not None:
                     responsedata = responsefunc(response, conn, responsedata)
