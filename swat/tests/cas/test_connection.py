@@ -141,19 +141,19 @@ class TestConnection(tm.TestCase):
 
         self.assertTrue('builtins.loadactionset' in dirout)
         self.assertTrue('table.loadtable' in dirout)
-        self.assertTrue('elasticsearch.index' not in dirout)
-        self.assertTrue('sandindex' not in dirout)
-        self.assertTrue('elasticsearch.sandindex' not in dirout)
+        self.assertTrue('autotune.tuneall' not in dirout)
+        self.assertTrue('tunesvm' not in dirout)
+        self.assertTrue('autotune.tunesvm' not in dirout)
 
-        self.s.loadactionset('elasticsearch')
+        self.s.loadactionset('autotune')
 
         dirout = self.s.__dir__()
 
         self.assertTrue('builtins.loadactionset' in dirout)
         self.assertTrue('table.loadtable' in dirout)
-        self.assertTrue('elasticsearch.index' in dirout)
-        self.assertTrue('sandindex' in dirout)
-        self.assertTrue('elasticsearch.sandindex' in dirout)
+        self.assertTrue('autotune.tuneall' in dirout)
+        self.assertTrue('tunesvm' in dirout)
+        self.assertTrue('autotune.tunesvm' in dirout)
 
     def test_str(self):
         s = str(self.s)
