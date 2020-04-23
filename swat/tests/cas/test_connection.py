@@ -826,6 +826,19 @@ class TestConnection(tm.TestCase):
         self.assertFalse(self.s.has_actionset('unknownActionSet'))
         self.assertFalse(self.s.has_actionset('unknownactionset'))
 
+    def test_session_aborted(self):
+        from unittest import mock
+        from swat import SWATCASActionError
+        from swat.utils.testingmocks import mock_getone_session_aborted
+
+        # Mock swat.cas.connection.getone to return a response with the session aborted error
+        # Mock CAS.close so we can verify it gets called
+        with mock.patch('swat.cas.connection.getone', new=mock_getone_session_aborted), \
+             mock.patch.object(swat.CAS, 'close', autospec=True) as mock_close:
+            with self.assertRaisesRegex(SWATCASActionError, swat.utils.testingmocks.SESSION_ABORTED_MESSAGE):
+                self.s.about()
+            mock_close.assert_called_with(self.s)
+
 
 if __name__ == '__main__':
    import xmlrunner
