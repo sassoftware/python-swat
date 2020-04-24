@@ -134,7 +134,11 @@ class TestBuiltins(tm.TestCase):
         #self.assertEqual( r.debug, None )        
 
     def test_addnode(self):
-        r = self.s.addnode()
+        try:
+            r = self.s.addnode()
+        except TypeError:
+            tm.TestCase.skipTest(self, 'addnode action is not available')
+
         if r.severity == 0:
             # MPP mode
             self.assertEqual( r['Nodes'], [] )
