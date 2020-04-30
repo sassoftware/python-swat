@@ -330,12 +330,14 @@ class TestBuiltins(tm.TestCase):
         # WX6 returns an empty string for groups
         if isinstance(userInfo['groups'], list):
             self.assertTrue('users' in userInfo['groups'] or
-                            'Everyone' in userInfo['groups'])
+                            'Everyone' in userInfo['groups'] or
+                            'openid' in userInfo['groups'] or
+                            'SASAdministrators' in userInfo['groups'])
         self.assertIn(userInfo['hostAccount'], [1, False])
         self.assertEqual(userInfo['providedName'].split('\\')[-1].split('@')[0],
                          self.s._username.split('\\')[-1].split('@')[0])
         # WX6 returns 'Windows' for providerName
-        self.assertIn(userInfo['providerName'], ['Active Directory', 'Windows', 'OAuth/External PAM', 'External PAM'])
+        self.assertIn(userInfo['providerName'], ['Active Directory', 'Windows', 'OAuth/External PAM', 'External PAM', 'OAuth'])
         # WX6 returns the domain for uniqueId
         self.assertTrue(userInfo['uniqueId'], self.s._username.split('@')[0])
         self.assertTrue(userInfo['userId'], self.s._username.split('@')[0])
