@@ -18,12 +18,14 @@ PAPEROPT_letter = -D latex_paper_size=letter
 ALLSPHINXOPTS   = -d $(BUILDDIR)/doctrees $(PAPEROPT_$(PAPER)) $(SPHINXOPTS) source
 # the i18n builder cannot share the environment and doctrees with the others
 I18NSPHINXOPTS  = $(PAPEROPT_$(PAPER)) $(SPHINXOPTS) source
+SWAT_VERSION_TAG := $(shell grep __version__ ../swat/__init__.py | cut -d"'" -f2 | sed 's/-dev/\.dev0/')
 
-.PHONY: help clean html dirhtml singlehtml pickle json htmlhelp qthelp devhelp epub latex latexpdf text man changes linkcheck doctest coverage gettext
+.PHONY: help clean html tarhtml dirhtml singlehtml pickle json htmlhelp qthelp devhelp epub latex latexpdf text man changes linkcheck doctest coverage gettext
 
 help:
 	@echo "Please use \`make <target>' where <target> is one of"
 	@echo "  html       to make standalone HTML files"
+	@echo "  tarhtml    to make standalone HTML files in a tar.gz file"
 	@echo "  dirhtml    to make HTML files named index.html in directories"
 	@echo "  singlehtml to make a single large HTML file"
 	@echo "  pickle     to make pickle files"
@@ -56,6 +58,15 @@ html:
 	python post-process-sphinx-html $(BUILDDIR)/html
 	@echo
 	@echo "Build finished. The HTML pages are in $(BUILDDIR)/html."
+
+tarhtml:
+	@echo $(SWAT_VERSION_TAG)
+	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(BUILDDIR)/python-swat-$(SWAT_VERSION_TAG)-doc
+	python post-process-sphinx-html $(BUILDDIR)/python-swat-$(SWAT_VERSION_TAG)-doc
+	cd $(BUILDDIR) && tar zcvf python-swat-$(SWAT_VERSION_TAG)-doc.tar.gz python-swat-$(SWAT_VERSION_TAG)-doc
+	python check-doc-errors $(BUILDDIR)/python-swat-$(SWAT_VERSION_TAG)-doc
+	@echo
+	@echo "Build finished. The HTML pages are in $(BUILDDIR)/python-swat-$(SWAT_VERSION_TAG)-doc.tar.gz."
 
 dirhtml:
 	$(SPHINXBUILD) -b dirhtml $(ALLSPHINXOPTS) $(BUILDDIR)/dirhtml
