@@ -126,7 +126,7 @@ def _get_unique(seq, lowercase=False):
     Parameters
     ----------
     lowercase : boolean
-        If true, compare elements in a case-insensitive way
+        If True, compare elements in a case-insensitive way
 
     Returns
     -------
