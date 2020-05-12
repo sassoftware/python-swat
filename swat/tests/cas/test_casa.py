@@ -57,6 +57,9 @@ class TestCall(tm.TestCase):
 
     def test_dynamic_table_open(self):
         r = self.s.loadactionset(actionset='actionTest')
+        if r.severity != 0:
+            self.skipTest("actionTest failed to load")
+
         r = self.s.loadactionset(actionset='sessionProp')
 
         r = tm.load_data(self.s, 'datasources/cars_single.sashdat', self.server_type)
@@ -76,6 +79,9 @@ class TestCall(tm.TestCase):
 
     def test_reflect(self):
         r = self.s.loadactionset(actionset='actionTest')
+        if r.severity != 0:
+            self.skipTest("actionTest failed to load")
+
         self.assertEqual(r, {'actionset':'actionTest'})
         r = self.s.builtins.reflect(actionset="actionTest")
         self.assertEqual(r[0]['name'], 'actionTest')

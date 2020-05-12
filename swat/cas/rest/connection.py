@@ -296,6 +296,11 @@ class REST_CASConnection(object):
 
                     res = self._req_sess.get(url, data=b'')
 
+                    if 'tkhttp-id' in res.cookies:
+                        self._req_sess.headers.update({
+                            'tkhttp-id': res.cookies['tkhttp-id'].strip()
+                        })
+
                     if get_option('cas.debug.responses'):
                         _print_response(res.text)
 
@@ -324,6 +329,11 @@ class REST_CASConnection(object):
 
                     res = self._req_sess.put(url, data=b'')
 
+                    if 'tkhttp-id' in res.cookies:
+                        self._req_sess.headers.update({
+                            'tkhttp-id': res.cookies['tkhttp-id'].strip()
+                        })
+
                     if get_option('cas.debug.responses'):
                         _print_response(res.text)
 
@@ -350,6 +360,7 @@ class REST_CASConnection(object):
                                             .get('formattedStatus',
                                                  'Invalid locale: %s' % locale))
                         self._results.clear()
+
                     break
 
             except requests.ConnectionError:

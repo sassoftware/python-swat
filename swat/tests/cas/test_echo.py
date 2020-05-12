@@ -40,7 +40,9 @@ class TestEcho(tm.TestCase):
 
         self.s = swat.CAS(HOST, PORT, USER, PASSWD, protocol=PROTOCOL)
 
-        self.s.loadactionset(actionset='actionTest')
+        out = self.s.loadactionset(actionset='actionTest')
+        if out.severity != 0:
+            self.skipTest("actionTest failed to load")
 
     def tearDown(self):
         # tear down tests

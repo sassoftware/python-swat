@@ -178,12 +178,12 @@ class TestCASTable(tm.TestCase):
         self.assertTrue('session.timeout' in dirout)
         self.assertTrue('sessionid' in dirout)
         self.assertTrue('session.sessionid' in dirout)
-        self.assertTrue('elasticsearch' not in dirout)
-        self.assertTrue('elasticsearch.index' not in dirout)
-        self.assertTrue('sandindex' not in dirout)
-        self.assertTrue('elasticsearch.sandindex' not in dirout)
+        self.assertTrue('autotune' not in dirout)
+        self.assertTrue('autotune.tuneall' not in dirout)
+        self.assertTrue('tunesvm' not in dirout)
+        self.assertTrue('autotune.tunesvm' not in dirout)
 
-        self.s.loadactionset('elasticsearch')
+        self.s.loadactionset('autotune')
 
         dirout = self.table.__dir__()
 
@@ -191,9 +191,9 @@ class TestCASTable(tm.TestCase):
         self.assertTrue('session.timeout' in dirout)
         self.assertTrue('sessionid' in dirout)
         self.assertTrue('session.sessionid' in dirout)
-        self.assertTrue('elasticsearch.index' in dirout)
-        self.assertTrue('sandindex' in dirout)
-        self.assertTrue('elasticsearch.sandindex' in dirout)
+        self.assertTrue('autotune.tuneall' in dirout)
+        self.assertTrue('tunesvm' in dirout)
+        self.assertTrue('autotune.tunesvm' in dirout)
 
         # Whack connection
         self.table.set_connection(None)
@@ -478,6 +478,9 @@ class TestCASTable(tm.TestCase):
 
         srcLib = self.srcLib
         out = self.s.loadactionset(actionset='actionTest')
+        if out.severity != 0:
+            self.skipTest("actionTest failed to load")
+
         out = self.s.alltypes(casout=dict(caslib=srcLib, name='typestable'))
 
         tbl = self.s.CASTable('typestable', caslib=srcLib)
@@ -508,6 +511,9 @@ class TestCASTable(tm.TestCase):
 
         srcLib = self.srcLib
         out = self.s.loadactionset(actionset='actionTest')
+        if out.severity != 0:
+            self.skipTest("actionTest failed to load")
+
         out = self.s.alltypes(casout=dict(caslib=srcLib, name='typestable'))
 
         tbl = self.s.CASTable('typestable', caslib=srcLib)
@@ -552,6 +558,9 @@ class TestCASTable(tm.TestCase):
     def test_select_dtypes(self):
         srcLib = self.srcLib
         out = self.s.loadactionset(actionset='actionTest')
+        if out.severity != 0:
+            self.skipTest("actionTest failed to load")
+
         out = self.s.alltypes(casout=dict(caslib=srcLib, name='typestable'))
 
         tbl = self.s.CASTable('typestable', caslib=srcLib)

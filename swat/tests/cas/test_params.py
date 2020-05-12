@@ -42,7 +42,10 @@ class TestParams(tm.TestCase):
 
         self.s = swat.CAS(HOST, PORT, USER, PASSWD, protocol=PROTOCOL)
 
-        self.s.loadactionset(actionset='actionTest')
+        r = self.s.loadactionset(actionset='actionTest')
+        if r.severity != 0:
+            self.skipTest("actionTest failed to load")
+
         self.s.loadactionset(actionset='simple')
 
         server_type = tm.get_cas_host_type(self.s)

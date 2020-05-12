@@ -141,19 +141,19 @@ class TestConnection(tm.TestCase):
 
         self.assertTrue('builtins.loadactionset' in dirout)
         self.assertTrue('table.loadtable' in dirout)
-        self.assertTrue('elasticsearch.index' not in dirout)
-        self.assertTrue('sandindex' not in dirout)
-        self.assertTrue('elasticsearch.sandindex' not in dirout)
+        self.assertTrue('autotune.tuneall' not in dirout)
+        self.assertTrue('tunesvm' not in dirout)
+        self.assertTrue('autotune.tunesvm' not in dirout)
 
-        self.s.loadactionset('elasticsearch')
+        self.s.loadactionset('autotune')
 
         dirout = self.s.__dir__()
 
         self.assertTrue('builtins.loadactionset' in dirout)
         self.assertTrue('table.loadtable' in dirout)
-        self.assertTrue('elasticsearch.index' in dirout)
-        self.assertTrue('sandindex' in dirout)
-        self.assertTrue('elasticsearch.sandindex' in dirout)
+        self.assertTrue('autotune.tuneall' in dirout)
+        self.assertTrue('tunesvm' in dirout)
+        self.assertTrue('autotune.tunesvm' in dirout)
 
     def test_str(self):
         s = str(self.s)
@@ -571,6 +571,10 @@ class TestConnection(tm.TestCase):
         self.assertTrue(s1 is not s2)
 
     def test_multiple_connection_retrieval(self):
+        out = self.s.loadactionset(actionset='actionTest')
+        if out.severity != 0:
+            self.skipTest("actionTest failed to load")
+
         f = self.s.fork(3)
 
         self.assertEqual(len(f), 3)
@@ -630,7 +634,9 @@ class TestConnection(tm.TestCase):
 
     @unittest.skip('Timeouts don\'t seem to work in the event watcher')
     def test_timeout(self):
-        self.s.loadactionset('actiontest')
+        out = self.s.loadactionset('actiontest')
+        if out.severity != 0:
+            self.skipTest("actionTest failed to load")
 
         sleep = self.s.Testsleep(duration=10000)
 
@@ -819,6 +825,19 @@ class TestConnection(tm.TestCase):
 
         self.assertFalse(self.s.has_actionset('unknownActionSet'))
         self.assertFalse(self.s.has_actionset('unknownactionset'))
+
+    def test_session_aborted(self):
+        from unittest import mock
+        from swat import SWATCASActionError
+        from swat.utils.testingmocks import mock_getone_session_aborted
+
+        # Mock swat.cas.connection.getone to return a response with the session aborted error
+        # Mock CAS.close so we can verify it gets called
+        with mock.patch('swat.cas.connection.getone', new=mock_getone_session_aborted), \
+             mock.patch.object(swat.CAS, 'close', autospec=True) as mock_close:
+            with self.assertRaisesRegex(SWATCASActionError, swat.utils.testingmocks.SESSION_ABORTED_MESSAGE):
+                self.s.about()
+            mock_close.assert_called_with(self.s)
 
 
 if __name__ == '__main__':
