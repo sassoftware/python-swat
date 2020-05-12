@@ -3505,7 +3505,7 @@ class CASTable(ParamManager, ActionParamManager):
 
     def all(self, axis=None, bool_only=None, skipna=True, level=None, **kwargs):
         '''
-        Return True for each column with only elements that evaluate to True
+        Return True for each column with only elements that evaluate to true
 
         Parameters
         ----------
@@ -3554,7 +3554,7 @@ class CASTable(ParamManager, ActionParamManager):
 
     def any(self, axis=None, bool_only=None, skipna=True, level=None, **kwargs):
         '''
-        Return True for each column with at least one True element
+        Return True for each column with at least one true element
 
         Parameters
         ----------
@@ -9604,7 +9604,7 @@ class CASColumn(CASTable):
         return col._numrows == numrows
 
     def any(self, axis=None, bool_only=None, skipna=None, level=None, **kwargs):
-        ''' Return True for each column with one or more element treated as True '''
+        ''' Return True for each column with one or more element treated as true '''
         col = self.copy()
         if self._is_character():
             col.append_where('lengthn(%s) ^= 0' % _nlit(col.name))
