@@ -25,6 +25,7 @@ from __future__ import print_function, division, absolute_import, unicode_litera
 
 import copy
 import keyword
+import inspect
 import numbers
 import re
 import sys
@@ -1622,6 +1623,9 @@ class CASTable(ParamManager, ActionParamManager):
         return column
 
     def __dir__(self):
+        # Short-circuit PyCharm's introspection
+        if 'get_names' in [x.function for x in inspect.stack()]:
+            return ['params']
         try:
             conn = self.get_connection()
             return list(sorted(list(self._dir) + list(conn.get_action_names())))

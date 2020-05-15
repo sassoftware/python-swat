@@ -26,6 +26,7 @@ from __future__ import print_function, division, absolute_import, unicode_litera
 import collections
 import contextlib
 import copy
+import inspect
 import json
 import os
 import random
@@ -643,6 +644,9 @@ class CAS(object):
         return self.__getattr__(name, atype='actionset')
 
     def __dir__(self):
+        # Short-circuit PyCharm's introspection
+        if 'get_names' in [x.function for x in inspect.stack()]:
+            return list(self._dir)
         return list(sorted(list(self._dir) + list(self.get_action_names())))
 
     def __dir_actions__(self):
