@@ -337,7 +337,7 @@ class TestBuiltins(tm.TestCase):
         self.assertEqual(userInfo['providedName'].split('\\')[-1].split('@')[0],
                          self.s._username.split('\\')[-1].split('@')[0])
         # WX6 returns 'Windows' for providerName
-        self.assertIn(userInfo['providerName'], ['Active Directory', 'Windows', 'OAuth/External PAM', 'External PAM', 'OAuth'])
+        self.assertIn(userInfo['providerName'], ['Active Directory', 'Windows', 'OAuth/External PAM', 'External PAM', 'OAuth', 'OAuth/Windows'])
         # WX6 returns the domain for uniqueId
         self.assertTrue(userInfo['uniqueId'], self.s._username.split('@')[0])
         self.assertTrue(userInfo['userId'], self.s._username.split('@')[0])
