@@ -645,7 +645,7 @@ class CAS(object):
 
     def __dir__(self):
         # Short-circuit PyCharm's introspection
-        if 'get_names' in [x.function for x in inspect.stack()]:
+        if 'get_names' in [x[3] for x in inspect.stack()]:
             return list(self._dir)
         return list(sorted(list(self._dir) + list(self.get_action_names())))
 

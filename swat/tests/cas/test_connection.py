@@ -827,7 +827,11 @@ class TestConnection(tm.TestCase):
         self.assertFalse(self.s.has_actionset('unknownactionset'))
 
     def test_session_aborted(self):
-        from unittest import mock
+        try:
+            from unittest import mock
+        except ImportError:
+            self.skipTest("unittest.mock is not available")
+
         from swat import SWATCASActionError
         from swat.utils.testingmocks import mock_getone_session_aborted
 

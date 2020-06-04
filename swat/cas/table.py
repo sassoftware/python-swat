@@ -1624,7 +1624,7 @@ class CASTable(ParamManager, ActionParamManager):
 
     def __dir__(self):
         # Short-circuit PyCharm's introspection
-        if 'get_names' in [x.function for x in inspect.stack()]:
+        if 'get_names' in [x[3] for x in inspect.stack()]:
             return ['params']
         try:
             conn = self.get_connection()
