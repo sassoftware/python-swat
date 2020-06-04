@@ -91,3 +91,4 @@ from .exceptions import SWATError, SWATOptionError, SWATCASActionError    # noqa
 from .formatter import SASFormatter    # noqa: E402
 
 __version__ = '1.6.2-dev'
+__tk_version__ = None
