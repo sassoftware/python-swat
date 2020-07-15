@@ -10487,12 +10487,20 @@ class CASTableGroupBy(object):
 
     def __init__(self, table, by, axis=0, level=None, as_index=True, sort=True,
                  group_keys=True, squeeze=False, **kwargs):
-        self._table = table.copy()
-        self._table.append_groupby(by)
         if isinstance(by, items_types):
             self._by = list(by)
         else:
             self._by = [by]
+
+        new_by = []
+        for item in self._by:
+            if isinstance(item, CASColumn):
+                item = item.name
+            new_by.append(item)
+        by = new_by
+
+        self._table = table.copy()
+        self._table.append_groupby(by)
         self._sort = sort
         self._plot = CASTablePlotter(self._table)
         self._as_index = as_index

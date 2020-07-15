@@ -5220,6 +5220,13 @@ class TestCASTable(tm.TestCase):
         self.assertTrue(set(tbl2.to_params().keys()), set(['name']))
         self.assertTrue(set(tbl2.to_params().keys()), set(['name', 'replace', 'promote']))
 
+    def test_groupby_column(self):
+        head1 = self.table.groupby(['Type', 'Cylinders']).head()
+        head2 = self.table.groupby([self.table['Type'], self.table['Cylinders']]).head()
+        head3 = self.table.groupby(['Type', self.table['Cylinders']]).head()
+        self.assertTablesEqual(head1, head2)
+        self.assertTablesEqual(head2, head3)
+
 
 if __name__ == '__main__':
     tm.runtests()
