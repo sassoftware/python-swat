@@ -22,6 +22,7 @@
 #       A specific protocol ('cas', 'http', 'https', or 'auto') can be set using
 #       the CASPROTOCOL environment variable.
 
+import contextlib
 import datetime
 import os
 import pandas
@@ -31,6 +32,7 @@ import swat.utils.testing as tm
 import sys
 import numpy as np
 import unittest
+import warnings
 
 from swat.utils.compat import patch_pandas_sort
 from swat.utils.testing import UUID_RE, get_cas_host_type, load_data
@@ -42,6 +44,39 @@ SORT_KEYS = ['Origin', 'MSRP', 'Horsepower', 'Model']
 
 USER, PASSWD = tm.get_user_pass()
 HOST, PORT, PROTOCOL = tm.get_host_port_proto()
+
+
+@contextlib.contextmanager
+def captured_output(stream_name):
+    ''' Return a context manager used by captured_stdout and captured_stdin '''
+    try:
+        from io import StringIO
+    except ImportError:
+        from StringIO import StringIO
+    orig_stdout = getattr(sys, stream_name)
+    setattr(sys, stream_name, StringIO())
+    try:
+        yield getattr(sys, stream_name)
+    finally:
+        setattr(sys, stream_name, orig_stdout)
+
+
+def captured_stdout():
+    ''' 
+    Capture the output of sys.stdout
+
+    Example::
+
+        with captured_stdout() as s:
+            print "hello"
+        self.assertEqual(s.getvalue(), "hello")
+
+    '''
+    return captured_output("stdout")
+
+
+def captured_stderr():
+    return captured_output("stderr")
 
 
 class TestBasics(tm.TestCase):
@@ -85,8 +120,9 @@ class TestBasics(tm.TestCase):
 
     def test_connection_failure(self):
         user, passwd = tm.get_user_pass()
-        with self.assertRaises(swat.SWATError):
-           swat.CAS(HOST, 1999, USER, PASSWD, protocol=PROTOCOL)
+        with captured_stderr() as out:
+            with self.assertRaises(swat.SWATError):
+                swat.CAS(HOST, 1999, USER, PASSWD, protocol=PROTOCOL)
 
     def test_copy_connection(self):
         s2 = self.s.copy()
@@ -155,8 +191,9 @@ class TestBasics(tm.TestCase):
 
     def test_connect_with_bad_session(self):
         user, passwd = tm.get_user_pass()
-        with self.assertRaises(swat.SWATError):
-           swat.CAS(HOST, PORT, USER, PASSWD, protocol=PROTOCOL, session='bad-session')
+        with captured_stderr() as out:
+            with self.assertRaises(swat.SWATError):
+                swat.CAS(HOST, PORT, USER, PASSWD, protocol=PROTOCOL, session='bad-session')
 
     def test_set_session_locale(self):
         user, passwd = tm.get_user_pass()
@@ -171,8 +208,9 @@ class TestBasics(tm.TestCase):
 
     def test_set_bad_session_locale(self):
         user, passwd = tm.get_user_pass()
-        with self.assertRaises(swat.SWATError):
-           swat.CAS(HOST, PORT, USER, PASSWD, protocol=PROTOCOL, locale='bad-locale')
+        with captured_stderr() as out:
+            with self.assertRaises(swat.SWATError):
+                swat.CAS(HOST, PORT, USER, PASSWD, protocol=PROTOCOL, locale='bad-locale')
 
     def test_echo(self):
         out = self.s.builtins.echo(a=10, b=12.5, c='string value',
@@ -483,6 +521,19 @@ class TestBasics(tm.TestCase):
         self.assertEqual(out.attrs['Action'], 'summary')
         self.assertEqual(out.attrs['Actionset'], 'simple')
         self.assertNotEqual(out.attrs['CreateTime'], 0)
+
+    def test_stdout(self):
+        code = "str = ''; do i = 1 to 997; str = str || 'foo'; end; print str;"
+        self.s.loadactionset('sccasl')
+
+        if swat.TKVersion() == 'vb025':
+            self.skipTest("Stdout fix does not exist in this version")
+
+        with swat.option_context(print_messages=True):
+            with captured_stdout() as out:
+                self.s.runcasl(code)
+
+        self.assertEqual(out.getvalue(), (997 * 'foo') + '\n')
 
 
 if __name__ == '__main__':

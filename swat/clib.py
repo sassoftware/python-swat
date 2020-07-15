@@ -163,6 +163,16 @@ def InitializeTK(*args, **kwargs):
     return out
 
 
+def TKVersion():
+    ''' Return the TK subsystem version '''
+    if _pyswat is None:
+        _import_pyswat()
+    try:
+        return _pyswat.TKVersion()
+    except AttributeError:
+        return 'vb025'
+
+
 def errorcheck(expr, obj):
     '''
     Check for generated error message

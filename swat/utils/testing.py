@@ -28,10 +28,16 @@ import re
 import sys
 import unittest
 import pandas as pd
+import warnings
+from swat.config import OptionWarning
 
 UUID_RE = r'^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$'
 
 RE_TYPE = type(re.compile(r''))
+
+
+warnings.filterwarnings('ignore', category=OptionWarning)
+warnings.filterwarnings('ignore', category=RuntimeWarning)
 
 
 class TestCase(unittest.TestCase):
