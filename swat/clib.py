@@ -74,9 +74,22 @@ def _import_pyswat():
         libssl = list(sorted(glob.glob(os.path.join('/usr/lib64/libssl.so.10')))) + \
             list(sorted(glob.glob(os.path.join('/usr/lib64/libssl.so.1.0*')))) + \
             list(sorted(glob.glob(os.path.join(sys.prefix, 'lib', 'libssl.so.10')))) + \
-            list(sorted(glob.glob(os.path.join(sys.prefix, 'lib', 'libssl.so.1.0*'))))
+            list(sorted(glob.glob(os.path.join(sys.prefix, 'lib', 'libssl.so.1.0*')))) + \
+            list(sorted(glob.glob(os.path.join('/usr/lib64/libssl.so.1.1*')))) + \
+            list(sorted(glob.glob(os.path.join(sys.prefix, 'lib', 'libssl.so.1.1*'))))
         if libssl:
             os.environ['TKESSL_OPENSSL_LIB'] = libssl[-1]
+
+    if not os.environ.get('TKERSA2_OPENSSL_LIB', '').strip():
+        # Make sure the correct libssl.so is used
+        libssl = list(sorted(glob.glob(os.path.join('/usr/lib64/libssl.so.10')))) + \
+            list(sorted(glob.glob(os.path.join('/usr/lib64/libssl.so.1.0*')))) + \
+            list(sorted(glob.glob(os.path.join(sys.prefix, 'lib', 'libssl.so.10')))) + \
+            list(sorted(glob.glob(os.path.join(sys.prefix, 'lib', 'libssl.so.1.0*')))) + \
+            list(sorted(glob.glob(os.path.join('/usr/lib64/libssl.so.1.1*')))) + \
+            list(sorted(glob.glob(os.path.join(sys.prefix, 'lib', 'libssl.so.1.1*'))))
+        if libssl:
+            os.environ['TKERSA2_OPENSSL_LIB'] = libssl[-1]
 
     if struct.calcsize('P') < 8:
         raise RuntimeError('A 64-bit build of Python is required for the '
