@@ -269,15 +269,16 @@ class REST_CASConnection(object):
 
         self._req_sess = requests.Session()
 
-        if 'SSLCALISTLOC' in os.environ:
-            self._req_sess.verify = os.path.expanduser(os.environ['SSLCALISTLOC'])
+        if os.environ.get('SSLREQCERT', 'y').lower() in ['n', 'no', '0', 'f', 'false', 'off']:
+            self._req_sess.verify = False
         elif 'CAS_CLIENT_SSL_CA_LIST' in os.environ:
             self._req_sess.verify = os.path.expanduser(os.environ['CAS_CLIENT_SSL_CA_LIST'])
+        elif 'SAS_TRUSTED_CA_CERTIFICATES_PEM_FILE' in os.environ:
+            self._req_sess.verify = os.path.expanduser(os.environ['SAS_TRUSTED_CA_CERTIFICATES_PEM_FILE'])
+        elif 'SSLCALISTLOC' in os.environ:
+            self._req_sess.verify = os.path.expanduser(os.environ['SSLCALISTLOC'])
         elif 'REQUESTS_CA_BUNDLE' not in os.environ:
             self._req_sess.mount('https://', SSLContextAdapter())
-
-        if os.environ.get('SSLREQCERT', 'y').lower().startswith('n'):
-            self._req_sess.verify = False
 
         self._req_sess.headers.update({
             'Content-Type': 'application/json',

@@ -34,7 +34,7 @@ import six
 import types
 import weakref
 from six.moves.urllib.parse import urlparse
-from .compat import a2u, text_types, binary_types, int_types
+from .compat import a2u, text_types, binary_types, int_types, items_types
 from .args import iteroptions
 from .xdict import xdict
 from ..exceptions import SWATOptionError
@@ -47,6 +47,76 @@ _config = xdict()
 
 # Subscribers to option changes
 _subscribers = weakref.WeakKeyDictionary()
+
+
+def _getenv(names, *args):
+    '''
+    Check for multiple environment variable values
+
+    Two forms of the environment variable name will be checked,
+    both with and without underscores.  This allows for aliases
+    such as CAS_HOST and CASHOST.
+
+    Parameters
+    ----------
+    names : string or list-of-strings
+        Names of environment variables to look for
+    *args : any, optional
+        The default return value if no matching environment
+        variables exist
+
+    Returns
+    -------
+    string or default value
+
+    '''
+    if not isinstance(names, items_types):
+        names = [names]
+    for name in names:
+        if name in os.environ:
+            return os.environ[name]
+        name = name.replace('_', '')
+        if name in os.environ:
+            return os.environ[name]
+    if args:
+        return args[0]
+    raise KeyError(names[0])
+
+
+def _setenv(names, value):
+    '''
+    Set environment variable
+
+    The environment is first checked for an existing variable
+    that is set.  If it finds one, it uses that name.
+    If no variable is found, the first one in the `names`
+    list is used.
+
+    Just as with _getenv, the variable name is checked both
+    with and without underscores to allow aliases.
+
+    '''
+    if not isinstance(names, items_types):
+        names = [names]
+    found = None
+    for name in names:
+        if name in os.environ:
+            found = name
+        name = name.replace('_', '')
+        if name in os.environ:
+            found = name
+    if not found:
+        found = names[0]
+    os.environ[found] = value
+
+
+def _delenv(names):
+    ''' Delete given environment variables '''
+    if not isinstance(names, items_types):
+        names = [names]
+    for name in names:
+        os.environ.pop(name, None)
+        os.environ.pop(name.replace('_', ''), None)
 
 
 def subscribe(func):
@@ -463,7 +533,13 @@ def check_boolean(value):
         if value == 0:
             return False
 
-    raise SWATOptionError('%s is not a boolean or proper integer value')
+    if isinstance(value, (text_types, binary_types)):
+        if value.lower() in ['y', 'yes', 'on', 't', 'true', 'enable', 'enabled', '1']:
+            return True
+        if value.lower() in ['n', 'no', 'off', 'f', 'false', 'disable', 'disabled', '0']:
+            return False 
+
+    raise SWATOptionError('%s is not a recognized boolean value')
 
 
 def check_string(value, pattern=None, max_length=None, min_length=None,
@@ -564,7 +640,7 @@ class SWATOption(object):
     doc : string
         The documentation string for the option
 
-    environ : string, optional
+    environ : string or list-of-strings, optional
         If specified, the value should be specified in an environment
         variable of that name.
 
@@ -579,7 +655,7 @@ class SWATOption(object):
         self._typedesc = typedesc
         self._validator = validator
         if environ is not None:
-            self._default = validator(os.environ.get(environ, default))
+            self._default = validator(_getenv(environ, default))
         else:
             self._default = validator(default)
         self._environ = environ
@@ -614,7 +690,10 @@ class SWATOption(object):
         _config[self._name]._value = value
 
         if self._environ is not None:
-            os.environ[self._environ] = str(value)
+            if value is None:
+                _delenv(self._environ)
+            else:
+                _setenv(self._environ, str(value))
 
         for func, obj in list(_subscribers.values()):
             if func is not None:
@@ -639,7 +718,7 @@ class SWATOption(object):
         '''
         if self._environ is not None:
             try:
-                _config[self._name]._value = self._validator(os.environ[self._environ])
+                _config[self._name]._value = self._validator(_getenv(self._environ))
             except KeyError:
                 pass
         return _config[self._name]._value
@@ -674,8 +753,7 @@ def register_option(key, typedesc, validator, default, doc, environ=None):
         The default value of the option
     doc : string
         The documentation string for the option
-
-    environ : string, optional
+    environ : string or list-of-strings, optional
         If specified, the value should be specified in an environment
         variable of that name.
 

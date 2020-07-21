@@ -30,6 +30,7 @@ import swat
 import swat.utils.testing as tm
 import sys
 import unittest
+from swat.exceptions import SWATError
 
 USER, PASSWD = tm.get_user_pass()
 HOST, PORT, PROTOCOL = tm.get_host_port_proto()
@@ -844,9 +845,354 @@ class TestConnection(tm.TestCase):
             mock_close.assert_called_with(self.s)
 
 
+class TestConnectionInfo(tm.TestCase):
+
+    def setUp(self):
+        # Set default config values
+        swat.set_option('cas.protocol', 'auto')
+        swat.set_option('cas.hostname', 'localhost')
+        swat.set_option('cas.port', 0)
+        swat.set_option('cas.username', None)
+        swat.set_option('cas.token', None)
+
+    def tearDown(self):
+        swat.reset_option()
+
+    #
+    # self._get_connection_info(hostname, port, username, password, protocol, path)
+    #
+
+    def test_basics(self):
+        c = swat.CAS
+
+        with self.assertRaises(SWATError):
+            c._get_connection_info(None, None, None, None, None, None)
+
+        with self.assertRaises(SWATError):
+            c._get_connection_info('cas-server-1.com', None, None, None, None, None)
+
+        # cas
+        out = c._get_connection_info('cas-server-1.com', 12345, None, None, None, None)
+        self.assertEqual(out, ('cas-server-1.com', 12345, None, None, 'cas'))
+
+        out = c._get_connection_info('cas-server-1.com', 12345, 'myuserid', None, None, None)
+        self.assertEqual(out, ('cas-server-1.com', 12345, 'myuserid', None, 'cas'))
+
+        out = c._get_connection_info('cas-server-1.com', 12345, None, 'mytoken', None, None)
+        self.assertEqual(out, ('cas-server-1.com', 12345, None, 'mytoken', 'cas'))
+
+        out = c._get_connection_info('cas-server-1.com', 12345, 'myuserid', 'mytoken', None, None)
+        self.assertEqual(out, ('cas-server-1.com', 12345, 'myuserid', 'mytoken', 'cas'))
+
+        # http
+        out = c._get_connection_info('cas-server-1.com', 12345, None, None, 'http', None)
+        self.assertEqual(out, ('http://cas-server-1.com:12345', None, None, None, None))
+
+        out = c._get_connection_info('cas-server-1.com', 12345, 'myuserid', None, 'http', None)
+        self.assertEqual(out, ('http://cas-server-1.com:12345', None, 'myuserid', None, None))
+
+        out = c._get_connection_info('cas-server-1.com', 12345, None, 'mytoken', 'http', None)
+        self.assertEqual(out, ('http://cas-server-1.com:12345', None, None, 'mytoken', None))
+
+        out = c._get_connection_info('cas-server-1.com', 12345, 'myuserid', 'mytoken', 'http', None)
+        self.assertEqual(out, ('http://cas-server-1.com:12345', None, 'myuserid', 'mytoken', None))
+
+        # cas with path (which means nothing)
+        out = c._get_connection_info('cas-server-1.com', 12345, None, None, None, 'cas-server/base')
+        self.assertEqual(out, ('cas-server-1.com', 12345, None, None, 'cas'))
+
+        out = c._get_connection_info('cas-server-1.com', 12345, 'myuserid', None, None, 'cas-server/base')
+        self.assertEqual(out, ('cas-server-1.com', 12345, 'myuserid', None, 'cas'))
+
+        out = c._get_connection_info('cas-server-1.com', 12345, None, 'mytoken', None, 'cas-server/base')
+        self.assertEqual(out, ('cas-server-1.com', 12345, None, 'mytoken', 'cas'))
+
+        out = c._get_connection_info('cas-server-1.com', 12345, 'myuserid', 'mytoken', None, 'cas-server/base')
+        self.assertEqual(out, ('cas-server-1.com', 12345, 'myuserid', 'mytoken', 'cas'))
+
+        # http with path
+        out = c._get_connection_info('cas-server-1.com', 12345, None, None, 'http', 'cas-server/base')
+        self.assertEqual(out, ('http://cas-server-1.com:12345/cas-server/base', None, None, None, None))
+
+        out = c._get_connection_info('cas-server-1.com', 12345, 'myuserid', None, 'http', 'cas-server/base')
+        self.assertEqual(out, ('http://cas-server-1.com:12345/cas-server/base', None, 'myuserid', None, None))
+
+        out = c._get_connection_info('cas-server-1.com', 12345, None, 'mytoken', 'http', 'cas-server/base')
+        self.assertEqual(out, ('http://cas-server-1.com:12345/cas-server/base', None, None, 'mytoken', None))
+
+        out = c._get_connection_info('cas-server-1.com', 12345, 'myuserid', 'mytoken', 'http', 'cas-server/base')
+        self.assertEqual(out, ('http://cas-server-1.com:12345/cas-server/base', None, 'myuserid', 'mytoken', None))
+
+        # URL with path and separate port
+        out = c._get_connection_info('cas-server-1.com/cas-server/base', 12345, None, None, 'http', None)
+        self.assertEqual(out, ('http://cas-server-1.com:12345/cas-server/base', None, None, None, None))
+
+        out = c._get_connection_info('cas-server-1.com/cas-server/base', 12345, 'myuserid', None, 'http', None)
+        self.assertEqual(out, ('http://cas-server-1.com:12345/cas-server/base', None, 'myuserid', None, None))
+
+        out = c._get_connection_info('cas-server-1.com/cas-server/base', 12345, None, 'mytoken', 'http', None)
+        self.assertEqual(out, ('http://cas-server-1.com:12345/cas-server/base', None, None, 'mytoken', None))
+
+        out = c._get_connection_info('cas-server-1.com/cas-server/base', 12345, 'myuserid', 'mytoken', 'http', None)
+        self.assertEqual(out, ('http://cas-server-1.com:12345/cas-server/base', None, 'myuserid', 'mytoken', None))
+
+        out = c._get_connection_info('https://cas-server-1.com/cas-server/base', 12345, None, None, 'http', None)
+        self.assertEqual(out, ('https://cas-server-1.com:12345/cas-server/base', None, None, None, None))
+
+        out = c._get_connection_info('https://cas-server-1.com/cas-server/base', 12345, 'myuserid', None, 'http', None)
+        self.assertEqual(out, ('https://cas-server-1.com:12345/cas-server/base', None, 'myuserid', None, None))
+
+        out = c._get_connection_info('https://cas-server-1.com/cas-server/base', 12345, None, 'mytoken', 'http', None)
+        self.assertEqual(out, ('https://cas-server-1.com:12345/cas-server/base', None, None, 'mytoken', None))
+
+        out = c._get_connection_info('https://cas-server-1.com/cas-server/base', 12345, 'myuserid', 'mytoken', 'http', None)
+        self.assertEqual(out, ('https://cas-server-1.com:12345/cas-server/base', None, 'myuserid', 'mytoken', None))
+
+    def test_protocols(self):
+        c = swat.CAS
+
+        out = c._get_connection_info('cas-server-1.com', 12345, 'myuserid', 'mytoken', 'auto', None)
+        self.assertEqual(out, ('cas-server-1.com', 12345, 'myuserid', 'mytoken', 'cas'))
+
+        out = c._get_connection_info('cas-server-1.com', 12345, 'myuserid', 'mytoken', 'http', None)
+        self.assertEqual(out, ('http://cas-server-1.com:12345', None, 'myuserid', 'mytoken', None))
+
+        out = c._get_connection_info('cas-server-1.com', 12345, 'myuserid', 'mytoken', 'https', None)
+        self.assertEqual(out, ('https://cas-server-1.com:12345', None, 'myuserid', 'mytoken', None))
+
+        out = c._get_connection_info('cas-server-1.com', 12345, 'myuserid', 'mytoken', 'cas', None)
+        self.assertEqual(out, ('cas-server-1.com', 12345, 'myuserid', 'mytoken', 'cas'))
+
+        with self.assertRaises(SWATError):
+            c._get_connection_info('cas-server-1.com', 12345, 'myuserid', 'mytoken', 'unknown', None)
+
+    def test_duplicate_parameters(self):
+        c = swat.CAS
+
+        out = c._get_connection_info('cas-server-1.com:5570', 12345, 'myuserid', 'mytoken', 'cas', None)
+        self.assertEqual(out, ('cas-server-1.com', 5570, 'myuserid', 'mytoken', 'cas'))
+        
+        out = c._get_connection_info('cas://cas-server-1.com:5570', 12345, 'myuserid', 'mytoken', 'http', None)
+        self.assertEqual(out, ('cas-server-1.com', 5570, 'myuserid', 'mytoken', 'cas'))
+        
+        out = c._get_connection_info('cas://otheruser:@cas-server-1.com:5570', 12345, 'myuserid', 'mytoken', 'http', None)
+        self.assertEqual(out, ('cas-server-1.com', 5570, 'otheruser', 'mytoken', 'cas'))
+        
+        out = c._get_connection_info('cas://:otherpassword@cas-server-1.com:5570', 12345, 'myuserid', 'mytoken', 'http', None)
+        self.assertEqual(out, ('cas-server-1.com', 5570, 'myuserid', 'otherpassword', 'cas'))
+        
+        out = c._get_connection_info('cas://otheruser:otherpassword@cas-server-1.com:5570', 12345, 'myuserid', 'mytoken', 'http', None)
+        self.assertEqual(out, ('cas-server-1.com', 5570, 'otheruser', 'otherpassword', 'cas'))
+        
+        out = c._get_connection_info('http://cas-server-1.com:5570', 12345, 'myuserid', 'mytoken', 'cas', None)
+        self.assertEqual(out, ('http://cas-server-1.com:5570', None, 'myuserid', 'mytoken', None))
+        
+        out = c._get_connection_info('http://otheruser:@cas-server-1.com:5570', 12345, 'myuserid', 'mytoken', 'cas', None)
+        self.assertEqual(out, ('http://cas-server-1.com:5570', None, 'otheruser', 'mytoken', None))
+        
+        out = c._get_connection_info('http://otheruser:otherpassword@cas-server-1.com:5570', 12345, 'myuserid', 'mytoken', 'cas', None)
+        self.assertEqual(out, ('http://cas-server-1.com:5570', None, 'otheruser', 'otherpassword', None))
+        
+    def test_multiple_hosts(self):
+        c = swat.CAS
+
+        with self.assertRaises(SWATError):
+            c._get_connection_info(None, None, None, None, None, None)
+
+        with self.assertRaises(SWATError):
+            c._get_connection_info(['cas-server-1.com', 
+                                    'cas-server-2.com', 
+                                    'cas-server-3.com'], None, None, None, None, None)
+
+        # cas
+        out = c._get_connection_info(['cas-server-1.com', 
+                                      'cas-server-2.com', 
+                                      'cas-server-3.com'], 12345, None, None, None, None)
+        self.assertEqual(out, ('cas-server-1.com '
+                               'cas-server-2.com '
+                               'cas-server-3.com', 12345, None, None, 'cas'))
+
+        out = c._get_connection_info(['cas-server-1.com', 
+                                      'cas-server-2.com', 
+                                      'cas-server-3.com'], 12345, 'myuserid', None, None, None)
+        self.assertEqual(out, ('cas-server-1.com '
+                               'cas-server-2.com '
+                               'cas-server-3.com', 12345, 'myuserid', None, 'cas'))
+
+        out = c._get_connection_info(['cas-server-1.com', 
+                                      'cas-server-2.com', 
+                                      'cas-server-3.com'], 12345, None, 'mytoken', None, None)
+        self.assertEqual(out, ('cas-server-1.com '
+                               'cas-server-2.com '
+                               'cas-server-3.com', 12345, None, 'mytoken', 'cas'))
+
+        out = c._get_connection_info(['cas-server-1.com', 
+                                      'cas-server-2.com', 
+                                      'cas-server-3.com'], 12345, 'myuserid', 'mytoken', None, None)
+        self.assertEqual(out, ('cas-server-1.com '
+                               'cas-server-2.com '
+                               'cas-server-3.com', 12345, 'myuserid', 'mytoken', 'cas'))
+
+        # http
+        out = c._get_connection_info(['cas-server-1.com', 
+                                      'cas-server-2.com', 
+                                      'cas-server-3.com'], 12345, None, None, 'http', None)
+        self.assertEqual(out, ('http://cas-server-1.com:12345 '
+                               'http://cas-server-2.com:12345 '
+                               'http://cas-server-3.com:12345', None, None, None, None))
+
+        out = c._get_connection_info(['cas-server-1.com', 
+                                      'cas-server-2.com', 
+                                      'cas-server-3.com'], 12345, 'myuserid', None, 'http', None)
+        self.assertEqual(out, ('http://cas-server-1.com:12345 '
+                               'http://cas-server-2.com:12345 '
+                               'http://cas-server-3.com:12345', None, 'myuserid', None, None))
+
+        out = c._get_connection_info(['cas-server-1.com', 
+                                      'cas-server-2.com', 
+                                      'cas-server-3.com'], 12345, None, 'mytoken', 'http', None)
+        self.assertEqual(out, ('http://cas-server-1.com:12345 '
+                               'http://cas-server-2.com:12345 '
+                               'http://cas-server-3.com:12345', None, None, 'mytoken', None))
+
+        out = c._get_connection_info(['cas-server-1.com', 
+                                      'cas-server-2.com', 
+                                      'cas-server-3.com'], 12345, 'myuserid', 'mytoken', 'http', None)
+        self.assertEqual(out, ('http://cas-server-1.com:12345 '
+                               'http://cas-server-2.com:12345 '
+                               'http://cas-server-3.com:12345', None, 'myuserid', 'mytoken', None))
+
+        # cas with path (which means nothing)
+        out = c._get_connection_info(['cas-server-1.com', 
+                                      'cas-server-2.com', 
+                                      'cas-server-3.com'], 12345, None, None, None, 'cas-server/base')
+        self.assertEqual(out, ('cas-server-1.com '
+                               'cas-server-2.com '
+                               'cas-server-3.com', 12345, None, None, 'cas'))
+
+        out = c._get_connection_info(['cas-server-1.com', 
+                                      'cas-server-2.com', 
+                                      'cas-server-3.com'], 12345, 'myuserid', None, None, 'cas-server/base')
+        self.assertEqual(out, ('cas-server-1.com '
+                               'cas-server-2.com '
+                               'cas-server-3.com', 12345, 'myuserid', None, 'cas'))
+
+        out = c._get_connection_info(['cas-server-1.com', 
+                                      'cas-server-2.com', 
+                                      'cas-server-3.com'], 12345, None, 'mytoken', None, 'cas-server/base')
+        self.assertEqual(out, ('cas-server-1.com '
+                               'cas-server-2.com '
+                               'cas-server-3.com', 12345, None, 'mytoken', 'cas'))
+
+        out = c._get_connection_info(['cas-server-1.com', 
+                                      'cas-server-2.com', 
+                                      'cas-server-3.com'], 12345, 'myuserid', 'mytoken', None, 'cas-server/base')
+        self.assertEqual(out, ('cas-server-1.com '
+                               'cas-server-2.com '
+                               'cas-server-3.com', 12345, 'myuserid', 'mytoken', 'cas'))
+
+        # http with path
+        out = c._get_connection_info(['cas-server-1.com', 
+                                      'cas-server-2.com', 
+                                      'cas-server-3.com'], 12345, None, None, 'http', 'cas-server/base')
+        self.assertEqual(out, ('http://cas-server-1.com:12345/cas-server/base '
+                               'http://cas-server-2.com:12345/cas-server/base '
+                               'http://cas-server-3.com:12345/cas-server/base', None, None, None, None))
+
+        out = c._get_connection_info(['cas-server-1.com', 
+                                      'cas-server-2.com', 
+                                      'cas-server-3.com'], 12345, 'myuserid', None, 'http', 'cas-server/base')
+        self.assertEqual(out, ('http://cas-server-1.com:12345/cas-server/base '
+                               'http://cas-server-2.com:12345/cas-server/base '
+                               'http://cas-server-3.com:12345/cas-server/base', None, 'myuserid', None, None))
+
+        out = c._get_connection_info(['cas-server-1.com', 
+                                      'cas-server-2.com', 
+                                      'cas-server-3.com'], 12345, None, 'mytoken', 'http', 'cas-server/base')
+        self.assertEqual(out, ('http://cas-server-1.com:12345/cas-server/base '
+                               'http://cas-server-2.com:12345/cas-server/base '
+                               'http://cas-server-3.com:12345/cas-server/base', None, None, 'mytoken', None))
+
+        out = c._get_connection_info(['cas-server-1.com', 
+                                      'cas-server-2.com', 
+                                      'cas-server-3.com'], 12345, 'myuserid', 'mytoken', 'http', 'cas-server/base')
+        self.assertEqual(out, ('http://cas-server-1.com:12345/cas-server/base '
+                               'http://cas-server-2.com:12345/cas-server/base '
+                               'http://cas-server-3.com:12345/cas-server/base', None, 'myuserid', 'mytoken', None))
+
+        # URL with path and separate port
+        out = c._get_connection_info(['cas-server-1.com/cas-server/base', 
+                                      'cas-server-2.com/cas-server/base'], 12345, None, None, 'http', None)
+        self.assertEqual(out, ('http://cas-server-1.com:12345/cas-server/base '
+                               'http://cas-server-2.com:12345/cas-server/base', None, None, None, None))
+
+        out = c._get_connection_info(['cas-server-1.com/cas-server/base', 
+                                      'cas-server-2.com/cas-server/base'], 12345, 'myuserid', None, 'http', None)
+        self.assertEqual(out, ('http://cas-server-1.com:12345/cas-server/base '
+                               'http://cas-server-2.com:12345/cas-server/base', None, 'myuserid', None, None))
+
+        out = c._get_connection_info(['cas-server-1.com/cas-server/base', 
+                                      'cas-server-2.com/cas-server/base'], 12345, None, 'mytoken', 'http', None)
+        self.assertEqual(out, ('http://cas-server-1.com:12345/cas-server/base '
+                               'http://cas-server-2.com:12345/cas-server/base', None, None, 'mytoken', None))
+
+        out = c._get_connection_info(['cas-server-1.com/cas-server/base', 
+                                      'cas-server-2.com/cas-server/base'], 12345, 'myuserid', 'mytoken', 'http', None)
+        self.assertEqual(out, ('http://cas-server-1.com:12345/cas-server/base '
+                               'http://cas-server-2.com:12345/cas-server/base', None, 'myuserid', 'mytoken', None))
+
+        out = c._get_connection_info(['https://cas-server-1.com/cas-server/base', 
+                                      'https://cas-server-2.com/cas-server/base'], 12345, None, None, 'http', None)
+        self.assertEqual(out, ('https://cas-server-1.com:12345/cas-server/base '
+                               'https://cas-server-2.com:12345/cas-server/base', None, None, None, None))
+
+        out = c._get_connection_info(['https://cas-server-1.com/cas-server/base', 
+                                      'https://cas-server-2.com/cas-server/base'], 12345, 'myuserid', None, 'http', None)
+        self.assertEqual(out, ('https://cas-server-1.com:12345/cas-server/base '
+                               'https://cas-server-2.com:12345/cas-server/base', None, 'myuserid', None, None))
+
+        out = c._get_connection_info(['https://cas-server-1.com/cas-server/base', 
+                                      'https://cas-server-2.com/cas-server/base'], 12345, None, 'mytoken', 'http', None)
+        self.assertEqual(out, ('https://cas-server-1.com:12345/cas-server/base '
+                               'https://cas-server-2.com:12345/cas-server/base', None, None, 'mytoken', None))
+
+        out = c._get_connection_info(['https://cas-server-1.com/cas-server/base', 
+                                      'https://cas-server-2.com/cas-server/base'], 12345, 'myuserid', 'mytoken', 'http', None)
+        self.assertEqual(out, ('https://cas-server-1.com:12345/cas-server/base '
+                               'https://cas-server-2.com:12345/cas-server/base', None, 'myuserid', 'mytoken', None))
+
+    def test_hostname_expansion(self):
+        c = swat.CAS
+
+        out = c._get_connection_info('cas-server-[1,2,3].com:5570', 12345, 'myuserid', 'mytoken', 'cas', None)
+        self.assertEqual(out, ('cas-server-1.com '
+                               'cas-server-2.com '
+                               'cas-server-3.com', 5570, 'myuserid', 'mytoken', 'cas'))
+        
+        out = c._get_connection_info('cas-server-[1].com:5570', 12345, 'myuserid', 'mytoken', 'cas', None)
+        self.assertEqual(out, ('cas-server-1.com', 5570, 'myuserid', 'mytoken', 'cas'))
+        
+        out = c._get_connection_info('[cas-server-1,cas-server-2].com:5570]', None, 'myuserid', 'mytoken', None, None)
+        self.assertEqual(out, ('cas-server-1.com '
+                               'cas-server-2.com', 5570, 'myuserid', 'mytoken', 'cas'))
+
+        out = c._get_connection_info('cas-server-[1,2,3].com:5570', 12345, 'myuserid', 'mytoken', 'http', None)
+        self.assertEqual(out, ('http://cas-server-1.com:5570 '
+                               'http://cas-server-2.com:5570 '
+                               'http://cas-server-3.com:5570', None, 'myuserid', 'mytoken', None))
+        
+        out = c._get_connection_info('cas-server-[1].com:5570', 12345, 'myuserid', 'mytoken', 'http', None)
+        self.assertEqual(out, ('http://cas-server-1.com:5570', None, 'myuserid', 'mytoken', None))
+        
+        out = c._get_connection_info('[cas-server-1,cas-server-2].com:5570]', None, 'myuserid', 'mytoken', 'http', None)
+        self.assertEqual(out, ('http://cas-server-1.com:5570 '
+                               'http://cas-server-2.com:5570', None, 'myuserid', 'mytoken', None))
+
+
 if __name__ == '__main__':
-   import xmlrunner
-   unittest.main(testRunner=xmlrunner.XMLTestRunner(output='test-reports', verbosity=2))
+    unittest.main()
+#   import xmlrunner
+#   unittest.main(testRunner=xmlrunner.XMLTestRunner(output='test-reports', verbosity=2))
 
 #  import profile, pstats
 

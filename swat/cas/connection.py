@@ -27,16 +27,19 @@ import collections
 import contextlib
 import copy
 import inspect
+import itertools
 import json
 import os
 import random
 import re
 import weakref
 import six
+from six.moves.urllib.parse import urlparse
 from . import rest
 from .. import clib
 from .. import config as cf
 from ..exceptions import SWATError, SWATCASActionError, SWATCASActionRetry
+from ..logging import logger
 from ..utils.config import subscribe, get_option
 from ..clib import errorcheck
 from ..utils.compat import (a2u, a2n, int32, int64, float64, text_types,
@@ -138,15 +141,21 @@ class CAS(object):
     Parameters
     ----------
     hostname : string or list-of-strings, optional
-        Host to connect to.  If not specified, the value will come
-        from the ``cas.hostname`` option or ``CASHOST`` environment variable.
+        Host or URL to connect to.  This parameter can also be specified
+        by a ``CAS_URL`` or ``CAS_HOST`` environment variable.
     port : int or long, optional
         Port number.  If not specified, the value will come from the
-        ``cas.port`` option or ``CASPORT`` environment variable.
+        ``cas.port`` option or ``CAS_PORT`` environment variable.
+        If a URL is specified in the first parameter, that port number
+        will be used.
     username : string, optional
-        Name of user on CAS host.
+        Name of user on CAS host.  This parameter can also be specified
+        in a ``CAS_USER`` environment variable.
     password : string, optional
-        Password of user on CAS host.
+        Password of user on CAS host or OAuth token.  If an OAuth token
+        is specified, the `username` parameter should be None.
+        This parameter can also be specified in a ``CAS_PASSWORD``
+        or ``CAS_TOKEN`` environment variable.
     session : string, optional
         ID of existing session to reconnect to.
     locale : string, optional
@@ -161,8 +170,12 @@ class CAS(object):
     protocol : string, optional
         The protocol to use for communicating with the server.
         This protocol must match the protocol spoken by the specified
-        server port.  If not specified, the value will come from the
-        ``cas.protocol`` option or ``CASPROTOCOL`` environment variable.
+        server port.  If the first parameter is a URL, that protocol will
+        be used.
+    path : string, optional
+        Base path of URL when using the REST protocol.
+    ssl_ca_list : string, optional
+        The path to the SSL certificates for the CAS server.
     **kwargs : any, optional
         Arbitrary keyword arguments used for internal purposes only.
 
@@ -217,56 +230,149 @@ class CAS(object):
     sessions = weakref.WeakValueDictionary()
     _sessioncount = 1
 
+    @classmethod
+    def _expand_url(cls, url):
+        ''' Expand [...] groups in URL to all linear combinations '''
+        if not isinstance(url, items_types):
+            url = [url]
+        
+        out = []
+
+        for item in url:
+            parts = [x for x in re.split(r'(?:\[|\])', item) if x]
+
+            for i, part in enumerate(parts):
+                if ',' in part:
+                    parts[i] = re.split(r'\s*,\s*', part)
+#               elif re.match(r'^\d+\-\d+$', part):
+#                   start, end = part.split('-')
+#                   width = len(start)
+#                   start = int(start)
+#                   end = int(end)
+#                   parts[i] = [('%%0%sd' % width) % x for x in range(start, end+1)]
+                else:
+                    parts[i] = [part]
+
+            out += list(''.join(x) for x in itertools.product(*parts))
+
+        return out
+
+    @classmethod
+    def _get_connection_info(cls, hostname, port, username, password, protocol, path):
+        ''' Distill connection information from parameters, config, and environment '''
+
+        # Get defaults from config, if needed
+        username = username or cf.get_option('cas.username')
+        password = password or cf.get_option('cas.token')
+        protocol = protocol or cf.get_option('cas.protocol')
+        hostname = hostname or cf.get_option('cas.hostname')
+        port = port or cf.get_option('cas.port')
+
+        # Always make hostname a list
+        if not isinstance(hostname, items_types):
+            hostname = re.split(r'\s+', re.sub(r'\s*,\s*', r',', hostname.strip()))
+        else:
+            hostname = [re.sub(r'\s*,\s*', r',', x.strip()) for x in hostname]
+
+        # Check hostname for other components
+        new_hostname = []
+        for name in hostname:
+            if not re.match(r'^\w+://', hostname[0]):
+                new_hostname.append('%s://%s' % (protocol, name))
+            else:
+                new_hostname.append(name)
+
+        hostname = cls._expand_url(new_hostname)
+        urlp = urlparse(hostname[0])
+        protocol = urlp.scheme or protocol
+        hostname = [urlparse(x).hostname for x in hostname]
+        port = urlp.port or port
+        username = urlp.username or username
+        password = urlp.password or password
+        path = urlp.path or path
+
+        # Set port based on protocol, if port number is missing
+        if not port:
+            if protocol == 'http':
+                port = 80
+            elif protocol == 'https':
+                port = 443
+            elif protocol == 'cas':
+                port = 5570 
+            else:
+                raise SWATError('Port number was not specified')
+
+        # Auto-detect protocol if still missing
+        if protocol == 'auto':
+            protocol = cls._detect_protocol(hostname, port, protocol=protocol)
+
+        if protocol not in ['http', 'https', 'cas']:
+            raise SWATError('Unrecognized protocol: %s' % protocol)
+
+        # For http(s), construct URLs
+        if protocol.startswith('http'):
+            urls = []
+            for name in hostname:
+                url = '%s://%s:%s' % (protocol, name, port)
+                if path: 
+                    url = '%s/%s' % (url, re.sub(r'^/+', r'', path))
+                urls.append(url)
+            urls = ' '.join(urls)
+            logger.debug('Distilled connection parameters: '
+                         "url='%s' username=%s", urls, username)
+            return a2n(urls), None, a2n(username), a2n(password), None
+
+        hostname = ' '.join(hostname)
+        logger.debug('Distilled connection parameters: '
+                     "hostname='%s' port=%s, username=%s, protocol=%s",
+                     hostname, port, username, protocol)
+
+        return a2n(hostname), int(port), a2n(username), a2n(password), a2n(protocol)
+
     def __init__(self, hostname=None, port=None, username=None, password=None,
                  session=None, locale=None, nworkers=None, name=None,
-                 authinfo=None, protocol=None, **kwargs):
+                 authinfo=None, protocol=None, path=None, ssl_ca_list=None, **kwargs):
+
+        # Check for unknown connection parameters
+        unknown_keys = [k for k in kwargs if k not in ['prototype']]
+        if unknown_keys:
+            warnings.warn('Unrecognized keys in connection parameters: %s' %
+                          ', '.join(unknown_keys))
+
+        # Distill connection information from parameters, config, and environment
+        hostname, port, username, password, protocol = \
+            self._get_connection_info(hostname, port, username, password, protocol, path)
+
+        # Check for SSL certificate
+        if ssl_ca_list is None:
+            ssl_ca_list = cf.get_option('cas.ssl_ca_list')
+        if ssl_ca_list:
+            logger.debug('Using certificate file: %s', ssl_ca_list)
 
         # Check for explicitly specified authinfo files
         if authinfo is not None:
             if not any_file_exists(authinfo):
-                if isinstance(authinfo, items_types):
-                    raise OSError('None of the specified authinfo files '
-                                  'exist: %s' % ', '.join(authinfo))
-                else:
-                    raise OSError('The specified authinfo file does not '
-                                  'exist: %s' % authinfo)
+                if not isinstance(authinfo, items_types):
+                    authinfo = [authinfo]
+                raise OSError('None of the specified authinfo files from'
+                              'list exist: %s' % ', '.join(authinfo))
 
         # If a prototype exists, use it for the connection config
         prototype = kwargs.get('prototype')
         if prototype is not None:
-            soptions = prototype._soptions
-            protocol = prototype._protocol
+            soptions = a2n(prototype._soptions)
+            protocol = a2n(prototype._protocol)
 
         else:
-            # Get connection parameters from config
-            if hostname is None:
-                hostname = cf.get_option('cas.hostname')
-            if port is None:
-                port = cf.get_option('cas.port')
-
-            # Detect protocol
-            if (isinstance(hostname, items_types)
-                    and (hostname[0].startswith('http:')
-                         or hostname[0].startswith('https:'))):
-                protocol = hostname[0].split(':', 1)[0]
-
-            elif (isinstance(hostname, six.string_types)
-                  and (hostname.startswith('http:')
-                       or hostname.startswith('https:'))):
-                protocol = hostname.split(':', 1)[0]
-
-            else:
-                protocol = self._detect_protocol(hostname, port, protocol=protocol)
-
-            soptions = getsoptions(session=session, locale=locale,
-                                   nworkers=nworkers, protocol=protocol)
+            soptions = a2n(getsoptions(session=session, locale=locale,
+                                       nworkers=nworkers, protocol=protocol))
 
         # Create error handler
         try:
             if protocol in ['http', 'https']:
-                self._sw_error = rest.REST_CASError(a2n(soptions))
+                self._sw_error = rest.REST_CASError(soptions)
             else:
-                self._sw_error = clib.SW_CASError(a2n(soptions))
+                self._sw_error = clib.SW_CASError(soptions)
         except SystemError:
             raise SWATError('Could not create CAS error handler object. '
                             'Check your SAS TK path setting.')
@@ -280,13 +386,6 @@ class CAS(object):
 
             # Create a new connection
             else:
-                # Set up hostnames
-                if (protocol not in ['http', 'https']
-                        and isinstance(hostname, items_types)):
-                    hostname = a2n(' '.join(a2n(x) for x in hostname if x))
-                elif isinstance(hostname, six.string_types):
-                    hostname = a2n(hostname)
-
                 # Set up authinfo paths
                 if authinfo is not None and password is None:
                     password = ''
@@ -297,8 +396,7 @@ class CAS(object):
                     password = 'authinfo={%s}' % password
 
                 # Set up connection parameters
-                params = (hostname, int(port), a2n(username), a2n(password),
-                          a2n(soptions), self._sw_error)
+                params = (hostname, port, username, password, soptions, self._sw_error)
                 if protocol in ['http', 'https']:
                     self._sw_connection = rest.REST_CASConnection(*params)
                 else:
@@ -349,9 +447,10 @@ class CAS(object):
                                            _messagelevel='error',
                                            _apptag='UI').items():
             self._actionset_classes[asname.lower()] = None
-            for actname in value['name']:
-                self._action_classes[asname.lower() + '.' + actname.lower()] = None
-                self._action_classes[actname.lower()] = None
+            if value is not None:
+                for actname in value['name']:
+                    self._action_classes[asname.lower() + '.' + actname.lower()] = None
+                    self._action_classes[actname.lower()] = None
 
         # Populate CASTable documentation and method signatures
         CASTable._bootstrap(self)
@@ -422,7 +521,8 @@ class CAS(object):
 
         return stype, version, out
 
-    def _detect_protocol(self, hostname, port, protocol=None):
+    @classmethod
+    def _detect_protocol(cls, hostname, port, protocol=None):
         '''
         Detect the protocol type for the given host and port
 
@@ -482,7 +582,12 @@ class CAS(object):
                     break
 
             if protocol == 'auto':
-                protocol = 'cas'
+                if port in [80, 8777]:
+                    protocol = 'http'
+                elif port == 443:
+                    protocol = 'https'
+                else:
+                    protocol = 'cas'
 
         return protocol
 

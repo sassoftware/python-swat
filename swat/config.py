@@ -24,7 +24,9 @@ Initialization of SWAT options
 from __future__ import print_function, division, absolute_import, unicode_literals
 
 import functools
+import logging
 import warnings
+from . import logging as swat_logging
 from .clib import InitializeTK
 from .utils.config import (register_option, check_boolean, check_int, get_option,
                            set_option, reset_option, describe_option, check_url,
@@ -91,33 +93,45 @@ register_option('interactive_mode', 'boolean', check_boolean, True,
                 'Interactive features include things like generating formatted help\n'
                 'strings for objects automatically generated from information from\n'
                 'the server.  This may give a performance improvement in batch jobs\n'
-                'that don\'t need interactive features.')
+                'that don\'t need interactive features.',
+                environ='SWAT_INTERACTIVE_MODE')
 
 #
 # CAS connection options
 #
 
 register_option('cas.print_messages', 'boolean', check_boolean, True,
-                'Indicates whether or not CAS response messages should be printed.')
+                'Indicates whether or not CAS response messages should be printed.',
+                environ='CAS_PRINT_MESSAGES')
 
 register_option('cas.trace_actions', 'boolean', check_boolean, False,
                 'Indicates whether or not CAS action names and parameters should\n'
                 'be printed.  This can be helpful in debugging incorrect action\n'
-                'parameters.')
+                'parameters.', environ='CAS_TRACE_ACTIONS')
 
 register_option('cas.trace_ui_actions', 'boolean', check_boolean, False,
                 'Indicates whether or not CAS action names and parameters from\n'
                 'actions invoked by the interface itself. should be printed.\n'
-                'This option is only honored if cas.trace_actions is also enabled.')
+                'This option is only honored if cas.trace_actions is also enabled.',
+                environ='CAS_TRACE_UI_ACTIONS')
 
 register_option('cas.hostname', 'string', check_string,
                 'localhost',
-                'Specifies the hostname for the CAS server.',
-                environ='CASHOST')
+                'Specifies the hostname or complete URL (including host, port,\n'
+                'and protocol) for the CAS server.',
+                environ=['CAS_URL', 'CAS_HOST', 'CAS_HOSTNAME'])
+
+register_option('cas.username', 'string', check_string, None,
+                'Specifies the username for the CAS server.',
+                environ=['CAS_USER', 'CAS_USERNAME'])
+
+register_option('cas.token', 'string', check_string, None,
+                'Specifies the OAuth token / password for the CAS server.',
+                environ=['CAS_TOKEN', 'CAS_PASSWORD'])
 
 register_option('cas.port', 'int', check_int, 0,
                 'Sets the port number for the CAS server.',
-                environ='CASPORT')
+                environ='CAS_PORT')
 
 register_option('cas.protocol', 'string',
                 functools.partial(check_string,
@@ -126,7 +140,13 @@ register_option('cas.protocol', 'string',
                 'Communication protocol for talking to CAS server.\n'
                 'The value of "auto" will try to auto-detect the type.\n'
                 'Using "http" or "https" will use the REST interface.',
-                environ='CASPROTOCOL')
+                environ='CAS_PROTOCOL')
+
+register_option('cas.ssl_ca_list', 'string', check_string, None,
+                'Sets the path to the SSL certificates for the CAS server.',
+                environ=['CAS_CLIENT_SSL_CA_LIST',
+                         'SAS_TRUSTED_CA_CERTIFICATES_PEM_FILE',
+                         'SSLCALISTLOC'])
 
 
 def check_severity(sev):
@@ -295,11 +315,43 @@ register_option('cas.dataset.bygroup_casout_threshold', 'int', check_int, 25000,
 #
 
 register_option('cas.debug.requests', 'boolean', check_boolean, False,
-                'Display requested URL when accessing REST interface.')
+                'Display requested URL when accessing REST interface.',
+                environ='CAS_DEBUG_REQUESTS')
 register_option('cas.debug.request_bodies', 'boolean', check_boolean, False,
-                'Display body of request when accessing REST interface.')
+                'Display body of request when accessing REST interface.',
+                environ='CAS_DEBUG_REQUEST_BODIES')
 register_option('cas.debug.responses', 'boolean', check_boolean, False,
-                'Display raw responses from server.')
+                'Display raw responses from server.',
+                environ='CAS_DEBUG_RESPONSES')
+
+#
+# Logging options
+#
+def check_log_level(val):
+    ''' Check and set the log level '''
+    val = check_string(val, valid_values=['critical', 'error', 'warning', 'info', 'debug'])
+    swat_logging.logger.setLevel(dict(
+        debug=logging.DEBUG,
+        info=logging.INFO,
+        warning=logging.WARNING,
+        error=logging.ERROR,
+        critical=logging.CRITICAL,
+    )[val])
+    return val
+
+register_option('log.level', 'string', check_log_level, swat_logging.default_level,
+                'Set the level of displayed log messages.',
+                environ='SWAT_LOG_LEVEL')
+
+def check_log_format(val):
+    ''' Check and set the log format '''
+    val = check_string(val)
+    swat_logging.handler.setFormatter(logging.Formatter(cf.get_option('log.format')))
+    return val
+
+register_option('log.format', 'string', check_string, swat_logging.default_format,
+                'Set the format of the displayed log messages.',
+                environ='SWAT_LOG_FORMAT')
 
 #
 # IPython notebook options
