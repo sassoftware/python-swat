@@ -26,6 +26,7 @@ from __future__ import print_function, division, absolute_import, unicode_litera
 import collections
 import contextlib
 import copy
+import inspect
 import json
 import os
 import random
@@ -55,6 +56,7 @@ from .utils.misc import super_dir, any_file_exists
 # pylint: disable=W0212
 
 RETRY_ACTION_CODE = 0x280034
+SESSION_ABORTED_CODE = 0x2D51AC
 
 
 def _option_handler(key, value):
@@ -227,7 +229,7 @@ class CAS(object):
                                   'exist: %s' % ', '.join(authinfo))
                 else:
                     raise OSError('The specified authinfo file does not '
-                                  'exist: %s' % authinfo) 
+                                  'exist: %s' % authinfo)
 
         # If a prototype exists, use it for the connection config
         prototype = kwargs.get('prototype')
@@ -243,14 +245,14 @@ class CAS(object):
                 port = cf.get_option('cas.port')
 
             # Detect protocol
-            if (isinstance(hostname, items_types) and
-                    (hostname[0].startswith('http:') or
-                     hostname[0].startswith('https:'))):
+            if (isinstance(hostname, items_types)
+                    and (hostname[0].startswith('http:')
+                         or hostname[0].startswith('https:'))):
                 protocol = hostname[0].split(':', 1)[0]
 
-            elif (isinstance(hostname, six.string_types) and
-                  (hostname.startswith('http:') or
-                   hostname.startswith('https:'))):
+            elif (isinstance(hostname, six.string_types)
+                  and (hostname.startswith('http:')
+                       or hostname.startswith('https:'))):
                 protocol = hostname.split(':', 1)[0]
 
             else:
@@ -279,8 +281,8 @@ class CAS(object):
             # Create a new connection
             else:
                 # Set up hostnames
-                if (protocol not in ['http', 'https'] and
-                        isinstance(hostname, items_types)):
+                if (protocol not in ['http', 'https']
+                        and isinstance(hostname, items_types)):
                     hostname = a2n(' '.join(a2n(x) for x in hostname if x))
                 elif isinstance(hostname, six.string_types):
                     hostname = a2n(hostname)
@@ -390,7 +392,9 @@ class CAS(object):
                 num = num + 1
         self._id_generator = _id_generator()
 
-        self.server_type, self.server_version, self.server_features = self._get_server_features()
+        (self.server_type,
+         self.server_version,
+         self.server_features) = self._get_server_features()
 
     def _gen_id(self):
         ''' Generate an ID unique to the session '''
@@ -627,7 +631,7 @@ class CAS(object):
         boolean
 
         '''
-        return name in self._action_classes
+        return name.lower() in self._action_classes
 
     def has_actionset(self, name):
         '''
@@ -643,7 +647,7 @@ class CAS(object):
         boolean
 
         '''
-        return name in self._actionset_classes
+        return name.lower() in self._actionset_classes
 
     def get_action(self, name):
         '''
@@ -694,6 +698,9 @@ class CAS(object):
         return self.__getattr__(name, atype='actionset')
 
     def __dir__(self):
+        # Short-circuit PyCharm's introspection
+        if 'get_names' in [x[3] for x in inspect.stack()]:
+            return list(self._dir)
         return list(sorted(list(self._dir) + list(self.get_action_names())))
 
     def __dir_actions__(self):
@@ -1150,8 +1157,7 @@ class CAS(object):
             if isinstance(kwargs['table'], CASTable):
                 kwargs['table'] = kwargs['table'].to_table_params()
             if isinstance(kwargs['table'], dict):
-                if caslib and 'caslib' not in kwargs and \
-                       kwargs['table'].get('caslib'):
+                if caslib and 'caslib' not in kwargs and kwargs['table'].get('caslib'):
                     kwargs['caslib'] = kwargs['table']['caslib']
                 kwargs['table'] = kwargs['table']['name']
 
@@ -1399,6 +1405,9 @@ class CAS(object):
                 casout = value
                 del kwargs[key]
 
+        if importoptions is None:
+            importoptions = {}
+
         import pandas as pd
         if isinstance(data, pd.DataFrame):
             import tempfile
@@ -1406,8 +1415,12 @@ class CAS(object):
                 delete = True
                 filename = tmp.name
                 name = os.path.splitext(os.path.basename(filename))[0]
-                data.to_csv(filename, encoding='utf-8', index=False)
+                data.to_csv(filename, encoding='utf-8',
+                            index=False, sep=a2n(',', 'utf-8'),
+                            decimal=a2n('.', 'utf-8'),
+                            line_terminator=a2n('\r\n', 'utf-8'))
                 df_dtypes = self._extract_dtypes(data)
+                importoptions['locale'] = 'EN-us'
 
         elif data.startswith('http://') or \
                 data.startswith('https://') or \
@@ -1437,9 +1450,6 @@ class CAS(object):
             'sashdat': 'hdat',
             'sas7bdat': 'basesas',
         }
-
-        if importoptions is None:
-            importoptions = {}
 
         if isinstance(importoptions, (dict, ParamManager)) and \
                 'filetype' not in [x.lower() for x in importoptions.keys()]:
@@ -1475,7 +1485,7 @@ class CAS(object):
         if delete:
             try:
                 os.remove(filename)
-            except:
+            except Exception:
                 pass
 
         return self._get_results([(CASResponse(resp, connection=self), self)])
@@ -1802,6 +1812,10 @@ class CAS(object):
 
                 if response.disposition.status_code == RETRY_ACTION_CODE:
                     raise SWATCASActionRetry(response.disposition.status)
+                elif response.disposition.status_code == SESSION_ABORTED_CODE:
+                    # Any new requests sent to the session will never return, so just close the connection now
+                    self.close()
+                    raise SWATCASActionError(response.disposition.status, response, conn)
 
                 if responsefunc is not None:
                     responsedata = responsefunc(response, conn, responsedata)
@@ -1919,12 +1933,12 @@ class CAS(object):
         name = name.lower()
 
         # Check cache for actionset and action classes
-        if (atype in [None, 'actionset'] and name in self._actionset_classes and
-                self._actionset_classes[name] is not None):
+        if (atype in [None, 'actionset'] and name in self._actionset_classes
+                and self._actionset_classes[name] is not None):
             return self._actionset_classes[name]()
 
-        if (atype in [None, 'action'] and name in self._action_classes and
-                self._action_classes[name] is not None):
+        if (atype in [None, 'action'] and name in self._action_classes
+                and self._action_classes[name] is not None):
             if class_requested:
                 return self._action_classes[name]
             return self._action_classes[name]()
@@ -3168,7 +3182,7 @@ class CAS(object):
 
         '''
         if not name:
-            name = 'Caslib_%x' % random.randint(0,1e9)
+            name = 'Caslib_%x' % random.randint(0, 1e9)
 
         activeonadd_key = None
         subdirectories_key = None
@@ -3220,7 +3234,7 @@ class CAS(object):
             elif normpath.startswith(item):
                 if bool(subdirs) != bool(kwargs[subdirectories_key]):
                     raise SWATError('caslib exists, but subdirectories flag differs')
-                return libname, path[len(item)+1:]
+                return libname, path[len(item) + 1:]
 
         out = self.retrieve('table.addcaslib', _messagelevel='error',
                             name=name, path=path, **kwargs)

@@ -22,6 +22,7 @@
 #       A specific protocol ('cas', 'http', 'https', or 'auto') can be set using
 #       the CASPROTOCOL environment variable.
 
+import re
 import swat
 import swat.utils.testing as tm
 import sys
@@ -41,7 +42,10 @@ class TestParams(tm.TestCase):
 
         self.s = swat.CAS(HOST, PORT, USER, PASSWD, protocol=PROTOCOL)
 
-        self.s.loadactionset(actionset='actionTest')
+        r = self.s.loadactionset(actionset='actionTest')
+        if r.severity != 0:
+            self.skipTest("actionTest failed to load")
+
         self.s.loadactionset(actionset='simple')
 
         server_type = tm.get_cas_host_type(self.s)
@@ -210,14 +214,14 @@ class TestParams(tm.TestCase):
         r = self.s.actionTest.testparms( dbl=5,  varz={'AAA', 'AAATYPE'} ) 
         self.assertEqual( r, {} )   
         self.assertEqual( r.status, "A parameter was the wrong type and could not be converted." )       
-        self.assertContainsMessage(r, "ERROR: An attempt was made to convert parameter 'varz[1]' from string to parameter list, but the conversion failed." ) 
+        self.assertContainsMessage(r, re.compile(r"ERROR: An attempt was made to convert parameter 'varz\[\d\]' from string to parameter list, but the conversion failed\." ) )
 
     def test_parmarray_badsubparm(self):
         # This is invalid because 'foo' is not a valid subparm of 'varz'
         r = self.s.actionTest.testparms( dbl=5,  varz=[{'name':'AAA', 'type':'AAATYPE'}, {'name':'BBB', 'type':'BBBTYPE', 'foo':2}] )            
         self.assertEqual( r, {} )  
         self.assertEqual( r.status, "Error parsing action parameters." ) 
-        self.assertContainsMessage(r, "ERROR: Parameter 'varz[2].foo' is not recognized." ) 
+        self.assertContainsMessage(r, re.compile(r"ERROR: Parameter 'varz\[\d\].foo' is not recognized\." ))
      
     def test_enumfail(self):     
         r = self.s.actionTest.testparms( color="orange", dbl=5. )
@@ -308,7 +312,7 @@ class TestParams(tm.TestCase):
         r = self.s.actionTest.testparms( dbl=5, strList=[{"ABC"}] )                                            
         self.assertEqual( r, {} )
         self.assertEqual( r.status, "Error parsing action parameters." )
-        self.assertContainsMessage(r, "ERROR: Cannot convert parameter 'strList[1]' from value_list to string." )
+        self.assertContainsMessage(r, re.compile(r"ERROR: Cannot convert parameter 'strList\[\d\]' from value_list to string\." ))
     
     def test_altnum(self):
         # 08/20/2014: This test produces an exception on the server when run with Python 2.7, but passes with 3.4.

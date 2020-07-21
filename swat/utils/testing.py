@@ -28,8 +28,16 @@ import re
 import sys
 import unittest
 import pandas as pd
+import warnings
+from swat.config import OptionWarning
 
 UUID_RE = r'^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$'
+
+RE_TYPE = type(re.compile(r''))
+
+
+warnings.filterwarnings('ignore', category=OptionWarning)
+warnings.filterwarnings('ignore', category=RuntimeWarning)
 
 
 class TestCase(unittest.TestCase):
@@ -55,9 +63,14 @@ class TestCase(unittest.TestCase):
 
     def assertContainsMessage(self, results, expectedMsg):
         ''' See if expected message is in results '''
-        for i in range(len(results.messages)):
-            if expectedMsg in results.messages[i]:
-                return
+        if isinstance(expectedMsg, RE_TYPE):
+            for msg in results.messages:
+                if expectedMsg.match(msg):
+                    return
+        else:
+            for i in range(len(results.messages)):
+                if expectedMsg in results.messages[i]:
+                    return
         raise ValueError('Expected message not found: ' + expectedMsg)
 
     def replaceNaN(self, row, nan):
@@ -257,20 +270,20 @@ def _read_casrc(path):
 
     try:
         cashost = str(lg.cashost)
-    except:
+    except Exception:
         sys.sterr.write('ERROR: Could not access cashost setting\n')
         sys.exit(1)
 
     try:
         casport = int(lg.casport)
-    except:
+    except Exception:
         sys.sterr.write('ERROR: Could not access casport setting\n')
         sys.exit(1)
 
     try:
         if lg.casprotocol:
             casprotocol = str(lg.casprotocol)
-    except:
+    except Exception:
         pass
 
     return cashost, casport, casprotocol
@@ -374,7 +387,7 @@ def get_cas_host_type(conn):
     ostype = out['About']['System']['OS Family']
     stype = 'mpp'
     htype = 'nohdfs'
-    if out['server'].ix[0, 'nodes'] == 1:
+    if out['server'].iloc[0]['nodes'] == 1:
         stype = 'smp'
     if ostype.startswith('LIN'):
         ostype = 'linux'

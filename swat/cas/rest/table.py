@@ -280,10 +280,10 @@ class REST_CASTable(object):
                 elif isinstance(item, dict):
                     try:
                         outrow.append(base64.b64decode(item['data']))
-                    except:
+                    except Exception:
                         try:
                             outrow.append(base64.b64decode(item['data'] + '='))
-                        except:
+                        except Exception:
                             outrow.append(base64.b64decode(item['data'] + '=='))
                 # Check for datetime, date, time
                 elif dtype == 'datetime':

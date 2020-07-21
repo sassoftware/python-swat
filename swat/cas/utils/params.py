@@ -208,14 +208,14 @@ class ParamManager(object):
 
     def set_params(self, *args, **kwargs):
         '''
-        Set paramaters according to key/value pairs
+        Set paramaters according to key-value pairs
 
         Parameters
         ----------
         *args : any, optional
-           Key / value pairs specified as sequential arguments (not in tuples).
+           Key-value pairs specified as sequential arguments (not in tuples).
         **kwargs : any, optional
-           Arbitrary keyword arguments.  These key/value pairs of
+           Arbitrary keyword arguments.  These key-value pairs of
            parameters added to the CAS action's set of parameters.
 
         Returns
@@ -293,7 +293,7 @@ class ParamManager(object):
 
     def has_params(self, *keys):
         '''
-        Return a boolean indicating whether or not the parameters exist
+        Return True if the specified parameters exist
 
         Parameters
         ----------

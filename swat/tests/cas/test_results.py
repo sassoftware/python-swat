@@ -111,7 +111,7 @@ class TestCASResults(tm.TestCase):
                  'Std', 'StdErr', 'Var', 'USS', 'CSS', 'CV', 'TValue', 'ProbT'])
 
         caption = [x.string for x in htbl.find_all('caption')]
-        index = [x.string for x in htbl.tbody.find_all('th')]
+        index = [x.string for x in htbl.tbody.find_all('tr')]
         data = [x.string for x in htbl.tbody.find_all('td')]
         self.assertEqual(len(caption), 1)
         self.assertEqual(len(index), 10)
@@ -316,7 +316,7 @@ class TestCASResults(tm.TestCase):
         self.assertTrue('[ByGroup1.Topk]' in sout)
         self.assertTrue('[ByGroup2.Topk]' in sout)
         self.assertTrue('[ByGroup3.Topk]' in sout)
-        self.assertTrue('+ Elapsed: ' in sout)
+        self.assertTrue('+ Elapsed: ' in sout or '+ Mem: ' in sout)
 
     def test_render_html(self):
         out = self.table.groupby('Origin').topk()

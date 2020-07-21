@@ -134,17 +134,23 @@ class TestBuiltins(tm.TestCase):
         #self.assertEqual( r.debug, None )        
 
     def test_addnode(self):
-        r = self.s.addnode()
+        try:
+            r = self.s.addnode()
+        except TypeError:
+            tm.TestCase.skipTest(self, 'addnode action is not available')
+
         if r.severity == 0:
             # MPP mode
             self.assertEqual( r['Nodes'], [] )
         else:
-            # SMP mode
+            # Could fail for a number of reasons such as we're in SMP mode,
+            # we don't have proper credentials for addnode, .etc
             self.assertIn( r.status, ['Error parsing action parameters.',
+                           "Authorization",
                            "Nodes cannot be added when the server is running with in SMP mode."] )
 
         r = self.s.addnode(salt='controller', node=['pepper'])
-        self.assertContainsMessage(r, "ERROR: Expecting one of the following: role, node.")
+        self.assertContainsMessage(r, "ERROR: The action stopped due to errors.")
 
         r = self.s.addnode(node=['salt', 'pepper'])
         self.assertContainsMessage(r, "ERROR: The action stopped due to errors.")
@@ -232,32 +238,16 @@ class TestBuiltins(tm.TestCase):
                          aset.iloc[2].tolist() == ['annCode','Generates DATA step scoring code from an artificial neural network model'])
         
         # List an action that is loaded.
-        act = self.s.builtins.help(action='annTrain', showHidden=True)
+        act = self.s.builtins.help(action='annTrain')
         self.assertTrue(act is not None)
         self.assertTrue(act['annTrain'])
 
         # We get back several hundred lines of output. Verify a few at the beginning of the response. 
         self.assertTrue("NOTE: Information for action 'neuralNet.annTrain':" in act.messages)
         self.assertTrue("NOTE: The following parameters are accepted.  Default values are shown." in act.messages)
-        # self.assertTrue("NOTE:    boolean resident=true," in act.messages)
-        
-        # Hidden arguments are not visible in optimized images even when showHidden=True;
-        box = os.environ.get('SDSBOX', 'LAXNO').upper()
-        if (box == 'LAXND' ) | (box == 'LAXDD') | (box == 'WX6ND') | (box == 'WX6DD'):
-            # Verify a few hidden arguments;
-            self.assertTrue("NOTE:    int32 nThreads=0 (0 <= value <= 64)," in act.messages)
-            self.assertTrue("NOTE:    boolean noBias=false," in act.messages)
         
         # Verify a line of output near the end of the response.
         self.assertTrue("NOTE:    double dropOut=0 (0 <= value < 1)," in act.messages)
-        
-        # List a loaded action and don't show hidden arguments
-        act = self.s.builtins.help(action='annTrain', showHidden=False)
-        self.assertTrue(act is not None)
-        self.assertTrue(act['annTrain'])
-        
-        # Verify hidden arguments don't appear since we specified showHidden=False
-        self.assertTrue("NOTE:    int32 nThreads=0 (0 <= value <= 64)," not in act.messages)
 
     def test_listnodes(self):
         self.assertNotEqual(self.s.listnodes(), {})
@@ -285,25 +275,27 @@ class TestBuiltins(tm.TestCase):
         self.assertEqual(list(r.keys())[0], 'setinfo')
         setinfo = r['setinfo']
         # Get the actionset column
-        actionsets = setinfo.ix[:,'actionset'].tolist()
+        actionsets = setinfo['actionset'].tolist()
         self.assertIn('builtins', actionsets)
         
         r = self.s.actionsetinfo(all=True) 
         self.assertEqual(list(r.keys())[0], 'setinfo')
         setinfo = r['setinfo']
         # Get the actionset column
-        allactionsets = setinfo.ix[:,'actionset'].tolist()
+        allactionsets = setinfo['actionset'].tolist()
         self.assertIn('builtins', allactionsets)
         self.assertNotIn('unknown', allactionsets)
         self.assertTrue(len(allactionsets) > len(actionsets))
                                     
     def test_log(self):
+        r = self.s.log(logger='App.cas.builtins.log', level="debug")
+        if r.severity != 0:
+            self.assertIn( r.status, ["You must be an administrator to set logging levels. The logger is immutable."] )
+            self.skipTest("You must be an administrator to set logging levels")
         r = self.s.log(invalid='parameter')
         self.assertNotEqual(r.status, None)
         r = self.s.log(logger='App.cas.builtins.log', level="invalid")
         self.assertNotEqual(r.status, None) 
-        r = self.s.log(logger='App.cas.builtins.log', level="debug")
-        self.assertEqual(r.status, None)
         r = self.s.log(logger='App.cas.builtins.log')
         self.assertEqual(r.status, None)   
         self.assertEqual(r.messages[0], "NOTE: Logger: 'App.cas.builtins.log', level: 'debug'.") 
@@ -338,12 +330,14 @@ class TestBuiltins(tm.TestCase):
         # WX6 returns an empty string for groups
         if isinstance(userInfo['groups'], list):
             self.assertTrue('users' in userInfo['groups'] or
-                            'Everyone' in userInfo['groups'])
+                            'Everyone' in userInfo['groups'] or
+                            'openid' in userInfo['groups'] or
+                            'SASAdministrators' in userInfo['groups'])
         self.assertIn(userInfo['hostAccount'], [1, False])
         self.assertEqual(userInfo['providedName'].split('\\')[-1].split('@')[0],
                          self.s._username.split('\\')[-1].split('@')[0])
         # WX6 returns 'Windows' for providerName
-        self.assertIn(userInfo['providerName'], ['Active Directory', 'Windows'])
+        self.assertIn(userInfo['providerName'], ['Active Directory', 'Windows', 'OAuth/External PAM', 'External PAM', 'OAuth', 'OAuth/Windows'])
         # WX6 returns the domain for uniqueId
         self.assertTrue(userInfo['uniqueId'], self.s._username.split('@')[0])
         self.assertTrue(userInfo['userId'], self.s._username.split('@')[0])
@@ -376,7 +370,7 @@ class TestBuiltins(tm.TestCase):
         self.assertNotEqual(r, None)          
         self.assertTrue(r['protocol'] in ['http', 'https'])
         if self.s._protocol in ['http', 'https']:        
-            self.assertEqual(str(r['port']), os.environ['CASPORT'])
+            self.assertEqual(str(int(r['port'])), os.environ['CASPORT'])
         # 02/20/2016: bosout: Documentation indicates the action should return virtualHost.
         # However, that is not being returned. Developers notified. Comment out until we know more.
         #self.assertNotEqual(r['virtualHost'], None)

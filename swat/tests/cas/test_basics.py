@@ -22,6 +22,7 @@
 #       A specific protocol ('cas', 'http', 'https', or 'auto') can be set using
 #       the CASPROTOCOL environment variable.
 
+import contextlib
 import datetime
 import os
 import pandas
@@ -31,6 +32,7 @@ import swat.utils.testing as tm
 import sys
 import numpy as np
 import unittest
+import warnings
 
 from swat.utils.compat import patch_pandas_sort
 from swat.utils.testing import UUID_RE, get_cas_host_type, load_data
@@ -42,6 +44,39 @@ SORT_KEYS = ['Origin', 'MSRP', 'Horsepower', 'Model']
 
 USER, PASSWD = tm.get_user_pass()
 HOST, PORT, PROTOCOL = tm.get_host_port_proto()
+
+
+@contextlib.contextmanager
+def captured_output(stream_name):
+    ''' Return a context manager used by captured_stdout and captured_stdin '''
+    try:
+        from io import StringIO
+    except ImportError:
+        from StringIO import StringIO
+    orig_stdout = getattr(sys, stream_name)
+    setattr(sys, stream_name, StringIO())
+    try:
+        yield getattr(sys, stream_name)
+    finally:
+        setattr(sys, stream_name, orig_stdout)
+
+
+def captured_stdout():
+    ''' 
+    Capture the output of sys.stdout
+
+    Example::
+
+        with captured_stdout() as s:
+            print "hello"
+        self.assertEqual(s.getvalue(), "hello")
+
+    '''
+    return captured_output("stdout")
+
+
+def captured_stderr():
+    return captured_output("stderr")
 
 
 class TestBasics(tm.TestCase):
@@ -85,8 +120,9 @@ class TestBasics(tm.TestCase):
 
     def test_connection_failure(self):
         user, passwd = tm.get_user_pass()
-        with self.assertRaises(swat.SWATError):
-           swat.CAS(HOST, 1999, USER, PASSWD, protocol=PROTOCOL)
+        with captured_stderr() as out:
+            with self.assertRaises(swat.SWATError):
+                swat.CAS(HOST, 1999, USER, PASSWD, protocol=PROTOCOL)
 
     def test_copy_connection(self):
         s2 = self.s.copy()
@@ -155,8 +191,9 @@ class TestBasics(tm.TestCase):
 
     def test_connect_with_bad_session(self):
         user, passwd = tm.get_user_pass()
-        with self.assertRaises(swat.SWATError):
-           swat.CAS(HOST, PORT, USER, PASSWD, protocol=PROTOCOL, session='bad-session')
+        with captured_stderr() as out:
+            with self.assertRaises(swat.SWATError):
+                swat.CAS(HOST, PORT, USER, PASSWD, protocol=PROTOCOL, session='bad-session')
 
     def test_set_session_locale(self):
         user, passwd = tm.get_user_pass()
@@ -171,8 +208,9 @@ class TestBasics(tm.TestCase):
 
     def test_set_bad_session_locale(self):
         user, passwd = tm.get_user_pass()
-        with self.assertRaises(swat.SWATError):
-           swat.CAS(HOST, PORT, USER, PASSWD, protocol=PROTOCOL, locale='bad-locale')
+        with captured_stderr() as out:
+            with self.assertRaises(swat.SWATError):
+                swat.CAS(HOST, PORT, USER, PASSWD, protocol=PROTOCOL, locale='bad-locale')
 
     def test_echo(self):
         out = self.s.builtins.echo(a=10, b=12.5, c='string value',
@@ -232,71 +270,78 @@ class TestBasics(tm.TestCase):
 
         data = summ
 
-        self.assertEqual(data.ix[:,'Column'].tolist(), 
+        self.assertEqual(data['Column'].tolist(), 
                          ['MSRP','Invoice','EngineSize','Cylinders',
                           'Horsepower','MPG_City','MPG_Highway','Weight','Wheelbase','Length'])
-        self.assertEqual(data.ix[:,'Min'].tolist(), 
+        self.assertEqual(data['Min'].tolist(), 
                          [10280.0, 9875.0, 1.3, 3.0, 73.0, 10.0, 12.0, 1850.0, 89.0, 143.0])
-        self.assertEqual(data.ix[:,'NMiss'].tolist(),
+        self.assertEqual(data['NMiss'].tolist(),
                          [0.0, 0.0, 0.0, 2.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
 
     def test_alltypes(self):
         srcLib = tm.get_casout_lib(self.server_type)
         out = self.s.loadactionset(actionset='actionTest')
+        if out.severity != 0:
+            self.skipTest("actionTest failed to load")
+
         out = self.s.alltypes(casout=dict(caslib=srcLib, name='typestable'))
         out = self.s.fetch(table=self.s.CASTable('typestable', caslib=srcLib), sastypes=False)
 
         data = out['Fetch']
 
-        self.assertEqual(data.ix[:,'Double'][0], 42.42)
-        self.assertEqual(type(data.ix[:,'Double'][0]), np.float64)
+        self.assertEqual(data['Double'].iloc[0], 42.42)
+        self.assertEqual(type(data['Double'].iloc[0]), np.float64)
 
-        self.assertEqual(data.ix[:,'Char'][0], u'AbC\u2782\u2781\u2780')
+        self.assertEqual(data['Char'].iloc[0], u'AbC\u2782\u2781\u2780')
         if (sys.version_info >= (3, 0)):
-            self.assertEqual(type(data.ix[:,'Char'][0]), type('aString'))
+            self.assertEqual(type(data['Char'].iloc[0]), type('aString'))
         else:
-            self.assertEqual(type(data.ix[:,'Char'][0]), unicode)
+            self.assertEqual(type(data['Char'].iloc[0]), unicode)
 
-        self.assertEqual(data.ix[:,'Varchar'][0],
+        self.assertEqual(data['Varchar'].iloc[0],
                          u'This is a test of the Emergency Broadcast System. This is only a test. BEEEEEEEEEEEEEEEEEEP WHAAAA SCREEEEEEEEEEEECH. \u2789\u2788\u2787\u2786\u2785\u2784\u2783\u2782\u2781\u2780 Blastoff!')
         if (sys.version_info >= (3, 0)):
-            self.assertEqual(type(data.ix[:,'Varchar'][0]), type('aString'))
+            self.assertEqual(type(data['Varchar'].iloc[0]), type('aString'))
         else:
-            self.assertEqual(type(data.ix[:,'Varchar'][0]), unicode)
+            self.assertEqual(type(data['Varchar'].iloc[0]), unicode)
 
-        self.assertEqual(data.ix[:,'Int32'][0], 42)
-        self.assertIn(type(data.ix[:,'Int32'][0]), [np.int32, np.int64])
+        self.assertEqual(data['Int32'].iloc[0], 42)
+        self.assertIn(type(data['Int32'].iloc[0]), [np.int32, np.int64])
 
-        self.assertEqual(data.ix[:,'Int64'][0], 9223372036854775807)
-        self.assertEqual(type(data.ix[:,'Int64'][0]), np.int64)
+        # REST interface can sometimes overflow the JSON float
+        if np.isnan(data['Int64'].iloc[0]):
+            self.assertEqual(type(data['Int64'].iloc[0]), np.float64)
+        else:
+            self.assertEqual(data['Int64'].iloc[0], 9223372036854775807)
+            self.assertEqual(type(data['Int64'].iloc[0]), np.int64)
 
-        self.assertEqual(data.ix[:,'Date'][0], datetime.date(1963, 5, 19))
-        self.assertEqual(type(data.ix[:,'Date'][0]), datetime.date)
-        #self.assertEqual(type(data.ix[:,'Date'][0]), datetime.Date)
+        self.assertEqual(data['Date'].iloc[0], datetime.date(1963, 5, 19))
+        self.assertEqual(type(data['Date'].iloc[0]), datetime.date)
+        #self.assertEqual(type(data['Date'].iloc[0]), datetime.Date)
 
-        self.assertEqual(data.ix[:,'Time'][0], datetime.time(11, 12, 13, 141516))
-        self.assertEqual(type(data.ix[:,'Time'][0]), datetime.time)
-        #self.assertEqual(type(data.ix[:,'Time'][0]), datetime.Time)
+        self.assertEqual(data['Time'].iloc[0], datetime.time(11, 12, 13, 141516))
+        self.assertEqual(type(data['Time'].iloc[0]), datetime.time)
+        #self.assertEqual(type(data['Time'].iloc[0]), datetime.Time)
 
-        self.assertEqual(data.ix[:,'Datetime'][0], pandas.to_datetime('1963-05-19 11:12:13.141516'))
-        self.assertEqual(type(data.ix[:,'Datetime'][0]), pandas.Timestamp)
-        #self.assertEqual(type(data.ix[:,'Datetime'][0]), datetime.Datetime)
+        self.assertEqual(data['Datetime'].iloc[0], pandas.to_datetime('1963-05-19 11:12:13.141516'))
+        self.assertEqual(type(data['Datetime'].iloc[0]), pandas.Timestamp)
+        #self.assertEqual(type(data['Datetime'].iloc[0]), datetime.Datetime)
 
-        self.assertEqual(data.ix[:,'DecSext'][0], '12345678901234567890.123456789')
+        self.assertEqual(data['DecSext'].iloc[0], '12345678901234567890.123456789')
         if (sys.version_info >= (3, 0)):
-            self.assertEqual(type(data.ix[:,'DecSext'][0]), type('aString'))
+            self.assertEqual(type(data['DecSext'].iloc[0]), type('aString'))
         else:
-            self.assertEqual(type(data.ix[:,'DecSext'][0]), unicode)
-        #self.assertEqual(type(data.ix[:,'DecSext'][0]), Decimal)
+            self.assertEqual(type(data['DecSext'].iloc[0]), unicode)
+        #self.assertEqual(type(data['DecSext'].iloc[0]), Decimal)
 
-        self.assertEqual(type(data.ix[:,'Binary'][0]), bytes)
-        self.assertTrue(len(data.ix[:,'Binary'][0]) > 0)
+        self.assertEqual(type(data['Binary'].iloc[0]), bytes)
+        self.assertTrue(len(data['Binary'].iloc[0]) > 0)
 
-        self.assertEqual(type(data.ix[:,'Varbinary'][0]), bytes)
+        self.assertEqual(type(data['Varbinary'].iloc[0]), bytes)
         #import binascii
-        #print(len(data.ix[:,'Varbinary'][0]))
-        #print(binascii.hexlify(data.ix[:,'Varbinary'][0]))
-        self.assertTrue(len(data.ix[:,'Varbinary'][0]) > 0)
+        #print(len(data['Varbinary'].iloc[0]))
+        #print(binascii.hexlify(data['Varbinary'].iloc[0]))
+        self.assertTrue(len(data['Varbinary'].iloc[0]) > 0)
 
     def test_array_types(self):
         r = load_data(self.s, 'datasources/summary_array.sashdat', self.server_type)
@@ -309,24 +354,28 @@ class TestBasics(tm.TestCase):
         data = out['Fetch']
 
         for i in range(15):
-           self.assertEqual(data.ix[:,'_Min_'][i], data.ix[:,'myArray1'][i])
-           self.assertEqual(data.ix[:,'_Max_'][i], data.ix[:,'myArray2'][i])
-           self.assertEqual(data.ix[:,'_N_'][i], data.ix[:,'myArray3'][i])
-           self.assertEqual(data.ix[:,'_NMiss_'][i], data.ix[:,'myArray4'][i])
-           self.assertEqual(data.ix[:,'_Mean_'][i], data.ix[:,'myArray5'][i])
-           self.assertEqual(data.ix[:,'_Sum_'][i], data.ix[:,'myArray6'][i])
-           self.assertEqual(data.ix[:,'_Std_'][i], data.ix[:,'myArray7'][i])
-           self.assertEqual(data.ix[:,'_StdErr_'][i], data.ix[:,'myArray8'][i])
-           self.assertEqual(data.ix[:,'_Var_'][i], data.ix[:,'myArray9'][i])
-           self.assertEqual(data.ix[:,'_USS_'][i], data.ix[:,'myArray10'][i])
-           self.assertEqual(data.ix[:,'_CSS_'][i], data.ix[:,'myArray11'][i])
-           self.assertEqual(data.ix[:,'_CV_'][i], data.ix[:,'myArray12'][i])
-           self.assertEqual(data.ix[:,'_T_'][i], data.ix[:,'myArray13'][i])
-           self.assertEqual(data.ix[:,'_PRT_'][i], data.ix[:,'myArray14'][i])
+           self.assertEqual(data['_Min_'].iloc[i], data['myArray1'].iloc[i])
+           self.assertEqual(data['_Max_'].iloc[i], data['myArray2'].iloc[i])
+           self.assertEqual(data['_N_'].iloc[i], data['myArray3'].iloc[i])
+           self.assertEqual(data['_NMiss_'].iloc[i], data['myArray4'].iloc[i])
+           self.assertEqual(data['_Mean_'].iloc[i], data['myArray5'].iloc[i])
+           self.assertEqual(data['_Sum_'].iloc[i], data['myArray6'].iloc[i])
+           self.assertEqual(data['_Std_'].iloc[i], data['myArray7'].iloc[i])
+           self.assertEqual(data['_StdErr_'].iloc[i], data['myArray8'].iloc[i])
+           self.assertEqual(data['_Var_'].iloc[i], data['myArray9'].iloc[i])
+           self.assertEqual(data['_USS_'].iloc[i], data['myArray10'].iloc[i])
+           self.assertEqual(data['_CSS_'].iloc[i], data['myArray11'].iloc[i])
+           self.assertEqual(data['_CV_'].iloc[i], data['myArray12'].iloc[i])
+           self.assertEqual(data['_T_'].iloc[i], data['myArray13'].iloc[i])
+           self.assertEqual(data['_PRT_'].iloc[i], data['myArray14'].iloc[i])
 
         self.s.droptable(caslib=self.srcLib, table=tablename)
 
     def test_multiple_connection_retrieval(self):
+        out = self.s.loadactionset(actionset='actionTest')
+        if out.severity != 0:
+            self.skipTest("actionTest failed to load")
+
         f = self.s.fork(3)
 
         self.assertEqual(len(f), 3)
@@ -403,17 +452,17 @@ class TestBasics(tm.TestCase):
         out = self.s.tableinfo(caslib=srcLib, table='cars')
         data = out['TableInfo']
 
-        self.assertEqual(data.ix[:,'Name'][0], 'CARS')
-        self.assertEqual(data.ix[:,'Rows'][0], 428)
-        self.assertEqual(data.ix[:,'Columns'][0], 15)
+        self.assertEqual(data['Name'].iloc[0], 'CARS')
+        self.assertEqual(data['Rows'].iloc[0], 428)
+        self.assertEqual(data['Columns'].iloc[0], 15)
 
         out = self.s.columninfo(table=self.s.CASTable('cars', caslib=srcLib))
         data = out['ColumnInfo']
 
         self.assertEqual(len(data), 15)
-        self.assertEqual(data.ix[:,'Column'].tolist(),
+        self.assertEqual(data['Column'].tolist(),
                          'Make,Model,Type,Origin,DriveTrain,MSRP,Invoice,EngineSize,Cylinders,Horsepower,MPG_City,MPG_Highway,Weight,Wheelbase,Length'.split(','))
-        self.assertEqual(data.ix[:,'Type'].tolist(), ['varchar', 'varchar', 'varchar', 'varchar', 'varchar', 'int64', 'int64', 'double', 'int64', 'int64', 'int64', 'int64', 'int64', 'int64', 'int64'])
+        self.assertEqual(data['Type'].tolist(), ['varchar', 'varchar', 'varchar', 'varchar', 'varchar', 'int64', 'int64', 'double', 'int64', 'int64', 'int64', 'int64', 'int64', 'int64', 'int64'])
 
         self.assertTablesEqual(cars, self.s.CASTable('cars', caslib=srcLib), sortby=SORT_KEYS)
 
@@ -442,7 +491,7 @@ class TestBasics(tm.TestCase):
         userdata = tbl.histogram(responsefunc=myfunc, vars={'mpg_highway','mpg_city'})
 
         self.assertEqual(sorted(userdata.keys()), ['BinDetails'])
-        self.assertEqual(userdata['BinDetails'].ix[:,'Variable'].tolist(),
+        self.assertEqual(userdata['BinDetails']['Variable'].tolist(),
                          [u'MPG_City']*11 + [u'MPG_Highway']*12)
 
     def test_resultfunc(self):
@@ -459,7 +508,7 @@ class TestBasics(tm.TestCase):
         userdata = tbl.histogram(resultfunc=myfunc, vars={'mpg_highway','mpg_city'})
 
         self.assertEqual(sorted(userdata.keys()), ['BinDetails'])
-        self.assertEqual(userdata['BinDetails'].ix[:,'Variable'].tolist(),
+        self.assertEqual(userdata['BinDetails']['Variable'].tolist(),
                          [u'MPG_City']*11 + [u'MPG_Highway']*12)
 
     def test_attrs(self):        
@@ -472,85 +521,19 @@ class TestBasics(tm.TestCase):
         self.assertEqual(out.attrs['Action'], 'summary')
         self.assertEqual(out.attrs['Actionset'], 'simple')
         self.assertNotEqual(out.attrs['CreateTime'], 0)
-        
-    def test_epdf_server_options_are_hidden(self):
-        # Verify datafeeder options are hidden
-        
-        # Hidden arguments are not visible in optimized images even when showHidden=True;
-        box = os.environ.get('SDSBOX', 'LAXNO').upper()
-        if (box == 'LAXNO' ) | (box == 'LAXDO') | (box == 'WX6NO') | (box == 'WX6DO'):
-            # Do nothing in an optimized image
-            return
 
-        # Load the Server Properties actionSet that contains the datafeeder options
-        r = self.s.builtins.loadactionset(actionset='configuration')
-        if r.severity != 0:
-            self.pp.pprint(r.messages)
-            self.assertEquals( r.status, None )
+    def test_stdout(self):
+        code = "str = ''; do i = 1 to 997; str = str || 'foo'; end; print str;"
+        self.s.loadactionset('sccasl')
 
-        # List the actionSet and include all hidden actions. 
-        # The setServOpt is supposed to be hidden but get and list are not. 
-        out = self.s.builtins.help(actionSet='configuration', showHidden=True)
-        cfg = out['configuration']
-        self.assertTrue(cfg is not None)
-        self.assertEqual(len(cfg.columns), 2)
-        self.assertGreaterEqual(len(cfg), 3)
-        self.assertEqual(cfg.columns[0], 'name')
-        self.assertEqual(cfg.columns[1], 'description')
-        item = cfg.iloc[0].tolist()
-        self.assertTrue(item == ['setServOpt','sets a server option'] or
-                        item == ['setServOpts','sets a server option'])
-        self.assertEqual(cfg.iloc[1].tolist(),
-                         ['getServOpt','displays the value of a server option'])
-        self.assertEqual(cfg.iloc[2].tolist(),
-                         ['listServOpts','Displays the server options and server values'])
-        
-        # List a hidden action 
-        act = self.s.builtins.help(action='setServOpt', showHidden=True)
-        has_set_serv_opts = False
-        if not act:
-            act = self.s.builtins.help(action='setServOpts', showHidden=True)
-            self.assertTrue(act is not None)
-            self.assertTrue(act['setServOpts'])
-            has_set_serv_opts = True
-        else:
-            self.assertTrue(act is not None)
-            self.assertTrue(act['setServOpt'])
-        
-        # 03/09/2016: bosout: Didn't expect hidden action to be returned. Developers notified.
-        # Comment out until we know what to expect.
-        #
-        # Try to list a hidden action when hidden ones are not supposed to be shown
-        act = self.s.builtins.help(action='setServOpt', showHidden=False)
-        #self.assertTrue(act is None) 
-            
-        # Expect non-hidden actions to be returned       
-        act = self.s.builtins.help(action='getServOpt', showHidden=False)
-        self.assertTrue(act is not None)
-        self.assertTrue(act['getServOpt'])
-        
-        act = self.s.builtins.help(action='listServOpts', showHidden=False)
-        self.assertTrue(act is not None)
-        self.assertTrue(act['listServOpts'])         
-        
-        # See if we can set a hidden datafeeder option
-        if has_set_serv_opts:
-            out = self.s.configuration.setServOpts(epdfsslusesni="NO")
-            self.assertEqual( out.status, "Error parsing action parameters." )
-        else:
-            with self.assertRaises(AttributeError):
-                self.s.configuration.setServOpts(epdfsslusesni="NO")
-        
-        # See if we can get a hidden datafeeder option
-        with self.assertRaises(AttributeError):
-            self.s.configuration.getServOpts(name='epdfsslusesni')
-        
-        # See if hidden datafeeder options appear in the option list. 
-        opts = self.s.configuration.listServOpts()
-        self.assertTrue(opts is not None)                      
-        
-        # Verify the datafeeder options don't appear since they are hidden
-        self.assertFalse('NOTE:    int32 nThreads=0 (0 <= value <= 64),' in opts.messages)
+        if swat.TKVersion() == 'vb025':
+            self.skipTest("Stdout fix does not exist in this version")
+
+        with swat.option_context(print_messages=True):
+            with captured_stdout() as out:
+                self.s.runcasl(code)
+
+        self.assertEqual(out.getvalue(), (997 * 'foo') + '\n')
 
 
 if __name__ == '__main__':

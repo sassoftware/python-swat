@@ -99,17 +99,24 @@ class TestCASResponse(tm.TestCase):
         
         conn = self.table.invoke('loadactionset', actionset='simple')
 
+        messages = []
+        disp = None
+        perf = None
         for resp in conn:
-            self.assertIn("NOTE: Added action set 'simple'.", resp.messages)
-            if not resp.messages[0].startswith('WARNING: License for feature'):
-                self.assertEqual(resp.disposition.to_dict(), dict(debug=None, reason=None, 
-                                                                  severity=0, status=None,
-                                                                  status_code=0))
-            self.assertEqual(set(resp.performance.to_dict().keys()), 
-                             set(['cpu_system_time', 'cpu_user_time', 'elapsed_time', 'memory', 
-                                  'memory_os', 'memory_quota', 'system_cores',
-                                  'system_nodes', 'system_total_memory', 'data_movement_time',
-                                  'data_movement_bytes']))
+            messages += resp.messages
+            disp = resp.disposition
+            perf = resp.performance
+
+        self.assertIn("NOTE: Added action set 'simple'.", messages)
+        if not messages[0].startswith('WARNING: License for feature'):
+            self.assertEqual(disp.to_dict(), dict(debug=None, reason=None, 
+                                                  severity=0, status=None,
+                                                  status_code=0))
+        self.assertEqual(set(perf.to_dict().keys()), 
+                         set(['cpu_system_time', 'cpu_user_time', 'elapsed_time', 'memory', 
+                              'memory_os', 'memory_quota', 'system_cores',
+                              'system_nodes', 'system_total_memory', 'data_movement_time',
+                              'data_movement_bytes']))
 
     def test_str(self):
         conn = self.table.invoke('loadactionset', actionset='simple')

@@ -29,6 +29,7 @@ import os
 import re
 import requests
 import six
+import ssl
 import sys
 from six.moves import urllib
 from .message import REST_CASMessage
@@ -159,6 +160,18 @@ def _normalize_list(items):
     return newitems
 
 
+class SSLContextAdapter(requests.adapters.HTTPAdapter):
+    ''' HTTPAdapter that uses the default SSL context on the machine '''
+
+    def init_poolmanager(self, connections, maxsize,
+                         block=requests.adapters.DEFAULT_POOLBLOCK, **pool_kwargs):
+        context = ssl.create_default_context()
+        pool_kwargs['ssl_context'] = context
+        return super(SSLContextAdapter, self).init_poolmanager(connections,
+                                                               maxsize, block,
+                                                               **pool_kwargs)
+
+
 class REST_CASConnection(object):
     '''
     Create a REST CAS connection
@@ -260,6 +273,8 @@ class REST_CASConnection(object):
             self._req_sess.verify = os.path.expanduser(os.environ['SSLCALISTLOC'])
         elif 'CAS_CLIENT_SSL_CA_LIST' in os.environ:
             self._req_sess.verify = os.path.expanduser(os.environ['CAS_CLIENT_SSL_CA_LIST'])
+        elif 'REQUESTS_CA_BUNDLE' not in os.environ:
+            self._req_sess.mount('https://', SSLContextAdapter())
 
         if os.environ.get('SSLREQCERT', 'y').lower().startswith('n'):
             self._req_sess.verify = False
@@ -281,10 +296,21 @@ class REST_CASConnection(object):
 
                     res = self._req_sess.get(url, data=b'')
 
+                    if 'tkhttp-id' in res.cookies:
+                        self._req_sess.headers.update({
+                            'tkhttp-id': res.cookies['tkhttp-id'].strip()
+                        })
+
                     if get_option('cas.debug.responses'):
                         _print_response(res.text)
 
-                    out = json.loads(a2u(res.text, 'utf-8'))
+                    try:
+                        txt = a2u(res.text, 'utf-8')
+                        out = json.loads(txt, strict=False)
+                    except Exception:
+                        sys.stderr.write(txt)
+                        sys.stderr.write('\n')
+                        raise
 
                     if out.get('error', None):
                         if out.get('details', None):
@@ -303,10 +329,21 @@ class REST_CASConnection(object):
 
                     res = self._req_sess.put(url, data=b'')
 
+                    if 'tkhttp-id' in res.cookies:
+                        self._req_sess.headers.update({
+                            'tkhttp-id': res.cookies['tkhttp-id'].strip()
+                        })
+
                     if get_option('cas.debug.responses'):
                         _print_response(res.text)
 
-                    out = json.loads(a2u(res.text, 'utf-8'))
+                    try:
+                        txt = a2u(res.text, 'utf-8')
+                        out = json.loads(txt, strict=False)
+                    except Exception:
+                        sys.stderr.write(txt)
+                        sys.stderr.write('\n')
+                        raise
 
                     if out.get('error', None):
                         if out.get('details', None):
@@ -323,9 +360,10 @@ class REST_CASConnection(object):
                                             .get('formattedStatus',
                                                  'Invalid locale: %s' % locale))
                         self._results.clear()
+
                     break
 
-            except requests.ConnectionError as exc:
+            except requests.ConnectionError:
                 self._set_next_connection()
 
             except Exception as exc:
@@ -378,6 +416,7 @@ class REST_CASConnection(object):
 
         result_id = None
 
+        txt = ''
         while True:
             try:
                 url = urllib.parse.urljoin(self._current_baseurl,
@@ -395,7 +434,7 @@ class REST_CASConnection(object):
                 res = res.text
                 break
 
-            except requests.ConnectionError as exc:
+            except requests.ConnectionError:
                 self._set_next_connection()
 
                 # Get ID of results
@@ -418,7 +457,14 @@ class REST_CASConnection(object):
                 if get_option('cas.debug.responses'):
                     _print_response(res.text)
 
-                out = json.loads(a2u(res.text, 'utf-8'), strict=False)
+                try:
+                    txt = a2u(res.text, 'utf-8')
+                    out = json.loads(txt, strict=False)
+                except Exception:
+                    sys.stderr.write(txt)
+                    sys.stderr.write('\n')
+                    raise
+
                 result_id = out['results']['Queued Results']['rows'][0][0]
 
                 # Setup retrieval of results from ID
@@ -433,7 +479,14 @@ class REST_CASConnection(object):
                 raise SWATError(str(exc))
 
         try:
-            self._results = json.loads(a2u(res, 'utf-8'), strict=False)
+            txt = a2u(res, 'utf-8')
+            self._results = json.loads(txt, strict=False)
+        except Exception:
+            sys.stderr.write(txt)
+            sys.stderr.write('\n')
+            raise
+
+        try:
             if self._results.get('disposition', None) is None:
                 if self._results.get('error'):
                     raise SWATError(self._results['error'])
@@ -480,8 +533,7 @@ class REST_CASConnection(object):
 
     def copy(self):
         ''' Copy the connection object '''
-        username, password = base64.b64decode(
-                                 self._auth.split(b' ', 1)[-1]).split(b':', 1)
+        username, password = base64.b64decode(self._auth.split(b' ', 1)[-1]).split(b':', 1)
         return type(self)(self._orig_hostname, self._orig_port,
                           a2u(username), a2u(password),
                           self._soptions,
@@ -550,7 +602,7 @@ class REST_CASConnection(object):
                 res = res.text
                 break
 
-            except requests.ConnectionError as exc:
+            except requests.ConnectionError:
                 self._set_next_connection()
 
             except Exception as exc:
@@ -560,7 +612,14 @@ class REST_CASConnection(object):
                 del self._req_sess.headers['JSON-Parameters']
 
         try:
-            out = json.loads(a2u(res, 'utf-8'), strict=False)
+            txt = a2u(res, 'utf-8')
+            out = json.loads(txt, strict=False)
+        except Exception:
+            sys.stderr.write(txt)
+            sys.stderr.write('\n')
+            raise
+
+        try:
             if out.get('disposition', None) is None:
                 if out.get('error'):
                     raise SWATError(self._results['error'])

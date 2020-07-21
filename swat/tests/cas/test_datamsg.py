@@ -95,16 +95,16 @@ class TestDataMsgHandlers(tm.TestCase):
         out = self.s.tableinfo(caslib=srcLib, table='cars')
         data = out['TableInfo']
 
-        self.assertEqual(data.ix[:,'Name'][0], 'CARS')
-        self.assertEqual(data.ix[:,'Rows'][0], 428)
-        self.assertEqual(data.ix[:,'Columns'][0], 15)
+        self.assertEqual(data['Name'].iloc[0], 'CARS')
+        self.assertEqual(data['Rows'].iloc[0], 428)
+        self.assertEqual(data['Columns'].iloc[0], 15)
 
         out = self.s.columninfo(table=self.s.CASTable('cars', caslib=srcLib))
         data = out['ColumnInfo']
 
         self.assertEqual(len(data), 15)
-        self.assertEqual(data.ix[:,'Column'].tolist(), 'Make,Model,Type,Origin,DriveTrain,MSRP,Invoice,EngineSize,Cylinders,Horsepower,MPG_City,MPG_Highway,Weight,Wheelbase,Length'.split(','))
-        self.assertEqual(data.ix[:,'Type'].tolist(), ['varchar', 'varchar', 'varchar', 'varchar', 'varchar', 'int64', 'int64', 'double', 'int64', 'int64', 'int64', 'int64', 'int64', 'int64', 'int64'])
+        self.assertEqual(data['Column'].tolist(), 'Make,Model,Type,Origin,DriveTrain,MSRP,Invoice,EngineSize,Cylinders,Horsepower,MPG_City,MPG_Highway,Weight,Wheelbase,Length'.split(','))
+        self.assertEqual(data['Type'].tolist(), ['varchar', 'varchar', 'varchar', 'varchar', 'varchar', 'int64', 'int64', 'double', 'int64', 'int64', 'int64', 'int64', 'int64', 'int64', 'int64'])
 
         self.assertTablesEqual(cars, self.s.CASTable('cars', caslib=srcLib), sortby=SORT_KEYS)
 

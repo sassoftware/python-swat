@@ -25,6 +25,8 @@ from __future__ import print_function, division, absolute_import, unicode_litera
 
 import glob
 import os
+import platform
+import struct
 import sys
 from .utils.compat import PY3, WIDE_CHARS, a2u
 from .exceptions import SWATError
@@ -38,16 +40,13 @@ def _import_pyswat():
     ''' Import version-specific _pyswat package '''
     global _pyswat
 
-    import glob
     import importlib
-    import os
-    import sys
 
-    platform = 'linux'
+    plat = 'linux'
     if sys.platform.lower().startswith('win'):
-        platform = 'win'
+        plat = 'win'
     elif sys.platform.lower().startswith('darwin'):
-        platform = 'mac'
+        plat = 'mac'
 
     if PY3:
         libname = '_py%s%sswat' % (sys.version_info[0], sys.version_info[1])
@@ -57,14 +56,14 @@ def _import_pyswat():
         libname = '_pyswat'
 
     # Bail out if we aren't on Linux
-#   if platform != 'linux':
+#   if plat != 'linux':
 #       raise ValueError('Currently, Linux is the only platform with support '
 #                        'for the binary protocol.  You must connect to CAS '
 #                        'using the REST interface on this platform.')
 
     # Bail out if the C extension doesn't exist
     if not glob.glob(os.path.join(os.path.dirname(__file__), 'lib',
-                                  platform, libname + '.*')):
+                                  plat, libname + '.*')):
         raise ValueError('The extensions for the binary protocol have not been '
                          'installed.  You can either install them using the full '
                          'platform-dependent install file, or use the REST interface '
@@ -73,15 +72,34 @@ def _import_pyswat():
     if not os.environ.get('TKESSL_OPENSSL_LIB', '').strip():
         # Make sure the correct libssl.so is used
         libssl = list(sorted(glob.glob(os.path.join('/usr/lib64/libssl.so.10')))) + \
-                 list(sorted(glob.glob(os.path.join('/usr/lib64/libssl.so.1.0*')))) + \
-                 list(sorted(glob.glob(os.path.join(sys.prefix, 'lib', 'libssl.so.10')))) + \
-                 list(sorted(glob.glob(os.path.join(sys.prefix, 'lib', 'libssl.so.1.0*'))))
+            list(sorted(glob.glob(os.path.join('/usr/lib64/libssl.so.1.0*')))) + \
+            list(sorted(glob.glob(os.path.join(sys.prefix, 'lib', 'libssl.so.10')))) + \
+            list(sorted(glob.glob(os.path.join(sys.prefix, 'lib', 'libssl.so.1.0*')))) + \
+            list(sorted(glob.glob(os.path.join('/usr/lib64/libssl.so.1.1*')))) + \
+            list(sorted(glob.glob(os.path.join(sys.prefix, 'lib', 'libssl.so.1.1*'))))
         if libssl:
             os.environ['TKESSL_OPENSSL_LIB'] = libssl[-1]
 
+    if not os.environ.get('TKERSA2_OPENSSL_LIB', '').strip():
+        # Make sure the correct libssl.so is used
+        libssl = list(sorted(glob.glob(os.path.join('/usr/lib64/libssl.so.10')))) + \
+            list(sorted(glob.glob(os.path.join('/usr/lib64/libssl.so.1.0*')))) + \
+            list(sorted(glob.glob(os.path.join(sys.prefix, 'lib', 'libssl.so.10')))) + \
+            list(sorted(glob.glob(os.path.join(sys.prefix, 'lib', 'libssl.so.1.0*')))) + \
+            list(sorted(glob.glob(os.path.join('/usr/lib64/libssl.so.1.1*')))) + \
+            list(sorted(glob.glob(os.path.join(sys.prefix, 'lib', 'libssl.so.1.1*'))))
+        if libssl:
+            os.environ['TKERSA2_OPENSSL_LIB'] = libssl[-1]
+
+    if struct.calcsize('P') < 8:
+        raise RuntimeError('A 64-bit build of Python is required for the '
+                           'binary protocol.  You can either install a 64-bit '
+                           'version of Python, or use the REST interface as '
+                           'an alternative.')
+
     # Try to import the C extension
     try:
-        _pyswat = importlib.import_module('.lib.%s.%s' % (platform, libname),
+        _pyswat = importlib.import_module('.lib.%s.%s' % (plat, libname),
                                           package='swat')
 
     except ImportError:
@@ -137,7 +155,35 @@ def InitializeTK(*args, **kwargs):
     ''' Initialize the TK subsystem (importing _pyswat as needed) '''
     if _pyswat is None:
         _import_pyswat()
-    return _pyswat.InitializeTK(*args, **kwargs)
+
+    # Patch ppc linux path
+    set_tkpath_env = 'ppc' in platform.machine() and 'TKPATH' not in os.environ
+    if set_tkpath_env and args:
+        os.environ['TKPATH'] = args[0]
+
+    try:
+        out = _pyswat.InitializeTK(*args, **kwargs)
+
+    finally:
+        if set_tkpath_env:
+            del os.environ['TKPATH']
+
+        # Override TKPATH after initialization so that other TK applications
+        # won't be affected (Windows only).
+        if sys.platform.lower().startswith('win') and 'TKPATH' not in os.environ:
+            os.environ['TKPATH'] = os.pathsep
+
+    return out
+
+
+def TKVersion():
+    ''' Return the TK subsystem version '''
+    if _pyswat is None:
+        _import_pyswat()
+    try:
+        return _pyswat.TKVersion()
+    except AttributeError:
+        return 'vb025'
 
 
 def errorcheck(expr, obj):

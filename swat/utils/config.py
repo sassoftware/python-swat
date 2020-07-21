@@ -359,7 +359,7 @@ def check_int(value, minimum=None, maximum=None, exclusive_minimum=False,
     '''
     try:
         out = int(value)
-    except:
+    except Exception:
         raise SWATOptionError('Could not convert %s to an integer' % value)
 
     if minimum is not None:
@@ -413,7 +413,7 @@ def check_float(value, minimum=None, maximum=None, exclusive_minimum=False,
     '''
     try:
         out = float(value)
-    except:
+    except Exception:
         raise SWATOptionError('Could not convert %s to a float' % value)
 
     if minimum is not None:
@@ -492,7 +492,7 @@ def check_string(value, pattern=None, max_length=None, min_length=None,
     '''
     try:
         out = a2u(value)
-    except:
+    except Exception:
         raise SWATOptionError('Could not convert string value to unicode')
 
     if max_length is not None and len(out) > max_length:
@@ -541,7 +541,7 @@ def check_url(value, pattern=None, max_length=None, min_length=None, valid_value
                        min_length=min_length, valid_values=valid_values)
     try:
         urlparse(out)
-    except:
+    except Exception:
         raise SWATOptionError('%s is not a valid URL' % value)
     return out
 

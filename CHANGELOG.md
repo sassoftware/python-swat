@@ -1,6 +1,23 @@
 
 # Change Log
 
+## 1.6.1 - 2020-02-10
+
+- Add pandas v1.0.0 support
+
+## 1.6.0 - 2019-11-21
+
+- Fix letter-casing in `has_action` and `has_actionset` methods
+- Remove usage of deprecated `ix` accessor
+- Explicitly specify column and line delimiters and locale in uploaded CSV files
+- Fix TKPATH issues in Windows and PPC
+
+## 1.5.2 - 2019-09-09
+
+- Fix issue with nulls in REST parameters
+- Add fallback default configuration for SSL
+- Add `CASTable.get` method
+
 ## 1.5.1 - 2019-03-01
 
 - Fix Authinfo matching when using base URLs in REST interface

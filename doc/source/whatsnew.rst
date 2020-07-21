@@ -9,6 +9,28 @@ What's New
 
 This document outlines features and improvements from each release.
 
+1.6.1 (February 10, 2020)
+=========================
+
+- Add pandas v1.0.0 support
+
+1.6.0 (November 21, 2019)
+=========================
+
+- Fix letter-casing in ``has_action`` and ``has_actionset`` methods
+- Remove usage of deprecated ``ix`` accessor
+- Explicitly specify column and line delimiters and locale in uploaded CSV files
+- Fix TKPATH issues in Windows and PPC
+
+
+1.5.2 (September 9, 2019)
+=========================
+
+- Fix issue with nulls in REST parameters
+- Add fallback default configuration for SSL
+- Add ``CASTable.get`` method
+
+
 1.5.1 (March 1, 2019)
 =====================
 

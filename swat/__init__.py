@@ -65,6 +65,9 @@ import sys
 if sys.hexversion < 0x02070000:
     raise RuntimeError('Python 2.7 or newer is required to use this package.')
 
+# C extension
+from .clib import InitializeTK, TKVersion
+
 # Configuration
 from . import config    # noqa: E402
 from .config import (set_option, get_option, reset_option, describe_option,
@@ -90,4 +93,5 @@ from .exceptions import SWATError, SWATOptionError, SWATCASActionError    # noqa
 # SAS Formatter
 from .formatter import SASFormatter    # noqa: E402
 
-__version__ = '1.5.2-dev'
+__version__ = '1.6.2-dev'
+__tk_version__ = None
