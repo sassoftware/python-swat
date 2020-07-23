@@ -528,6 +528,8 @@ class TestBasics(tm.TestCase):
 
         if swat.TKVersion() == 'vb025':
             self.skipTest("Stdout fix does not exist in this version")
+        if sys.version_info[0] < 3:
+            self.skipTest("Stdout redirection in C extension does not work in Python 2")
 
         with swat.option_context(print_messages=True):
             with captured_stdout() as out:

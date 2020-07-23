@@ -35,6 +35,7 @@ import swat
 import swat.utils.testing as tm
 import sys
 import unittest
+import warnings
 from swat.cas.table import concat
 
 from PIL import Image
@@ -2087,82 +2088,85 @@ class TestCASTable(tm.TestCase):
         df = self.get_cars_df().sort_values(SORT_KEYS)
         tbl = self.table.sort_values(SORT_KEYS)
 
-        # Row indexes
-#       self.assertEqual(df[0].tolist(), tbl.ix[0].tolist())
-#       self.assertEqual(df.ix[5].tolist(), tbl.ix[5].tolist())
-#       self.assertEqual(df.ix[149].tolist(), tbl.ix[149].tolist())
+        with warnings.catch_warnings():
+            warnings.filterwarnings('ignore', category=FutureWarning)
 
-        # No negative indexing if the index column is numeric
-#       with self.assertRaises(KeyError):
-#           tbl.ix[-1]
+            # Row indexes
+#           self.assertEqual(df[0].tolist(), tbl.ix[0].tolist())
+#           self.assertEqual(df.ix[5].tolist(), tbl.ix[5].tolist())
+#           self.assertEqual(df.ix[149].tolist(), tbl.ix[149].tolist())
 
-        # Slicing that returns a CASTable is not allowed
-#       with self.assertRaises(TypeError):
-#           tbl.ix[0:1]
+            # No negative indexing if the index column is numeric
+#           with self.assertRaises(KeyError):
+#               tbl.ix[-1]
 
-        with self.assertRaises(IndexError):
-            tbl.ix[0, 0]
+            # Slicing that returns a CASTable is not allowed
+#           with self.assertRaises(TypeError):
+#               tbl.ix[0:1]
 
-        with self.assertRaises(IndexError):
-            tbl.ix[:3, 0]
+            with self.assertRaises(IndexError):
+                tbl.ix[0, 0]
 
-        # Row indexes with single column name
-        self.assertColsEqual(df.ix[:, 0], tbl.ix[:, 0])
-        self.assertColsEqual(df.ix[:, 3], tbl.ix[:, 3])
+            with self.assertRaises(IndexError):
+                tbl.ix[:3, 0]
 
-        # Row indexes with columns
-        self.assertTablesEqual(df.ix[:, [0]], tbl.ix[:, [0]], sortby=None)
-        self.assertEqual(len(df.ix[:, [0]]), len(tbl.ix[:, [0]]))
-        self.assertTablesEqual(df.ix[:, [0, 3]], tbl.ix[:, [0, 3]], sortby=None)
-        self.assertTablesEqual(df.ix[:, [-2]], tbl.ix[:, [-2]], sortby=None)
-        self.assertTablesEqual(df.ix[:, [2, -3]], tbl.ix[:, [2, -3]], sortby=None)
-        self.assertTablesEqual(df.ix[:, [2, -3, 4]], tbl.ix[:, [2, -3, 4]], sortby=None)
+            # Row indexes with single column name
+            self.assertColsEqual(df.ix[:, 0], tbl.ix[:, 0])
+            self.assertColsEqual(df.ix[:, 3], tbl.ix[:, 3])
 
-        # Non-existent row
-#       with self.assertRaises(KeyError):
-#           tbl.ix[500, [0, 3]]
+            # Row indexes with columns
+            self.assertTablesEqual(df.ix[:, [0]], tbl.ix[:, [0]], sortby=None)
+            self.assertEqual(len(df.ix[:, [0]]), len(tbl.ix[:, [0]]))
+            self.assertTablesEqual(df.ix[:, [0, 3]], tbl.ix[:, [0, 3]], sortby=None)
+            self.assertTablesEqual(df.ix[:, [-2]], tbl.ix[:, [-2]], sortby=None)
+            self.assertTablesEqual(df.ix[:, [2, -3]], tbl.ix[:, [2, -3]], sortby=None)
+            self.assertTablesEqual(df.ix[:, [2, -3, 4]], tbl.ix[:, [2, -3, 4]], sortby=None)
 
-        # Non-existent column
-#       with self.assertRaises(IndexError):
-#           tbl.ix[5, [100, 3]]
+            # Non-existent row
+#           with self.assertRaises(KeyError):
+#               tbl.ix[500, [0, 3]]
 
-        # Column slices - use strings because nan won't compare equal
-        self.assertTablesEqual(df.ix[:, 1:5], tbl.ix[:, 1:5], sortby=None)
-        self.assertTablesEqual(df.ix[:, 1:], tbl.ix[:, 1:], sortby=None)
-        self.assertTablesEqual(df.ix[:, :5], tbl.ix[:, :5], sortby=None)
-        self.assertTablesEqual(df.ix[:, :], tbl.ix[:, :], sortby=None)
-        self.assertTablesEqual(df.ix[:, 1:-5], tbl.ix[:, 1:-5], sortby=None)
-        self.assertTablesEqual(df.ix[:, 1:], tbl.ix[:, 1:], sortby=None)
-        self.assertTablesEqual(df.ix[:, :-5], tbl.ix[:, :-5], sortby=None)
-        self.assertTablesEqual(df.ix[:, :], tbl.ix[:, :], sortby=None)
+            # Non-existent column
+#           with self.assertRaises(IndexError):
+#               tbl.ix[5, [100, 3]]
 
-        # Row labels with single column name
-        self.assertColsEqual(df.ix[:, 'Make'], tbl.ix[:, 'Make'])
-        self.assertColsEqual(df.ix[:, 'MSRP'], tbl.ix[:, 'MSRP'])
+            # Column slices - use strings because nan won't compare equal
+            self.assertTablesEqual(df.ix[:, 1:5], tbl.ix[:, 1:5], sortby=None)
+            self.assertTablesEqual(df.ix[:, 1:], tbl.ix[:, 1:], sortby=None)
+            self.assertTablesEqual(df.ix[:, :5], tbl.ix[:, :5], sortby=None)
+            self.assertTablesEqual(df.ix[:, :], tbl.ix[:, :], sortby=None)
+            self.assertTablesEqual(df.ix[:, 1:-5], tbl.ix[:, 1:-5], sortby=None)
+            self.assertTablesEqual(df.ix[:, 1:], tbl.ix[:, 1:], sortby=None)
+            self.assertTablesEqual(df.ix[:, :-5], tbl.ix[:, :-5], sortby=None)
+            self.assertTablesEqual(df.ix[:, :], tbl.ix[:, :], sortby=None)
 
-        # Row labels with columns
-        self.assertTablesEqual(df.ix[:, ['Make']], tbl.ix[:, ['Make']], sortby=None)
-        self.assertTablesEqual(df.ix[:, ['Make', 'MSRP']], tbl.ix[:, ['Make', 'MSRP']], sortby=None)
+            # Row labels with single column name
+            self.assertColsEqual(df.ix[:, 'Make'], tbl.ix[:, 'Make'])
+            self.assertColsEqual(df.ix[:, 'MSRP'], tbl.ix[:, 'MSRP'])
 
-        # Non-existent row
-#       with self.assertRaises(KeyError):
-#           tbl.ix[500, ['Make', 'MSRP']]
+            # Row labels with columns
+            self.assertTablesEqual(df.ix[:, ['Make']], tbl.ix[:, ['Make']], sortby=None)
+            self.assertTablesEqual(df.ix[:, ['Make', 'MSRP']], tbl.ix[:, ['Make', 'MSRP']], sortby=None)
 
-        # Non-existent column
-        try:
-            dfout = df.ix[:, ['Foo', 'MSRP']].values
-            tblout = tbl.ix[:, ['Foo', 'MSRP']].values
-            self.assertTrue(np.isnan(dfout[0, 0]) and np.isnan(tblout[0, 0]))
-            self.assertEqual(dfout[0, 1], tblout[0, 1])
-        except KeyError:
-            # Newer versions of pandas raise a KeyError.  If that happens, skip this test.
-            pass
+            # Non-existent row
+#           with self.assertRaises(KeyError):
+#               tbl.ix[500, ['Make', 'MSRP']]
 
-        # Column slices
-        self.assertTablesEqual(df.ix[:, 'Make':'MSRP'], tbl.ix[:, 'Make':'MSRP'], sortby=None)
-        self.assertTablesEqual(df.ix[:, 'Make':], tbl.ix[:, 'Make':], sortby=None)
-        self.assertTablesEqual(df.ix[:, :'MSRP'], tbl.ix[:, :'MSRP'], sortby=None)
-        self.assertTablesEqual(df.ix[:, :], tbl.ix[:, :], sortby=None)
+            # Non-existent column
+            try:
+                dfout = df.ix[:, ['Foo', 'MSRP']].values
+                tblout = tbl.ix[:, ['Foo', 'MSRP']].values
+                self.assertTrue(np.isnan(dfout[0, 0]) and np.isnan(tblout[0, 0]))
+                self.assertEqual(dfout[0, 1], tblout[0, 1])
+            except KeyError:
+                # Newer versions of pandas raise a KeyError.  If that happens, skip this test.
+                pass
+
+            # Column slices
+            self.assertTablesEqual(df.ix[:, 'Make':'MSRP'], tbl.ix[:, 'Make':'MSRP'], sortby=None)
+            self.assertTablesEqual(df.ix[:, 'Make':], tbl.ix[:, 'Make':], sortby=None)
+            self.assertTablesEqual(df.ix[:, :'MSRP'], tbl.ix[:, :'MSRP'], sortby=None)
+            self.assertTablesEqual(df.ix[:, :], tbl.ix[:, :], sortby=None)
 
     @unittest.skipIf(pd_version >= (1, 0, 0), 'Need newer version of Pandas')
     def test_column_ix(self):

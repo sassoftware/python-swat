@@ -886,16 +886,16 @@ class TestConnectionInfo(tm.TestCase):
 
         # http
         out = c._get_connection_info('cas-server-1.com', 12345, None, None, 'http', None)
-        self.assertEqual(out, ('http://cas-server-1.com:12345', None, None, None, None))
+        self.assertEqual(out, ('http://cas-server-1.com:12345', 12345, None, None, 'http'))
 
         out = c._get_connection_info('cas-server-1.com', 12345, 'myuserid', None, 'http', None)
-        self.assertEqual(out, ('http://cas-server-1.com:12345', None, 'myuserid', None, None))
+        self.assertEqual(out, ('http://cas-server-1.com:12345', 12345, 'myuserid', None, 'http'))
 
         out = c._get_connection_info('cas-server-1.com', 12345, None, 'mytoken', 'http', None)
-        self.assertEqual(out, ('http://cas-server-1.com:12345', None, None, 'mytoken', None))
+        self.assertEqual(out, ('http://cas-server-1.com:12345', 12345, None, 'mytoken', 'http'))
 
         out = c._get_connection_info('cas-server-1.com', 12345, 'myuserid', 'mytoken', 'http', None)
-        self.assertEqual(out, ('http://cas-server-1.com:12345', None, 'myuserid', 'mytoken', None))
+        self.assertEqual(out, ('http://cas-server-1.com:12345', 12345, 'myuserid', 'mytoken', 'http'))
 
         # cas with path (which means nothing)
         out = c._get_connection_info('cas-server-1.com', 12345, None, None, None, 'cas-server/base')
@@ -912,41 +912,41 @@ class TestConnectionInfo(tm.TestCase):
 
         # http with path
         out = c._get_connection_info('cas-server-1.com', 12345, None, None, 'http', 'cas-server/base')
-        self.assertEqual(out, ('http://cas-server-1.com:12345/cas-server/base', None, None, None, None))
+        self.assertEqual(out, ('http://cas-server-1.com:12345/cas-server/base', 12345, None, None, 'http'))
 
         out = c._get_connection_info('cas-server-1.com', 12345, 'myuserid', None, 'http', 'cas-server/base')
-        self.assertEqual(out, ('http://cas-server-1.com:12345/cas-server/base', None, 'myuserid', None, None))
+        self.assertEqual(out, ('http://cas-server-1.com:12345/cas-server/base', 12345, 'myuserid', None, 'http'))
 
         out = c._get_connection_info('cas-server-1.com', 12345, None, 'mytoken', 'http', 'cas-server/base')
-        self.assertEqual(out, ('http://cas-server-1.com:12345/cas-server/base', None, None, 'mytoken', None))
+        self.assertEqual(out, ('http://cas-server-1.com:12345/cas-server/base', 12345, None, 'mytoken', 'http'))
 
         out = c._get_connection_info('cas-server-1.com', 12345, 'myuserid', 'mytoken', 'http', 'cas-server/base')
-        self.assertEqual(out, ('http://cas-server-1.com:12345/cas-server/base', None, 'myuserid', 'mytoken', None))
+        self.assertEqual(out, ('http://cas-server-1.com:12345/cas-server/base', 12345, 'myuserid', 'mytoken', 'http'))
 
         # URL with path and separate port
         out = c._get_connection_info('cas-server-1.com/cas-server/base', 12345, None, None, 'http', None)
-        self.assertEqual(out, ('http://cas-server-1.com:12345/cas-server/base', None, None, None, None))
+        self.assertEqual(out, ('http://cas-server-1.com:12345/cas-server/base', 12345, None, None, 'http'))
 
         out = c._get_connection_info('cas-server-1.com/cas-server/base', 12345, 'myuserid', None, 'http', None)
-        self.assertEqual(out, ('http://cas-server-1.com:12345/cas-server/base', None, 'myuserid', None, None))
+        self.assertEqual(out, ('http://cas-server-1.com:12345/cas-server/base', 12345, 'myuserid', None, 'http'))
 
         out = c._get_connection_info('cas-server-1.com/cas-server/base', 12345, None, 'mytoken', 'http', None)
-        self.assertEqual(out, ('http://cas-server-1.com:12345/cas-server/base', None, None, 'mytoken', None))
+        self.assertEqual(out, ('http://cas-server-1.com:12345/cas-server/base', 12345, None, 'mytoken', 'http'))
 
         out = c._get_connection_info('cas-server-1.com/cas-server/base', 12345, 'myuserid', 'mytoken', 'http', None)
-        self.assertEqual(out, ('http://cas-server-1.com:12345/cas-server/base', None, 'myuserid', 'mytoken', None))
+        self.assertEqual(out, ('http://cas-server-1.com:12345/cas-server/base', 12345, 'myuserid', 'mytoken', 'http'))
 
         out = c._get_connection_info('https://cas-server-1.com/cas-server/base', 12345, None, None, 'http', None)
-        self.assertEqual(out, ('https://cas-server-1.com:12345/cas-server/base', None, None, None, None))
+        self.assertEqual(out, ('https://cas-server-1.com:12345/cas-server/base', 12345, None, None, 'https'))
 
         out = c._get_connection_info('https://cas-server-1.com/cas-server/base', 12345, 'myuserid', None, 'http', None)
-        self.assertEqual(out, ('https://cas-server-1.com:12345/cas-server/base', None, 'myuserid', None, None))
+        self.assertEqual(out, ('https://cas-server-1.com:12345/cas-server/base', 12345, 'myuserid', None, 'https'))
 
         out = c._get_connection_info('https://cas-server-1.com/cas-server/base', 12345, None, 'mytoken', 'http', None)
-        self.assertEqual(out, ('https://cas-server-1.com:12345/cas-server/base', None, None, 'mytoken', None))
+        self.assertEqual(out, ('https://cas-server-1.com:12345/cas-server/base', 12345, None, 'mytoken', 'https'))
 
         out = c._get_connection_info('https://cas-server-1.com/cas-server/base', 12345, 'myuserid', 'mytoken', 'http', None)
-        self.assertEqual(out, ('https://cas-server-1.com:12345/cas-server/base', None, 'myuserid', 'mytoken', None))
+        self.assertEqual(out, ('https://cas-server-1.com:12345/cas-server/base', 12345, 'myuserid', 'mytoken', 'https'))
 
     def test_protocols(self):
         c = swat.CAS
@@ -955,10 +955,10 @@ class TestConnectionInfo(tm.TestCase):
         self.assertEqual(out, ('cas-server-1.com', 12345, 'myuserid', 'mytoken', 'cas'))
 
         out = c._get_connection_info('cas-server-1.com', 12345, 'myuserid', 'mytoken', 'http', None)
-        self.assertEqual(out, ('http://cas-server-1.com:12345', None, 'myuserid', 'mytoken', None))
+        self.assertEqual(out, ('http://cas-server-1.com:12345', 12345, 'myuserid', 'mytoken', 'http'))
 
         out = c._get_connection_info('cas-server-1.com', 12345, 'myuserid', 'mytoken', 'https', None)
-        self.assertEqual(out, ('https://cas-server-1.com:12345', None, 'myuserid', 'mytoken', None))
+        self.assertEqual(out, ('https://cas-server-1.com:12345', 12345, 'myuserid', 'mytoken', 'https'))
 
         out = c._get_connection_info('cas-server-1.com', 12345, 'myuserid', 'mytoken', 'cas', None)
         self.assertEqual(out, ('cas-server-1.com', 12345, 'myuserid', 'mytoken', 'cas'))
@@ -985,13 +985,13 @@ class TestConnectionInfo(tm.TestCase):
         self.assertEqual(out, ('cas-server-1.com', 5570, 'otheruser', 'otherpassword', 'cas'))
         
         out = c._get_connection_info('http://cas-server-1.com:5570', 12345, 'myuserid', 'mytoken', 'cas', None)
-        self.assertEqual(out, ('http://cas-server-1.com:5570', None, 'myuserid', 'mytoken', None))
+        self.assertEqual(out, ('http://cas-server-1.com:5570', 5570, 'myuserid', 'mytoken', 'http'))
         
         out = c._get_connection_info('http://otheruser:@cas-server-1.com:5570', 12345, 'myuserid', 'mytoken', 'cas', None)
-        self.assertEqual(out, ('http://cas-server-1.com:5570', None, 'otheruser', 'mytoken', None))
+        self.assertEqual(out, ('http://cas-server-1.com:5570', 5570, 'otheruser', 'mytoken', 'http'))
         
         out = c._get_connection_info('http://otheruser:otherpassword@cas-server-1.com:5570', 12345, 'myuserid', 'mytoken', 'cas', None)
-        self.assertEqual(out, ('http://cas-server-1.com:5570', None, 'otheruser', 'otherpassword', None))
+        self.assertEqual(out, ('http://cas-server-1.com:5570', 5570, 'otheruser', 'otherpassword', 'http'))
         
     def test_multiple_hosts(self):
         c = swat.CAS
@@ -1039,28 +1039,28 @@ class TestConnectionInfo(tm.TestCase):
                                       'cas-server-3.com'], 12345, None, None, 'http', None)
         self.assertEqual(out, ('http://cas-server-1.com:12345 '
                                'http://cas-server-2.com:12345 '
-                               'http://cas-server-3.com:12345', None, None, None, None))
+                               'http://cas-server-3.com:12345', 12345, None, None, 'http'))
 
         out = c._get_connection_info(['cas-server-1.com', 
                                       'cas-server-2.com', 
                                       'cas-server-3.com'], 12345, 'myuserid', None, 'http', None)
         self.assertEqual(out, ('http://cas-server-1.com:12345 '
                                'http://cas-server-2.com:12345 '
-                               'http://cas-server-3.com:12345', None, 'myuserid', None, None))
+                               'http://cas-server-3.com:12345', 12345, 'myuserid', None, 'http'))
 
         out = c._get_connection_info(['cas-server-1.com', 
                                       'cas-server-2.com', 
                                       'cas-server-3.com'], 12345, None, 'mytoken', 'http', None)
         self.assertEqual(out, ('http://cas-server-1.com:12345 '
                                'http://cas-server-2.com:12345 '
-                               'http://cas-server-3.com:12345', None, None, 'mytoken', None))
+                               'http://cas-server-3.com:12345', 12345, None, 'mytoken', 'http'))
 
         out = c._get_connection_info(['cas-server-1.com', 
                                       'cas-server-2.com', 
                                       'cas-server-3.com'], 12345, 'myuserid', 'mytoken', 'http', None)
         self.assertEqual(out, ('http://cas-server-1.com:12345 '
                                'http://cas-server-2.com:12345 '
-                               'http://cas-server-3.com:12345', None, 'myuserid', 'mytoken', None))
+                               'http://cas-server-3.com:12345', 12345, 'myuserid', 'mytoken', 'http'))
 
         # cas with path (which means nothing)
         out = c._get_connection_info(['cas-server-1.com', 
@@ -1097,69 +1097,69 @@ class TestConnectionInfo(tm.TestCase):
                                       'cas-server-3.com'], 12345, None, None, 'http', 'cas-server/base')
         self.assertEqual(out, ('http://cas-server-1.com:12345/cas-server/base '
                                'http://cas-server-2.com:12345/cas-server/base '
-                               'http://cas-server-3.com:12345/cas-server/base', None, None, None, None))
+                               'http://cas-server-3.com:12345/cas-server/base', 12345, None, None, 'http'))
 
         out = c._get_connection_info(['cas-server-1.com', 
                                       'cas-server-2.com', 
                                       'cas-server-3.com'], 12345, 'myuserid', None, 'http', 'cas-server/base')
         self.assertEqual(out, ('http://cas-server-1.com:12345/cas-server/base '
                                'http://cas-server-2.com:12345/cas-server/base '
-                               'http://cas-server-3.com:12345/cas-server/base', None, 'myuserid', None, None))
+                               'http://cas-server-3.com:12345/cas-server/base', 12345, 'myuserid', None, 'http'))
 
         out = c._get_connection_info(['cas-server-1.com', 
                                       'cas-server-2.com', 
                                       'cas-server-3.com'], 12345, None, 'mytoken', 'http', 'cas-server/base')
         self.assertEqual(out, ('http://cas-server-1.com:12345/cas-server/base '
                                'http://cas-server-2.com:12345/cas-server/base '
-                               'http://cas-server-3.com:12345/cas-server/base', None, None, 'mytoken', None))
+                               'http://cas-server-3.com:12345/cas-server/base', 12345, None, 'mytoken', 'http'))
 
         out = c._get_connection_info(['cas-server-1.com', 
                                       'cas-server-2.com', 
                                       'cas-server-3.com'], 12345, 'myuserid', 'mytoken', 'http', 'cas-server/base')
         self.assertEqual(out, ('http://cas-server-1.com:12345/cas-server/base '
                                'http://cas-server-2.com:12345/cas-server/base '
-                               'http://cas-server-3.com:12345/cas-server/base', None, 'myuserid', 'mytoken', None))
+                               'http://cas-server-3.com:12345/cas-server/base', 12345, 'myuserid', 'mytoken', 'http'))
 
         # URL with path and separate port
         out = c._get_connection_info(['cas-server-1.com/cas-server/base', 
                                       'cas-server-2.com/cas-server/base'], 12345, None, None, 'http', None)
         self.assertEqual(out, ('http://cas-server-1.com:12345/cas-server/base '
-                               'http://cas-server-2.com:12345/cas-server/base', None, None, None, None))
+                               'http://cas-server-2.com:12345/cas-server/base', 12345, None, None, 'http'))
 
         out = c._get_connection_info(['cas-server-1.com/cas-server/base', 
                                       'cas-server-2.com/cas-server/base'], 12345, 'myuserid', None, 'http', None)
         self.assertEqual(out, ('http://cas-server-1.com:12345/cas-server/base '
-                               'http://cas-server-2.com:12345/cas-server/base', None, 'myuserid', None, None))
+                               'http://cas-server-2.com:12345/cas-server/base', 12345, 'myuserid', None, 'http'))
 
         out = c._get_connection_info(['cas-server-1.com/cas-server/base', 
                                       'cas-server-2.com/cas-server/base'], 12345, None, 'mytoken', 'http', None)
         self.assertEqual(out, ('http://cas-server-1.com:12345/cas-server/base '
-                               'http://cas-server-2.com:12345/cas-server/base', None, None, 'mytoken', None))
+                               'http://cas-server-2.com:12345/cas-server/base', 12345, None, 'mytoken', 'http'))
 
         out = c._get_connection_info(['cas-server-1.com/cas-server/base', 
                                       'cas-server-2.com/cas-server/base'], 12345, 'myuserid', 'mytoken', 'http', None)
         self.assertEqual(out, ('http://cas-server-1.com:12345/cas-server/base '
-                               'http://cas-server-2.com:12345/cas-server/base', None, 'myuserid', 'mytoken', None))
+                               'http://cas-server-2.com:12345/cas-server/base', 12345, 'myuserid', 'mytoken', 'http'))
 
         out = c._get_connection_info(['https://cas-server-1.com/cas-server/base', 
                                       'https://cas-server-2.com/cas-server/base'], 12345, None, None, 'http', None)
         self.assertEqual(out, ('https://cas-server-1.com:12345/cas-server/base '
-                               'https://cas-server-2.com:12345/cas-server/base', None, None, None, None))
+                               'https://cas-server-2.com:12345/cas-server/base', 12345, None, None, 'https'))
 
         out = c._get_connection_info(['https://cas-server-1.com/cas-server/base', 
                                       'https://cas-server-2.com/cas-server/base'], 12345, 'myuserid', None, 'http', None)
         self.assertEqual(out, ('https://cas-server-1.com:12345/cas-server/base '
-                               'https://cas-server-2.com:12345/cas-server/base', None, 'myuserid', None, None))
+                               'https://cas-server-2.com:12345/cas-server/base', 12345, 'myuserid', None, 'https'))
 
         out = c._get_connection_info(['https://cas-server-1.com/cas-server/base', 
                                       'https://cas-server-2.com/cas-server/base'], 12345, None, 'mytoken', 'http', None)
         self.assertEqual(out, ('https://cas-server-1.com:12345/cas-server/base '
-                               'https://cas-server-2.com:12345/cas-server/base', None, None, 'mytoken', None))
+                               'https://cas-server-2.com:12345/cas-server/base', 12345, None, 'mytoken', 'https'))
 
         out = c._get_connection_info(['https://cas-server-1.com/cas-server/base', 
                                       'https://cas-server-2.com/cas-server/base'], 12345, 'myuserid', 'mytoken', 'http', None)
         self.assertEqual(out, ('https://cas-server-1.com:12345/cas-server/base '
-                               'https://cas-server-2.com:12345/cas-server/base', None, 'myuserid', 'mytoken', None))
+                               'https://cas-server-2.com:12345/cas-server/base', 12345, 'myuserid', 'mytoken', 'https'))
 
     def test_hostname_expansion(self):
         c = swat.CAS
@@ -1179,14 +1179,29 @@ class TestConnectionInfo(tm.TestCase):
         out = c._get_connection_info('cas-server-[1,2,3].com:5570', 12345, 'myuserid', 'mytoken', 'http', None)
         self.assertEqual(out, ('http://cas-server-1.com:5570 '
                                'http://cas-server-2.com:5570 '
-                               'http://cas-server-3.com:5570', None, 'myuserid', 'mytoken', None))
+                               'http://cas-server-3.com:5570', 5570, 'myuserid', 'mytoken', 'http'))
         
         out = c._get_connection_info('cas-server-[1].com:5570', 12345, 'myuserid', 'mytoken', 'http', None)
-        self.assertEqual(out, ('http://cas-server-1.com:5570', None, 'myuserid', 'mytoken', None))
+        self.assertEqual(out, ('http://cas-server-1.com:5570', 5570, 'myuserid', 'mytoken', 'http'))
         
         out = c._get_connection_info('[cas-server-1,cas-server-2].com:5570]', None, 'myuserid', 'mytoken', 'http', None)
         self.assertEqual(out, ('http://cas-server-1.com:5570 '
-                               'http://cas-server-2.com:5570', None, 'myuserid', 'mytoken', None))
+                               'http://cas-server-2.com:5570', 5570, 'myuserid', 'mytoken', 'http'))
+
+    def test_cas_url(self):
+        c = swat.CAS
+
+        out = c._get_connection_info('cas-server-1.com:5570', 12345, 'myuserid', 'mytoken', None, None)
+        self.assertEqual(out, ('cas-server-1.com', 5570, 'myuserid', 'mytoken', 'cas'))
+
+        out = c._get_connection_info('cas://cas-server-1.com', 12345, 'myuserid', 'mytoken', 'http', None)
+        self.assertEqual(out, ('cas-server-1.com', 12345, 'myuserid', 'mytoken', 'cas'))
+
+        out = c._get_connection_info('cas://cas-server-1.com:5570', 12345, 'myuserid', 'mytoken', 'http', None)
+        self.assertEqual(out, ('cas-server-1.com', 5570, 'myuserid', 'mytoken', 'cas'))
+
+        out = c._get_connection_info('cas://cas-server-1.com/cas-server/base', 12345, 'myuserid', 'mytoken', 'http', None)
+        self.assertEqual(out, ('cas-server-1.com', 12345, 'myuserid', 'mytoken', 'cas'))
 
 
 if __name__ == '__main__':

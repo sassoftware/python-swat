@@ -25,7 +25,6 @@ from __future__ import print_function, division, absolute_import, unicode_litera
 
 import logging
 import sys
-from . import config as cf
 
 default_level = 'warning'
 default_format = '[%(levelname)s] %(message)s'

@@ -195,35 +195,44 @@ class CAS(object):
     an example specifying a single hostname, and username and password as
     strings.
 
-    >>> conn = swat.CAS('mycashost.com', 12345, 'username', 'password')
+    >>> conn = swat.CAS('mycashost.com', 5570, 'username', 'password')
 
     If you use an authinfo file and it is in your home directory, you don't
     have to specify any username or password.  You can override the authinfo
     file location with the authinfo= parameter.  This form also works for
     Kerberos authentication.
 
-    >>> conn = swat.CAS('mycashost.com', 12345)
+    >>> conn = swat.CAS('mycashost.com', 5570)
 
     If you specify multiple hostnames, it will connect to the first available
     server in the list.
 
     >>> conn = swat.CAS(['mycashost1.com', 'mycashost2.com', 'mycashost3.com'],
-                        12345, 'username', 'password')
+                        5570, 'username', 'password')
+
+    URLs can also be used for both binary and REST protocols.  Notice that
+    you need to specify the username= and password= keywords since the
+    port number is skipped.
+
+    >>> conn = swat.CAS('cas://mycashost1.com:5570',
+    ...                 username='username', password='password')
+    >>> conn = swat.CAS('http://mycashost1.com:80',
+    ...                 username='username', password='password')
 
     To connect to an existing CAS session, you specify the session identifier.
 
-    >>> conn = swat.CAS('mycashost.com', 12345,
-                        session='ABCDEF12-ABCD-EFG1-2345-ABCDEF123456')
+    >>> conn = swat.CAS('mycashost.com', 5570,
+    ...                 session='ABCDEF12-ABCD-EFG1-2345-ABCDEF123456')
 
     If you wish to change the locale used on the server, you can use the
     locale= option.
 
-    >>> conn = swat.CAS('mycashost.com', 12345, locale='es_US')
+    >>> conn = swat.CAS('mycashost.com', 5570, locale='es_US')
 
     To limit the number of worker nodes in a grid, you use the nworkers=
     parameter.
 
-    >>> conn = swat.CAS('mycashost.com', 12345, nworkers=4)
+    >>> conn = swat.CAS('mycashost.com', 5570, nworkers=4)
 
     '''
     trait_names = None  # Block IPython's query for this
@@ -267,6 +276,10 @@ class CAS(object):
         protocol = protocol or cf.get_option('cas.protocol')
         hostname = hostname or cf.get_option('cas.hostname')
         port = port or cf.get_option('cas.port')
+
+        logger.debug('Connection info: hostname=%s port=%s protocol=%s '
+                     'username=%s password=%s path=%s',
+                     hostname, port, protocol, username, password, path)
 
         # Always make hostname a list
         if not isinstance(hostname, items_types):
@@ -317,15 +330,15 @@ class CAS(object):
                 if path: 
                     url = '%s/%s' % (url, re.sub(r'^/+', r'', path))
                 urls.append(url)
-            urls = ' '.join(urls)
+            hostname = ' '.join(urls)
             logger.debug('Distilled connection parameters: '
                          "url='%s' username=%s", urls, username)
-            return a2n(urls), None, a2n(username), a2n(password), None
 
-        hostname = ' '.join(hostname)
-        logger.debug('Distilled connection parameters: '
-                     "hostname='%s' port=%s, username=%s, protocol=%s",
-                     hostname, port, username, protocol)
+        else:
+            hostname = ' '.join(hostname)
+            logger.debug('Distilled connection parameters: '
+                         "hostname='%s' port=%s, username=%s, protocol=%s",
+                         hostname, port, username, protocol)
 
         return a2n(hostname), int(port), a2n(username), a2n(password), a2n(protocol)
 
@@ -348,6 +361,7 @@ class CAS(object):
             ssl_ca_list = cf.get_option('cas.ssl_ca_list')
         if ssl_ca_list:
             logger.debug('Using certificate file: %s', ssl_ca_list)
+            os.environ['CAS_CLIENT_SSL_CA_LIST'] = ssl_ca_list
 
         # Check for explicitly specified authinfo files
         if authinfo is not None:
@@ -522,7 +536,7 @@ class CAS(object):
         return stype, version, out
 
     @classmethod
-    def _detect_protocol(cls, hostname, port, protocol=None):
+    def _detect_protocol(cls, hostname, port, protocol=None, timeout=3):
         '''
         Detect the protocol type for the given host and port
 
@@ -534,6 +548,8 @@ class CAS(object):
             The CAS port to connect to.
         protocol : string, optional
             The protocol override value.
+        timeout : int, optional
+            Timeout (in seconds) for checking a protocol
 
         Returns
         -------
@@ -541,109 +557,137 @@ class CAS(object):
             'cas', 'http', or 'https'
 
         '''
-
         if protocol is None:
             protocol = cf.get_option('cas.protocol')
 
         if isinstance(hostname, six.string_types):
             hostname = re.split(r'\s+', hostname.strip())
 
+        if protocol != 'auto':
+            logger.debug('Protocol specified explicitly: %s' % protocol)
+
         # Try to detect the proper protocol
 
         if protocol == 'auto':
+            try:
+                import queue
+            except ImportError:
+                import Queue as queue
             import socket
             import ssl
+            import threading
 
             for host in hostname:
-                for ptype in ['cas']:
-                    if protocol == 'auto':
-                        try:
-                            cas_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                            cas_socket.settimeout(3)
-                            cas_socket.connect((host, port))
-                            cas_socket.sendall(bytearray([0, 0x53, 0x41, 0x43,
-                                                    0x10, 0, 0, 0, 0, 0, 0, 0,
-                                                    0x10, 0, 0, 0,
-                                                    0, 0, 0, 0,
-                                                    2, 0, 0, 0,
-                                                    5, 0, 0, 0])
-                                         )
 
-                            if cas_socket.recv(4) == "\0SAC":
-                                protocol = ptype
-                                break
+                out = queue.Queue()
 
-                        except Exception:
-                            pass
+                logger.debug('Attempting protocol auto-detect on %s:%s', host, port)
 
-                        finally:
-                            cas_socket.close()
+                def check_cas_protocol():
+                    ''' Test port for CAS (binary) support '''
+                    proto = None
+                    try:
+                        cas_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                        cas_socket.settimeout(timeout)
+                        cas_socket.connect((host, port))
+                        cas_socket.sendall(bytearray([0, 0x53, 0x41, 0x43,
+                                                0x10, 0, 0, 0, 0, 0, 0, 0,
+                                                0x10, 0, 0, 0,
+                                                0, 0, 0, 0,
+                                                2, 0, 0, 0,
+                                                5, 0, 0, 0]))
+
+                        if cas_socket.recv(4) == b'\x00SAC':
+                            proto = 'cas'
+
+                    except Exception:
+                        pass
+
+                    finally:
+                        cas_socket.close()
+                        out.put(proto)
+
+                def check_https_protocol():
+                    ''' Test port for HTTPS support '''
+                    proto = None
+                    try:
+                        ssl_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                        ssl_socket.settimeout(timeout)
+                        ssl_context = ssl.create_default_context(ssl.Purpose.SERVER_AUTH)
+                        ssl_conn = ssl_context.wrap_socket(ssl_socket, server_hostname=host)
+                        ssl_conn.connect((host, port))
+                        ssl_conn.write(('GET /cas HTTP/1.1\r\n' +
+                                        ('Host: %s\r\n' % host) +
+                                        'Connection: close\r\n' +
+                                        'User-Agent: Python-SWAT\r\n' +
+                                        'Cache-Control: no-cache\r\n\r\n').encode('utf8'))
+
+                    except ssl.SSLError as exc:
+                        if 'certificate verify failed' in str(exc):
+                            proto = 'https'
+
+                    except Exception:
+                        pass
+
+                    finally:
+                        ssl_socket.close()
+                        out.put(proto)
+
+                def check_http_protocol():
+                    ''' Test port for HTTP support '''
+                    proto = None
+                    try:
+                        http_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                        http_socket.settimeout(timeout)
+                        http_socket.connect((host, port))
+
+                        http_socket.send(('GET /cas HTTP/1.1\r\n' +
+                                   ('Host: %s\r\n' % host) +
+                                   'Connection: close\r\n' +
+                                   'User-Agent: Python-SWAT\r\n' +
+                                   'Cache-Control: no-cache\r\n\r\n').encode('utf8'))
+
+                        txt = http_socket.recv(16).decode('utf-8').lower()
+                        if txt.startswith('http') and txt.split()[1] != '400':
+                            proto = 'http'
+
+                    except Exception:
+                        pass
+
+                    finally:
+                        http_socket.close()
+                        out.put(proto)
+
+                checkers = [check_cas_protocol, check_https_protocol, check_http_protocol]
+                for item in checkers:
+                    threading.Thread(target=item).start()
+
+                try:
+                    for i in range(len(checkers)):
+                        proto = out.get(block=True, timeout=timeout)
+                        if proto is not None:
+                            protocol = proto
+                            break
+                except queue.Empty:
+                    pass
 
                 if protocol != 'auto':
+                    logger.debug('Protocol detected: %s', protocol)
                     break
 
-                for ptype in ['https']:
-                    if protocol == 'auto':
-                        try:
-                            ssl_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                            ssl_socket.settimeout(3)
-                            ssl_context = ssl.create_default_context(ssl.Purpose.SERVER_AUTH)
-                            ssl_conn = ssl_context.wrap_socket(ssl_socket, server_hostname=host)
-                            ssl_conn.connect((host, port))
-                            ssl_conn.write(('GET /cas HTTP/1.1\r\n' +
-                                            ('Host: %s\r\n' % host) +
-                                            'Connection: close\r\n' +
-                                            'User-Agent: Python-SWAT\r\n' +
-                                            'Cache-Control: no-cache\r\n\r\n').encode('utf8'))
+        # No protocol detected
+        if protocol == 'auto':
+            if port == 80:
+                logger.debug('Protocol defaulted by port 80: http')
+                protocol = 'http'
+            elif port == 443:
+                logger.debug('Protocol defaulted by port 443: http')
+                protocol = 'https'
+            else:
+                logger.debug('No protocol detected: defaulting to \'cas\'')
+                protocol = 'cas'
 
-                        except ssl.SSLError as e:
-                            if "certificate verify failed" in e.strerror:
-                                protocol = ptype
-
-                        except Exception:
-                            pass
-
-                        finally:
-                            ssl_socket.close()
-
-                if protocol != 'auto':
-                    break
-
-                for ptype in ['http']:
-                    if protocol == 'auto':
-                        try:
-                            http_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                            http_socket.settimeout(3)
-                            http_socket.connect((host, port))
-
-                            http_socket.send(('GET /cas HTTP/1.1\r\n' +
-                                       ('Host: %s\r\n' % host) +
-                                       'Connection: close\r\n' +
-                                       'User-Agent: Python-SWAT\r\n' +
-                                       'Cache-Control: no-cache\r\n\r\n').encode('utf8'))
-
-                            if http_socket.recv(4).decode('utf-8').lower() == 'http':
-                                protocol = ptype
-                                break
-
-                        except Exception:
-                            pass
-
-                        finally:
-                            http_socket.close()
-
-                if protocol != 'auto':
-                    break
-
-            if protocol == 'auto':
-                if port in [80, 8777]:
-                    protocol = 'http'
-                elif port == 443:
-                    protocol = 'https'
-                else:
-                    protocol = 'cas'
-
-            return protocol
+        return protocol
 
     def __enter__(self):
         ''' Enter a context '''

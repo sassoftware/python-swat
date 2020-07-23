@@ -248,7 +248,8 @@ class TestConfig(tm.TestCase):
                          ['dataset', 'debug', 'exception_on_severity',
                           'hostname', 'missing',
                           'port', 'print_messages', 'protocol',
-                          'trace_actions', 'trace_ui_actions'])
+                          'ssl_ca_list', 'token',
+                          'trace_actions', 'trace_ui_actions', 'username'])
 
         with self.assertRaises(SWATOptionError):
             get_suboptions('cas.foo')
@@ -373,11 +374,21 @@ class TestConfig(tm.TestCase):
         self.assertEqual(check_boolean(False), False)
         self.assertEqual(check_boolean(1), True)
         self.assertEqual(check_boolean(0), False)
+        self.assertEqual(check_boolean('yes'), True)
+        self.assertEqual(check_boolean('no'), False)
+        self.assertEqual(check_boolean('T'), True)
+        self.assertEqual(check_boolean('F'), False)
+        self.assertEqual(check_boolean('true'), True)
+        self.assertEqual(check_boolean('false'), False)
+        self.assertEqual(check_boolean('on'), True)
+        self.assertEqual(check_boolean('off'), False)
+        self.assertEqual(check_boolean('enabled'), True)
+        self.assertEqual(check_boolean('disabled'), False)
 
         with self.assertRaises(SWATOptionError):
             check_boolean(2)
         with self.assertRaises(SWATOptionError):
-            check_boolean('true')
+            check_boolean('foo')
         with self.assertRaises(SWATOptionError):
             check_boolean(1.1)
 

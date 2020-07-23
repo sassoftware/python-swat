@@ -98,16 +98,12 @@ def _setenv(names, value):
     '''
     if not isinstance(names, items_types):
         names = [names]
-    found = None
     for name in names:
         if name in os.environ:
-            found = name
+            os.environ[name] = value
         name = name.replace('_', '')
         if name in os.environ:
-            found = name
-    if not found:
-        found = names[0]
-    os.environ[found] = value
+            os.environ[name] = value
 
 
 def _delenv(names):
