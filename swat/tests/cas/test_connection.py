@@ -844,6 +844,15 @@ class TestConnection(tm.TestCase):
                 self.s.about()
             mock_close.assert_called_with(self.s)
 
+    def test_sessopts(self):
+        with swat.CAS(HOST, PORT, USER, PASSWD, protocol=PROTOCOL, metrics=True) as conn:
+            value = conn.sessionprop.getsessopt('metrics')
+            self.assertTrue(value['metrics'])
+
+        with swat.CAS(HOST, PORT, USER, PASSWD, protocol=PROTOCOL, timeout=123) as conn:
+            value = conn.sessionprop.getsessopt('timeout')
+            self.assertEqual(value['timeout'], 123)
+
 
 class TestConnectionInfo(tm.TestCase):
 

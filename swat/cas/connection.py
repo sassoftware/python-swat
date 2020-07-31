@@ -344,7 +344,18 @@ class CAS(object):
 
     def __init__(self, hostname=None, port=None, username=None, password=None,
                  session=None, locale=None, nworkers=None, name=None,
-                 authinfo=None, protocol=None, path=None, ssl_ca_list=None, **kwargs):
+                 authinfo=None, protocol=None, path=None, ssl_ca_list=None,
+                 **kwargs):
+
+        # Filter session options allowed as parameters
+        _kwargs = {}
+        sess_opts = {}
+        for k, v in kwargs.items():
+            if k.lower() in ['caslib', 'metrics', 'timeout', 'timezone']:
+                sess_opts[k] = v
+            else:
+                _kwargs[k] = v
+        kwargs = _kwargs
 
         # Check for unknown connection parameters
         unknown_keys = [k for k in kwargs if k not in ['prototype']]
@@ -376,7 +387,6 @@ class CAS(object):
         if prototype is not None:
             soptions = a2n(prototype._soptions)
             protocol = a2n(prototype._protocol)
-
         else:
             soptions = a2n(getsoptions(session=session, locale=locale,
                                        nworkers=nworkers, protocol=protocol))
@@ -456,10 +466,10 @@ class CAS(object):
         self._dir = set([x for x in super_dir(CAS, self)])
 
         # Pre-populate action set attributes
-        for asname, value in self.retrieve('builtins.help',
-                                           showhidden=True,
-                                           _messagelevel='error',
-                                           _apptag='UI').items():
+        for asname, value in self._raw_retrieve('builtins.help',
+                                                showhidden=True,
+                                                _messagelevel='error',
+                                                _apptag='UI').items():
             self._actionset_classes[asname.lower()] = None
             if value is not None:
                 for actname in value['name']:
@@ -482,11 +492,13 @@ class CAS(object):
         self.add_results_hook('builtins.loadactionset', handle_loadactionset)
 
         # Set the session name
-        for resp in self._invoke_without_signature('session.sessionname',
-                                                   name=self._name,
-                                                   _messagelevel='error',
-                                                   _apptag='UI'):
-            pass
+        self._raw_retrieve('session.sessionname', name=self._name,
+                           _messagelevel='error', _apptag='UI')
+
+        # Set session options
+        if sess_opts:
+            self._raw_retrieve('sessionprop.setsessopt', _messagelevel='error',
+                               _apptag='UI', **sess_opts)
 
         # Set options
         self._set_option(print_messages=cf.get_option('cas.print_messages'))
@@ -1712,6 +1724,21 @@ class CAS(object):
             raise SWATError(out.status)
 
         return out['casTable']
+
+    def _raw_invoke(self, _name_, **kwargs):
+        ''' Invoke a CAS action without any parameter checking '''
+        self._invoke_without_signature(a2n(_name_), **kwargs)
+        return self
+
+    def _raw_retrieve(self, _name_, **kwargs):
+        ''' Call a CAS action without parameter checking and return results '''
+        try:
+            # Call the action and compile the results
+            self._invoke_without_signature(a2n(_name_), **kwargs)
+            return self._get_results(getnext(self))
+        except SWATCASActionRetry:
+            self._invoke_without_signature(a2n(_name_), **kwargs)
+            return self._get_results(getnext(self))
 
     def invoke(self, _name_, **kwargs):
         '''
