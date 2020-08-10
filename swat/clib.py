@@ -178,8 +178,11 @@ def InitializeTK(*args, **kwargs):
 
 def TKVersion():
     ''' Return the TK subsystem version '''
-    if _pyswat is None:
-        _import_pyswat()
+    try:
+        if _pyswat is None:
+            _import_pyswat()
+    except (ValueError, RuntimeError):
+        return 'none'
     try:
         return _pyswat.TKVersion()
     except AttributeError:
