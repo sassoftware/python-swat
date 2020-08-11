@@ -238,6 +238,10 @@ class REST_CASConnection(object):
                 self._hostname.append(host)
                 self._port.append(port)
 
+        for i, item in enumerate(self._baseurl):
+            if not item.endswith('/'):
+                self._baseurl[i] = '%s/' % self._baseurl[i]
+
         self._host_index = 0
         self._current_hostname = self._hostname[self._host_index]
         self._current_baseurl = self._baseurl[self._host_index]
