@@ -436,7 +436,6 @@ class REST_CASConnection(object):
                 if get_option('cas.debug.responses'):
                     _print_response(res.text)
 
-                res = res.text
                 break
 
             except requests.ConnectionError:
@@ -484,10 +483,10 @@ class REST_CASConnection(object):
                 raise SWATError(str(exc))
 
         try:
-            txt = a2u(res, 'utf-8')
+            txt = a2u(res.text, 'utf-8')
             self._results = json.loads(txt, strict=False)
         except Exception:
-            sys.stderr.write(txt)
+            sys.stderr.write(res.text)
             sys.stderr.write('\n')
             raise
 
