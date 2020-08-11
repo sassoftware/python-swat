@@ -113,7 +113,7 @@ def _normalize_params(params):
 
     '''
     out = {}
-    for key, value in sorted(params.items(), key=lambda x:str(x[0])):
+    for key, value in params.items():
         key = keywordify(key)
         if value is None:
             continue
