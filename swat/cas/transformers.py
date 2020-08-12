@@ -591,7 +591,7 @@ def py2cas(soptions, _sw_error, **kwargs):
             _sw_sublist = errorcheck(_sw_values.createListAt(
                                      i, key, len(item)), _sw_values)
             j = 0
-            for k, v in six.iteritems(item):
+            for k, v in sorted(six.iteritems(item), key=lambda x: '%s' % x[0]):
                 if isinstance(k, (text_types, binary_types)):
                     j = set_list_value(_sw_sublist, j, k, v)
                 else:
@@ -613,7 +613,7 @@ def py2cas(soptions, _sw_error, **kwargs):
         return i
 
     i = 0
-    for skey, svalue in six.iteritems(kwargs):
+    for skey, svalue in sorted(six.iteritems(kwargs), key=lambda x: '%s' % x[0]):
         i = set_list_value(_sw_values, i, skey, svalue)
 
     return _sw_values
