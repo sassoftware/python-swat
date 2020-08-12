@@ -31,6 +31,7 @@ import pandas as pd
 import warnings
 from six.moves.urllib.parse import urlparse
 from swat.config import OptionWarning
+from swat.cas.connection import CAS
 
 UUID_RE = r'^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$'
 
@@ -177,23 +178,21 @@ def get_host_port_proto():
     casport = None
     casprotocol = None
 
+    url = None
     for name in ['CAS_URL', 'CASURL', 'CAS_HOST', 'CASHOST', 'CAS_HOSTNAME', 'CASHOSTNAME']:
         if name in os.environ:
             url = os.environ[name]
-            if not re.match(r'^\w+://', url):
-                url = 'unknown://%s' % url
-            urlp = urlparse(url)
-            cashost = urlp.hostname
-            casport = urlp.port
-            casprotocol = urlp.scheme
-            if casprotocol == 'unknown':
-                casprotocol = None
+            break
 
     casport = casport or os.environ.get('CAS_PORT', os.environ.get('CASPORT'))
+    if casport:
+        casport = int(casport)
+
     casprotocol = casprotocol or os.environ.get('CAS_PROTOCOL', os.environ.get('CASPROTOCOL'))
 
-    if casport is not None:
-        casport = int(casport)
+    if url:
+        cashost, casport, username, password, casprotocol = \
+            CAS._get_connection_info(url, casport, casprotocol, None, None, None)
 
     if cashost and casport:
         return cashost, casport, casprotocol

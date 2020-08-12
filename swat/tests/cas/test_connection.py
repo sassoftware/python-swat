@@ -160,16 +160,12 @@ class TestConnection(tm.TestCase):
         s = str(self.s)
 
         self.assertTrue(type(s) == str)
-        self.assertTrue(HOST in s)
-#       self.assertTrue(USERNAME in s)
-        self.assertTrue(str(PORT) in s)
+        self.assertRegex(s, r'''^CAS\(.+?, name='[^\']+', session='[^\']+'\)$''')
 
         r = repr(self.s)
 
         self.assertTrue(type(r) == str)
-        self.assertTrue(HOST in r)
-#       self.assertTrue(USERNAME in r)
-        self.assertTrue(str(PORT) in r)
+        self.assertRegex(r, r'''^CAS\(.+?, name='[^\']+', session='[^\']+'\)$''')
 
     def test_formatter(self):
         f = self.s.SASFormatter()

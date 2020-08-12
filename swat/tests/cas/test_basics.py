@@ -26,6 +26,7 @@ import contextlib
 import datetime
 import os
 import pandas
+import re
 import six
 import swat
 import swat.utils.testing as tm
@@ -108,7 +109,7 @@ class TestBasics(tm.TestCase):
         swat.reset_option()
 
     def test_basic_connection(self):
-        self.assertEqual(self.s._hostname, HOST)
+        self.assertRegex(HOST, r'(\w+://)?%s(:|/|$)' % self.s._hostname)
         self.assertEqual(self.s._port, PORT)
         self.assertRegex(self.s._session, UUID_RE)
         if self.s._protocol == 'http':
@@ -122,7 +123,7 @@ class TestBasics(tm.TestCase):
         user, passwd = tm.get_user_pass()
         with captured_stderr() as out:
             with self.assertRaises(swat.SWATError):
-                swat.CAS(HOST, 1999, USER, PASSWD, protocol=PROTOCOL)
+                swat.CAS(re.sub(r':\d+(/|$)', r'\1', HOST), 1999, USER, PASSWD, protocol=PROTOCOL)
 
     def test_copy_connection(self):
         s2 = self.s.copy()
@@ -178,7 +179,7 @@ class TestBasics(tm.TestCase):
         user, passwd = tm.get_user_pass()
         t = swat.CAS(HOST, PORT, USER, PASSWD, protocol=PROTOCOL, session=self.s._session)
 
-        self.assertEqual(t._hostname, HOST)
+        self.assertRegex(HOST, r'(\w+://)?%s(:|/|$)' % t._hostname)
         self.assertEqual(t._port, PORT)
         self.assertEqual(t._session, self.s._session)
         if self.s._protocol == 'http':
