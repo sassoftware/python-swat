@@ -31,31 +31,22 @@ import six
 import swat
 import swat.utils.testing as tm
 import unittest
+from swat.utils.compat import text_types
 
 os.environ['LANG'] = 'en_US.UTF-8'
-
-if six.PY2:
-   int32 = int
-   int64 = long
-   float64 = float
-else:
-   int32 = int
-   int64 = int
-   float64 = float
-   unicode = str
-
-
-def has_same_items(list1, list2):
-   return list(sorted(list1)) == list(sorted(list2))
 
 USER, PASSWD = tm.get_user_pass()
 HOST, PORT, PROTOCOL = tm.get_host_port_proto()
 
 
+def has_same_items(list1, list2):
+    return list(sorted(list1)) == list(sorted(list2))
+
+
 class TestUnicode(tm.TestCase):
-    
+
     # Create a class attribute to hold the cas host type
-    server_type = None    
+    server_type = None
 
     def setUp(self):
         swat.reset_option()
@@ -64,9 +55,10 @@ class TestUnicode(tm.TestCase):
 
         self.s = swat.CAS(HOST, PORT, USER, PASSWD, protocol=PROTOCOL)
 
-        if type(self).server_type is None: 
-            # Set once per class and have every test use it. No need to change between tests.    
-            type(self).server_type = tm.get_cas_host_type(self.s)        
+        if type(self).server_type is None:
+            # Set once per class and have every test use it.
+            # No need to change between tests.
+            type(self).server_type = tm.get_cas_host_type(self.s)
 
     def tearDown(self):
         # tear down tests
@@ -75,33 +67,33 @@ class TestUnicode(tm.TestCase):
         swat.reset_option()
 
     def test_connection_unicode_params(self):
-        self.assertTrue(isinstance(self.s._hostname, unicode))
-        self.assertTrue(isinstance(self.s._username, unicode))
-        self.assertTrue(isinstance(self.s._session, unicode))
-        self.assertTrue(isinstance(self.s._soptions, unicode))
-        self.assertTrue(isinstance(self.s._name, unicode))
+        self.assertTrue(isinstance(self.s._hostname, text_types))
+        self.assertTrue(isinstance(self.s._username, text_types))
+        self.assertTrue(isinstance(self.s._session, text_types))
+        self.assertTrue(isinstance(self.s._soptions, text_types))
+        self.assertTrue(isinstance(self.s._name, text_types))
 
-        s = swat.CAS(unicode(HOST), PORT, USER, PASSWD)
+        s = swat.CAS(u'%s' % HOST, PORT, USER, PASSWD)
 
-        self.assertTrue(isinstance(s._hostname, unicode))
-        self.assertTrue(isinstance(s._username, unicode))
-        self.assertTrue(isinstance(s._session, unicode))
-        self.assertTrue(isinstance(s._soptions, unicode))
-        self.assertTrue(isinstance(s._name, unicode))
-        
-        s = swat.CAS(unicode(HOST), PORT, USER, PASSWD, name=u'\u2603')
+        self.assertTrue(isinstance(s._hostname, text_types))
+        self.assertTrue(isinstance(s._username, text_types))
+        self.assertTrue(isinstance(s._session, text_types))
+        self.assertTrue(isinstance(s._soptions, text_types))
+        self.assertTrue(isinstance(s._name, text_types))
 
-        self.assertTrue(isinstance(s._name, unicode))
+        s = swat.CAS(u'%s' % HOST, PORT, USER, PASSWD, name=u'\u2603')
+
+        self.assertTrue(isinstance(s._name, text_types))
 
     def test_connection_str(self):
-        s = swat.CAS(unicode(HOST), PORT, USER, PASSWD, name=u'\u2603')
+        s = swat.CAS(u'%s' % HOST, PORT, USER, PASSWD, name=u'\u2603')
         out = str(s)
-        self.assertRegex(out, u"CAS\(u?'%s', %d, u?'\w+(@\w+)?'," % (HOST, PORT))
-        self.assertTrue((u"name=u'\\u2603'" in out) or (u"name='\\u2603'" in out) or
-                        (u"name=u'\u2603'" in out) or (u"name='\u2603'" in out))
+        self.assertRegex(out, r"CAS\(u?'[^']+', %d, u?'\w+(@\w+)?'," % PORT)
+        self.assertTrue((u"name=u'\\u2603'" in out) or (u"name='\\u2603'" in out)
+                        or (u"name=u'\u2603'" in out) or (u"name='\u2603'" in out))
 
     def test_connection_repr(self):
-        s = swat.CAS(unicode(HOST), PORT, USER, PASSWD, name=u'\u2603')
+        s = swat.CAS(u'%s' % HOST, PORT, USER, PASSWD, name=u'\u2603')
         self.assertEqual(str(s), repr(s))
 
     def test_formatter(self):
@@ -110,30 +102,43 @@ class TestUnicode(tm.TestCase):
 
         f = swat.SASFormatter()
 
-        self.assertTrue(isinstance(f.format(123.56, sasfmt='f10.5', width=20), unicode))
-        self.assertEqual(f.format(123.56, sasfmt='f10.5', width=20), '123.56000')
+        val = f.format(123.56, sasfmt='f10.5', width=20)
+        self.assertTrue(isinstance(val, text_types))
+        val = f.format(123.56, sasfmt='f10.5', width=20)
+        self.assertEqual(val, '123.56000')
 
-        self.assertTrue(isinstance(f.format(123.56, sasfmt='BEST.', width=20), unicode))
-        self.assertEqual(f.format(123.56, sasfmt='BEST.', width=20), '123.56')
+        val = f.format(123.56, sasfmt='BEST.', width=20)
+        self.assertTrue(isinstance(val, text_types))
+        val = f.format(123.56, sasfmt='BEST.', width=20)
+        self.assertEqual(val, '123.56')
 
-        self.assertTrue(isinstance(f.format(123.56, sasfmt='DOLLAR20.2', width=20), unicode))
-        self.assertEqual(f.format(123.56, sasfmt='DOLLAR20.2', width=20), '$123.56')
+        val = f.format(123.56, sasfmt='DOLLAR20.2', width=20)
+        self.assertTrue(isinstance(val, text_types))
+        val = f.format(123.56, sasfmt='DOLLAR20.2', width=20)
+        self.assertEqual(val, '$123.56')
 
-        self.assertTrue(isinstance(f.format(123456.78, sasfmt='EURO20.2', width=20), unicode))
-        self.assertEqual(f.format(123456.78, sasfmt='EURO20.2', width=20), u'\u20ac123,456.78')
+        val = f.format(123456.78, sasfmt='EURO20.2', width=20)
+        self.assertTrue(isinstance(val, text_types))
+        val = f.format(123456.78, sasfmt='EURO20.2', width=20)
+        self.assertEqual(val, u'\u20ac123,456.78')
 
-        self.assertTrue(isinstance(f.format(123456.78, sasfmt='NLMNY20.2', width=20), unicode))
-        self.assertEqual(f.format(123456.78, sasfmt='NLMNY20.2', width=20), u'$123,456.78')
+        val = f.format(123456.78, sasfmt='NLMNY20.2', width=20)
+        self.assertTrue(isinstance(val, text_types))
+        val = f.format(123456.78, sasfmt='NLMNY20.2', width=20)
+        self.assertEqual(val, u'$123,456.78')
 
         f = swat.SASFormatter(soptions='locale=fr-FR')
 
-        self.assertTrue(isinstance(f.format(123456.78, sasfmt='NLMNY20.2', width=20), unicode))
-        # Comment out the following line that is returning 'EUR' instead of the 'Euro Sign'
-        # unicode character until the reason for the diff is determined. 
-        # What _should_ we be getting back from python? Should python be honoring the NLMNY format
-        # as documented for 9.4 or is it OK for python to return the NLMNYl format ('EUR') instead? 
+        val = f.format(123456.78, sasfmt='NLMNY20.2', width=20)
+        self.assertTrue(isinstance(val, text_types))
+        # Comment out the following line that is returning 'EUR' instead
+        # of the 'Euro Sign' unicode character until the reason for the
+        # diff is determined.  What _should_ we be getting back from python?
+        # Should python be honoring the NLMNY format as documented for 9.4
+        # or is it OK for python to return the NLMNYl format ('EUR') instead?
         #
-        #self.assertEqual(f.format(123456.78, sasfmt='NLMNY20.2', width=20), u'123\u00a0456,78 \u20ac')
+        # self.assertEqual(f.format(123456.78, sasfmt='NLMNY20.2', width=20),
+        #                  u'123\u00a0456,78 \u20ac')
 
     def test_unicode_params(self):
         r = self.s.echo(**{u'a': 1, u'\u2603': 2.3, u'foo': u'\u2603'})
@@ -147,11 +152,11 @@ class TestUnicode(tm.TestCase):
 
         self.assertEqual(r[u'foo'], u'\u2603')
         self.assertEqual(r['foo'], u'\u2603')
-        self.assertTrue(isinstance(r[u'foo'], unicode))
+        self.assertTrue(isinstance(r[u'foo'], text_types))
 
     def test_unicode_list_params(self):
-        r = self.s.echo(**{u'a': [1, 2, 3], 
-                           u'\u2603': [1.1, 2.3, 4], 
+        r = self.s.echo(**{u'a': [1, 2, 3],
+                           u'\u2603': [1.1, 2.3, 4],
                            u'foo': [u'\u2603', u'\u2600', u'\u2680']})
 
         self.assertTrue(has_same_items(r.keys(), [u'a', u'foo', u'\u2603']))
@@ -161,12 +166,12 @@ class TestUnicode(tm.TestCase):
 
         self.assertEqual(r[u'\u2603'], [1.1, 2.3, 4])
 
-        self.assertTrue(all(isinstance(x, unicode) for x in r[u'foo']))
+        self.assertTrue(all(isinstance(x, text_types) for x in r[u'foo']))
         self.assertEqual(r[u'foo'], [u'\u2603', u'\u2600', u'\u2680'])
         self.assertEqual(r['foo'], [u'\u2603', u'\u2600', u'\u2680'])
 
     def test_unicode_tuple_params(self):
-        r = self.s.echo(**{u'a': (1, 2, 3), 
+        r = self.s.echo(**{u'a': (1, 2, 3),
                            u'\u2603': (1.1, 2.3, 4),
                            u'foo': (u'\u2603', u'\u2600', u'\u2680')})
 
@@ -177,12 +182,12 @@ class TestUnicode(tm.TestCase):
 
         self.assertEqual(r[u'\u2603'], [1.1, 2.3, 4])
 
-        self.assertTrue(all(isinstance(x, unicode) for x in r[u'foo']))
+        self.assertTrue(all(isinstance(x, text_types) for x in r[u'foo']))
         self.assertEqual(r[u'foo'], [u'\u2603', u'\u2600', u'\u2680'])
         self.assertEqual(r['foo'], [u'\u2603', u'\u2600', u'\u2680'])
 
     def test_unicode_set_params(self):
-        r = self.s.echo(**{u'a': set([1, 2, 3]), 
+        r = self.s.echo(**{u'a': set([1, 2, 3]),
                            u'\u2603': set([1.1, 2.3, 4]),
                            u'foo': set([u'\u2603', u'\u2600', u'\u2680'])})
 
@@ -193,27 +198,27 @@ class TestUnicode(tm.TestCase):
 
         self.assertTrue(has_same_items(r[u'\u2603'], [1.1, 2.3, 4]))
 
-        self.assertTrue(all(isinstance(x, unicode) for x in r[u'foo']))
+        self.assertTrue(all(isinstance(x, text_types) for x in r[u'foo']))
         self.assertTrue(has_same_items(r[u'foo'], [u'\u2603', u'\u2600', u'\u2680']))
         self.assertTrue(has_same_items(r['foo'], [u'\u2603', u'\u2600', u'\u2680']))
 
     def test_unicode_dict_params(self):
-        r = self.s.echo(**{u'a': {u'x':1, u'y':2, u'z':3},
-                           u'\u2603': {u'\u2600':1.1, u'\u2680':2.3, u'\u2690':4}})
+        r = self.s.echo(**{u'a': {u'x': 1, u'y': 2, u'z': 3},
+                           u'\u2603': {u'\u2600': 1.1, u'\u2680': 2.3, u'\u2690': 4}})
 
         self.assertTrue(has_same_items(r.keys(), [u'a', u'\u2603']))
 
-        self.assertTrue(all(isinstance(x, unicode) for x in r[u'a'].keys()))
-        self.assertEqual(r[u'a'], {u'x':1, u'y':2, u'z':3})
-        self.assertEqual(r['a'], {u'x':1, u'y':2, u'z':3})
+        self.assertTrue(all(isinstance(x, text_types) for x in r[u'a'].keys()))
+        self.assertEqual(r[u'a'], {u'x': 1, u'y': 2, u'z': 3})
+        self.assertEqual(r['a'], {u'x': 1, u'y': 2, u'z': 3})
 
-        self.assertTrue(all(isinstance(x, unicode) for x in r[u'\u2603'].keys()))
-        self.assertEqual(r[u'\u2603'], {u'\u2600':1.1, u'\u2680':2.3, u'\u2690':4})
+        self.assertTrue(all(isinstance(x, text_types) for x in r[u'\u2603'].keys()))
+        self.assertEqual(r[u'\u2603'], {u'\u2600': 1.1, u'\u2680': 2.3, u'\u2690': 4})
 
     def test_byte_params(self):
         if self.s._protocol in ['http', 'https']:
             unittest.TestCase.skipTest(self, 'REST does not support binary parameters')
-                           
+
         r = self.s.echo(**{'a': 1, 'b': b'\xc2\xa9'})
 
         self.assertTrue(has_same_items(r.keys(), [u'a', u'b']))
@@ -221,12 +226,12 @@ class TestUnicode(tm.TestCase):
         self.assertEqual(r['a'], 1)
 
         self.assertEqual(r['b'], u'\xa9')
-        self.assertTrue(isinstance(r['b'], unicode))
+        self.assertTrue(isinstance(r['b'], text_types))
 
     def test_byte_list_params(self):
         if self.s._protocol in ['http', 'https']:
             unittest.TestCase.skipTest(self, 'REST does not support binary parameters')
-               
+
         r = self.s.echo(**{'a': 1, 'b': [b'\xc2\xa9', b'\xe2\x98\x83']})
 
         self.assertTrue(has_same_items(r.keys(), [u'a', u'b']))
@@ -234,16 +239,17 @@ class TestUnicode(tm.TestCase):
         self.assertEqual(r['a'], 1)
 
         self.assertEqual(r['b'], [u'\xa9', u'\u2603'])
-        self.assertTrue(all(isinstance(x, unicode) for x in r['b']))
+        self.assertTrue(all(isinstance(x, text_types) for x in r['b']))
 
-    def test_alltypes(self):         
+    def test_alltypes(self):
         srcLib = tm.get_casout_lib(self.server_type)
         out = self.s.loadactionset(actionset='actionTest')
         if out.severity != 0:
             self.skipTest("actionTest failed to load")
 
         out = self.s.alltypes(casout=dict(caslib=srcLib, name='typestable'))
-        out = self.s.fetch(table=self.s.CASTable('typestable', caslib=srcLib), sastypes=False)
+        out = self.s.fetch(table=self.s.CASTable('typestable', caslib=srcLib),
+                           sastypes=False)
 
         data = out['Fetch']
 
@@ -251,10 +257,14 @@ class TestUnicode(tm.TestCase):
         self.assertEqual(type(data['Double'].iloc[0]), np.float64)
 
         self.assertEqual(data['Char'].iloc[0], u'AbC\u2782\u2781\u2780')
-        self.assertTrue(isinstance(data['Char'].iloc[0], unicode))
+        self.assertTrue(isinstance(data['Char'].iloc[0], text_types))
 
-        self.assertEqual(data['Varchar'].iloc[0], u'This is a test of the Emergency Broadcast System. This is only a test. BEEEEEEEEEEEEEEEEEEP WHAAAA SCREEEEEEEEEEEECH. \u2789\u2788\u2787\u2786\u2785\u2784\u2783\u2782\u2781\u2780 Blastoff!')
-        self.assertTrue(isinstance(data['Varchar'].iloc[0], unicode))
+        self.assertEqual(data['Varchar'].iloc[0],
+                         u'This is a test of the Emergency Broadcast System. '
+                         u'This is only a test. BEEEEEEEEEEEEEEEEEEP WHAAAA '
+                         u'SCREEEEEEEEEEEECH. \u2789\u2788\u2787\u2786\u2785'
+                         u'\u2784\u2783\u2782\u2781\u2780 Blastoff!')
+        self.assertTrue(isinstance(data['Varchar'].iloc[0], text_types))
 
         self.assertEqual(data['Int32'].iloc[0], 42)
         self.assertIn(type(data['Int32'].iloc[0]), [np.int32, np.int64])
@@ -268,25 +278,26 @@ class TestUnicode(tm.TestCase):
 
         self.assertEqual(data['Date'].iloc[0], datetime.date(1963, 5, 19))
         self.assertEqual(type(data['Date'].iloc[0]), datetime.date)
-        #self.assertEqual(type(data['Date'].iloc[0]), datetime.Date)
+        # self.assertEqual(type(data['Date'].iloc[0]), datetime.Date)
 
         self.assertEqual(data['Time'].iloc[0], datetime.time(11, 12, 13, 141516))
         self.assertTrue(isinstance(data['Time'].iloc[0], datetime.time))
-        #self.assertEqual(type(data['Time'].iloc[0]), datetime.Time)
+        # self.assertEqual(type(data['Time'].iloc[0]), datetime.Time)
 
-        self.assertEqual(data['Datetime'].iloc[0], pd.to_datetime('1963-05-19 11:12:13.141516'))
+        self.assertEqual(data['Datetime'].iloc[0],
+                         pd.to_datetime('1963-05-19 11:12:13.141516'))
         self.assertTrue(isinstance(data['Datetime'].iloc[0], pd.Timestamp))
-        #self.assertEqual(type(data['Datetime'].iloc[0]), datetime.Datetime)
+        # self.assertEqual(type(data['Datetime'].iloc[0]), datetime.Datetime)
 
         self.assertEqual(data['DecSext'].iloc[0], '12345678901234567890.123456789')
-        self.assertTrue(isinstance(data['DecSext'].iloc[0], unicode))
-        #self.assertEqual(type(data['DecSext'].iloc[0]), Decimal)
+        self.assertTrue(isinstance(data['DecSext'].iloc[0], text_types))
+        # self.assertEqual(type(data['DecSext'].iloc[0]), Decimal)
 
-        #self.assertEqual(data['Varbinary'].iloc[0], '???')
-        #self.assertEqual(type(data['Varbinary'].iloc[0]), bytes)
+        # self.assertEqual(data['Varbinary'].iloc[0], '???')
+        # self.assertEqual(type(data['Varbinary'].iloc[0]), bytes)
 
-        #self.assertEqual(data['Binary'].iloc[0], '???')
-        #self.assertEqual(type(data['Binary'].iloc[0]), bytes)
+        # self.assertEqual(data['Binary'].iloc[0], '???')
+        # self.assertEqual(type(data['Binary'].iloc[0]), bytes)
 
 
 if __name__ == '__main__':

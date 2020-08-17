@@ -52,7 +52,7 @@ pd_version = tuple([int(x) for x in re.match(r'^(\d+)\.(\d+)\.(\d+)',
 class TestFunctions(tm.TestCase):
 
     server_type = None
-    
+
     def setUp(self):
         swat.reset_option()
         swat.options.cas.print_messages = False
@@ -123,25 +123,32 @@ class TestFunctions(tm.TestCase):
                                sortby=SORT_KEYS)
 
         # Standard DataFrames
-        self.assertTablesEqual(pd.concat(dfs),
-                               swat.concat([pd.DataFrame(cars_a), pd.DataFrame(cars_b), pd.DataFrame(cars_c)]),
-                               sortby=SORT_KEYS)
+        self.assertTablesEqual(
+            pd.concat(dfs),
+            swat.concat([pd.DataFrame(cars_a),
+                         pd.DataFrame(cars_b),
+                         pd.DataFrame(cars_c)]),
+            sortby=SORT_KEYS)
 
     def _get_merge_data(self):
         import swat.tests as st
 
-        finance = os.path.join(os.path.dirname(st.__file__), 'datasources', 'merge_finance.csv')
-        repertory = os.path.join(os.path.dirname(st.__file__), 'datasources', 'merge_repertory.csv')
+        finance = os.path.join(os.path.dirname(st.__file__),
+                               'datasources', 'merge_finance.csv')
+        repertory = os.path.join(os.path.dirname(st.__file__),
+                                 'datasources', 'merge_repertory.csv')
 
         df_finance = pd.read_csv(finance)
         df_repertory = pd.read_csv(repertory)
 
-        tbl_finance = self.s.read_csv(finance, casout=dict(name='unittest.merge_finance',
-                                                           caslib=self.srcLib,
-                                                           replace=True))
-        tbl_repertory = self.s.read_csv(repertory, casout=dict(name='unittest.merge_repertory',
-                                                               caslib=self.srcLib,
-                                                               replace=True))
+        tbl_finance = self.s.read_csv(
+            finance, casout=dict(name='unittest.merge_finance',
+                                 caslib=self.srcLib,
+                                 replace=True))
+        tbl_repertory = self.s.read_csv(
+            repertory, casout=dict(name='unittest.merge_repertory',
+                                   caslib=self.srcLib,
+                                   replace=True))
 
         return (df_finance, df_repertory), (tbl_finance, tbl_repertory)
 
@@ -166,26 +173,31 @@ class TestFunctions(tm.TestCase):
             return frame
 
         # Use CASTables
-        df_out = fill_char(pd.merge(df_finance, df_repertory, on='IdNumber', indicator=True))
-        tbl_out = swat.merge(tbl_finance, tbl_repertory, on='IdNumber', indicator=True)
+        df_out = fill_char(pd.merge(df_finance, df_repertory,
+                                    on='IdNumber', indicator=True))
+        tbl_out = swat.merge(tbl_finance, tbl_repertory,
+                             on='IdNumber', indicator=True)
         try:
             self.assertTablesEqual(df_out, tbl_out, sortby=['IdNumber', 'Play'])
         finally:
             tbl_out.droptable()
 
         # Use SASDataFrames
-        self.assertTablesEqual(df_out,
-                               fill_char(swat.merge(tbl_finance.fetch(to=1000, sastypes=False)['Fetch'],
-                                                   tbl_repertory.fetch(to=1000, sastypes=False)['Fetch'],
-                                                   on='IdNumber', indicator=True)), sortby=['IdNumber', 'Play'])
+        self.assertTablesEqual(
+            df_out,
+            fill_char(swat.merge(tbl_finance.fetch(to=1000, sastypes=False)['Fetch'],
+                                 tbl_repertory.fetch(to=1000, sastypes=False)['Fetch'],
+                                 on='IdNumber', indicator=True)),
+            sortby=['IdNumber', 'Play'])
 
         # Use DataFrames
-        self.assertTablesEqual(df_out,
-                               fill_char(swat.merge(pd.DataFrame(tbl_finance.to_frame()),
-                                                    pd.DataFrame(tbl_repertory.to_frame()),
-                                                    on='IdNumber', indicator=True)), sortby=['IdNumber', 'Play'])
-
+        self.assertTablesEqual(
+            df_out,
+            fill_char(swat.merge(pd.DataFrame(tbl_finance.to_frame()),
+                                 pd.DataFrame(tbl_repertory.to_frame()),
+                                 on='IdNumber', indicator=True)),
+            sortby=['IdNumber', 'Play'])
 
 
 if __name__ == '__main__':
-   tm.runtests()
+    tm.runtests()

@@ -310,10 +310,10 @@ register_option('cas.dataset.bygroup_casout_threshold', 'int', check_int, 25000,
                 'number of by groups is only estimated based on the product of the\n'
                 'cardinality of each by group variable.')
 
+
 #
 # Debugging options
 #
-
 register_option('cas.debug.requests', 'boolean', check_boolean, False,
                 'Display requested URL when accessing REST interface.',
                 environ='CAS_DEBUG_REQUESTS')
@@ -324,12 +324,14 @@ register_option('cas.debug.responses', 'boolean', check_boolean, False,
                 'Display raw responses from server.',
                 environ='CAS_DEBUG_RESPONSES')
 
+
 #
 # Logging options
 #
 def check_log_level(val):
     ''' Check and set the log level '''
-    val = check_string(val, valid_values=['critical', 'error', 'warning', 'info', 'debug'])
+    val = check_string(val, valid_values=['critical', 'error',
+                                          'warning', 'info', 'debug'])
     swat_logging.logger.setLevel(dict(
         debug=logging.DEBUG,
         info=logging.INFO,
@@ -339,19 +341,23 @@ def check_log_level(val):
     )[val])
     return val
 
+
 register_option('log.level', 'string', check_log_level, swat_logging.default_level,
                 'Set the level of displayed log messages.',
                 environ='SWAT_LOG_LEVEL')
 
+
 def check_log_format(val):
     ''' Check and set the log format '''
     val = check_string(val)
-    swat_logging.handler.setFormatter(logging.Formatter(cf.get_option('log.format')))
+    swat_logging.handler.setFormatter(logging.Formatter(get_option('log.format')))
     return val
+
 
 register_option('log.format', 'string', check_string, swat_logging.default_format,
                 'Set the format of the displayed log messages.',
                 environ='SWAT_LOG_FORMAT')
+
 
 #
 # IPython notebook options

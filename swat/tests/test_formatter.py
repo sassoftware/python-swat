@@ -22,11 +22,12 @@
 #       A specific protocol ('cas', 'http', 'https', or 'auto') can be set using
 #       the CASPROTOCOL environment variable.
 
+import numpy as np
 import re
 import swat
 import swat.utils.testing as tm
 import unittest
-from swat.utils.compat import *
+from swat.utils.compat import int32, int64
 from swat.formatter import SASFormatter
 
 USER, PASSWD = tm.get_user_pass()
@@ -34,7 +35,7 @@ HOST, PORT, PROTOCOL = tm.get_host_port_proto()
 
 
 class TestFormatter(tm.TestCase):
-    
+
     # Create a class attribute to hold the cas host type
     server_type = None
 
@@ -45,9 +46,10 @@ class TestFormatter(tm.TestCase):
 
         self.s = swat.CAS(HOST, PORT, USER, PASSWD, protocol=PROTOCOL)
 
-        if type(self).server_type is None: 
-            # Set once per class and have every test use it. No need to change between tests.    
-            type(self).server_type = tm.get_cas_host_type(self.s)        
+        if type(self).server_type is None:
+            # Set once per class and have every test use it.
+            # No need to change between tests.
+            type(self).server_type = tm.get_cas_host_type(self.s)
 
         r = tm.load_data(self.s, 'datasources/cars_single.sashdat', self.server_type)
 
@@ -90,10 +92,10 @@ class TestFormatter(tm.TestCase):
 
         out = f.format(np.float64(1.234))
         self.assertEqual(out, '1.234')
-       
+
         out = f.format(float(1.234))
         self.assertEqual(out, '1.234')
-       
+
         out = f.format(np.nan)
         self.assertEqual(out, 'nan')
 
@@ -112,7 +114,7 @@ class TestFormatter(tm.TestCase):
 
     def test_missing_format(self):
         f = self.s.SASFormatter()
-        
+
         out = f.format(123.45678, sasfmt='foo7.2')
         self.assertEqual(out, '123.45678')
 

@@ -329,10 +329,9 @@ def ctb2tabular(_sw_table, soptions='', connection=None):
 
     # Create a np.array and fill it
     kwargs['data'] = np.array(_sw_table.toTuples(a2n(
-                         get_option('encoding_errors'), 'utf-8'),
-                         casdt.cas2python_datetime, casdt.cas2python_date,
-                         casdt.cas2python_time),
-                         dtype=dtypes)
+        get_option('encoding_errors'), 'utf-8'),
+        casdt.cas2python_datetime, casdt.cas2python_date,
+        casdt.cas2python_time), dtype=dtypes)
 
     # Short circuit for numpy arrays
 #   if tformat == 'numpy_array':

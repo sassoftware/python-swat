@@ -33,7 +33,7 @@ import swat.utils.testing as tm
 import sys
 import time
 import unittest
-from swat.cas.datamsghandlers import *
+from swat.cas.datamsghandlers import *  # noqa: F403
 
 # Pick sort keys that will match across SAS and Pandas sorting orders
 SORT_KEYS = ['Origin', 'MSRP', 'Horsepower', 'Model']
@@ -43,10 +43,10 @@ HOST, PORT, PROTOCOL = tm.get_host_port_proto()
 
 
 class TestDataMsgHandlers(tm.TestCase):
-    
+
     # Create a class attribute to hold the cas host type
-    server_type = None    
-    
+    server_type = None
+
     def setUp(self):
         swat.reset_option()
         swat.options.cas.print_messages = False
@@ -56,14 +56,15 @@ class TestDataMsgHandlers(tm.TestCase):
         self.s = swat.CAS(HOST, PORT, USER, PASSWD, protocol=PROTOCOL)
 
         if self.s._protocol in ['http', 'https']:
-            tm.TestCase.skipTest(self, 'REST does not support data messages')        
+            tm.TestCase.skipTest(self, 'REST does not support data messages')
 
-        if type(self).server_type is None: 
-            # Set once per class and have every test use it. No need to change between tests.    
-            type(self).server_type = tm.get_cas_host_type(self.s)        
+        if type(self).server_type is None:
+            # Set once per class and have every test use it.
+            # No need to change between tests.
+            type(self).server_type = tm.get_cas_host_type(self.s)
 
         self.srcLib = tm.get_casout_lib(self.server_type)
-        
+
         r = tm.load_data(self.s, 'datasources/cars_single.sashdat', self.server_type)
 
         self.tablename = r['tableName']
@@ -103,10 +104,17 @@ class TestDataMsgHandlers(tm.TestCase):
         data = out['ColumnInfo']
 
         self.assertEqual(len(data), 15)
-        self.assertEqual(data['Column'].tolist(), 'Make,Model,Type,Origin,DriveTrain,MSRP,Invoice,EngineSize,Cylinders,Horsepower,MPG_City,MPG_Highway,Weight,Wheelbase,Length'.split(','))
-        self.assertEqual(data['Type'].tolist(), ['varchar', 'varchar', 'varchar', 'varchar', 'varchar', 'int64', 'int64', 'double', 'int64', 'int64', 'int64', 'int64', 'int64', 'int64', 'int64'])
+        self.assertEqual(data['Column'].tolist(),
+                         ('Make,Model,Type,Origin,DriveTrain,MSRP,Invoice,'
+                          'EngineSize,Cylinders,Horsepower,MPG_City,MPG_Highway,'
+                          'Weight,Wheelbase,Length').split(','))
+        self.assertEqual(data['Type'].tolist(),
+                         ['varchar', 'varchar', 'varchar', 'varchar',
+                          'varchar', 'int64', 'int64', 'double', 'int64',
+                          'int64', 'int64', 'int64', 'int64', 'int64', 'int64'])
 
-        self.assertTablesEqual(cars, self.s.CASTable('cars', caslib=srcLib), sortby=SORT_KEYS)
+        self.assertTablesEqual(cars, self.s.CASTable('cars', caslib=srcLib),
+                               sortby=SORT_KEYS)
 
         self.s.droptable(caslib=srcLib, table='cars')
 
@@ -173,46 +181,46 @@ class TestDataMsgHandlers(tm.TestCase):
         # pd.options.display.max_columns = 100
 
         df = pd.DataFrame(dict(
-            bool_ = s_bool_,
-            bool8 = s_bool8,
+            bool_=s_bool_,
+            bool8=s_bool8,
 
-            byte = s_byte,
-            short = s_short,
-            intc = s_intc,
-            int_ = s_int_,
-            longlong = s_longlong,
-            intp = s_intp,
-            int8 = s_int8, 
-            int16 = s_int16, 
-            int32 = s_int32, 
-            int64 = s_int64, 
+            byte=s_byte,
+            short=s_short,
+            intc=s_intc,
+            int_=s_int_,
+            longlong=s_longlong,
+            intp=s_intp,
+            int8=s_int8,
+            int16=s_int16,
+            int32=s_int32,
+            int64=s_int64,
 
-            ubyte = s_ubyte,
-            ushort = s_ushort,
-            uintc = s_uintc,
-            uint = s_uint,
-            ulonglong = s_ulonglong,
-            uintp = s_uintp,
-            uint8 = s_uint8, 
-            uint16 = s_uint16, 
-            uint32 = s_uint32, 
-            uint64 = s_uint64, 
-            
-            half = s_half,
-            single = s_single,
-            double = s_double,
-            longfloat = s_longfloat,
-            float16 = s_float16,
-            float32 = s_float32,
-            float64 = s_float64,
-#           float96 = s_float96,
-            float128 = s_float128,
+            ubyte=s_ubyte,
+            ushort=s_ushort,
+            uintc=s_uintc,
+            uint=s_uint,
+            ulonglong=s_ulonglong,
+            uintp=s_uintp,
+            uint8=s_uint8,
+            uint16=s_uint16,
+            uint32=s_uint32,
+            uint64=s_uint64,
 
-            object_ = s_object_,
-            str_ = s_str_,
-            unicode_ = s_unicode_,
+            half=s_half,
+            single=s_single,
+            double=s_double,
+            longfloat=s_longfloat,
+            float16=s_float16,
+            float32=s_float32,
+            float64=s_float64,
+            # float96=s_float96,
+            float128=s_float128,
 
-            datetime = s_datetime
+            object_=s_object_,
+            str_=s_str_,
+            unicode_=s_unicode_,
+
+            datetime=s_datetime
         ))
 
         dmh = swat.datamsghandlers.PandasDataFrame(df)
@@ -263,14 +271,15 @@ class TestDataMsgHandlers(tm.TestCase):
         self.assertEqual(df['unicode_'].tolist(), data['unicode_'].tolist())
 
         tbl.vars[0].name = 'datetime'
-        tbl.vars[0].nfl  = 20
-        tbl.vars[0].nfd  = 0
+        tbl.vars[0].nfl = 20
+        tbl.vars[0].nfd = 0
 
         data = tbl.fetch(sastypes=True, format=True).Fetch
 
-        self.assertEqual([pd.to_datetime(x) for x in df['datetime'].tolist()], 
-                         [pd.to_datetime(datetime.datetime.strptime(x, '  %d%b%Y:%H:%M:%S'))
-                             for x in data['datetime'].tolist()])
+        self.assertEqual(
+            [pd.to_datetime(x) for x in df['datetime'].tolist()],
+            [pd.to_datetime(datetime.datetime.strptime(x, '  %d%b%Y:%H:%M:%S'))
+             for x in data['datetime'].tolist()])
 
     def test_sasdataframe(self):
         df = self.table.fetch(sastypes=False).Fetch
@@ -293,7 +302,7 @@ class TestDataMsgHandlers(tm.TestCase):
         self.assertEqual(hp.Format, hpinfo.format)
         self.assertEqual(hp.FormattedLength, hpinfo.width)
 
-    def test_sas7bdat(self):       
+    def test_sas7bdat(self):
         try:
             import sas7bdat
         except ImportError:
@@ -301,7 +310,8 @@ class TestDataMsgHandlers(tm.TestCase):
 
         import swat.tests as st
 
-        myFile = os.path.join(os.path.dirname(st.__file__), 'datasources', 'cars.sas7bdat')
+        myFile = os.path.join(os.path.dirname(st.__file__),
+                              'datasources', 'cars.sas7bdat')
 
         dmh = swat.datamsghandlers.SAS7BDAT(myFile)
 
@@ -312,7 +322,7 @@ class TestDataMsgHandlers(tm.TestCase):
 
         self.assertTablesEqual(f, s, sortby=SORT_KEYS)
 
-    def test_text(self):              
+    def test_text(self):
         import swat.tests as st
 
         myFile = os.path.join(os.path.dirname(st.__file__), 'datasources', 'cars.tsv')
@@ -331,7 +341,7 @@ class TestDataMsgHandlers(tm.TestCase):
         jsondf = df.to_json()
 
         dmh = swat.datamsghandlers.JSON(jsondf)
-        
+
         tbl = self.s.addtable(table='cars', **dmh.args.addtable).casTable
 
         data = tbl.to_frame()
@@ -352,7 +362,7 @@ class TestDataMsgHandlers(tm.TestCase):
 
         self.assertTablesEqual(f, s, sortby=SORT_KEYS)
 
-    def test_sql(self):              
+    def test_sql(self):
         try:
             import sqlite3 as lite
         except ImportError:
@@ -363,7 +373,7 @@ class TestDataMsgHandlers(tm.TestCase):
         tmph, tmpf = tempfile.mkstemp(suffix='.db')
 
         with lite.connect(tmpf) as con:
-            cur = con.cursor()    
+            cur = con.cursor()
             cur.execute("CREATE TABLE Cars(Id INT, Name TEXT, Price INT)")
             cur.execute("INSERT INTO Cars VALUES(1,'Audi',52642)")
             cur.execute("INSERT INTO Cars VALUES(2,'Mercedes',57127)")
@@ -377,19 +387,22 @@ class TestDataMsgHandlers(tm.TestCase):
         from sqlalchemy import create_engine
 
         # SQLTable
-        dmh = swat.datamsghandlers.SQLTable('Cars', 
+        dmh = swat.datamsghandlers.SQLTable(
+            'Cars',
             swat.datamsghandlers.SQLTable.create_engine('sqlite:///%s' % tmpf))
 
         tbl = self.s.addtable(table='Cars', **dmh.args.addtable).casTable
         data = tbl.fetch(sortby=['Id']).Fetch
 
-        df = pd.io.sql.read_sql_table('Cars', create_engine('sqlite:///%s' % tmpf)).sort_values(['Id'])
+        df = pd.io.sql.read_sql_table(
+            'Cars', create_engine('sqlite:///%s' % tmpf)).sort_values(['Id'])
 
         for col in df.columns:
             self.assertEqual(df[col].tolist(), data[col].tolist())
 
-        # SQLQuery 
-        dmh = swat.datamsghandlers.SQLQuery('select * from cars where id < 5',
+        # SQLQuery
+        dmh = swat.datamsghandlers.SQLQuery(
+            'select * from cars where id < 5',
             swat.datamsghandlers.SQLQuery.create_engine('sqlite:///%s' % tmpf))
 
         tbl = self.s.addtable(table='Cars2', **dmh.args.addtable).casTable
@@ -398,9 +411,9 @@ class TestDataMsgHandlers(tm.TestCase):
         for col in df.columns:
             self.assertEqual(df[col].tolist()[:4], data[col].tolist())
 
-        try: 
+        try:
             os.remove(tmpf)
-        except: 
+        except:  # noqa: E722
             pass
 
     def test_excel(self):
@@ -417,7 +430,7 @@ class TestDataMsgHandlers(tm.TestCase):
 
         self.assertTablesEqual(f, s, sortby=SORT_KEYS)
 
-    def test_dbapi(self):              
+    def test_dbapi(self):
         try:
             import sqlite3 as lite
         except ImportError:
@@ -434,13 +447,19 @@ class TestDataMsgHandlers(tm.TestCase):
         # Create database
         with lite.connect(tmpf) as con:
             cur = con.cursor()
-            cur.execute('CREATE TABLE Cars(Make TEXT, Model TEXT, Type TEXT, Origin TEXT, DriveTrain DOUBLE, MSRP DOUBLE, Invoice DOUBLE, EngineSize, Cylinders DOUBLE, Horsepower DOUBLE, MPG_City DOUBLE, MPG_Highway DOUBLE, Weight DOUBLE, Wheelbase DOUBLE, Length DOUBLE)')
+            cur.execute(
+                'CREATE TABLE Cars(Make TEXT, Model TEXT, Type TEXT, Origin TEXT, '
+                'DriveTrain DOUBLE, MSRP DOUBLE, Invoice DOUBLE, EngineSize, '
+                'Cylinders DOUBLE, Horsepower DOUBLE, MPG_City DOUBLE, '
+                'MPG_Highway DOUBLE, Weight DOUBLE, Wheelbase DOUBLE, Length DOUBLE)')
             with open(myFile) as csv_data:
                 # Skip header
                 next(csv_data)
                 reader = csv.reader(csv_data)
                 for row in reader:
-                    cur.execute('INSERT INTO Cars VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', row)
+                    cur.execute(
+                        'INSERT INTO Cars '
+                        'VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', row)
 
         # swat.options.cas.print_messages = True
 
@@ -455,20 +474,27 @@ class TestDataMsgHandlers(tm.TestCase):
         self.assertEqual(tblinfo['Rows'][0], 3)
         self.assertEqual(tblinfo['Columns'][0], 15)
 
-        self.assertEqual(colinfo['Column'].tolist(),
-                         'Make,Model,Type,Origin,DriveTrain,MSRP,Invoice,EngineSize,Cylinders,Horsepower,MPG_City,MPG_Highway,Weight,Wheelbase,Length'.split(','))
-                         
-        self.assertEqual(sorted(tuple(x) for x in tbl.head().itertuples(index=False)),
-            sorted([('Dodge', 'Viper SRT-10 convertible 2dr', 'Sports', 'USA', 'Rear', 81795.0,
-              74451.0, '8.3', 10.0, 500.0, 12.0, 20.0, 3410.0, 99.0, 176.0), 
-             ('Mercedes-Benz', 'CL600 2dr', 'Sedan', 'Europe', 'Rear', 128420.0, 119600.0,
-              '5.5', 12.0, 493.0, 13.0, 19.0, 4473.0, 114.0, 196.0),
-             ('Mercedes-Benz', 'SL600 convertible 2dr', 'Sports', 'Europe', 'Rear',
-              126670.0, 117854.0, '5.5', 12.0, 493.0, 13.0, 19.0, 4429.0, 101.0, 179.0)]))
+        self.assertEqual(
+            colinfo['Column'].tolist(),
+            ('Make,Model,Type,Origin,DriveTrain,MSRP,Invoice,EngineSize,'
+             'Cylinders,Horsepower,MPG_City,MPG_Highway,Weight,'
+             'Wheelbase,Length').split(','))
 
-        try: 
+        self.assertEqual(
+            sorted(tuple(x) for x in tbl.head().itertuples(index=False)),
+            sorted([('Dodge', 'Viper SRT-10 convertible 2dr', 'Sports', 'USA',
+                     'Rear', 81795.0, 74451.0, '8.3', 10.0, 500.0, 12.0, 20.0,
+                     3410.0, 99.0, 176.0),
+                    ('Mercedes-Benz', 'CL600 2dr', 'Sedan', 'Europe', 'Rear',
+                     128420.0, 119600.0, '5.5', 12.0, 493.0, 13.0, 19.0, 4473.0,
+                     114.0, 196.0),
+                    ('Mercedes-Benz', 'SL600 convertible 2dr', 'Sports', 'Europe',
+                     'Rear', 126670.0, 117854.0, '5.5', 12.0, 493.0, 13.0, 19.0,
+                     4429.0, 101.0, 179.0)]))
+
+        try:
             os.remove(tmpf)
-        except: 
+        except:  # noqa: E722
             pass
 
 

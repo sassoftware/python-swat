@@ -368,7 +368,7 @@ def merge(left, right, how='inner', on=None, left_on=None, right_on=None,
     right_rename = ' rename=(%s=__by_var%s)' % (_nlit(right_on), right_rename)
 
     columns = ' '.join([_nlit(left_map[x]) for x in left_columns]
-                     + [_nlit(right_map[x]) for x in right_columns])
+                       + [_nlit(right_map[x]) for x in right_columns])
 
     left_missval = '.'
     right_missval = '.'
@@ -2485,7 +2485,7 @@ class CASTable(ParamManager, ActionParamManager):
 
     def as_matrix(self, columns=None, n=None):
         '''
-        Represent CASTable as a Numpy array 
+        Represent CASTable as a Numpy array
 
         Parameters
         ----------
@@ -2817,7 +2817,7 @@ class CASTable(ParamManager, ActionParamManager):
             A subset of columns to return.
         bygroup_as_index : boolean
             When by_group_index is True, By groups are converted to an index if they exist
-            
+
         Notes
         -----
         Since CAS tables can be distributed across a grid of computers,
@@ -2850,7 +2850,7 @@ class CASTable(ParamManager, ActionParamManager):
             A subset of columns to return.
         bygroup_as_index : boolean
             When by_group_index is True, By groups are converted to an index if they exist
-            
+
         Notes
         -----
         Since CAS tables can be distributed across a grid of computers,
@@ -4418,8 +4418,8 @@ class CASTable(ParamManager, ActionParamManager):
                                  casout=casout, **kwargs)
 
             return self._normalize_percentile_casout(
-                    out['OutputCasTables']['casTable'][0],
-                    single=(stat == 'median' or len(percentile_values) == 1))
+                out['OutputCasTables']['casTable'][0],
+                single=(stat == 'median' or len(percentile_values) == 1))
 
         else:
             summ_stats = ['css', 'cv', 'kurtosis', 'mean',
@@ -4435,7 +4435,7 @@ class CASTable(ParamManager, ActionParamManager):
                                  inputs=inputs, casout=casout, **kwargs)
 
             return self._normalize_summary_casout(
-                    out['OutputCasTables']['casTable'][0], stat)
+                out['OutputCasTables']['casTable'][0], stat)
 
     def _normalize_bygroups(self, drop=None, rename=None):
         '''
@@ -6275,9 +6275,8 @@ class CASTable(ParamManager, ActionParamManager):
 
         dscode = []
         dscode.append('data %s(caslib=%s);' % (_quote(newname), _quote(caslib)))
-        dscode.append('    set %s(caslib=%s);' %
-                       (_quote(self.params.name),
-                        _quote(self.params.get('caslib', default_caslib))))
+        dscode.append('    set %s(caslib=%s);' % (_quote(self.params.name),
+                      _quote(self.params.get('caslib', default_caslib))))
         if isinstance(code, items_types):
             dscode.extend(code)
         else:
@@ -6405,7 +6404,8 @@ class CASTable(ParamManager, ActionParamManager):
         if 'groupby' in kwargs['tables'][0]:
             kwargs['tables'][0].pop('groupby', None)
         groups = self.get_groupby_vars()
-        kwargs['tables'][0]['vars'] = groups + [x for x in self.columns if x not in groups]
+        kwargs['tables'][0]['vars'] = groups + [x for x in self.columns
+                                                if x not in groups]
         out = self._retrieve('table.view', *args, **kwargs)
         if 'caslib' in out and 'viewName' in out:
             conn = self.get_connection()
@@ -6593,8 +6593,8 @@ class CASTable(ParamManager, ActionParamManager):
                 warnings.warn(('Data downloads are limited to %d rows.  '
                                'To change this limit, set '
                                'swat.options.cas.dataset.max_rows_fetched '
-                               'to the desired limit.') % max_rows_fetched,
-                               RuntimeWarning)
+                               'to the desired limit.') %
+                              max_rows_fetched, RuntimeWarning)
 
         # Compute sample percentage as needed
         if sample_pct is None and sample:
@@ -10723,7 +10723,8 @@ class CASTableGroupBy(object):
         '''
         if self._as_index:
             return self._table.value_counts(*args, **kwargs)
-        return self._table.value_counts(*args, **kwargs).reset_index(self.get_groupby_vars())
+        return self._table.value_counts(*args,
+                                        **kwargs).reset_index(self.get_groupby_vars())
 
     def max(self, *args, **kwargs):
         '''

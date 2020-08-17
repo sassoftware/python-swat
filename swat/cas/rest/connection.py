@@ -273,14 +273,18 @@ class REST_CASConnection(object):
 
         self._req_sess = requests.Session()
 
-        if os.environ.get('SSLREQCERT', 'y').lower() in ['n', 'no', '0', 'f', 'false', 'off']:
+        if os.environ.get('SSLREQCERT', 'y').lower() in ['n', 'no', '0',
+                                                         'f', 'false', 'off']:
             self._req_sess.verify = False
         elif 'CAS_CLIENT_SSL_CA_LIST' in os.environ:
-            self._req_sess.verify = os.path.expanduser(os.environ['CAS_CLIENT_SSL_CA_LIST'])
+            self._req_sess.verify = os.path.expanduser(
+                os.environ['CAS_CLIENT_SSL_CA_LIST'])
         elif 'SAS_TRUSTED_CA_CERTIFICATES_PEM_FILE' in os.environ:
-            self._req_sess.verify = os.path.expanduser(os.environ['SAS_TRUSTED_CA_CERTIFICATES_PEM_FILE'])
+            self._req_sess.verify = os.path.expanduser(
+                os.environ['SAS_TRUSTED_CA_CERTIFICATES_PEM_FILE'])
         elif 'SSLCALISTLOC' in os.environ:
-            self._req_sess.verify = os.path.expanduser(os.environ['SSLCALISTLOC'])
+            self._req_sess.verify = os.path.expanduser(
+                os.environ['SSLCALISTLOC'])
         elif 'REQUESTS_CA_BUNDLE' not in os.environ:
             self._req_sess.mount('https://', SSLContextAdapter())
 
@@ -537,7 +541,8 @@ class REST_CASConnection(object):
 
     def copy(self):
         ''' Copy the connection object '''
-        username, password = base64.b64decode(self._auth.split(b' ', 1)[-1]).split(b':', 1)
+        username, password = base64.b64decode(
+            self._auth.split(b' ', 1)[-1]).split(b':', 1)
         return type(self)(self._orig_hostname, self._orig_port,
                           a2u(username), a2u(password),
                           self._soptions,

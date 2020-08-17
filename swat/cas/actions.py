@@ -645,10 +645,10 @@ class CASAction(ParamManager):
                     + '{%s}, kwargs)') % callargs
         six.exec_(('''def __init__(_self_, %s):'''
                    + '''    CASAction.__init__(_self_, %s)''')
-                     % (sig, funcargs), _globals, _locals)
+                  % (sig, funcargs), _globals, _locals)
         six.exec_(('''def __call__(_self_, %s):'''
                    + '''    return CASAction.__call__(_self_, %s)''')
-                     % (sig, funcargs), _globals, _locals)
+                  % (sig, funcargs), _globals, _locals)
 
         # Generate documentation
         all_params = []

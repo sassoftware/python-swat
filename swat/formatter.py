@@ -243,34 +243,37 @@ class SASFormatter(object):
         ''' Generic formatter for when tkefmt isn't available '''
         out = None
 
+        num_fmts = r'^[df]?\d*\.\d*$'
+        money_fmts = r'^(nl)?(comma|mny|mny|dollar|euro)\d*\.\d*$'
+
         if isinstance(value, float64_types):
             if np.isnan(value) or value is None:
                 out = a2u(str(value))
-            elif sasfmt and re.match(r'^[df]?\d*\.\d*$', sasfmt, flags=re.I):
+            elif sasfmt and re.match(num_fmts, sasfmt, flags=re.I):
                 out = self._format_numeric(value, sasfmt, width=width)
-            elif sasfmt and re.match(r'^(nl)?(comma|mny|mny|dollar|euro)\d*\.\d*$', sasfmt, flags=re.I):
+            elif sasfmt and re.match(money_fmts, sasfmt, flags=re.I):
                 out = self._format_numeric(value, sasfmt, width=width, commas=True)
             else:
                 out = a2u(str(float64(value)))
         elif isinstance(value, int64_types):
-            if sasfmt and re.match(r'^[df]?\d*\.\d*$', sasfmt):
+            if sasfmt and re.match(num_fmts, sasfmt):
                 out = self._format_numeric(value, sasfmt, width=width)
-            elif sasfmt and re.match(r'^(nl)?(comma|mny|dollar|euro)\d*\.\d*$', sasfmt, flags=re.I):
+            elif sasfmt and re.match(money_fmts, sasfmt, flags=re.I):
                 out = self._format_numeric(value, sasfmt, width=width, commas=True)
             else:
                 out = a2u(str(int64(value)))
         elif isinstance(value, int32_types):
             try:
-                if sasfmt and re.match(r'^[df]?\d*\.\d*$', sasfmt, flags=re.I):
+                if sasfmt and re.match(num_fmts, sasfmt, flags=re.I):
                     out = self._format_numeric(int32(value), sasfmt, width=width)
-                elif sasfmt and re.match(r'^(nl)(comma|mny|dollar|euro)\d*\.\d*$', sasfmt, flags=re.I):
+                elif sasfmt and re.match(money_fmts, sasfmt, flags=re.I):
                     out = self._format_numeric(value, sasfmt, width=width, commas=True)
                 else:
                     out = a2u(str(int32(value)))
             except OverflowError:
-                if sasfmt and re.match(r'^[df]?\d*\.\d*', sasfmt, flags=re.I):
+                if sasfmt and re.match(num_fmts, sasfmt, flags=re.I):
                     out = self._format_numeric(int64(value), sasfmt, width=width)
-                elif sasfmt and re.match(r'^(nl)?(comma|mny|dollar|euro)\d*\.\d*$', sasfmt, flags=re.I):
+                elif sasfmt and re.match(money_fmts, sasfmt, flags=re.I):
                     out = self._format_numeric(value, sasfmt, width=width, commas=True)
                 else:
                     out = a2u(str(int64(value)))

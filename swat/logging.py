@@ -30,7 +30,7 @@ default_level = 'warning'
 default_format = '[%(levelname)s] %(message)s'
 
 # Create global logger
-logger = logging.getLogger(__name__)  
+logger = logging.getLogger(__name__)
 logger.setLevel(dict(
     debug=logging.DEBUG,
     info=logging.INFO,

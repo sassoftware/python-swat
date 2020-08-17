@@ -71,7 +71,8 @@ class TestCASTable(tm.TestCase):
         self.s = swat.CAS(HOST, PORT, USER, PASSWD, protocol=PROTOCOL)
 
         if type(self).server_type is None:
-            # Set once per class and have every test use it. No need to change between tests.
+            # Set once per class and have every test use it.
+            # No need to change between tests.
             type(self).server_type = tm.get_cas_host_type(self.s)
 
         if type(self).server_version is None:
@@ -94,9 +95,9 @@ class TestCASTable(tm.TestCase):
         df['Model'] = ' ' + df['Model']
 
         if all_doubles:
-           for name in ['MSRP', 'Invoice', 'EngineSize', 'Cylinders', 'Horsepower',
-                        'MPG_City', 'MPG_Highway', 'Weight', 'Wheelbase', 'Length']:
-               df[name] = df[name].astype(float)
+            for name in ['MSRP', 'Invoice', 'EngineSize', 'Cylinders', 'Horsepower',
+                         'MPG_City', 'MPG_Highway', 'Weight', 'Wheelbase', 'Length']:
+                df[name] = df[name].astype(float)
 
         return df
 
@@ -116,7 +117,7 @@ class TestCASTable(tm.TestCase):
         self.assertTrue(t1 is not t2)
         self.assertEqual(t1, t2)
 
-        self.assertTrue(t1.params.vars is t2.params.vars)
+        self.assertTrue(t1.params.vars == t2.params.vars)
 
         t3 = copy.deepcopy(t1)
 
@@ -226,13 +227,16 @@ class TestCASTable(tm.TestCase):
         self.assertTrue(repr(newtbl).endswith(".sort_values('Model')"))
 
         newtbl.sort_values(['MSRP', 'Invoice'], ascending=False, inplace=True)
-        self.assertTrue(repr(newtbl).endswith(".sort_values(['MSRP', 'Invoice'], ascending=False)"))
+        self.assertTrue(repr(newtbl).endswith(".sort_values(['MSRP', 'Invoice'], "
+                                              "ascending=False)"))
 
         newtbl = self.table.sort_values(['Make', 'Model'], ascending=[True, False])
-        self.assertTrue(repr(newtbl).endswith(".sort_values(['Make', 'Model'], ascending=[True, False])"))
+        self.assertTrue(repr(newtbl).endswith(".sort_values(['Make', 'Model'], "
+                                              "ascending=[True, False])"))
 
         newtbl = self.table.sort_values(['Make', 'Model'], ascending=False)
-        self.assertTrue(repr(newtbl).endswith(".sort_values(['Make', 'Model'], ascending=False)"))
+        self.assertTrue(repr(newtbl).endswith(".sort_values(['Make', 'Model'], "
+                                              "ascending=False)"))
 
     def test_castable(self):
         # CASTable as table name
@@ -355,7 +359,7 @@ class TestCASTable(tm.TestCase):
         self.assertEqual(tbl.name, 'foo')
         self.assertEqual(tbl.caslib, 'MyCaslib')
         # NOTE: This will return the `replace` method
-        #self.assertEqual(tbl.replace, True)
+        # self.assertEqual(tbl.replace, True)
         self.assertEqual(tbl.SinglePass, True)
         self.assertEqual(tbl.importOptions, dict(filetype='xlsx'))
 
@@ -434,7 +438,8 @@ class TestCASTable(tm.TestCase):
 
         self.assertTrue(isinstance(matrix, np.ndarray))
 
-        self.assertEqual(matrix.tolist()[:3],
+        self.assertEqual(
+            matrix.tolist()[:3],
             [[u'Acura', u' MDX', u'SUV', u'Asia', u'All', 36945.0, 33337.0, 3.5,
               6.0, 265.0, 17.0, 23.0, 4451.0, 106.0, 189.0],
              [u'Acura', u' RSX Type S 2dr', u'Sedan', u'Asia', u'Front', 23820.0,
@@ -442,15 +447,18 @@ class TestCASTable(tm.TestCase):
              [u'Acura', u' TSX 4dr', u'Sedan', u'Asia', u'Front', 26990.0, 24647.0,
               2.4, 4.0, 200.0, 22.0, 29.0, 3230.0, 105.0, 183.0]])
 
-        self.assertEqual(matrix.tolist()[-1],
+        self.assertEqual(
+            matrix.tolist()[-1],
             [u'Volvo', u' XC70', u'Wagon', u'Europe', u'All', 35145.0, 33112.0,
              2.5, 5.0, 208.0, 20.0, 27.0, 3823.0, 109.0, 186.0])
 
         # Subset
         matrix = self.table.as_matrix(columns=['Make', 'MSRP', 'Invoice'])
 
-        self.assertEqual(matrix.tolist()[:3], [[u'Acura', 36945.0, 33337.0],
-            [u'Acura', 23820.0, 21761.0], [u'Acura', 26990.0, 24647.0]])
+        self.assertEqual(matrix.tolist()[:3],
+                         [[u'Acura', 36945.0, 33337.0],
+                          [u'Acura', 23820.0, 21761.0],
+                          [u'Acura', 26990.0, 24647.0]])
 
         self.assertEqual(matrix.tolist()[-1], [u'Volvo', 35145.0, 33112.0])
 
@@ -463,7 +471,9 @@ class TestCASTable(tm.TestCase):
         matrix = tbl.as_matrix(columns=['Make', 'MSRP'])
 
         self.assertEqual(matrix.tolist()[:3],
-            [[u'Acura', 36945.0], [u'Acura', 23820.0], [u'Acura', 26990.0]])
+                         [[u'Acura', 36945.0],
+                          [u'Acura', 23820.0],
+                          [u'Acura', 26990.0]])
 
         # Make sure the table didn't get modified
         self.assertEqual(tbl.columns.tolist(), ['Make', 'Model', 'MSRP', 'Invoice'])
@@ -572,10 +582,12 @@ class TestCASTable(tm.TestCase):
         self.assertEqual(subtbl.head().columns.tolist(), ['Double', 'Int32', 'Int64'])
 
         subtbl = tbl.select_dtypes(exclude=['int32', 'int64', 'double'])
-        self.assertEqual(subtbl.columns.tolist(), ['Char', 'Varchar', 'Date', 'Time',
-                                         'Datetime', 'DecSext', 'Varbinary', 'Binary'])
-        self.assertEqual(subtbl.head().columns.tolist(), ['Char', 'Varchar', 'Date', 'Time',
-                                                'Datetime', 'DecSext', 'Varbinary', 'Binary'])
+        self.assertEqual(subtbl.columns.tolist(),
+                         ['Char', 'Varchar', 'Date', 'Time',
+                          'Datetime', 'DecSext', 'Varbinary', 'Binary'])
+        self.assertEqual(subtbl.head().columns.tolist(),
+                         ['Char', 'Varchar', 'Date', 'Time',
+                          'Datetime', 'DecSext', 'Varbinary', 'Binary'])
 
         char_names = ['Char', 'Varchar', 'Varbinary', 'Binary']
         num_names = ['Double', 'Int32', 'Int64', 'Date', 'Time', 'Datetime', 'DecSext']
@@ -624,8 +636,10 @@ class TestCASTable(tm.TestCase):
 
         # Mixed include and exclude
         subtbl = tbl.select_dtypes(include=['number'], exclude=['int32', 'int64'])
-        self.assertEqual(subtbl.columns.tolist(), [x for x in num_names if x not in ['Int32', 'Int64']])
-        self.assertEqual(subtbl.head().columns.tolist(), [x for x in num_names if x not in ['Int32', 'Int64']])
+        self.assertEqual(subtbl.columns.tolist(),
+                         [x for x in num_names if x not in ['Int32', 'Int64']])
+        self.assertEqual(subtbl.head().columns.tolist(),
+                         [x for x in num_names if x not in ['Int32', 'Int64']])
 
         # In place
         subtbl = tbl.select_dtypes(include=['number'], inplace=True)
@@ -636,7 +650,8 @@ class TestCASTable(tm.TestCase):
     def test_values(self):
         data = self.table.values
 
-        self.assertEqual(data.tolist()[:3],
+        self.assertEqual(
+            data.tolist()[:3],
             [[u'Acura', u' MDX', u'SUV', u'Asia', u'All', 36945.0, 33337.0,
               3.5, 6.0, 265.0, 17.0, 23.0, 4451.0, 106.0, 189.0],
              [u'Acura', u' RSX Type S 2dr', u'Sedan', u'Asia', u'Front', 23820.0,
@@ -644,7 +659,8 @@ class TestCASTable(tm.TestCase):
              [u'Acura', u' TSX 4dr', u'Sedan', u'Asia', u'Front', 26990.0, 24647.0,
               2.4, 4.0, 200.0, 22.0, 29.0, 3230.0, 105.0, 183.0]])
 
-        self.assertEqual(data.tolist()[-1],
+        self.assertEqual(
+            data.tolist()[-1],
             [u'Volvo', u' XC70', u'Wagon', u'Europe', u'All', 35145.0, 33112.0,
              2.5, 5.0, 208.0, 20.0, 27.0, 3823.0, 109.0, 186.0])
 
@@ -690,7 +706,7 @@ class TestCASTable(tm.TestCase):
 
     def test_axes(self):
         axes = self.table.axes
-        #self.assertEqual(axes[0].tolist(), list(range(428)))
+        # self.assertEqual(axes[0].tolist(), list(range(428)))
         self.assertEqual(axes[1].tolist(), list(self.table.columns))
 
     def test_ndim(self):
@@ -728,7 +744,7 @@ class TestCASTable(tm.TestCase):
         shape = self.table['Make'].head(n=10000).shape
         self.assertEqual(self.table['Make'].shape, shape)
 
-    def test_copy(self):
+    def test_copy_with_params(self):
         tbl = self.table.copy()
 
         self.assertTrue(tbl is not self.table)
@@ -766,11 +782,15 @@ class TestCASTable(tm.TestCase):
         df = self.get_cars_df()
         tbl = self.table
 
-        self.assertEqual(df['Cylinders'].isnull().tolist(), tbl['Cylinders'].isnull().tolist())
-        self.assertEqual(df['Cylinders'].notnull().tolist(), tbl['Cylinders'].notnull().tolist())
+        self.assertEqual(df['Cylinders'].isnull().tolist(),
+                         tbl['Cylinders'].isnull().tolist())
+        self.assertEqual(df['Cylinders'].notnull().tolist(),
+                         tbl['Cylinders'].notnull().tolist())
 
-        self.assertEqual(df['Make'].isnull().tolist(), tbl['Make'].isnull().tolist())
-        self.assertEqual(df['Make'].notnull().tolist(), tbl['Make'].notnull().tolist())
+        self.assertEqual(df['Make'].isnull().tolist(),
+                         tbl['Make'].isnull().tolist())
+        self.assertEqual(df['Make'].notnull().tolist(),
+                         tbl['Make'].notnull().tolist())
 
     def test_head(self):
         columns = ['Make', 'Model', 'Type', 'Origin', 'DriveTrain',
@@ -785,7 +805,8 @@ class TestCASTable(tm.TestCase):
         self.assertEqual(df.shape, (5, len(columns)))
 
         self.assertEqual(df['Model'].tolist(),
-            [' MDX', ' RSX Type S 2dr', ' TSX 4dr', ' TL 4dr', ' 3.5 RL 4dr'])
+                         [' MDX', ' RSX Type S 2dr', ' TSX 4dr',
+                          ' TL 4dr', ' 3.5 RL 4dr'])
 
         # Table head with n=10
         df = self.table.head(10)
@@ -800,7 +821,8 @@ class TestCASTable(tm.TestCase):
         self.assertEqual(df.shape, (10, 2))
 
         # Column head with n=10
-        self.assertEqual(df['MSRP'].head(10).tolist(), self.table['MSRP'].head(10).tolist())
+        self.assertEqual(df['MSRP'].head(10).tolist(),
+                         self.table['MSRP'].head(10).tolist())
 
     def test_tail(self):
         columns = ['Make', 'Model', 'Type', 'Origin', 'DriveTrain',
@@ -815,7 +837,8 @@ class TestCASTable(tm.TestCase):
         self.assertEqual(df.shape, (5, len(columns)))
 
         self.assertEqual(df['Model'].tolist(),
-            [' C70 LPT convertible 2dr', ' C70 HPT convertible 2dr', ' S80 T6 4dr', ' V40', ' XC70'])
+                         [' C70 LPT convertible 2dr', ' C70 HPT convertible 2dr',
+                          ' S80 T6 4dr', ' V40', ' XC70'])
 
         # Table tail with n=10
         df = self.table.tail(10)
@@ -830,7 +853,8 @@ class TestCASTable(tm.TestCase):
         self.assertEqual(df.shape, (10, 2))
 
         # Column tail with n=10
-        self.assertEqual(df['MSRP'].tail(10).tolist(), self.table['MSRP'].tail(10).tolist())
+        self.assertEqual(df['MSRP'].tail(10).tolist(),
+                         self.table['MSRP'].tail(10).tolist())
 
     def test_iter(self):
         columns = ['Make', 'Model', 'Type', 'Origin', 'DriveTrain',
@@ -864,16 +888,15 @@ class TestCASTable(tm.TestCase):
 
         # Computed columns
         self.table['MakeModel'] = (self.table.Make + ' ' + self.table.Model)
-        last = None
         for item in self.table.iteritems():
-            last = item
+            pass
         self.assertEqual(item[0], 'MakeModel')
         self.assertEqual(item[1].head().tolist(),
-            ['Acura  MDX',
-             'Acura  RSX Type S 2dr',
-             'Acura  TSX 4dr',
-             'Acura  TL 4dr',
-             'Acura  3.5 RL 4dr'])
+                         ['Acura  MDX',
+                          'Acura  RSX Type S 2dr',
+                          'Acura  TSX 4dr',
+                          'Acura  TL 4dr',
+                          'Acura  3.5 RL 4dr'])
 
     def test_column_iteritems(self):
         df = self.get_cars_df()
@@ -899,25 +922,23 @@ class TestCASTable(tm.TestCase):
         self.assertEqual(i, self.table.shape[0])
 
     def test_itertuples(self):
-        columns = ['Make', 'Model', 'Type', 'Origin', 'DriveTrain',
-                   'MSRP', 'Invoice', 'EngineSize', 'Cylinders',
-                   'Horsepower', 'MPG_City', 'MPG_Highway', 'Weight',
-                   'Wheelbase', 'Length']
-
         i = 0
         for row in self.table.itertuples():
             if i == 0:
-                self.assertEqual(row, (0, u'Acura', u' MDX', u'SUV', u'Asia', u'All',
-                                       36945.0, 33337.0, 3.5, 6.0, 265.0, 17.0, 23.0,
-                                       4451.0, 106.0, 189.0))
+                self.assertEqual(row,
+                                 (0, u'Acura', u' MDX', u'SUV', u'Asia', u'All',
+                                  36945.0, 33337.0, 3.5, 6.0, 265.0, 17.0, 23.0,
+                                  4451.0, 106.0, 189.0))
             elif i == 1:
-                self.assertEqual(row, (1, u'Acura', u' RSX Type S 2dr', u'Sedan', u'Asia',
-                                       u'Front', 23820.0, 21761.0, 2.0, 4.0, 200.0, 24.0,
-                                       31.0, 2778.0, 101.0, 172.0))
+                self.assertEqual(row,
+                                 (1, u'Acura', u' RSX Type S 2dr', u'Sedan', u'Asia',
+                                  u'Front', 23820.0, 21761.0, 2.0, 4.0, 200.0, 24.0,
+                                  31.0, 2778.0, 101.0, 172.0))
             elif i == 2:
-                self.assertEqual(row, (2, u'Acura', u' TSX 4dr', u'Sedan', u'Asia', u'Front',
-                                       26990.0, 24647.0, 2.3999999999999999, 4.0, 200.0, 22.0,
-                                       29.0, 3230.0, 105.0, 183.0))
+                self.assertEqual(row,
+                                 (2, u'Acura', u' TSX 4dr', u'Sedan', u'Asia', u'Front',
+                                  26990.0, 24647.0, 2.3999999999999999, 4.0, 200.0, 22.0,
+                                  29.0, 3230.0, 105.0, 183.0))
             i += 1
             self.assertTrue(isinstance(row, tuple))
 
@@ -946,8 +967,8 @@ class TestCASTable(tm.TestCase):
         self.assertEqual(df['Model'].get(500), tbl['Model'].get(500))
 
     def test_lookup(self):
-        look = self.table.lookup([0,5,10], ['Make','Make','MSRP'])
-        head = self.table.head(n=15).lookup([0,5,10], ['Make','Make','MSRP'])
+        look = self.table.lookup([0, 5, 10], ['Make', 'Make', 'MSRP'])
+        head = self.table.head(n=15).lookup([0, 5, 10], ['Make', 'Make', 'MSRP'])
 
         self.assertEqual(str(look.dtype), 'object')
         self.assertEqual(list(look), ['Acura', 'Acura', 33430.0])
@@ -955,8 +976,8 @@ class TestCASTable(tm.TestCase):
         self.assertEqual(str(look.dtype), str(head.dtype))
         self.assertEqual(list(head), ['Acura', 'Acura', 33430.0])
 
-        look = self.table.lookup([0,5,10], ['MSRP','MSRP','MSRP'])
-        head = self.table.head(n=15).lookup([0,5,10], ['MSRP','MSRP','MSRP'])
+        look = self.table.lookup([0, 5, 10], ['MSRP', 'MSRP', 'MSRP'])
+        head = self.table.head(n=15).lookup([0, 5, 10], ['MSRP', 'MSRP', 'MSRP'])
 
         self.assertEqual(str(look.dtype), 'float64')
         self.assertEqual(str(head.dtype), 'float64')
@@ -972,8 +993,10 @@ class TestCASTable(tm.TestCase):
         model = self.table.pop('Model')
 
         self.assertEqual(model.__class__.__name__, 'CASColumn')
-        self.assertEqual(self.table.columns.tolist(), [x for x in columns if x != 'Model'])
-        self.assertEqual(self.table.head().columns.tolist(), [x for x in columns if x != 'Model'])
+        self.assertEqual(self.table.columns.tolist(),
+                         [x for x in columns if x != 'Model'])
+        self.assertEqual(self.table.head().columns.tolist(),
+                         [x for x in columns if x != 'Model'])
 
         self.assertEqual(self.table.head().pop('Make').to_dict(),
                          self.table.pop('Make').head().to_dict())
@@ -993,9 +1016,9 @@ class TestCASTable(tm.TestCase):
         del self.table['Length']
 
         self.assertEqual(self.table.columns.tolist(),
-            [x for x in columns if x not in ['Model', 'Length']])
+                         [x for x in columns if x not in ['Model', 'Length']])
         self.assertEqual(self.table.head().columns.tolist(),
-            [x for x in columns if x not in ['Model', 'Length']])
+                         [x for x in columns if x not in ['Model', 'Length']])
 
         with self.assertRaises(KeyError):
             del self.table['Foo']
@@ -1009,14 +1032,14 @@ class TestCASTable(tm.TestCase):
 
         self.assertEqual(corr.columns.tolist(), dfcorr.columns.tolist())
         self.assertEqual(corr.columns.tolist(), columns)
-        self.assertEqual(re.sub(r'(\.\d{8})\d+', r'\1', corr.to_csv())\
-                                .replace('0.99999999', '1.0')\
-                                .replace('1.00000000', '1.0')\
-                                .split('\n'),
-                         re.sub(r'(\.\d{8})\d+', r'\1', dfcorr.to_csv())\
-                                .replace('0.99999999', '1.0')\
-                                .replace('1.00000000', '1.0')\
-                                .split('\n'))
+        self.assertEqual(re.sub(r'(\.\d{8})\d+', r'\1', corr.to_csv())
+                           .replace('0.99999999', '1.0')
+                           .replace('1.00000000', '1.0')
+                           .split('\n'),
+                         re.sub(r'(\.\d{8})\d+', r'\1', dfcorr.to_csv())
+                           .replace('0.99999999', '1.0')
+                           .replace('1.00000000', '1.0')
+                           .split('\n'))
 
     def test_count(self):
         count = self.table.count()
@@ -1033,8 +1056,8 @@ class TestCASTable(tm.TestCase):
 
     @unittest.skipIf(pd_version <= (0, 14, 0), 'Need newer version of Pandas')
     def test_describe(self):
-#       if self.server_type == 'windows.smp':
-#           tm.TestCase.skipTest(self, 'Skip on WX6 until defect S1240339 fixed')
+        # if self.server_type == 'windows.smp':
+        #     tm.TestCase.skipTest(self, 'Skip on WX6 until defect S1240339 fixed')
 
         df = self.get_cars_df()
 
@@ -1054,12 +1077,12 @@ class TestCASTable(tm.TestCase):
         for std, dfstd in zip(desc.loc['std'].tolist(), dfdesc.loc['std'].tolist()):
             self.assertAlmostEqual(std, dfstd, 5)
         self.assertEqual(desc.loc['min'].tolist(), dfdesc.loc['min'].tolist())
-#       for pct, dpct in zip(desc.loc['25%'].tolist(), dfdesc.loc['25%'].tolist()):
-#           self.assertAlmostEqual(pct, dpct, 0)
-#       for pct, dpct in zip(desc.loc['50%'].tolist(), dfdesc.loc['50%'].tolist()):
-#           self.assertAlmostEqual(pct, dpct, 0)
-#       for pct, dpct in zip(desc.loc['75%'].tolist(), dfdesc.loc['75%'].tolist()):
-#           self.assertAlmostEqual(pct, dpct, 0)
+        # for pct, dpct in zip(desc.loc['25%'].tolist(), dfdesc.loc['25%'].tolist()):
+        #     self.assertAlmostEqual(pct, dpct, 0)
+        # for pct, dpct in zip(desc.loc['50%'].tolist(), dfdesc.loc['50%'].tolist()):
+        #     self.assertAlmostEqual(pct, dpct, 0)
+        # for pct, dpct in zip(desc.loc['75%'].tolist(), dfdesc.loc['75%'].tolist()):
+        #     self.assertAlmostEqual(pct, dpct, 0)
         self.assertEqual(desc.loc['max'].tolist(), dfdesc.loc['max'].tolist())
 
         # Character data
@@ -1073,7 +1096,7 @@ class TestCASTable(tm.TestCase):
         self.assertEqual(desc.loc['unique'].tolist(), dfdesc.loc['unique'].tolist())
         # NOTE: The topk action sorts ties by formatted value, so it's different
         #       than what Pandas gets.
-        #self.assertEqual(desc.loc['top'].tolist(), dfdesc.loc['top'].tolist())
+        # self.assertEqual(desc.loc['top'].tolist(), dfdesc.loc['top'].tolist())
         self.assertEqual(desc.loc['freq'].tolist(), dfdesc.loc['freq'].tolist())
 
         # Percentiles
@@ -1125,28 +1148,34 @@ class TestCASTable(tm.TestCase):
         desc = self.table.describe(stats='all')
         labels = desc.index.tolist()
         if 'skewness' in labels:
-            self.assertEqual(labels,
-                ['count', 'unique', 'mean', 'std', 'min', '25%', '50%', '75%'] +
-                ['max', 'nmiss', 'sum', 'stderr', 'var', 'uss'] +
-                ['cv', 'tvalue', 'probt', 'css', 'kurtosis', 'skewness'])
+            self.assertEqual(
+                labels,
+                ['count', 'unique', 'mean', 'std', 'min', '25%', '50%', '75%']
+                + ['max', 'nmiss', 'sum', 'stderr', 'var', 'uss']
+                + ['cv', 'tvalue', 'probt', 'css', 'kurtosis', 'skewness'])
         else:
-            self.assertEqual(labels,
-                ['count', 'unique', 'mean', 'std', 'min', '25%', '50%', '75%'] +
-                ['max', 'nmiss', 'sum', 'stderr', 'var', 'uss'] +
-                ['cv', 'tvalue', 'probt', 'css'])
+            self.assertEqual(
+                labels,
+                ['count', 'unique', 'mean', 'std', 'min', '25%', '50%', '75%']
+                + ['max', 'nmiss', 'sum', 'stderr', 'var', 'uss']
+                + ['cv', 'tvalue', 'probt', 'css'])
 
         desc = self.table.describe(include='all', stats='all')
         labels = desc.index.tolist()
         if 'skewness' in labels:
-            self.assertEqual(labels,
-                ['count', 'unique', 'top', 'freq', 'mean', 'std', 'min', '25%', '50%', '75%'] +
-                ['max', 'nmiss', 'sum', 'stderr', 'var', 'uss'] +
-                ['cv', 'tvalue', 'probt', 'css', 'kurtosis', 'skewness'])
+            self.assertEqual(
+                labels,
+                ['count', 'unique', 'top', 'freq', 'mean']
+                + ['std', 'min', '25%', '50%', '75%']
+                + ['max', 'nmiss', 'sum', 'stderr', 'var', 'uss']
+                + ['cv', 'tvalue', 'probt', 'css', 'kurtosis', 'skewness'])
         else:
-            self.assertEqual(labels,
-                ['count', 'unique', 'top', 'freq', 'mean', 'std', 'min', '25%', '50%', '75%'] +
-                ['max', 'nmiss', 'sum', 'stderr', 'var', 'uss'] +
-                ['cv', 'tvalue', 'probt', 'css'])
+            self.assertEqual(
+                labels,
+                ['count', 'unique', 'top', 'freq', 'mean']
+                + ['std', 'min', '25%', '50%', '75%']
+                + ['max', 'nmiss', 'sum', 'stderr', 'var', 'uss']
+                + ['cv', 'tvalue', 'probt', 'css'])
 
         # Test all character data
         chardf = df[['Make', 'Model', 'Type', 'Origin']]
@@ -1154,25 +1183,37 @@ class TestCASTable(tm.TestCase):
         chardesc = self.table.datastep('keep Make Model Type Origin').describe()
 
         self.assertEqual(len(chardfdesc.index), len(chardesc.index))
-        self.assertEqual(chardfdesc.loc['count'].tolist(), chardesc.loc['count'].tolist())
-        self.assertEqual(chardfdesc.loc['unique'].tolist(), chardesc.loc['unique'].tolist())
+        self.assertEqual(chardfdesc.loc['count'].tolist(),
+                         chardesc.loc['count'].tolist())
+        self.assertEqual(chardfdesc.loc['unique'].tolist(),
+                         chardesc.loc['unique'].tolist())
         # TODO: Pandas sorts characters differently
-#       self.assertEqual(chardfdesc.loc['top'].tolist(), chardesc.loc['top'].tolist())
-        self.assertEqual(chardfdesc.loc['freq'].tolist(), chardesc.loc['freq'].tolist())
+        # self.assertEqual(chardfdesc.loc['top'].tolist(),
+        #                  chardesc.loc['top'].tolist())
+        self.assertEqual(chardfdesc.loc['freq'].tolist(),
+                         chardesc.loc['freq'].tolist())
 
         # All character / all stats
         chardfdesc = chardf.describe()
-        chardesc = self.table.datastep('keep Make Model Type Origin').describe(stats='all')
-        self.assertEqual(chardfdesc.loc['count'].tolist(), chardesc.loc['count'].tolist())
-        self.assertEqual(chardfdesc.loc['unique'].tolist(), chardesc.loc['unique'].tolist())
-#       self.assertEqual(chardfdesc.loc['min'].tolist(), chardesc.loc['max'].tolist())
-#       self.assertEqual(chardfdesc.loc['min'].tolist(), chardesc.loc['max'].tolist())
+        chardesc = self.table.datastep('keep Make Model Type Origin')\
+                       .describe(stats='all')
+        self.assertEqual(chardfdesc.loc['count'].tolist(),
+                         chardesc.loc['count'].tolist())
+        self.assertEqual(chardfdesc.loc['unique'].tolist(),
+                         chardesc.loc['unique'].tolist())
+        # self.assertEqual(chardfdesc.loc['min'].tolist(),
+        #                  chardesc.loc['max'].tolist())
+        # self.assertEqual(chardfdesc.loc['min'].tolist(),
+        #                  chardesc.loc['max'].tolist())
 
         # All character / manual stats
         chardfdesc = chardf.describe()
-        chardesc = self.table.datastep('keep Make Model Type Origin').describe(stats=['count', 'unique'])
-        self.assertEqual(chardfdesc.loc['count'].tolist(), chardesc.loc['count'].tolist())
-        self.assertEqual(chardfdesc.loc['unique'].tolist(), chardesc.loc['unique'].tolist())
+        chardesc = self.table.datastep('keep Make Model Type Origin')\
+                       .describe(stats=['count', 'unique'])
+        self.assertEqual(chardfdesc.loc['count'].tolist(),
+                         chardesc.loc['count'].tolist())
+        self.assertEqual(chardfdesc.loc['unique'].tolist(),
+                         chardesc.loc['unique'].tolist())
 
         # Test groupby
 
@@ -1182,8 +1223,10 @@ class TestCASTable(tm.TestCase):
         tbldesc = grptbl.describe(percentiles=[.5])
         dfdesc = grpdf.describe(percentiles=[.5])
 
-        self.assertEqual(tbldesc.index.tolist()[:50], dfdesc.index.tolist()[:50])
-        self.assertEqual(set(tbldesc.columns.tolist()), set(dfdesc.columns.tolist()))
+        self.assertEqual(tbldesc.index.tolist()[:50],
+                         dfdesc.index.tolist()[:50])
+        self.assertEqual(set(tbldesc.columns.tolist()),
+                         set(dfdesc.columns.tolist()))
 
         tbllist = tbldesc['MPG_City']
         dflist = dfdesc['MPG_City']
@@ -1193,7 +1236,8 @@ class TestCASTable(tm.TestCase):
             for i in range(50):
                 self.assertAlmostEqual(tbllist[i], dflist[i], 2)
         else:
-            self.assertTablesEqual(tbldesc['MPG_City'], dfdesc['MPG_City'], precision=6)
+            self.assertTablesEqual(tbldesc['MPG_City'],
+                                   dfdesc['MPG_City'], precision=6)
 
         # Test missing character values
         tbl2 = self.table.replace({'Make': {'BMW': ''}})
@@ -1204,18 +1248,18 @@ class TestCASTable(tm.TestCase):
 
     @unittest.skipIf(pd_version < (0, 16, 0), 'Need newer version of Pandas')
     def test_max(self):
-#       if self.server_type == 'windows.smp':
-#           tm.TestCase.skipTest(self, 'Skip on WX6 until defect S1240339 fixed')
+        # if self.server_type == 'windows.smp':
+        #     tm.TestCase.skipTest(self, 'Skip on WX6 until defect S1240339 fixed')
 
         df = self.get_cars_df()
         tbl = self.table
 
         out = tbl.max().tolist()
-        dfout = df.max().tolist()
+        # dfout = df.max().tolist()
 
         # TODO: The DataFrame result looks wrong.  It converts all values to
         #       strings and they get truncated.
-        #self.assertEqual(out, dfout)
+        # self.assertEqual(out, dfout)
 
         self.assertEqual(out, ['Volvo', ' Z4 convertible 3.0i 2dr', 'Wagon', 'USA',
                                'Rear', 192465.0, 173560.0, 8.3000000000000007, 12.0,
@@ -1232,7 +1276,7 @@ class TestCASTable(tm.TestCase):
         self.assertEqual(df['MSRP'].max(), tbl['MSRP'].max())
 
         # Only character columns
-        chardf = df[['Make', 'Model', 'Type', 'Origin']]
+        # chardf = df[['Make', 'Model', 'Type', 'Origin']]
         out = tbl.datastep('keep Make Model Type Origin').max().tolist()
         self.assertEqual(out, ['Volvo', ' Z4 convertible 3.0i 2dr', 'Wagon', 'USA'])
 
@@ -1248,12 +1292,14 @@ class TestCASTable(tm.TestCase):
             self.assertEqual(dfmax[:30].to_csv(), max[:30].to_csv())
 
         # Column max
-        self.assertEqual(dfgrp['Origin'].max().tolist()[:40], grp['Origin'].max().tolist()[:40])
-        self.assertEqual(dfgrp['Horsepower'].max().tolist()[:40], grp['Horsepower'].max().tolist()[:40])
+        self.assertEqual(dfgrp['Origin'].max().tolist()[:40],
+                         grp['Origin'].max().tolist()[:40])
+        self.assertEqual(dfgrp['Horsepower'].max().tolist()[:40],
+                         grp['Horsepower'].max().tolist()[:40])
 
     def test_mean(self):
-#       if self.server_type == 'windows.smp':
-#           tm.TestCase.skipTest(self, 'Skip on WX6 until defect S1240339 fixed')
+        # if self.server_type == 'windows.smp':
+        #     tm.TestCase.skipTest(self, 'Skip on WX6 until defect S1240339 fixed')
 
         mean = self.table.mean()
         dfmean = self.get_cars_df().mean()
@@ -1285,7 +1331,7 @@ class TestCASTable(tm.TestCase):
 
         # Only character columns
         with self.assertRaises(swat.SWATError):
-            out = self.table.datastep('keep Make Model Type Origin').mean().tolist()
+            self.table.datastep('keep Make Model Type Origin').mean().tolist()
 
     @unittest.skipIf(pd_version < (0, 18, 0), 'Need newer version of Pandas')
     def test_skew(self):
@@ -1302,7 +1348,7 @@ class TestCASTable(tm.TestCase):
 
         # Only character columns
         with self.assertRaises(swat.SWATError):
-            out = self.table.datastep('keep Make Model Type Origin').skew().tolist()
+            self.table.datastep('keep Make Model Type Origin').skew().tolist()
 
         skew = self.table.groupby('Origin').skew()
         dfskew = self.get_cars_df().groupby('Origin').skew()
@@ -1325,19 +1371,19 @@ class TestCASTable(tm.TestCase):
 
         # Only character columns
         with self.assertRaises(swat.SWATError):
-            out = self.table.datastep('keep Make Model Type Origin').kurt().tolist()
+            self.table.datastep('keep Make Model Type Origin').kurt().tolist()
 
         # Not supported by Pandas
-#       kurt = self.table.groupby('Origin').kurt()
-#       dfkurt = self.get_cars_df().groupby('Origin').kurt()
-#       # Pandas messes up the column order
-#       dfkurt = dfkurt[[x for x in self.table.columns if x in dfskew.columns]]
-#       self.assertTablesEqual(kurt, dfkurt, precision=4)
+        # kurt = self.table.groupby('Origin').kurt()
+        # dfkurt = self.get_cars_df().groupby('Origin').kurt()
+        # Pandas messes up the column order
+        # dfkurt = dfkurt[[x for x in self.table.columns if x in dfskew.columns]]
+        # self.assertTablesEqual(kurt, dfkurt, precision=4)
 
     @unittest.skipIf(pd_version < (0, 16, 0), 'Need newer version of Pandas')
     def test_min(self):
-#       if self.server_type == 'windows.smp':
-#           tm.TestCase.skipTest(self, 'Skip on WX6 until defect S1240339 fixed')
+        # if self.server_type == 'windows.smp':
+        #     tm.TestCase.skipTest(self, 'Skip on WX6 until defect S1240339 fixed')
 
         df = self.get_cars_df()
         tbl = self.table
@@ -1347,7 +1393,7 @@ class TestCASTable(tm.TestCase):
 
         # TODO: The DataFrame result looks wrong.  It converts all values to
         #       strings and they get truncated.
-        #self.assertEqual(out, dfout)
+        # self.assertEqual(out, dfout)
 
         self.assertEqual(out, ['Acura', ' 3.5 RL 4dr', 'Hybrid', 'Asia', 'All',
                                10280.0, 9875.0, 1.3, 3.0, 73.0, 10.0, 12.0,
@@ -1360,7 +1406,7 @@ class TestCASTable(tm.TestCase):
         self.assertEqual(out, dfout)
 
         # Only character columns
-        chardf = df[['Make', 'Model', 'Type', 'Origin']]
+        # chardf = df[['Make', 'Model', 'Type', 'Origin']]
         out = tbl.datastep('keep Make Model Type Origin').min().tolist()
         self.assertEqual(out, ['Acura', ' 3.5 RL 4dr', 'Hybrid', 'Asia'])
 
@@ -1380,8 +1426,10 @@ class TestCASTable(tm.TestCase):
             self.assertEqual(dfmin[:30].to_csv(), min[:30].to_csv())
 
         # Column min
-        self.assertEqual(dfgrp['Model'].min().tolist()[:40], grp['Model'].min().tolist()[:40])
-        self.assertEqual(dfgrp['Horsepower'].min().tolist()[:40], grp['Horsepower'].min().tolist()[:40])
+        self.assertEqual(dfgrp['Model'].min().tolist()[:40],
+                         grp['Model'].min().tolist()[:40])
+        self.assertEqual(dfgrp['Horsepower'].min().tolist()[:40],
+                         grp['Horsepower'].min().tolist()[:40])
 
     def test_mode(self):
         df = self.get_cars_df()
@@ -1412,27 +1460,31 @@ class TestCASTable(tm.TestCase):
         tblgrp = tbl.groupby(['Make', 'Cylinders'])
 
         # TODO: Pandas mode sets columns with all unique values to NaN
-        self.assertEqual(re.sub(r'^,+$',
-                                dfgrp.get_group(('Acura', 6.0)).mode()[['Type', 'Origin',
-                                                 'EngineSize', 'MPG_City']].to_csv(index=False),
-                                r'', re.M),
-                         re.sub(r'^,+$',
-                                tblgrp.mode().loc[('Acura', 6.0), ['Type', 'Origin',
-                                                   'EngineSize', 'MPG_City']].dropna(how='all').to_csv(index=False), r'', re.M))
+        self.assertEqual(
+            re.sub(r'^,+$', dfgrp.get_group(('Acura', 6.0))
+                                 .mode()[['Type', 'Origin',
+                                          'EngineSize', 'MPG_City']]
+                                 .to_csv(index=False), r'', re.M),
+            re.sub(r'^,+$', tblgrp.mode().loc[('Acura', 6.0),
+                                              ['Type', 'Origin',
+                                               'EngineSize', 'MPG_City']]
+                                  .dropna(how='all').to_csv(index=False), r'', re.M))
 
         dfgrp = df[['Make', 'Type']].groupby(['Make'])
         tblgrp = tbl[['Make', 'Type']].groupby(['Make'])
 
         # TODO: Pandas mode sets columns with all unique values to NaN
-        self.assertEqual(dfgrp.get_group('Acura').mode()[['Type']].to_csv(index=False),
-                         tblgrp.mode().loc['Acura', ['Type']].dropna(how='all').to_csv(index=False))
+        self.assertEqual(
+            dfgrp.get_group('Acura').mode()[['Type']].to_csv(index=False),
+            tblgrp.mode().loc['Acura', ['Type']].dropna(how='all').to_csv(index=False))
 
         dfgrp = df[['Cylinders', 'MPG_City']].groupby(['Cylinders'])
         tblgrp = tbl[['Cylinders', 'MPG_City']].groupby(['Cylinders'])
 
         # TODO: Pandas mode sets columns with all unique values to NaN
-        self.assertEqual(dfgrp.get_group(6.0).mode()[['MPG_City']].to_csv(index=False),
-                         tblgrp.mode().loc[6.0, ['MPG_City']].dropna(how='all').to_csv(index=False))
+        self.assertEqual(
+            dfgrp.get_group(6.0).mode()[['MPG_City']].to_csv(index=False),
+            tblgrp.mode().loc[6.0, ['MPG_City']].dropna(how='all').to_csv(index=False))
 
     def test_median(self):
         df = self.get_cars_df()
@@ -1444,7 +1496,8 @@ class TestCASTable(tm.TestCase):
         self.assertEqual(dfmed.tolist(), tblmed.tolist())
 
     @unittest.skipIf(pd_version < (0, 18, 0), 'Need newer version of Pandas')
-    @unittest.skipIf(tuple([int(x) for x in np.__version__.split('.')[:2]]) < (1, 9), 'Need newer version of numpy')
+    @unittest.skipIf(tuple([int(x) for x in np.__version__.split('.')[:2]])
+                     < (1, 9), 'Need newer version of numpy')
     def test_quantile(self):
         df = self.get_cars_df()
         tbl = self.table
@@ -1481,7 +1534,8 @@ class TestCASTable(tm.TestCase):
 
         # Columns
         self.assertEqual(df['MSRP'].quantile(), tbl['MSRP'].quantile())
-        self.assertEqual(df['Horsepower'].quantile([0.1, 0.5, 1], interpolation='nearest').tolist(),
+        self.assertEqual(df['Horsepower'].quantile([0.1, 0.5, 1],
+                                                   interpolation='nearest').tolist(),
                          tbl['Horsepower'].quantile([0.1, 0.5, 1]).tolist())
 
         # Newer versions of pandas have behavior changes that make checking quantiles
@@ -1489,32 +1543,33 @@ class TestCASTable(tm.TestCase):
 
         # Groupby variables
 
-#       dfgrp = df.groupby(['Make', 'Cylinders'])
-#       tblgrp = tbl.groupby(['Make', 'Cylinders'])
+        # dfgrp = df.groupby(['Make', 'Cylinders'])
+        # tblgrp = tbl.groupby(['Make', 'Cylinders'])
 
-#       dfqnt = dfgrp[['EngineSize']].quantile(interpolation='nearest')
-#       tblqnt = tblgrp.quantile()[['EngineSize']]
+        # dfqnt = dfgrp[['EngineSize']].quantile(interpolation='nearest')
+        # tblqnt = tblgrp.quantile()[['EngineSize']]
 
-#       self.assertEqual(dfqnt[1:10].to_csv(), tblqnt[1:10].to_csv())
+        # self.assertEqual(dfqnt[1:10].to_csv(), tblqnt[1:10].to_csv())
 
-#       dfqnt = dfgrp[['EngineSize']].quantile([0.5, 1], interpolation='nearest')
-#       tblqnt = tblgrp.quantile([0.5, 1])[['EngineSize']]
+        # dfqnt = dfgrp[['EngineSize']].quantile([0.5, 1], interpolation='nearest')
+        # tblqnt = tblgrp.quantile([0.5, 1])[['EngineSize']]
 
-#       self.assertEqual(dfqnt[1:10].to_csv(), tblqnt[1:10].to_csv())
+        # self.assertEqual(dfqnt[1:10].to_csv(), tblqnt[1:10].to_csv())
 
         # Groupby column
 
-#       dfqnt = dfgrp['EngineSize'].quantile(interpolation='nearest')
-#       tblqnt = tblgrp['EngineSize'].quantile()
+        # dfqnt = dfgrp['EngineSize'].quantile(interpolation='nearest')
+        # tblqnt = tblgrp['EngineSize'].quantile()
 
-#       self.assertEqual(dfqnt[1:10].tolist(), tblqnt[1:10].tolist())
+        # self.assertEqual(dfqnt[1:10].tolist(), tblqnt[1:10].tolist())
 
-#       dfqnt = dfgrp['EngineSize'].quantile([0.5, 1], interpolation='nearest')
-#       tblqnt = tblgrp['EngineSize'].quantile([0.5, 1])
+        # dfqnt = dfgrp['EngineSize'].quantile([0.5, 1], interpolation='nearest')
+        # tblqnt = tblgrp['EngineSize'].quantile([0.5, 1])
 
-#       self.assertEqual(dfqnt[1:10].tolist(), tblqnt[1:10].tolist())
+        # self.assertEqual(dfqnt[1:10].tolist(), tblqnt[1:10].tolist())
 
-    @unittest.skipIf(int(pd.__version__.split('.')[1]) >= 19, 'Bug in Pandas 19 returns too many results')
+    @unittest.skipIf(int(pd.__version__.split('.')[1]) >= 19,
+                     'Bug in Pandas 19 returns too many results')
     def test_nlargest(self):
         if not hasattr(pd.DataFrame, 'nlargest'):
             tm.TestCase.skipTest(self, 'DataFrame does not support nlargest')
@@ -1528,7 +1583,8 @@ class TestCASTable(tm.TestCase):
         self.assertEqual(df.nlargest(5, 'Invoice').to_csv(index=False),
                          tbl.nlargest(5, 'Invoice').to_csv(index=False))
 
-    @unittest.skipIf(int(pd.__version__.split('.')[1]) >= 19, 'Bug in Pandas 19 returns too many results')
+    @unittest.skipIf(int(pd.__version__.split('.')[1]) >= 19,
+                     'Bug in Pandas 19 returns too many results')
     def test_nsmallest(self):
         if not hasattr(pd.DataFrame, 'nsmallest'):
             tm.TestCase.skipTest(self, 'DataFrame does not support nsmallest')
@@ -1669,15 +1725,15 @@ class TestCASTable(tm.TestCase):
         self.assertAlmostEqual(out.loc['Length'], 0, 0)
 
     def test_datastep(self):
-#       if self.server_type == 'windows.smp':
-#           tm.TestCase.skipTest(self, 'Skip on WX6 until defect S1240339 fixed')
+        # if self.server_type == 'windows.smp':
+        #     tm.TestCase.skipTest(self, 'Skip on WX6 until defect S1240339 fixed')
 
         out = self.table.datastep('MakeModel = trim(Make) || trim(Model)')
 
         self.assertEqual(out.columns[-1], 'MakeModel')
         self.assertEqual(out.head()['MakeModel'].tolist(),
-             ['Acura MDX', 'Acura RSX Type S 2dr', 'Acura TSX 4dr',
-              'Acura TL 4dr', 'Acura 3.5 RL 4dr'])
+                         ['Acura MDX', 'Acura RSX Type S 2dr', 'Acura TSX 4dr',
+                          'Acura TL 4dr', 'Acura 3.5 RL 4dr'])
 
         # casout=
         out = self.table.datastep('MakeModel = trim(Make) || trim(Model)',
@@ -1735,12 +1791,14 @@ class TestCASTable(tm.TestCase):
     def test__summary(self):
         summ = self.table._summary()
         if len(summ.index) == 14:
-            self.assertEqual(list(summ.index), ['min', 'max', 'count', 'nmiss', 'mean', 'sum', 'std',
-                                                'stderr', 'var', 'uss', 'css', 'cv', 'tvalue', 'probt'])
+            self.assertEqual(list(summ.index),
+                             ['min', 'max', 'count', 'nmiss', 'mean', 'sum', 'std',
+                              'stderr', 'var', 'uss', 'css', 'cv', 'tvalue', 'probt'])
         else:
-            self.assertEqual(list(summ.index), ['min', 'max', 'count', 'nmiss', 'mean', 'sum', 'std',
-                                                'stderr', 'var', 'uss', 'css', 'cv', 'tvalue', 'probt',
-                                                'skewness', 'kurtosis'])
+            self.assertEqual(list(summ.index),
+                             ['min', 'max', 'count', 'nmiss', 'mean', 'sum', 'std',
+                              'stderr', 'var', 'uss', 'css', 'cv', 'tvalue', 'probt',
+                              'skewness', 'kurtosis'])
         self.assertEqual(len(summ.columns), 10)
 
     def test_disconnected(self):
@@ -1754,12 +1812,14 @@ class TestCASTable(tm.TestCase):
         with self.assertRaises(swat.SWATError):
             self.table.head()
 
-    def test_to_params(self):
+    def test_to_params2(self):
         self.table.params.singlepass = True
         self.table.params.replace = True
 
-        self.assertEqual(set(self.table.to_table_params().keys()), {'name', 'caslib', 'singlepass'})
-        self.assertEqual(set(self.table.to_outtable_params().keys()), {'name', 'caslib', 'replace'})
+        self.assertEqual(set(self.table.to_table_params().keys()),
+                         {'name', 'caslib', 'singlepass'})
+        self.assertEqual(set(self.table.to_outtable_params().keys()),
+                         {'name', 'caslib', 'replace'})
 
     def test_intersect_columns(self):
         self.assertEqual(self.table.get_param('vars', []), [])
@@ -1795,10 +1855,10 @@ class TestCASTable(tm.TestCase):
 
     def test_to_view(self):
         self.assertEqual(self.table.columns.tolist(),
-                  ['Make', 'Model', 'Type', 'Origin', 'DriveTrain',
-                   'MSRP', 'Invoice', 'EngineSize', 'Cylinders',
-                   'Horsepower', 'MPG_City', 'MPG_Highway', 'Weight',
-                   'Wheelbase', 'Length'])
+                         ['Make', 'Model', 'Type', 'Origin', 'DriveTrain',
+                          'MSRP', 'Invoice', 'EngineSize', 'Cylinders',
+                          'Horsepower', 'MPG_City', 'MPG_Highway', 'Weight',
+                          'Wheelbase', 'Length'])
 
         self.table.params.vars = ['Make', 'Model']
 
@@ -1820,31 +1880,31 @@ class TestCASTable(tm.TestCase):
         with self.assertRaises(NotImplementedError):
             tbl.iat[0, 0]
 
-#       self.assertEqual(df.iat[10, 5], tbl.iat[10, 5])
-#       self.assertEqual(df.iat[99, 0], tbl.iat[99, 0])
-#       self.assertEqual(df.iat[-5, 0], tbl.iat[-5, 0])
-#       self.assertEqual(df.iat[-99, 0], tbl.iat[-99, 0])
-#       self.assertEqual(df.iat[-99, -2], tbl.iat[-99, -2])
+        # self.assertEqual(df.iat[10, 5], tbl.iat[10, 5])
+        # self.assertEqual(df.iat[99, 0], tbl.iat[99, 0])
+        # self.assertEqual(df.iat[-5, 0], tbl.iat[-5, 0])
+        # self.assertEqual(df.iat[-99, 0], tbl.iat[-99, 0])
+        # self.assertEqual(df.iat[-99, -2], tbl.iat[-99, -2])
 
-#       with self.assertRaises(IndexError):
-#           tbl.iat[500, 0]
-#
-#       with self.assertRaises(IndexError):
-#           tbl.iat[-500, 0]
+        # with self.assertRaises(IndexError):
+        #     tbl.iat[500, 0]
+
+        # with self.assertRaises(IndexError):
+        #     tbl.iat[-500, 0]
 
 #   def test_column_iat(self):
 #       df = self.get_cars_df().sort_values(['Make', 'MSRP'])
 #       df.index = range(len(df))
 #       tbl = self.table.sort_values(['Make', 'MSRP'])
-
+#
 #       self.assertEqual(df['Model'].iat[10], tbl['Model'].iat[10])
 #       self.assertEqual(df['Model'].iat[99], tbl['Model'].iat[99])
 #       self.assertEqual(df['Model'].iat[-5], tbl['Model'].iat[-5])
 #       self.assertEqual(df['Model'].iat[-99], tbl['Model'].iat[-99])
-
+#
 #       with self.assertRaises(IndexError):
 #           tbl['Model'].iat[500]
-
+#
 #       with self.assertRaises(IndexError):
 #           tbl['Model'].iat[-500]
 
@@ -1856,17 +1916,17 @@ class TestCASTable(tm.TestCase):
         with self.assertRaises(NotImplementedError):
             tbl.at[0, 0]
 
-#       self.assertEqual(df.iat[10, 5], tbl.at[10, 5])
-#       self.assertEqual(df.iat[99, 0], tbl.at[99, 0])
+        # self.assertEqual(df.iat[10, 5], tbl.at[10, 5])
+        # self.assertEqual(df.iat[99, 0], tbl.at[99, 0])
 
-#       with self.assertRaises(KeyError):
-#           tbl.at[-5, 0]
+        # with self.assertRaises(KeyError):
+        #     tbl.at[-5, 0]
 
-#       with self.assertRaises(KeyError):
-#           tbl.at[500, 0]
+        # with self.assertRaises(KeyError):
+        #     tbl.at[500, 0]
 
-#       with self.assertRaises(KeyError):
-#           tbl.at[-500, 0]
+        # with self.assertRaises(KeyError):
+        #     tbl.at[-500, 0]
 
     def test_column_at(self):
         df = self.get_cars_df().sort_values(['Make', 'MSRP'])
@@ -1876,17 +1936,17 @@ class TestCASTable(tm.TestCase):
         with self.assertRaises(NotImplementedError):
             tbl['Model'].iat[0]
 
-#       self.assertEqual(df['Model'].iat[10], tbl['Model'].at[10])
-#       self.assertEqual(df['Model'].iat[99], tbl['Model'].at[99])
+        # self.assertEqual(df['Model'].iat[10], tbl['Model'].at[10])
+        # self.assertEqual(df['Model'].iat[99], tbl['Model'].at[99])
 
-#       with self.assertRaises(KeyError):
-#           tbl['Model'].at[-5]
+        # with self.assertRaises(KeyError):
+        #     tbl['Model'].at[-5]
 
-#       with self.assertRaises(KeyError):
-#           tbl['Model'].at[500]
+        # with self.assertRaises(KeyError):
+        #     tbl['Model'].at[500]
 
-#       with self.assertRaises(KeyError):
-#           tbl['Model'].at[-500]
+        # with self.assertRaises(KeyError):
+        #     tbl['Model'].at[-500]
 
     def test_loc(self):
         df = self.get_cars_df().sort_values(SORT_KEYS)
@@ -1928,17 +1988,18 @@ class TestCASTable(tm.TestCase):
                          list(tbl.loc[:, ['Make', 'MSRP']].columns))
 
         # Non-existent row
-#       with self.assertRaises(KeyError):
-#           tbl.loc[500, ['Make', 'MSRP']]
+        # with self.assertRaises(KeyError):
+        #     tbl.loc[500, ['Make', 'MSRP']]
 
         # Non-existent column
-#       dfout = df.loc[:, ['Foo', 'MSRP']].values
-#       tblout = tbl.loc[:, ['Foo', 'MSRP']].values
-#       self.assertTrue(np.isnan(dfout[0, 0]) and np.isnan(tblout[0, 0]))
-#       self.assertEqual(dfout[0, 1], tblout[0, 1])
+        # dfout = df.loc[:, ['Foo', 'MSRP']].values
+        # tblout = tbl.loc[:, ['Foo', 'MSRP']].values
+        # self.assertTrue(np.isnan(dfout[0, 0]) and np.isnan(tblout[0, 0]))
+        # self.assertEqual(dfout[0, 1], tblout[0, 1])
 
         # Column slices
-        self.assertTablesEqual(df.loc[:, 'Make':'MSRP'], tbl.loc[:, 'Make':'MSRP'], sortby=None)
+        self.assertTablesEqual(df.loc[:, 'Make':'MSRP'],
+                               tbl.loc[:, 'Make':'MSRP'], sortby=None)
 
         # Use str here because np.nan won't compare equal to each other
         self.assertTablesEqual(df.loc[:, 'Make':], tbl.loc[:, 'Make':], sortby=None)
@@ -1946,10 +2007,10 @@ class TestCASTable(tm.TestCase):
         self.assertTablesEqual(df.loc[:, :], tbl.loc[:, :], sortby=None)
 
         # Indexes should not work for columns
-#       with self.assertRaises((KeyError, TypeError)):
-#           tbl.loc[0, 5]
+        # with self.assertRaises((KeyError, TypeError)):
+        #     tbl.loc[0, 5]
 
-# TODO: I don't know why this test doesn't work yet
+    # TODO: I don't know why this test doesn't work yet
     def test_column_loc(self):
         df = self.get_cars_df().sort_values(['Make', 'Model'])
         df.index = range(len(df))
@@ -1958,25 +2019,25 @@ class TestCASTable(tm.TestCase):
         with self.assertRaises(NotImplementedError):
             tbl['Model'].loc[0]
 
-#       df = df['Model']
-#       tbl = tbl['Model']
+        # df = df['Model']
+        # tbl = tbl['Model']
 
-#       # Row labels
-#       self.assertEqual(df.loc[0], tbl.loc[0])
+        # Row labels
+        # self.assertEqual(df.loc[0], tbl.loc[0])
 
-#       # Slicing that returns a CASTable is not allowed
-#       with self.assertRaises(TypeError):
-#           tbl.loc[0:1]
+        # Slicing that returns a CASTable is not allowed
+        # with self.assertRaises(TypeError):
+        #     tbl.loc[0:1]
 
-#       # Non-existent row
-#       with self.assertRaises(KeyError):
-#           tbl.loc[500]
+        # Non-existent row
+        # with self.assertRaises(KeyError):
+        #     tbl.loc[500]
 
-#       with self.assertRaises(KeyError):
-#           tbl.loc[-2]
+        # with self.assertRaises(KeyError):
+        #     tbl.loc[-2]
 
-#       with self.assertRaises(TypeError):
-#           tbl.loc[[0, 2]]
+        # with self.assertRaises(TypeError):
+        #     tbl.loc[[0, 2]]
 
     def test_iloc(self):
         df = self.get_cars_df().sort_values(SORT_KEYS)
@@ -1993,59 +2054,69 @@ class TestCASTable(tm.TestCase):
         self.assertColsEqual(df.iloc[:, 3], tbl.iloc[:, 3])
 
         # Row indexes with columns
-        self.assertTablesEqual(df.iloc[:, [0]], tbl.iloc[:, [0]], sortby=None)
-        self.assertTablesEqual(df.iloc[:, [0, 3]], tbl.iloc[:, [0, 3]], sortby=None)
-        self.assertTablesEqual(df.iloc[:, [-2]], tbl.iloc[:, [-2]], sortby=None)
-        self.assertTablesEqual(df.iloc[:, [2, -3]], tbl.iloc[:, [2, -3]], sortby=None)
-        self.assertTablesEqual(df.iloc[:, [2, -3, 4]], tbl.iloc[:, [2, -3, 4]], sortby=None)
+        self.assertTablesEqual(df.iloc[:, [0]],
+                               tbl.iloc[:, [0]], sortby=None)
+        self.assertTablesEqual(df.iloc[:, [0, 3]],
+                               tbl.iloc[:, [0, 3]], sortby=None)
+        self.assertTablesEqual(df.iloc[:, [-2]],
+                               tbl.iloc[:, [-2]], sortby=None)
+        self.assertTablesEqual(df.iloc[:, [2, -3]],
+                               tbl.iloc[:, [2, -3]], sortby=None)
+        self.assertTablesEqual(df.iloc[:, [2, -3, 4]],
+                               tbl.iloc[:, [2, -3, 4]], sortby=None)
 
+        # Row indexes
+        # self.assertEqual(df.iloc[0].tolist(), tbl.iloc[0].tolist())
+        # self.assertEqual(df.iloc[5].tolist(), tbl.iloc[5].tolist())
+        # self.assertEqual(df.iloc[149].tolist(), tbl.iloc[149].tolist())
+        # self.assertEqual(df.iloc[-1].tolist(), tbl.iloc[-1].tolist())
+        # self.assertEqual(df.iloc[-423].tolist(), tbl.iloc[-423].tolist())
+        # self.assertEqual(df.iloc[5].tolist(), tbl.iloc[-423].tolist())
+        # self.assertEqual(df.iloc[-423].tolist(), tbl.iloc[5].tolist())
 
-#       # Row indexes
-#       self.assertEqual(df.iloc[0].tolist(), tbl.iloc[0].tolist())
-#       self.assertEqual(df.iloc[5].tolist(), tbl.iloc[5].tolist())
-#       self.assertEqual(df.iloc[149].tolist(), tbl.iloc[149].tolist())
-#       self.assertEqual(df.iloc[-1].tolist(), tbl.iloc[-1].tolist())
-#       self.assertEqual(df.iloc[-423].tolist(), tbl.iloc[-423].tolist())
-#       self.assertEqual(df.iloc[5].tolist(), tbl.iloc[-423].tolist())
-#       self.assertEqual(df.iloc[-423].tolist(), tbl.iloc[5].tolist())
+        # Slicing that returns a CASTable is not allowed
+        # with self.assertRaises(TypeError):
+        #     tbl.iloc[0:1]
 
-#       # Slicing that returns a CASTable is not allowed
-#       with self.assertRaises(TypeError):
-#           tbl.iloc[0:1]
+        # Row indexes with single column name
+        # self.assertEqual(df.iloc[0, 0], tbl.iloc[0, 0])
+        # self.assertEqual(df.iloc[5, 3], tbl.iloc[5, 3])
 
-#       # Row indexes with single column name
-#       self.assertEqual(df.iloc[0, 0], tbl.iloc[0, 0])
-#       self.assertEqual(df.iloc[5, 3], tbl.iloc[5, 3])
+        # Row indexes with columns
+        # self.assertEqual(df.iloc[0, [0]].tolist(),
+        #                  tbl.iloc[0, [0]].tolist())
+        # self.assertEqual(df.iloc[0, [0, 3]].tolist(),
+        #                  tbl.iloc[0, [0, 3]].tolist())
+        # self.assertEqual(df.iloc[149, [0, 3]].tolist(),
+        #                  tbl.iloc[149, [0, 3]].tolist())
+        # self.assertEqual(df.iloc[0, [-2]].tolist(),
+        #                  tbl.iloc[0, [-2]].tolist())
+        # self.assertEqual(df.iloc[0, [2, -3]].tolist(),
+        #                  tbl.iloc[0, [2, -3]].tolist())
+        # self.assertEqual(df.iloc[149, [2, -3, 4]].tolist(),
+        #                  tbl.iloc[149, [2, -3, 4]].tolist())
 
-#       # Row indexes with columns
-#       self.assertEqual(df.iloc[0, [0]].tolist(), tbl.iloc[0, [0]].tolist())
-#       self.assertEqual(df.iloc[0, [0, 3]].tolist(), tbl.iloc[0, [0, 3]].tolist())
-#       self.assertEqual(df.iloc[149, [0, 3]].tolist(), tbl.iloc[149, [0, 3]].tolist())
-#       self.assertEqual(df.iloc[0, [-2]].tolist(), tbl.iloc[0, [-2]].tolist())
-#       self.assertEqual(df.iloc[0, [2, -3]].tolist(), tbl.iloc[0, [2, -3]].tolist())
-#       self.assertEqual(df.iloc[149, [2, -3, 4]].tolist(), tbl.iloc[149, [2, -3, 4]].tolist())
+        # Non-existent row
+        # with self.assertRaises(IndexError):
+        #     tbl.iloc[500, [0, 3]]
 
-#       # Non-existent row
-#       with self.assertRaises(IndexError):
-#           tbl.iloc[500, [0, 3]]
+        # Non-existent column
+        # with self.assertRaises(IndexError):
+        #     tbl.iloc[5, [100, 3]]
 
-#       # Non-existent column
-#       with self.assertRaises(IndexError):
-#           tbl.iloc[5, [100, 3]]
+        # Column slices
+        # self.assertEqual(df.iloc[0, 1:5].tolist(), tbl.iloc[0, 1:5].tolist())
+        # self.assertEqual(df.iloc[0, 1:].tolist(), tbl.iloc[0, 1:].tolist())
+        # self.assertEqual(df.iloc[0, :5].tolist(), tbl.iloc[0, :5].tolist())
+        # self.assertEqual(df.iloc[0, :].tolist(), tbl.iloc[0, :].tolist())
+        # self.assertEqual(df.iloc[0, 1:-5].tolist(), tbl.iloc[0, 1:-5].tolist())
+        # self.assertEqual(df.iloc[0, 1:].tolist(), tbl.iloc[0, 1:].tolist())
+        # self.assertEqual(df.iloc[0, :-5].tolist(), tbl.iloc[0, :-5].tolist())
+        # self.assertEqual(df.iloc[0, :].tolist(), tbl.iloc[0, :].tolist())
 
-#       # Column slices
-#       self.assertEqual(df.iloc[0, 1:5].tolist(), tbl.iloc[0, 1:5].tolist())
-#       self.assertEqual(df.iloc[0, 1:].tolist(), tbl.iloc[0, 1:].tolist())
-#       self.assertEqual(df.iloc[0, :5].tolist(), tbl.iloc[0, :5].tolist())
-#       self.assertEqual(df.iloc[0, :].tolist(), tbl.iloc[0, :].tolist())
-#       self.assertEqual(df.iloc[0, 1:-5].tolist(), tbl.iloc[0, 1:-5].tolist())
-#       self.assertEqual(df.iloc[0, 1:].tolist(), tbl.iloc[0, 1:].tolist())
-#       self.assertEqual(df.iloc[0, :-5].tolist(), tbl.iloc[0, :-5].tolist())
-#       self.assertEqual(df.iloc[0, :].tolist(), tbl.iloc[0, :].tolist())
-
-#       # Labels should not work for columns
-#       with self.assertRaises(ValueError):
-#           tbl.iloc[0, 'Make']
+        # Labels should not work for columns
+        # with self.assertRaises(ValueError):
+        #     tbl.iloc[0, 'Make']
 
     def test_column_iloc(self):
         df = self.get_cars_df().sort_values(['Make', 'Model'])
@@ -2055,33 +2126,33 @@ class TestCASTable(tm.TestCase):
         with self.assertRaises(NotImplementedError):
             tbl['Model'].iloc[0]
 
-#       df = df['Model']
-#       tbl = tbl['Model']
+        # df = df['Model']
+        # tbl = tbl['Model']
 
-#       # Row indexes
-#       self.assertEqual(df.iloc[0], tbl.iloc[0])
-#       self.assertEqual(df.iloc[5], tbl.iloc[5])
-#       self.assertEqual(df.iloc[149], tbl.iloc[149])
-#       self.assertEqual(df.iloc[-1], tbl.iloc[-1])
-#       self.assertEqual(df.iloc[-423], tbl.iloc[-423])
-#       self.assertEqual(df.iloc[5], tbl.iloc[-423])
-#       self.assertEqual(df.iloc[-423], tbl.iloc[5])
+        # Row indexes
+        # self.assertEqual(df.iloc[0], tbl.iloc[0])
+        # self.assertEqual(df.iloc[5], tbl.iloc[5])
+        # self.assertEqual(df.iloc[149], tbl.iloc[149])
+        # self.assertEqual(df.iloc[-1], tbl.iloc[-1])
+        # self.assertEqual(df.iloc[-423], tbl.iloc[-423])
+        # self.assertEqual(df.iloc[5], tbl.iloc[-423])
+        # self.assertEqual(df.iloc[-423], tbl.iloc[5])
 
-#       # Slicing that returns a CASTable is not allowed
-#       with self.assertRaises(TypeError):
-#           tbl.iloc[0:1]
+        # Slicing that returns a CASTable is not allowed
+        # with self.assertRaises(TypeError):
+        #     tbl.iloc[0:1]
 
-#       # Row indexes with single column name
-#       with self.assertRaises(TypeError):
-#           tbl.iloc[0, 0]
+        # Row indexes with single column name
+        # with self.assertRaises(TypeError):
+        #     tbl.iloc[0, 0]
 
-#       # Row indexes with columns
-#       with self.assertRaises(TypeError):
-#           tbl.iloc[[0]]
+        # Row indexes with columns
+        # with self.assertRaises(TypeError):
+        #     tbl.iloc[[0]]
 
-#       # Labels should not work for columns
-#       with self.assertRaises(TypeError):
-#           tbl.iloc['Make']
+        # Labels should not work for columns
+        # with self.assertRaises(TypeError):
+        #     tbl.iloc['Make']
 
     @unittest.skipIf(pd_version >= (1, 0, 0), 'Need newer version of Pandas')
     def test_ix(self):
@@ -2092,17 +2163,17 @@ class TestCASTable(tm.TestCase):
             warnings.filterwarnings('ignore', category=FutureWarning)
 
             # Row indexes
-#           self.assertEqual(df[0].tolist(), tbl.ix[0].tolist())
-#           self.assertEqual(df.ix[5].tolist(), tbl.ix[5].tolist())
-#           self.assertEqual(df.ix[149].tolist(), tbl.ix[149].tolist())
+            # self.assertEqual(df[0].tolist(), tbl.ix[0].tolist())
+            # self.assertEqual(df.ix[5].tolist(), tbl.ix[5].tolist())
+            # self.assertEqual(df.ix[149].tolist(), tbl.ix[149].tolist())
 
             # No negative indexing if the index column is numeric
-#           with self.assertRaises(KeyError):
-#               tbl.ix[-1]
+            # with self.assertRaises(KeyError):
+            #     tbl.ix[-1]
 
             # Slicing that returns a CASTable is not allowed
-#           with self.assertRaises(TypeError):
-#               tbl.ix[0:1]
+            # with self.assertRaises(TypeError):
+            #     tbl.ix[0:1]
 
             with self.assertRaises(IndexError):
                 tbl.ix[0, 0]
@@ -2115,20 +2186,26 @@ class TestCASTable(tm.TestCase):
             self.assertColsEqual(df.ix[:, 3], tbl.ix[:, 3])
 
             # Row indexes with columns
-            self.assertTablesEqual(df.ix[:, [0]], tbl.ix[:, [0]], sortby=None)
-            self.assertEqual(len(df.ix[:, [0]]), len(tbl.ix[:, [0]]))
-            self.assertTablesEqual(df.ix[:, [0, 3]], tbl.ix[:, [0, 3]], sortby=None)
-            self.assertTablesEqual(df.ix[:, [-2]], tbl.ix[:, [-2]], sortby=None)
-            self.assertTablesEqual(df.ix[:, [2, -3]], tbl.ix[:, [2, -3]], sortby=None)
-            self.assertTablesEqual(df.ix[:, [2, -3, 4]], tbl.ix[:, [2, -3, 4]], sortby=None)
+            self.assertTablesEqual(df.ix[:, [0]],
+                                   tbl.ix[:, [0]], sortby=None)
+            self.assertEqual(len(df.ix[:, [0]]),
+                             len(tbl.ix[:, [0]]))
+            self.assertTablesEqual(df.ix[:, [0, 3]],
+                                   tbl.ix[:, [0, 3]], sortby=None)
+            self.assertTablesEqual(df.ix[:, [-2]],
+                                   tbl.ix[:, [-2]], sortby=None)
+            self.assertTablesEqual(df.ix[:, [2, -3]],
+                                   tbl.ix[:, [2, -3]], sortby=None)
+            self.assertTablesEqual(df.ix[:, [2, -3, 4]],
+                                   tbl.ix[:, [2, -3, 4]], sortby=None)
 
             # Non-existent row
-#           with self.assertRaises(KeyError):
-#               tbl.ix[500, [0, 3]]
+            # with self.assertRaises(KeyError):
+            #     tbl.ix[500, [0, 3]]
 
             # Non-existent column
-#           with self.assertRaises(IndexError):
-#               tbl.ix[5, [100, 3]]
+            # with self.assertRaises(IndexError):
+            #     tbl.ix[5, [100, 3]]
 
             # Column slices - use strings because nan won't compare equal
             self.assertTablesEqual(df.ix[:, 1:5], tbl.ix[:, 1:5], sortby=None)
@@ -2145,12 +2222,14 @@ class TestCASTable(tm.TestCase):
             self.assertColsEqual(df.ix[:, 'MSRP'], tbl.ix[:, 'MSRP'])
 
             # Row labels with columns
-            self.assertTablesEqual(df.ix[:, ['Make']], tbl.ix[:, ['Make']], sortby=None)
-            self.assertTablesEqual(df.ix[:, ['Make', 'MSRP']], tbl.ix[:, ['Make', 'MSRP']], sortby=None)
+            self.assertTablesEqual(df.ix[:, ['Make']],
+                                   tbl.ix[:, ['Make']], sortby=None)
+            self.assertTablesEqual(df.ix[:, ['Make', 'MSRP']],
+                                   tbl.ix[:, ['Make', 'MSRP']], sortby=None)
 
             # Non-existent row
-#           with self.assertRaises(KeyError):
-#               tbl.ix[500, ['Make', 'MSRP']]
+            # with self.assertRaises(KeyError):
+            #     tbl.ix[500, ['Make', 'MSRP']]
 
             # Non-existent column
             try:
@@ -2159,14 +2238,19 @@ class TestCASTable(tm.TestCase):
                 self.assertTrue(np.isnan(dfout[0, 0]) and np.isnan(tblout[0, 0]))
                 self.assertEqual(dfout[0, 1], tblout[0, 1])
             except KeyError:
-                # Newer versions of pandas raise a KeyError.  If that happens, skip this test.
+                # Newer versions of pandas raise a KeyError.
+                # If that happens, skip this test.
                 pass
 
             # Column slices
-            self.assertTablesEqual(df.ix[:, 'Make':'MSRP'], tbl.ix[:, 'Make':'MSRP'], sortby=None)
-            self.assertTablesEqual(df.ix[:, 'Make':], tbl.ix[:, 'Make':], sortby=None)
-            self.assertTablesEqual(df.ix[:, :'MSRP'], tbl.ix[:, :'MSRP'], sortby=None)
-            self.assertTablesEqual(df.ix[:, :], tbl.ix[:, :], sortby=None)
+            self.assertTablesEqual(df.ix[:, 'Make':'MSRP'],
+                                   tbl.ix[:, 'Make':'MSRP'], sortby=None)
+            self.assertTablesEqual(df.ix[:, 'Make':],
+                                   tbl.ix[:, 'Make':], sortby=None)
+            self.assertTablesEqual(df.ix[:, :'MSRP'],
+                                   tbl.ix[:, :'MSRP'], sortby=None)
+            self.assertTablesEqual(df.ix[:, :],
+                                   tbl.ix[:, :], sortby=None)
 
     @unittest.skipIf(pd_version >= (1, 0, 0), 'Need newer version of Pandas')
     def test_column_ix(self):
@@ -2177,43 +2261,43 @@ class TestCASTable(tm.TestCase):
         with self.assertRaises(NotImplementedError):
             tbl['Model'].ix[0]
 
-#       df = df['Model']
-#       tbl = tbl['Model']
+        # df = df['Model']
+        # tbl = tbl['Model']
 
-#       # Row indexes
-#       self.assertEqual(df.ix[0], tbl.ix[0])
-#       self.assertEqual(df.ix[5], tbl.ix[5])
-#       self.assertEqual(df.ix[149], tbl.ix[149])
+        # Row indexes
+        # self.assertEqual(df.ix[0], tbl.ix[0])
+        # self.assertEqual(df.ix[5], tbl.ix[5])
+        # self.assertEqual(df.ix[149], tbl.ix[149])
 
-#       # No negative indexing if the index column is numeric
-#       with self.assertRaises(KeyError):
-#           tbl.ix[-1]
+        # No negative indexing if the index column is numeric
+        # with self.assertRaises(KeyError):
+        #     tbl.ix[-1]
 
-#       # Slicing that returns a CASTable is not allowed
-#       with self.assertRaises(TypeError):
-#           tbl.ix[0:1]
+        # Slicing that returns a CASTable is not allowed
+        # with self.assertRaises(TypeError):
+        #     tbl.ix[0:1]
 
-#       # Row indexes with columns
-#       with self.assertRaises(TypeError):
-#           tbl.ix[[0]]
+        # Row indexes with columns
+        # with self.assertRaises(TypeError):
+        #     tbl.ix[[0]]
 
-#       # Non-existent row
-#       with self.assertRaises(KeyError):
-#           tbl.ix[500]
+        # Non-existent row
+        # with self.assertRaises(KeyError):
+        #     tbl.ix[500]
 
-#       # Column slices
-#       with self.assertRaises(TypeError):
-#           tbl.ix[1:5]
+        # Column slices
+        # with self.assertRaises(TypeError):
+        #     tbl.ix[1:5]
 
-#       # Row labels with single column name
-#       with self.assertRaises(TypeError):
-#           tbl.ix['Make']
+        # Row labels with single column name
+        # with self.assertRaises(TypeError):
+        #     tbl.ix['Make']
 
     def test_xs(self):
         df = self.get_cars_df()
         tbl = self.table
 
-#       self.assertEqual(df.xs(5).tolist(), tbl.xs(5).tolist())
+        # self.assertEqual(df.xs(5).tolist(), tbl.xs(5).tolist())
         self.assertEqual(sorted(df.xs('Model', axis=1).tolist()),
                          sorted(tbl.xs('Model', axis=1).tolist()))
 
@@ -2255,44 +2339,58 @@ class TestCASTable(tm.TestCase):
 
         self.assertEqual(tbl['MSRP'].sas.abs().head(1)[0], 10280)
         self.assertEqual(tbl['MSRP'].sas.airy().head(1)[0], 0)
-#       self.assertEqual(tbl['MSRP'].sas.beta().head(1)[0], 10280)
-#       self.assertEqual(tbl['MSRP'].sas.cnoct().head(1)[0], 10280)
+        # self.assertEqual(tbl['MSRP'].sas.beta().head(1)[0], 10280)
+        # self.assertEqual(tbl['MSRP'].sas.cnoct().head(1)[0], 10280)
 
-        self.assertAlmostEqual(tbl['MSRP'].sas.constant('e').head(1)[0], 2.7182818284590451)
-        self.assertAlmostEqual(tbl['MSRP'].sas.constant('euler').head(1)[0], 0.57721566490153287)
-        self.assertAlmostEqual(tbl['MSRP'].sas.constant('pi').head(1)[0], 3.1415926535897931)
-        self.assertEqual(tbl['MSRP'].sas.constant('exactint').head(1)[0], 9007199254740992)
-        self.assertTrue(tbl['MSRP'].sas.constant('big').head(1)[0] > 1.7976931348600000e+308)
-        self.assertAlmostEqual(tbl['MSRP'].sas.constant('logbig').head(1)[0], 709.78271289338397)
-        self.assertTrue(tbl['MSRP'].sas.constant('sqrtbig').head(1)[0] > 1.3407807929000000e+154)
-        self.assertAlmostEqual(tbl['MSRP'].sas.constant('small').head(1)[0], 2.2250738585072014e-308)
-        self.assertAlmostEqual(tbl['MSRP'].sas.constant('logsmall').head(1)[0], -708.40183374461219, 1)
-        self.assertAlmostEqual(tbl['MSRP'].sas.constant('sqrtsmall').head(1)[0], 1.4916681462400413e-154)
-        self.assertAlmostEqual(tbl['MSRP'].sas.constant('maceps').head(1)[0], 2.2204460492503131e-16)
-        self.assertAlmostEqual(tbl['MSRP'].sas.constant('logmaceps').head(1)[0], -36.043653389117154)
-        self.assertAlmostEqual(tbl['MSRP'].sas.constant('sqrtmaceps').head(1)[0], 1.4901161193847656e-08)
+        self.assertAlmostEqual(
+            tbl['MSRP'].sas.constant('e').head(1)[0], 2.7182818284590451)
+        self.assertAlmostEqual(
+            tbl['MSRP'].sas.constant('euler').head(1)[0], 0.57721566490153287)
+        self.assertAlmostEqual(
+            tbl['MSRP'].sas.constant('pi').head(1)[0], 3.1415926535897931)
+        self.assertEqual(
+            tbl['MSRP'].sas.constant('exactint').head(1)[0], 9007199254740992)
+        self.assertTrue(
+            tbl['MSRP'].sas.constant('big').head(1)[0] > 1.7976931348600000e+308)
+        self.assertAlmostEqual(
+            tbl['MSRP'].sas.constant('logbig').head(1)[0], 709.78271289338397)
+        self.assertTrue(
+            tbl['MSRP'].sas.constant('sqrtbig').head(1)[0] > 1.3407807929000000e+154)
+        self.assertAlmostEqual(
+            tbl['MSRP'].sas.constant('small').head(1)[0], 2.2250738585072014e-308)
+        self.assertAlmostEqual(
+            tbl['MSRP'].sas.constant('logsmall').head(1)[0], -708.40183374461219, 1)
+        self.assertAlmostEqual(
+            tbl['MSRP'].sas.constant('sqrtsmall').head(1)[0], 1.4916681462400413e-154)
+        self.assertAlmostEqual(
+            tbl['MSRP'].sas.constant('maceps').head(1)[0], 2.2204460492503131e-16)
+        self.assertAlmostEqual(
+            tbl['MSRP'].sas.constant('logmaceps').head(1)[0], -36.043653389117154)
+        self.assertAlmostEqual(
+            tbl['MSRP'].sas.constant('sqrtmaceps').head(1)[0], 1.4901161193847656e-08)
 
         self.assertAlmostEqual(tbl['MSRP'].sas.dairy().head(1)[0], -0.0)
-#       self.assertAlmostEqual(tbl['MSRP'].sas.deviance().head(1)[0], -0.0)
+        # self.assertAlmostEqual(tbl['MSRP'].sas.deviance().head(1)[0], -0.0)
         self.assertAlmostEqual(tbl['MSRP'].sas.digamma().head(1)[0], 9.237906900088305)
         self.assertAlmostEqual(tbl['MSRP'].sas.erf().head(1)[0], 1.0)
-#       self.assertAlmostEqual(tbl['MSRP'].sas.erfc().head(1)[0], -0.0)
-#       self.assertAlmostEqual(tbl['MSRP'].sas.exp().head(1)[0], -0.0)
-#       self.assertAlmostEqual(tbl['MSRP'].sas.fact().head(1)[0], -0.0)
-#       self.assertAlmostEqual(tbl['MSRP'].sas.fnoct().head(1)[0], -0.0)
-#       self.assertAlmostEqual(tbl['MSRP'].sas.gamma().head(1)[0], -0.0)
+        # self.assertAlmostEqual(tbl['MSRP'].sas.erfc().head(1)[0], -0.0)
+        # self.assertAlmostEqual(tbl['MSRP'].sas.exp().head(1)[0], -0.0)
+        # self.assertAlmostEqual(tbl['MSRP'].sas.fact().head(1)[0], -0.0)
+        # self.assertAlmostEqual(tbl['MSRP'].sas.fnoct().head(1)[0], -0.0)
+        # self.assertAlmostEqual(tbl['MSRP'].sas.gamma().head(1)[0], -0.0)
         self.assertAlmostEqual(tbl['MSRP'].sas.lgamma().head(1)[0], 84682.482909884173)
         self.assertAlmostEqual(tbl['MSRP'].sas.log().head(1)[0], 9.2379555390091568)
         self.assertAlmostEqual(tbl['MSRP'].sas.log1px().head(1)[0], 9.2380528105427189)
         self.assertAlmostEqual(tbl['MSRP'].sas.log10().head(1)[0], 4.0119931146592567)
         self.assertAlmostEqual(tbl['MSRP'].sas.log2().head(1)[0], 13.327552644081241)
-#       self.assertAlmostEqual(tbl['MSRP'].sas.logbeta().head(1)[0], -0.0)
+        # self.assertAlmostEqual(tbl['MSRP'].sas.logbeta().head(1)[0], -0.0)
         self.assertAlmostEqual(tbl['MSRP'].sas.mod(100).head(1)[0], 80)
         self.assertAlmostEqual(tbl['MSRP'].sas.modz(100).head(1)[0], 80)
         self.assertAlmostEqual(tbl['MSRP'].sas.sign().head(1)[0], 1)
         self.assertAlmostEqual(tbl['MSRP'].sas.sqrt().head(1)[0], 101.39033484509261)
-#       self.assertAlmostEqual(tbl['MSRP'].sas.tnoct().head(1)[0], -0.0)
-        self.assertAlmostEqual(tbl['MSRP'].sas.trigamma().head(1)[0], 9.7280996080681686e-05)
+        # self.assertAlmostEqual(tbl['MSRP'].sas.tnoct().head(1)[0], -0.0)
+        self.assertAlmostEqual(
+            tbl['MSRP'].sas.trigamma().head(1)[0], 9.7280996080681686e-05)
 
     @unittest.skipIf(pd_version <= (0, 16, 0), 'Need newer version of Pandas')
     def test_str_methods(self):
@@ -2314,19 +2412,19 @@ class TestCASTable(tm.TestCase):
         with self.assertRaises(TypeError):
             tbl['MSRP'].str.capitalize()
 
-#       self.assertEqual(df['Model'].str.cat(sep=', ')[:100],
-#                        tbl['Model'].str.cat(sep=', ')[:100])
-#       self.assertEqual(df['Make'].str.cat(sep=', ')[:100],
-#                        tbl['Make'].str.cat(sep=', ')[:100])
+        # self.assertEqual(df['Model'].str.cat(sep=', ')[:100],
+        #                  tbl['Model'].str.cat(sep=', ')[:100])
+        # self.assertEqual(df['Make'].str.cat(sep=', ')[:100],
+        #                  tbl['Make'].str.cat(sep=', ')[:100])
         # This method is implemented in DataFrames, so it doesn't work with numerics
-#       with self.assertRaises(AttributeError):
-#           tbl['MSRP'].str.cat(sep=', ')
+        # with self.assertRaises(AttributeError):
+        #     tbl['MSRP'].str.cat(sep=', ')
 
-#       self.assertEqual(df['Model'].str.center(50), tbl['Model'].str.center(50))
-#       self.assertEqual(df['Make'].str.center(50), tbl['Make'].str.center(50))
-#       # This method is implemented in DataFrames, so it doesn't work with numerics
-#       with self.assertRaises(AttributeError):
-#           tbl['MSRP'].str.center(50)
+        # self.assertEqual(df['Model'].str.center(50), tbl['Model'].str.center(50))
+        # self.assertEqual(df['Make'].str.center(50), tbl['Make'].str.center(50))
+        # This method is implemented in DataFrames, so it doesn't work with numerics
+        # with self.assertRaises(AttributeError):
+        #     tbl['MSRP'].str.center(50)
 
         # Compare to string literal
         sortAssertEqual(df['Model'].str.contains('Quattro', regex=False),
@@ -2340,29 +2438,50 @@ class TestCASTable(tm.TestCase):
         # TODO: This causes multiple definitions of Quattro and LowQuattro in comppgm
         tbl['Quattro'] = 'Quattro'
         tbl['LowQuattro'] = 'quattro'
-        self.assertEqual(len(tbl[tbl['Model'].str.contains(tbl['Quattro'], regex=False)].head(50)), 11)
-        self.assertEqual(len(tbl[tbl['Model'].str.contains(tbl['LowQuattro'], case=True, regex=False)].head(50)), 0)
-        self.assertEqual(len(tbl[tbl['Model'].str.contains(tbl['LowQuattro'], case=False, regex=False)].head(50)), 11)
+        self.assertEqual(
+            len(tbl[tbl['Model'].str.contains(tbl['Quattro'],
+                                              regex=False)].head(50)), 11)
+        self.assertEqual(
+            len(tbl[tbl['Model'].str.contains(tbl['LowQuattro'],
+                                              case=True, regex=False)].head(50)), 0)
+        self.assertEqual(
+            len(tbl[tbl['Model'].str.contains(tbl['LowQuattro'],
+                                              case=False, regex=False)].head(50)), 11)
 
         del tbl['Quattro']
         del tbl['LowQuattro']
 
         # Compare to regex
-        self.assertEqual(df[df['Model'].str.contains('Quat+ro|TL', regex=True)].to_csv(index=False),
-                         tbl[tbl['Model'].str.contains('Quat+ro|TL', regex=True)].to_csv(index=False))
-        self.assertEqual(df[df['Model'].str.contains('quat+ro|tl', case=True, regex=True)].to_csv(index=False),
-                         tbl[tbl['Model'].str.contains('quat+ro|tl', case=True, regex=True)].to_csv(index=False))
-        self.assertEqual(df[df['Model'].str.contains('quat+ro|tl', case=False, regex=True)].to_csv(index=False),
-                         tbl[tbl['Model'].str.contains('quat+ro|tl', case=False, regex=True)].to_csv(index=False))
+        self.assertEqual(
+            df[df['Model'].str.contains('Quat+ro|TL',
+                                        regex=True)].to_csv(index=False),
+            tbl[tbl['Model'].str.contains('Quat+ro|TL',
+                                          regex=True)].to_csv(index=False))
+        self.assertEqual(
+            df[df['Model'].str.contains('quat+ro|tl',
+                                        case=True, regex=True)].to_csv(index=False),
+            tbl[tbl['Model'].str.contains('quat+ro|tl',
+                                          case=True, regex=True)].to_csv(index=False))
+        self.assertEqual(
+            df[df['Model'].str.contains('quat+ro|tl',
+                                        case=False, regex=True)].to_csv(index=False),
+            tbl[tbl['Model'].str.contains('quat+ro|tl',
+                                          case=False, regex=True)].to_csv(index=False))
 
         # Compare to regex column
         # TODO: Deleting computed columns needs to delete the appropriate part
         #       of comppgm as well.
         tbl['ReQuattro'] = 'Quat+ro|TL'
         tbl['ReLowQuattro'] = 'quat+ro|tl'
-        self.assertEqual(len(tbl[tbl['Model'].str.contains(tbl['ReQuattro'], regex=True)].head(50)), 12)
-        self.assertEqual(len(tbl[tbl['Model'].str.contains(tbl['ReLowQuattro'], case=True, regex=True)].head(50)), 3)
-        self.assertEqual(len(tbl[tbl['Model'].str.contains(tbl['ReLowQuattro'], case=False, regex=True)].head(50)), 15)
+        self.assertEqual(
+            len(tbl[tbl['Model'].str.contains(tbl['ReQuattro'],
+                                              regex=True)].head(50)), 12)
+        self.assertEqual(
+            len(tbl[tbl['Model'].str.contains(tbl['ReLowQuattro'],
+                                              case=True, regex=True)].head(50)), 3)
+        self.assertEqual(
+            len(tbl[tbl['Model'].str.contains(tbl['ReLowQuattro'],
+                                              case=False, regex=True)].head(50)), 15)
 
         del tbl['ReQuattro']
         del tbl['ReLowQuattro']
@@ -2388,8 +2507,9 @@ class TestCASTable(tm.TestCase):
                         tbl['Model'].str.find('Quattro', 1, 3))
 
         # Index
-        sortAssertEqual(df[df['Model'].str.contains('Quattro')]['Model'].str.index('ttro'),
-                        tbl[tbl['Model'].str.contains('Quattro')]['Model'].str.index('ttro'))
+        sortAssertEqual(
+            df[df['Model'].str.contains('Quattro')]['Model'].str.index('ttro'),
+            tbl[tbl['Model'].str.contains('Quattro')]['Model'].str.index('ttro'))
         with self.assertRaises(ValueError):
             tbl['Model'].str.index('Quattro')
 
@@ -2407,7 +2527,7 @@ class TestCASTable(tm.TestCase):
 
         # Repeat
         sortAssertEqual(df['Model'].str.repeat(4),
-                         tbl['Model'].str.repeat(4))
+                        tbl['Model'].str.repeat(4))
 
         # Replace
         sortAssertEqual(df['Model'].str.replace('A4', 'B105'),
@@ -2417,7 +2537,8 @@ class TestCASTable(tm.TestCase):
 
         # TODO: If the replacement is an empty string, all empty strings come back
 
-        self.assertEqual(sorted(tbl['Model'].str.replace('4dr', tbl['Make']).tolist())[:12],
+        self.assertEqual(
+            sorted(tbl['Model'].str.replace('4dr', tbl['Make']).tolist())[:12],
             [' 3.5 RL Acura', ' 3.5 RL w/Navigation Acura', ' 300M Chrysler',
              ' 300M Special Edition Chrysler', ' 325Ci 2dr',
              ' 325Ci convertible 2dr', ' 325i BMW', ' 325xi BMW',
@@ -2427,14 +2548,15 @@ class TestCASTable(tm.TestCase):
         sortAssertEqual(df['Model'].str.rfind('Quattro'),
                         tbl['Model'].str.rfind('Quattro'))
         # start / end not supported yet
-#       sortAssertEqual(df['Model'].str.rfind('Quattro', 2),
-#                       tbl['Model'].str.rfind('Quattro', 2))
-#       sortAssertEqual(df['Model'].str.rfind('Quattro', 1, 3),
-#                       tbl['Model'].str.rfind('Quattro', 1, 3))
+        # sortAssertEqual(df['Model'].str.rfind('Quattro', 2),
+        #                 tbl['Model'].str.rfind('Quattro', 2))
+        # sortAssertEqual(df['Model'].str.rfind('Quattro', 1, 3),
+        #                 tbl['Model'].str.rfind('Quattro', 1, 3))
 
         # Rindex
-        sortAssertEqual(df[df['Model'].str.contains('Quattro')]['Model'].str.rindex('ttro'),
-                        tbl[tbl['Model'].str.contains('Quattro')]['Model'].str.rindex('ttro'))
+        sortAssertEqual(
+            df[df['Model'].str.contains('Quattro')]['Model'].str.rindex('ttro'),
+            tbl[tbl['Model'].str.contains('Quattro')]['Model'].str.rindex('ttro'))
         with self.assertRaises(ValueError):
             tbl['Model'].str.rindex('Quattro')
 
@@ -2500,87 +2622,115 @@ class TestCASTable(tm.TestCase):
                         tbl['Model'].str.isdecimal())
 
         # Soundslike
-        #print(tbl['Make'].str.soundslike('board').tolist()[:100])
+        # print(tbl['Make'].str.soundslike('board').tolist()[:100])
 
     def test_numeric_comparisons(self):
         df = self.get_cars_df().sort_values(SORT_KEYS)
         tbl = self.table.sort_values(SORT_KEYS)
 
-        self.assertTablesEqual(df[df['MSRP'] < 12360][['Model', 'MSRP']],
-                             tbl[tbl['MSRP'] < 12360][['Model', 'MSRP']], sortby=None)
-        self.assertTablesEqual(df[df['MSRP'].lt(12360)][['Model', 'MSRP']],
-                             tbl[tbl['MSRP'].lt(12360)][['Model', 'MSRP']], sortby=None)
+        self.assertTablesEqual(
+            df[df['MSRP'] < 12360][['Model', 'MSRP']],
+            tbl[tbl['MSRP'] < 12360][['Model', 'MSRP']],
+            sortby=None)
+        self.assertTablesEqual(
+            df[df['MSRP'].lt(12360)][['Model', 'MSRP']],
+            tbl[tbl['MSRP'].lt(12360)][['Model', 'MSRP']],
+            sortby=None)
 
-        self.assertTablesEqual(df[df['MSRP'] <= 12360][['Model', 'MSRP']],
-                             tbl[tbl['MSRP'] <= 12360][['Model', 'MSRP']], sortby=None)
-        self.assertTablesEqual(df[df['MSRP'].le(12360)][['Model', 'MSRP']],
-                             tbl[tbl['MSRP'].le(12360)][['Model', 'MSRP']], sortby=None)
+        self.assertTablesEqual(
+            df[df['MSRP'] <= 12360][['Model', 'MSRP']],
+            tbl[tbl['MSRP'] <= 12360][['Model', 'MSRP']],
+            sortby=None)
+        self.assertTablesEqual(
+            df[df['MSRP'].le(12360)][['Model', 'MSRP']],
+            tbl[tbl['MSRP'].le(12360)][['Model', 'MSRP']],
+            sortby=None)
 
-        self.assertTablesEqual(df[df['MSRP'] > 74995.0][['Model', 'MSRP']],
-                             tbl[tbl['MSRP'] > 74995.0][['Model', 'MSRP']], sortby=None)
-        self.assertTablesEqual(df[df['MSRP'].gt(74995.0)][['Model', 'MSRP']],
-                             tbl[tbl['MSRP'].gt(74995.0)][['Model', 'MSRP']], sortby=None)
+        self.assertTablesEqual(
+            df[df['MSRP'] > 74995.0][['Model', 'MSRP']],
+            tbl[tbl['MSRP'] > 74995.0][['Model', 'MSRP']],
+            sortby=None)
+        self.assertTablesEqual(
+            df[df['MSRP'].gt(74995.0)][['Model', 'MSRP']],
+            tbl[tbl['MSRP'].gt(74995.0)][['Model', 'MSRP']],
+            sortby=None)
 
-        self.assertTablesEqual(df[df['MSRP'] >= 74995.0][['Model', 'MSRP']],
-                             tbl[tbl['MSRP'] >= 74995.0][['Model', 'MSRP']], sortby=None)
-        self.assertTablesEqual(df[df['MSRP'].ge(74995.0)][['Model', 'MSRP']],
-                             tbl[tbl['MSRP'].ge(74995.0)][['Model', 'MSRP']], sortby=None)
+        self.assertTablesEqual(
+            df[df['MSRP'] >= 74995.0][['Model', 'MSRP']],
+            tbl[tbl['MSRP'] >= 74995.0][['Model', 'MSRP']],
+            sortby=None)
+        self.assertTablesEqual(
+            df[df['MSRP'].ge(74995.0)][['Model', 'MSRP']],
+            tbl[tbl['MSRP'].ge(74995.0)][['Model', 'MSRP']],
+            sortby=None)
 
-        self.assertTablesEqual(df[df['MSRP'] == 12360][['Model', 'MSRP']],
-                             tbl[tbl['MSRP'] == 12360][['Model', 'MSRP']], sortby=None)
-        self.assertTablesEqual(df[df['MSRP'].eq(12360)][['Model', 'MSRP']],
-                             tbl[tbl['MSRP'].eq(12360)][['Model', 'MSRP']], sortby=None)
+        self.assertTablesEqual(
+            df[df['MSRP'] == 12360][['Model', 'MSRP']],
+            tbl[tbl['MSRP'] == 12360][['Model', 'MSRP']],
+            sortby=None)
+        self.assertTablesEqual(
+            df[df['MSRP'].eq(12360)][['Model', 'MSRP']],
+            tbl[tbl['MSRP'].eq(12360)][['Model', 'MSRP']],
+            sortby=None)
 
-        self.assertEqual(len(df[df['MSRP'] != 12360][['Model', 'MSRP']]),
-                         len(tbl[tbl['MSRP'] != 12360][['Model', 'MSRP']]))
-        self.assertEqual(len(df[df['MSRP'].ne(12360)][['Model', 'MSRP']]),
-                         len(tbl[tbl['MSRP'].ne(12360)][['Model', 'MSRP']]))
+        self.assertEqual(
+            len(df[df['MSRP'] != 12360][['Model', 'MSRP']]),
+            len(tbl[tbl['MSRP'] != 12360][['Model', 'MSRP']]))
+        self.assertEqual(
+            len(df[df['MSRP'].ne(12360)][['Model', 'MSRP']]),
+            len(tbl[tbl['MSRP'].ne(12360)][['Model', 'MSRP']]))
 
-        self.assertTablesEqual(df[(df['MSRP'] < 12360) & (df['MSRP'] > 11000)][['Model', 'MSRP']],
-                             tbl[(tbl['MSRP'] < 12360) & (tbl['MSRP'] > 11000)][['Model', 'MSRP']], sortby=None)
+        self.assertTablesEqual(
+            df[(df['MSRP'] < 12360) & (df['MSRP'] > 11000)][['Model', 'MSRP']],
+            tbl[(tbl['MSRP'] < 12360) & (tbl['MSRP'] > 11000)][['Model', 'MSRP']],
+            sortby=None)
 
-        self.assertTablesEqual(df[(df['MSRP'] > 90000) | (df['MSRP'] < 11000)][['Model', 'MSRP']],
-                             tbl[(tbl['MSRP'] > 90000) | (tbl['MSRP'] < 11000)][['Model', 'MSRP']], sortby=None)
+        self.assertTablesEqual(
+            df[(df['MSRP'] > 90000) | (df['MSRP'] < 11000)][['Model', 'MSRP']],
+            tbl[(tbl['MSRP'] > 90000) | (tbl['MSRP'] < 11000)][['Model', 'MSRP']],
+            sortby=None)
 
     def test_character_comparisons(self):
         df = self.get_cars_df()
         tbl = self.table
 
         self.assertColsEqual(df[df['Make'] < 'BMW']['Model'],
-                           tbl[tbl['Make'] < 'BMW']['Model'])
+                             tbl[tbl['Make'] < 'BMW']['Model'])
         self.assertColsEqual(df[df['Make'].lt('BMW')]['Model'],
-                           tbl[tbl['Make'].lt('BMW')]['Model'])
+                             tbl[tbl['Make'].lt('BMW')]['Model'])
 
         self.assertColsEqual(df[df['Make'] <= 'BMW']['Model'],
-                           tbl[tbl['Make'] <= 'BMW']['Model'])
+                             tbl[tbl['Make'] <= 'BMW']['Model'])
         self.assertColsEqual(df[df['Make'].le('BMW')]['Model'],
-                           tbl[tbl['Make'].le('BMW')]['Model'])
+                             tbl[tbl['Make'].le('BMW')]['Model'])
 
         self.assertColsEqual(df[df['Make'] > 'Volkswagen']['Model'],
-                           tbl[tbl['Make'] > 'Volkswagen']['Model'])
+                             tbl[tbl['Make'] > 'Volkswagen']['Model'])
         self.assertColsEqual(df[df['Make'].gt('Volkswagen')]['Model'],
-                           tbl[tbl['Make'].gt('Volkswagen')]['Model'])
+                             tbl[tbl['Make'].gt('Volkswagen')]['Model'])
 
         self.assertColsEqual(df[df['Make'] >= 'Volkswagen']['Model'],
-                           tbl[tbl['Make'] >= 'Volkswagen']['Model'])
+                             tbl[tbl['Make'] >= 'Volkswagen']['Model'])
         self.assertColsEqual(df[df['Make'].ge('Volkswagen')]['Model'],
-                           tbl[tbl['Make'].ge('Volkswagen')]['Model'])
+                             tbl[tbl['Make'].ge('Volkswagen')]['Model'])
 
         self.assertColsEqual(df[df['Make'] == 'BMW']['Model'],
-                           tbl[tbl['Make'] == 'BMW']['Model'])
+                             tbl[tbl['Make'] == 'BMW']['Model'])
         self.assertColsEqual(df[df['Make'].eq('BMW')]['Model'],
-                           tbl[tbl['Make'].eq('BMW')]['Model'])
+                             tbl[tbl['Make'].eq('BMW')]['Model'])
 
         self.assertColsEqual(df[df['Make'] != 'BMW']['Model'],
-                           tbl[tbl['Make'] != 'BMW']['Model'])
+                             tbl[tbl['Make'] != 'BMW']['Model'])
         self.assertColsEqual(df[df['Make'].ne('BMW')]['Model'],
-                           tbl[tbl['Make'].ne('BMW')]['Model'])
+                             tbl[tbl['Make'].ne('BMW')]['Model'])
 
-        self.assertColsEqual(df[(df['Make'] < 'BMW') & (df['Make'] > 'Audi')]['Model'],
-                           tbl[(tbl['Make'] < 'BMW') & (tbl['Make'] > 'Audi')]['Model'])
+        self.assertColsEqual(
+            df[(df['Make'] < 'BMW') & (df['Make'] > 'Audi')]['Model'],
+            tbl[(tbl['Make'] < 'BMW') & (tbl['Make'] > 'Audi')]['Model'])
 
-        self.assertColsEqual(df[(df['Make'] > 'Volkswagen') | (df['Make'] < 'BMW')]['Model'],
-                           tbl[(tbl['Make'] > 'Volkswagen') | (tbl['Make'] < 'BMW')]['Model'])
+        self.assertColsEqual(
+            df[(df['Make'] > 'Volkswagen') | (df['Make'] < 'BMW')]['Model'],
+            tbl[(tbl['Make'] > 'Volkswagen') | (tbl['Make'] < 'BMW')]['Model'])
 
     def test_numeric_operators(self):
         df = self.get_cars_df()
@@ -2592,13 +2742,13 @@ class TestCASTable(tm.TestCase):
         self.assertColsEqual((df['MSRP'].add(-123.45)), (tbl['MSRP'].add(-123.45)))
 
         self.assertColsEqual((df['MSRP'] + df['Invoice']),
-                          (tbl['MSRP'] + tbl['Invoice']))
+                             (tbl['MSRP'] + tbl['Invoice']))
         self.assertColsEqual((df['MSRP'] + -df['Invoice']),
-                          (tbl['MSRP'] + -tbl['Invoice']))
+                             (tbl['MSRP'] + -tbl['Invoice']))
         self.assertColsEqual((df['MSRP'].add(df['Invoice'])),
-                          (tbl['MSRP'].add(tbl['Invoice'])))
+                             (tbl['MSRP'].add(tbl['Invoice'])))
         self.assertColsEqual((df['MSRP'].add(-df['Invoice'])),
-                          (tbl['MSRP'].add(-tbl['Invoice'])))
+                             (tbl['MSRP'].add(-tbl['Invoice'])))
 
         self.assertColsEqual((df['MSRP'] - 123.45), (tbl['MSRP'] - 123.45))
         self.assertColsEqual((df['MSRP'] - -123.45), (tbl['MSRP'] - -123.45))
@@ -2606,13 +2756,13 @@ class TestCASTable(tm.TestCase):
         self.assertColsEqual((df['MSRP'].sub(-123.45)), (tbl['MSRP'].sub(-123.45)))
 
         self.assertColsEqual((df['MSRP'] - df['Invoice']),
-                          (tbl['MSRP'] - tbl['Invoice']))
+                             (tbl['MSRP'] - tbl['Invoice']))
         self.assertColsEqual((df['MSRP'] - -df['Invoice']),
-                          (tbl['MSRP'] - -tbl['Invoice']))
+                             (tbl['MSRP'] - -tbl['Invoice']))
         self.assertColsEqual((df['MSRP'].sub(df['Invoice'])),
-                          (tbl['MSRP'].sub(tbl['Invoice'])))
+                             (tbl['MSRP'].sub(tbl['Invoice'])))
         self.assertColsEqual((df['MSRP'].sub(-df['Invoice'])),
-                          (tbl['MSRP'].sub(-tbl['Invoice'])))
+                             (tbl['MSRP'].sub(-tbl['Invoice'])))
 
         def assertItemsAlmostEqual(list1, list2, decimals=4):
             for item1, item2 in zip(sorted(list1.tolist()), sorted(list2.tolist())):
@@ -2696,17 +2846,17 @@ class TestCASTable(tm.TestCase):
         tblout = (tbl['MSRP'] % tbl['Horsepower'])
         assertItemsAlmostEqual(dfout, tblout, 2)
 
-#       dfout = (df['MSRP'] % -df['Horsepower'])
-#       tblout = ((tbl['MSRP'] % -tbl['Horsepower']) + tbl['MSRP'])
-#       assertItemsAlmostEqual(dfout, tblout, 2)
+        # dfout = (df['MSRP'] % -df['Horsepower'])
+        # tblout = ((tbl['MSRP'] % -tbl['Horsepower']) + tbl['MSRP'])
+        # assertItemsAlmostEqual(dfout, tblout, 2)
 
         dfout = (df['MSRP'].mod(df['Horsepower']))
         tblout = (tbl['MSRP'].mod(tbl['Horsepower']))
         assertItemsAlmostEqual(dfout, tblout, 2)
 
-#       dfout = (df['MSRP'].mod(-df['Horsepower']))
-#       tblout = ((tbl['MSRP'].mod(-tbl['Horsepower'])) + tbl['MSRP'])
-#       assertItemsAlmostEqual(dfout, tblout, 2)
+        # dfout = (df['MSRP'].mod(-df['Horsepower']))
+        # tblout = ((tbl['MSRP'].mod(-tbl['Horsepower'])) + tbl['MSRP'])
+        # assertItemsAlmostEqual(dfout, tblout, 2)
 
         dfout = (df['MSRP'] ** 1.2345)
         tblout = (tbl['MSRP'] ** 1.2345)
@@ -2724,47 +2874,47 @@ class TestCASTable(tm.TestCase):
         tblout = (tbl['MSRP'].pow(-1.2345))
         assertItemsAlmostEqual(dfout, tblout, 2)
 
-        dfout = (df['MSRP'] ** (df['EngineSize']/10))
-        tblout = (tbl['MSRP'] ** (tbl['EngineSize']/10))
+        dfout = (df['MSRP'] ** (df['EngineSize'] / 10))
+        tblout = (tbl['MSRP'] ** (tbl['EngineSize'] / 10))
         assertItemsAlmostEqual(dfout, tblout, 2)
 
-        dfout = (df['MSRP'] ** -(df['EngineSize']/10))
-        tblout = (tbl['MSRP'] ** -(tbl['EngineSize']/10))
+        dfout = (df['MSRP'] ** -(df['EngineSize'] / 10))
+        tblout = (tbl['MSRP'] ** -(tbl['EngineSize'] / 10))
         assertItemsAlmostEqual(dfout, tblout, 2)
 
-        dfout = (df['MSRP'].pow(df['EngineSize']/10))
-        tblout = (tbl['MSRP'].pow(tbl['EngineSize']/10))
+        dfout = (df['MSRP'].pow(df['EngineSize'] / 10))
+        tblout = (tbl['MSRP'].pow(tbl['EngineSize'] / 10))
         assertItemsAlmostEqual(dfout, tblout, 2)
 
-        dfout = (df['MSRP'].pow(-df['EngineSize']/10))
-        tblout = (tbl['MSRP'].pow(-tbl['EngineSize']/10))
+        dfout = (df['MSRP'].pow(-df['EngineSize'] / 10))
+        tblout = (tbl['MSRP'].pow(-tbl['EngineSize'] / 10))
         assertItemsAlmostEqual(dfout, tblout, 2)
 
         self.assertColsEqual(123.45 + df['MSRP'], 123.45 + tbl['MSRP'])
         self.assertColsEqual(-123.45 + df['MSRP'], -123.45 + tbl['MSRP'])
         self.assertColsEqual((df['MSRP'].radd(123.45)),
-                           (tbl['MSRP'].radd(123.45)))
+                             (tbl['MSRP'].radd(123.45)))
         self.assertColsEqual((df['MSRP'].radd(-123.45)),
-                           (tbl['MSRP'].radd(-123.45)))
+                             (tbl['MSRP'].radd(-123.45)))
 
         self.assertColsEqual((df['MSRP'].radd(df['EngineSize'])),
-                           (tbl['MSRP'].radd(tbl['EngineSize'])))
+                             (tbl['MSRP'].radd(tbl['EngineSize'])))
         self.assertColsEqual((df['MSRP'].radd(-df['EngineSize'])),
-                           (tbl['MSRP'].radd(-tbl['EngineSize'])))
+                             (tbl['MSRP'].radd(-tbl['EngineSize'])))
 
         self.assertColsEqual(123.45 - df['MSRP'], 123.45 - tbl['MSRP'])
         self.assertColsEqual(-123.45 - df['MSRP'], -123.45 - tbl['MSRP'])
         self.assertColsEqual((df['MSRP'].rsub(123.45)),
-                           (tbl['MSRP'].rsub(123.45)))
+                             (tbl['MSRP'].rsub(123.45)))
         self.assertColsEqual((df['MSRP'].rsub(-123.45)),
-                           (tbl['MSRP'].rsub(-123.45)))
+                             (tbl['MSRP'].rsub(-123.45)))
 
         self.assertColsEqual((df['MSRP'].rsub(df['EngineSize'])),
-                           (tbl['MSRP'].rsub(tbl['EngineSize'])))
+                             (tbl['MSRP'].rsub(tbl['EngineSize'])))
         self.assertColsEqual((df['MSRP'].rsub(-df['EngineSize'])),
-                           (tbl['MSRP'].rsub(-tbl['EngineSize'])))
+                             (tbl['MSRP'].rsub(-tbl['EngineSize'])))
 
-        assertItemsAlmostEqual(123.45 * df['MSRP'],  123.45 * tbl['MSRP'])
+        assertItemsAlmostEqual(123.45 * df['MSRP'], 123.45 * tbl['MSRP'])
         assertItemsAlmostEqual(-123.45 * df['MSRP'], -123.45 * tbl['MSRP'])
         assertItemsAlmostEqual((df['MSRP'].rmul(123.45)),
                                (tbl['MSRP'].rmul(123.45)))
@@ -2816,7 +2966,8 @@ class TestCASTable(tm.TestCase):
         assertItemsAlmostEqual(dfout, tblout, 4)
 
         dfout = (df['MSRP'].rmod(-123.45)).head(100).tolist()
-        tblout = ((tbl['MSRP'].rmod(-123.45)).head(100) + tbl['MSRP'].head(100)).tolist()
+        tblout = ((tbl['MSRP'].rmod(-123.45)).head(100)
+                  + tbl['MSRP'].head(100)).tolist()
         for dfo, tblo in zip(sorted(dfout), sorted(tblout)):
             self.assertAlmostEqual(dfo, tblo, 4)
 
@@ -2825,7 +2976,8 @@ class TestCASTable(tm.TestCase):
         assertItemsAlmostEqual(dfout, tblout, 4)
 
         dfout = (df['MSRP'].rmod(-df['EngineSize'])).head(100).tolist()
-        tblout = ((tbl['MSRP'].rmod(-tbl['EngineSize'])).head(100) + tbl['MSRP'].head(100)).tolist()
+        tblout = ((tbl['MSRP'].rmod(-tbl['EngineSize'])).head(100)
+                  + tbl['MSRP'].head(100)).tolist()
         for dfo, tblo in zip(sorted(dfout), sorted(tblout)):
             self.assertAlmostEqual(dfo, tblo, 4)
 
@@ -2841,19 +2993,19 @@ class TestCASTable(tm.TestCase):
         tblout = (tbl['MSRP'].rpow(-0.12345))
         assertItemsAlmostEqual(dfout, tblout, 4)
 
-        dfout = (df['MSRP'].rpow(df['EngineSize']/10))
-        tblout = (tbl['MSRP'].rpow(tbl['EngineSize']/10))
+        dfout = (df['MSRP'].rpow(df['EngineSize'] / 10))
+        tblout = (tbl['MSRP'].rpow(tbl['EngineSize'] / 10))
         assertItemsAlmostEqual(dfout, tblout, 4)
 
-        dfout = (df['MSRP'].rpow(-df['EngineSize']/10))
-        tblout = (tbl['MSRP'].rpow(-tbl['EngineSize']/10))
+        dfout = (df['MSRP'].rpow(-df['EngineSize'] / 10))
+        tblout = (tbl['MSRP'].rpow(-tbl['EngineSize'] / 10))
         assertItemsAlmostEqual(dfout, tblout, 4)
 
         self.assertColsEqual(df['EngineSize'].round(0),
-                           tbl['EngineSize'].round(0))
+                             tbl['EngineSize'].round(0))
 
         self.assertColsEqual(df['EngineSize'].round(2),
-                           tbl['EngineSize'].round(2))
+                             tbl['EngineSize'].round(2))
 
         if [int(x) for x in np.__version__.split('.')[:2]] > [1, 8]:
             assertItemsAlmostEqual(np.floor(df['EngineSize']),
@@ -2868,13 +3020,13 @@ class TestCASTable(tm.TestCase):
         tbl = self.table
 
         self.assertColsEqual((df['Make'] + 'Foo'),
-                           (tbl['Make'] + 'Foo'))
+                             (tbl['Make'] + 'Foo'))
         self.assertColsEqual((df['Make'].add('Foo')),
-                           (tbl['Make'].add('Foo')))
+                             (tbl['Make'].add('Foo')))
         self.assertColsEqual((df['Make'] + df['Model']),
-                           (tbl['Make'] + tbl['Model']))
+                             (tbl['Make'] + tbl['Model']))
         self.assertColsEqual((df['Make'].add(df['Model'])),
-                           (tbl['Make'].add(tbl['Model'])))
+                             (tbl['Make'].add(tbl['Model'])))
 
         with self.assertRaises(AttributeError):
             -tbl['Make']
@@ -2894,9 +3046,9 @@ class TestCASTable(tm.TestCase):
         self.assertColsEqual((df['Make'].mul(-3)), (tbl['Make'].mul(-3)))
 
         self.assertColsEqual((df['Make'] * df['EngineSize'].astype('int')),
-                           (tbl['Make'] * tbl['EngineSize']))
+                             (tbl['Make'] * tbl['EngineSize']))
         self.assertColsEqual((df['Make'].mul(df['EngineSize'].astype('int'))),
-                           (tbl['Make'].mul(tbl['EngineSize'])))
+                             (tbl['Make'].mul(tbl['EngineSize'])))
 
         with self.assertRaises(AttributeError):
             tbl['Make'] / 'Foo'
@@ -2936,11 +3088,11 @@ class TestCASTable(tm.TestCase):
 
         self.assertColsEqual('Foo' + df['Make'], 'Foo' + tbl['Make'])
         self.assertColsEqual((df['Make'].radd(df['Model'].str.strip())),
-                           (tbl['Make'].radd(tbl['Model'].str.strip())))
+                             (tbl['Make'].radd(tbl['Model'].str.strip())))
         self.assertColsEqual((df['Make'].radd('Foo')),
-                           (tbl['Make'].radd('Foo')))
+                             (tbl['Make'].radd('Foo')))
         self.assertColsEqual((df['Make'].radd(df['Model'].str.strip())),
-                           (tbl['Make'].radd(tbl['Model'].str.strip())))
+                             (tbl['Make'].radd(tbl['Model'].str.strip())))
 
         with self.assertRaises(AttributeError):
             tbl['Make'].rsub('Foo')
@@ -2949,9 +3101,9 @@ class TestCASTable(tm.TestCase):
 
         self.assertColsEqual(3 * df['Make'], 3 * tbl['Make'])
         self.assertColsEqual((df['Make'].rmul(3)),
-                           (tbl['Make'].rmul(3)))
+                             (tbl['Make'].rmul(3)))
         self.assertColsEqual((df['Make'].rmul(df['EngineSize'].astype('int'))),
-                           (tbl['Make'].rmul(tbl['EngineSize'])))
+                             (tbl['Make'].rmul(tbl['EngineSize'])))
 
         with self.assertRaises(AttributeError):
             tbl['Make'].rdiv('Foo')
@@ -2981,36 +3133,36 @@ class TestCASTable(tm.TestCase):
         with self.assertRaises(AttributeError):
             tbl['Make'].round(tbl['Model'])
 
-#       with self.assertRaises(AttributeError):
-#           np.floor(tbl['Make'])
-#       with self.assertRaises(AttributeError):
-#           np.ceil(tbl['Make'])
-#       with self.assertRaises(AttributeError):
-#           np.trunc(tbl['Make'])
+        # with self.assertRaises(AttributeError):
+        #     np.floor(tbl['Make'])
+        # with self.assertRaises(AttributeError):
+        #     np.ceil(tbl['Make'])
+        # with self.assertRaises(AttributeError):
+        #     np.trunc(tbl['Make'])
 
     def test_column_stats(self):
         df = self.get_cars_df().sort_values(SORT_KEYS)
         tbl = self.table.sort_values(SORT_KEYS)
 
         self.assertColsEqual(df['MSRP'].abs(),
-                           tbl['MSRP'].abs())
+                             tbl['MSRP'].abs())
         self.assertColsEqual((df['MSRP'] * -1).abs(),
-                           (tbl['MSRP'] * -1).abs())
+                             (tbl['MSRP'] * -1).abs())
 
         self.assertEqual(df['MSRP'].all(), tbl['MSRP'].all())
         self.assertEqual(df['Cylinders'].all(), tbl['Cylinders'].all())
 
         self.assertColsEqual(df['MSRP'].between(40000, 50000),
-                           tbl['MSRP'].between(40000, 50000))
+                             tbl['MSRP'].between(40000, 50000))
 
         self.assertColsEqual(df['MSRP'].clip(40000, 50000),
-                           tbl['MSRP'].clip(40000, 50000))
+                             tbl['MSRP'].clip(40000, 50000))
 
         if pd_version < (1, 0, 0):
             self.assertColsEqual(df['MSRP'].clip_lower(40000),
-                               tbl['MSRP'].clip_lower(40000))
+                                 tbl['MSRP'].clip_lower(40000))
             self.assertColsEqual(df['MSRP'].clip_upper(40000),
-                               tbl['MSRP'].clip_upper(40000))
+                                 tbl['MSRP'].clip_upper(40000))
 
         self.assertAlmostEqual(df['MSRP'].corr(df['Invoice']),
                                tbl['MSRP'].corr(tbl['Invoice']), 4)
@@ -3020,7 +3172,7 @@ class TestCASTable(tm.TestCase):
         # Pandas doesn't like NaNs in here
         dfdesc = df['Cylinders'].dropna().describe()
         tbldesc = tbl['Cylinders'].describe()
-#       self.assertEqual(dfdesc.name, tbldesc.name)
+        # self.assertEqual(dfdesc.name, tbldesc.name)
         self.assertEqual(dfdesc.loc['count'], tbldesc.loc['count'])
         self.assertAlmostEqual(dfdesc.loc['mean'], tbldesc.loc['mean'], 4)
         self.assertAlmostEqual(dfdesc.loc['std'], tbldesc.loc['std'], 4)
@@ -3032,7 +3184,7 @@ class TestCASTable(tm.TestCase):
 
         dfdesc = df['Make'].describe()
         tbldesc = tbl['Make'].describe()
-#       self.assertEqual(dfdesc.name, tbldesc.name)
+        # self.assertEqual(dfdesc.name, tbldesc.name)
         self.assertEqual(dfdesc.loc['count'], tbldesc.loc['count'])
         self.assertEqual(dfdesc.loc['unique'], tbldesc.loc['unique'])
         self.assertEqual(dfdesc.loc['top'], tbldesc.loc['top'])
@@ -3053,9 +3205,9 @@ class TestCASTable(tm.TestCase):
         self.assertAlmostEqual(tbl['MSRP'].probt(), 4.16041192748e-127, 127)
 
         self.assertColsEqual(df['MSRP'].nlargest(),
-                           tbl['MSRP'].nlargest())
+                             tbl['MSRP'].nlargest())
         self.assertColsEqual(df['MSRP'].nsmallest(),
-                           tbl['MSRP'].nsmallest())
+                             tbl['MSRP'].nsmallest())
 
     def test_column_value_counts(self):
         df = self.get_cars_df()
@@ -3065,34 +3217,34 @@ class TestCASTable(tm.TestCase):
         self.assertColsEqual(df['MSRP'].value_counts(), tbl['MSRP'].value_counts())
 
         self.assertColsEqual(df['Make'].value_counts(normalize=True),
-                          tbl['Make'].value_counts(normalize=True))
+                             tbl['Make'].value_counts(normalize=True))
         self.assertColsEqual(df['MSRP'].value_counts(normalize=True),
-                          tbl['MSRP'].value_counts(normalize=True))
+                             tbl['MSRP'].value_counts(normalize=True))
 
         self.assertColsEqual(df['Make'].value_counts(sort=True, ascending=True),
-                          tbl['Make'].value_counts(sort=True, ascending=True))
+                             tbl['Make'].value_counts(sort=True, ascending=True))
         self.assertColsEqual(df['MSRP'].value_counts(sort=True, ascending=True),
-                          tbl['MSRP'].value_counts(sort=True, ascending=True))
+                             tbl['MSRP'].value_counts(sort=True, ascending=True))
 
         # Test groupby variables
         tblgrp = tbl.groupby(['Make', 'Cylinders'])
         dfgrp = df.groupby(['Make', 'Cylinders'])
 
         self.assertColsEqual(dfgrp['Type'].value_counts(),
-                           tblgrp['Type'].value_counts())
+                             tblgrp['Type'].value_counts())
         self.assertColsEqual(dfgrp['Horsepower'].value_counts(),
-                           tblgrp['Horsepower'].value_counts())
+                             tblgrp['Horsepower'].value_counts())
 
         self.assertColsEqual(dfgrp['Type'].value_counts(normalize=True),
-                           tblgrp['Type'].value_counts(normalize=True))
+                             tblgrp['Type'].value_counts(normalize=True))
         self.assertColsEqual(dfgrp['Horsepower'].value_counts(normalize=True),
-                           tblgrp['Horsepower'].value_counts(normalize=True))
+                             tblgrp['Horsepower'].value_counts(normalize=True))
 
         # NOTE: Pandas doesn't seem to count NaNs regardless
-#       self.assertEqual(dfgrp['Type'].value_counts(dropna=False).tolist(),
-#                        tblgrp['Type'].value_counts(dropna=False).tolist())
-#       self.assertEqual(dfgrp['Horsepower'].value_counts(dropna=False).tolist(),
-#                        tblgrp['Horsepower'].value_counts(dropna=False).tolist())
+        # self.assertEqual(dfgrp['Type'].value_counts(dropna=False).tolist(),
+        #                  tblgrp['Type'].value_counts(dropna=False).tolist())
+        # self.assertEqual(dfgrp['Horsepower'].value_counts(dropna=False).tolist(),
+        #                  tblgrp['Horsepower'].value_counts(dropna=False).tolist())
 
     def test_column_unique(self):
         df = self.get_cars_df()
@@ -3100,10 +3252,12 @@ class TestCASTable(tm.TestCase):
 
         self.assertEqual(type(df['Make'].unique()), type(tbl['Make'].unique()))
         self.assertEqual(sorted(df['Make'].unique()), sorted(tbl['Make'].unique()))
-        self.assertEqual(len([True for x in df['Cylinders'].unique() if np.isnan(x)]),
-                         len([True for x in tbl['Cylinders'].unique() if np.isnan(x)]))
-        self.assertEqual(sorted([x for x in df['Cylinders'].unique() if not np.isnan(x)]),
-                         sorted([x for x in tbl['Cylinders'].unique() if not np.isnan(x)]))
+        self.assertEqual(
+            len([True for x in df['Cylinders'].unique() if np.isnan(x)]),
+            len([True for x in tbl['Cylinders'].unique() if np.isnan(x)]))
+        self.assertEqual(
+            sorted([x for x in df['Cylinders'].unique() if not np.isnan(x)]),
+            sorted([x for x in tbl['Cylinders'].unique() if not np.isnan(x)]))
 
         self.assertEqual(df['Make'].nunique(), tbl['Make'].nunique())
         self.assertEqual(df['Cylinders'].nunique(), tbl['Cylinders'].nunique())
@@ -3120,20 +3274,26 @@ class TestCASTable(tm.TestCase):
         self.assertEqual(type(dfgrp['Type'].unique()), type(tblgrp['Type'].unique()))
         self.assertEqual(sorted(sorted(list(x)) for x in dfgrp['Type'].unique()),
                          sorted(sorted(list(x)) for x in tblgrp['Type'].unique()))
-#       self.assertEqual(len([True for x in dfgrp['Horsepower'].unique() if np.isnan(x)]),
-#                        len([True for x in tblgrp['Horsepower'].unique() if np.isnan(x)]))
-#       self.assertEqual(sorted([x for x in dfgrp['Horsepower'].unique() if not np.isnan(x)]),
-#                        sorted([x for x in tblgrp['Horsepower'].unique() if not np.isnan(x)]))
+        # self.assertEqual(
+        #     len([True for x in dfgrp['Horsepower'].unique() if np.isnan(x)]),
+        #     len([True for x in tblgrp['Horsepower'].unique() if np.isnan(x)]))
+        # self.assertEqual(
+        #     sorted([x for x in dfgrp['Horsepower'].unique() if not np.isnan(x)]),
+        #     sorted([x for x in tblgrp['Horsepower'].unique() if not np.isnan(x)]))
 
         self.assertColsEqual(dfgrp['Type'].nunique(),
-                           tblgrp['Type'].nunique())
+                             tblgrp['Type'].nunique())
         self.assertColsEqual(dfgrp['Horsepower'].nunique(),
-                           tblgrp['Horsepower'].nunique())
-#       self.assertColsEqual(dfgrp['Horsepower'].nunique(dropna=False),
-#                          tblgrp['Horsepower'].nunique(dropna=False))
+                             tblgrp['Horsepower'].nunique())
+        # self.assertColsEqual(dfgrp['Horsepower'].nunique(dropna=False),
+        #                      tblgrp['Horsepower'].nunique(dropna=False))
 
-        self.assertTrue(x for x in tblgrp['Model'].query('Make = "Ford"').is_unique.tolist() if x is True)
-        self.assertTrue(x for x in tblgrp['Type'].query('Make = "Ford"').is_unique.tolist() if x is False)
+        self.assertTrue(
+            x for x in tblgrp['Model'].query('Make = "Ford"').is_unique.tolist()
+            if x is True)
+        self.assertTrue(
+            x for x in tblgrp['Type'].query('Make = "Ford"').is_unique.tolist()
+            if x is False)
 
     @unittest.skip('Need way to verify the file exists on server')
     def test_load_path(self):
@@ -3159,9 +3319,11 @@ class TestCASTable(tm.TestCase):
 
         self.assertTablesEqual(df2, tbl, sortby=SORT_KEYS)
         if 'csv-ints' in self.s.server_features:
-            self.assertEqual(set(tbl.dtypes.unique()), set(['double', 'int64', 'varchar']))
+            self.assertEqual(set(tbl.dtypes.unique()),
+                             set(['double', 'int64', 'varchar']))
         else:
-            self.assertEqual(set(tbl.dtypes.unique()), set(['double', 'varchar']))
+            self.assertEqual(set(tbl.dtypes.unique()),
+                             set(['double', 'varchar']))
 
         # Force addtable
         tbl = self.s.read_pickle(tmp.name, use_addtable=True)
@@ -3170,11 +3332,14 @@ class TestCASTable(tm.TestCase):
 
         if self.s._protocol in ['http', 'https']:
             if 'csv-ints' in self.s.server_features:
-                self.assertEqual(set(tbl.dtypes.unique()), set(['double', 'int64', 'varchar']))
+                self.assertEqual(set(tbl.dtypes.unique()),
+                                 set(['double', 'int64', 'varchar']))
             else:
-                self.assertEqual(set(tbl.dtypes.unique()), set(['double', 'varchar']))
+                self.assertEqual(set(tbl.dtypes.unique()),
+                                 set(['double', 'varchar']))
         else:
-            self.assertEqual(set(tbl.dtypes.unique()), set(['double', 'int64', 'varchar']))
+            self.assertEqual(set(tbl.dtypes.unique()),
+                             set(['double', 'int64', 'varchar']))
 
         os.remove(tmp.name)
 
@@ -3188,9 +3353,11 @@ class TestCASTable(tm.TestCase):
 
         self.assertTablesEqual(df, tbl, sortby=SORT_KEYS)
         if 'csv-ints' in self.s.server_features:
-            self.assertEqual(set(tbl.dtypes.unique()), set(['double', 'int64', 'varchar']))
+            self.assertEqual(set(tbl.dtypes.unique()),
+                             set(['double', 'int64', 'varchar']))
         else:
-            self.assertEqual(set(tbl.dtypes.unique()), set(['double', 'varchar']))
+            self.assertEqual(set(tbl.dtypes.unique()),
+                             set(['double', 'varchar']))
 
         # Force addtable
         tbl = self.s.read_table(myFile, use_addtable=True)
@@ -3199,11 +3366,14 @@ class TestCASTable(tm.TestCase):
 
         if self.s._protocol in ['http', 'https']:
             if 'csv-ints' in self.s.server_features:
-                self.assertEqual(set(tbl.dtypes.unique()), set(['double', 'int64', 'varchar']))
+                self.assertEqual(set(tbl.dtypes.unique()),
+                                 set(['double', 'int64', 'varchar']))
             else:
-                self.assertEqual(set(tbl.dtypes.unique()), set(['double', 'varchar']))
+                self.assertEqual(set(tbl.dtypes.unique()),
+                                 set(['double', 'varchar']))
         else:
-            self.assertEqual(set(tbl.dtypes.unique()), set(['double', 'int64', 'varchar']))
+            self.assertEqual(set(tbl.dtypes.unique()),
+                             set(['double', 'int64', 'varchar']))
 
     def test_read_csv(self):
         import swat.tests as st
@@ -3215,9 +3385,11 @@ class TestCASTable(tm.TestCase):
 
         self.assertTablesEqual(df, tbl, sortby=SORT_KEYS)
         if 'csv-ints' in self.s.server_features:
-            self.assertEqual(set(tbl.dtypes.unique()), set(['double', 'int64', 'varchar']))
+            self.assertEqual(set(tbl.dtypes.unique()),
+                             set(['double', 'int64', 'varchar']))
         else:
-            self.assertEqual(set(tbl.dtypes.unique()), set(['double', 'varchar']))
+            self.assertEqual(set(tbl.dtypes.unique()),
+                             set(['double', 'varchar']))
 
         # Force addtable
         tbl = self.s.read_csv(myFile, use_addtable=True)
@@ -3226,11 +3398,14 @@ class TestCASTable(tm.TestCase):
 
         if self.s._protocol in ['http', 'https']:
             if 'csv-ints' in self.s.server_features:
-                self.assertEqual(set(tbl.dtypes.unique()), set(['double', 'int64', 'varchar']))
+                self.assertEqual(set(tbl.dtypes.unique()),
+                                 set(['double', 'int64', 'varchar']))
             else:
-                self.assertEqual(set(tbl.dtypes.unique()), set(['double', 'varchar']))
+                self.assertEqual(set(tbl.dtypes.unique()),
+                                 set(['double', 'varchar']))
         else:
-            self.assertEqual(set(tbl.dtypes.unique()), set(['double', 'int64', 'varchar']))
+            self.assertEqual(set(tbl.dtypes.unique()),
+                             set(['double', 'int64', 'varchar']))
 
     def test_read_frame(self):
         import swat.tests as st
@@ -3242,9 +3417,11 @@ class TestCASTable(tm.TestCase):
 
         self.assertTablesEqual(df, tbl, sortby=SORT_KEYS)
         if 'csv-ints' in self.s.server_features:
-            self.assertEqual(set(tbl.dtypes.unique()), set(['double', 'int64', 'varchar']))
+            self.assertEqual(set(tbl.dtypes.unique()),
+                             set(['double', 'int64', 'varchar']))
         else:
-            self.assertEqual(set(tbl.dtypes.unique()), set(['double', 'varchar']))
+            self.assertEqual(set(tbl.dtypes.unique()),
+                             set(['double', 'varchar']))
 
         # Force addtable
         tbl = self.s.read_frame(df, use_addtable=True)
@@ -3253,11 +3430,14 @@ class TestCASTable(tm.TestCase):
 
         if self.s._protocol in ['http', 'https']:
             if 'csv-ints' in self.s.server_features:
-                self.assertEqual(set(tbl.dtypes.unique()), set(['double', 'int64', 'varchar']))
+                self.assertEqual(set(tbl.dtypes.unique()),
+                                 set(['double', 'int64', 'varchar']))
             else:
-                self.assertEqual(set(tbl.dtypes.unique()), set(['double', 'varchar']))
+                self.assertEqual(set(tbl.dtypes.unique()),
+                                 set(['double', 'varchar']))
         else:
-            self.assertEqual(set(tbl.dtypes.unique()), set(['double', 'int64', 'varchar']))
+            self.assertEqual(set(tbl.dtypes.unique()),
+                             set(['double', 'int64', 'varchar']))
 
     def test_read_fwf(self):
         import swat.tests as st
@@ -3269,9 +3449,11 @@ class TestCASTable(tm.TestCase):
 
         self.assertTablesEqual(df, tbl, sortby=SORT_KEYS)
         if 'csv-ints' in self.s.server_features:
-            self.assertEqual(set(tbl.dtypes.unique()), set(['double', 'int64', 'varchar']))
+            self.assertEqual(set(tbl.dtypes.unique()),
+                             set(['double', 'int64', 'varchar']))
         else:
-            self.assertEqual(set(tbl.dtypes.unique()), set(['double', 'varchar']))
+            self.assertEqual(set(tbl.dtypes.unique()),
+                             set(['double', 'varchar']))
 
         # Force addtable
         tbl = self.s.read_fwf(myFile, use_addtable=True)
@@ -3280,18 +3462,21 @@ class TestCASTable(tm.TestCase):
 
         if self.s._protocol in ['http', 'https']:
             if 'csv-ints' in self.s.server_features:
-                self.assertEqual(set(tbl.dtypes.unique()), set(['double', 'int64', 'varchar']))
+                self.assertEqual(set(tbl.dtypes.unique()),
+                                 set(['double', 'int64', 'varchar']))
             else:
-                self.assertEqual(set(tbl.dtypes.unique()), set(['double', 'varchar']))
+                self.assertEqual(set(tbl.dtypes.unique()),
+                                 set(['double', 'varchar']))
         else:
-            self.assertEqual(set(tbl.dtypes.unique()), set(['double', 'int64', 'varchar']))
+            self.assertEqual(set(tbl.dtypes.unique()),
+                             set(['double', 'int64', 'varchar']))
 
 #   def test_read_clipboard(self):
 #       ???
 
     def test_read_excel(self):
-#       if self.s._protocol in ['http', 'https']:
-#           tm.TestCase.skipTest(self, 'REST does not support data messages')
+        # if self.s._protocol in ['http', 'https']:
+        #     tm.TestCase.skipTest(self, 'REST does not support data messages')
 
         import swat.tests as st
 
@@ -3302,9 +3487,11 @@ class TestCASTable(tm.TestCase):
 
         self.assertTablesEqual(df, tbl, sortby=SORT_KEYS)
         if 'csv-ints' in self.s.server_features:
-            self.assertEqual(set(tbl.dtypes.unique()), set(['double', 'int64', 'varchar']))
+            self.assertEqual(set(tbl.dtypes.unique()),
+                             set(['double', 'int64', 'varchar']))
         else:
-            self.assertEqual(set(tbl.dtypes.unique()), set(['double', 'varchar']))
+            self.assertEqual(set(tbl.dtypes.unique()),
+                             set(['double', 'varchar']))
 
         # Force addtable
         tbl = self.s.read_excel(myFile, use_addtable=True)
@@ -3313,11 +3500,14 @@ class TestCASTable(tm.TestCase):
 
         if self.s._protocol in ['http', 'https']:
             if 'csv-ints' in self.s.server_features:
-                self.assertEqual(set(tbl.dtypes.unique()), set(['double', 'int64', 'varchar']))
+                self.assertEqual(set(tbl.dtypes.unique()),
+                                 set(['double', 'int64', 'varchar']))
             else:
-                self.assertEqual(set(tbl.dtypes.unique()), set(['double', 'varchar']))
+                self.assertEqual(set(tbl.dtypes.unique()),
+                                 set(['double', 'varchar']))
         else:
-            self.assertEqual(set(tbl.dtypes.unique()), set(['double', 'int64', 'varchar']))
+            self.assertEqual(set(tbl.dtypes.unique()),
+                             set(['double', 'int64', 'varchar']))
 
 #   @unittest.skip('Freezes on addtable')
 #   def test_read_json(self):
@@ -3326,7 +3516,8 @@ class TestCASTable(tm.TestCase):
 
 #       import swat.tests as st
 
-#       myFile = os.path.join(os.path.dirname(st.__file__), 'datasources', 'pandas_issues.json')
+#       myFile = os.path.join(os.path.dirname(st.__file__),
+#                             'datasources', 'pandas_issues.json')
 
 #       df = tbl = None
 
@@ -3349,9 +3540,11 @@ class TestCASTable(tm.TestCase):
 
         self.assertTablesEqual(df, tbl, sortby=SORT_KEYS)
         if 'csv-ints' in self.s.server_features:
-            self.assertEqual(set(tbl.dtypes.unique()), set(['double', 'int64', 'varchar']))
+            self.assertEqual(set(tbl.dtypes.unique()),
+                             set(['double', 'int64', 'varchar']))
         else:
-            self.assertEqual(set(tbl.dtypes.unique()), set(['double', 'varchar']))
+            self.assertEqual(set(tbl.dtypes.unique()),
+                             set(['double', 'varchar']))
 
         # Force addtable
         tbl = self.s.read_html(myFile, use_addtable=True)[0]
@@ -3360,11 +3553,14 @@ class TestCASTable(tm.TestCase):
 
         if self.s._protocol in ['http', 'https']:
             if 'csv-ints' in self.s.server_features:
-                self.assertEqual(set(tbl.dtypes.unique()), set(['double', 'int64', 'varchar']))
+                self.assertEqual(set(tbl.dtypes.unique()),
+                                 set(['double', 'int64', 'varchar']))
             else:
-                self.assertEqual(set(tbl.dtypes.unique()), set(['double', 'varchar']))
+                self.assertEqual(set(tbl.dtypes.unique()),
+                                 set(['double', 'varchar']))
         else:
-            self.assertEqual(set(tbl.dtypes.unique()), set(['double', 'int64', 'varchar']))
+            self.assertEqual(set(tbl.dtypes.unique()),
+                             set(['double', 'int64', 'varchar']))
 
     @unittest.skip('Need way to verify HDF installation')
     def test_read_hdf(self):
@@ -3385,9 +3581,11 @@ class TestCASTable(tm.TestCase):
 
         self.assertTablesEqual(df2, tbl, sortby=SORT_KEYS)
         if 'csv-ints' in self.s.server_features:
-            self.assertEqual(set(tbl.dtypes.unique()), set(['double', 'int64', 'varchar']))
+            self.assertEqual(set(tbl.dtypes.unique()),
+                             set(['double', 'int64', 'varchar']))
         else:
-            self.assertEqual(set(tbl.dtypes.unique()), set(['double', 'varchar']))
+            self.assertEqual(set(tbl.dtypes.unique()),
+                             set(['double', 'varchar']))
 
         # Force addtable
         tbl = self.s.read_hdf(tmp.name, use_addtable=True)
@@ -3396,11 +3594,14 @@ class TestCASTable(tm.TestCase):
 
         if self.s._protocol in ['http', 'https']:
             if 'csv-ints' in self.s.server_features:
-                self.assertEqual(set(tbl.dtypes.unique()), set(['double', 'int64', 'varchar']))
+                self.assertEqual(set(tbl.dtypes.unique()),
+                                 set(['double', 'int64', 'varchar']))
             else:
-                self.assertEqual(set(tbl.dtypes.unique()), set(['double', 'varchar']))
+                self.assertEqual(set(tbl.dtypes.unique()),
+                                 set(['double', 'varchar']))
         else:
-            self.assertEqual(set(tbl.dtypes.unique()), set(['double', 'int64', 'varchar']))
+            self.assertEqual(set(tbl.dtypes.unique()),
+                             set(['double', 'int64', 'varchar']))
 
         os.remove(tmp.name)
 
@@ -3415,7 +3616,8 @@ class TestCASTable(tm.TestCase):
 #       print(df)
 #       tbl = self.s.read_sas(myFile, format='sas7bdat', encoding='utf-8')
 
-#       self.assertEqual(df.head(50).to_csv(index=False), tbl.head(50).to_csv(index=False))
+#       self.assertEqual(df.head(50).to_csv(index=False),
+#                        tbl.head(50).to_csv(index=False))
 
     def test_column_to_frame(self):
         df = self.get_cars_df().sort_values(SORT_KEYS)
@@ -3505,9 +3707,9 @@ class TestCASTable(tm.TestCase):
         self.assertColsEqual(s2, c2, sort=True)
 
         if self.s._protocol in ['http', 'https']:
-           self.assertEqual(c2.dtype, 'double')
+            self.assertEqual(c2.dtype, 'double')
         else:
-           self.assertEqual(c2.dtype, 'int64')
+            self.assertEqual(c2.dtype, 'int64')
 
     def test_query(self):
         df = self.get_cars_df()
@@ -3546,19 +3748,20 @@ class TestCASTable(tm.TestCase):
 
         myFile = os.path.join(os.path.dirname(st.__file__), 'datasources', 'datetime.csv')
 
-        df = pd.read_csv(myFile, parse_dates=[0,1,2])
+        df = pd.read_csv(myFile, parse_dates=[0, 1, 2])
         df.sort_values(['datetime'], inplace=True)
 
         from swat.cas import datamsghandlers as dmh
 
-        pd_dmh = dmh.PandasDataFrame(df, dtype={'date':'date', 'time':'time'},
-                     formats={'date':'nldate', 'time':'nltime', 'datetime':'nldatm'},
-                     labels={'date':'Date', 'time':'Time', 'datetime':'Datetime'})
+        pd_dmh = dmh.PandasDataFrame(
+            df, dtype={'date': 'date', 'time': 'time'},
+            formats={'date': 'nldate', 'time': 'nltime', 'datetime': 'nldatm'},
+            labels={'date': 'Date', 'time': 'Time', 'datetime': 'Datetime'})
 
         tbl = self.s.addtable(table='datetime', caslib=self.srcLib,
                               **pd_dmh.args.addtable).casTable
         tbl['dbldatetime'] = tbl['datetime'] * 1.0
-#       tbl['sasdatetime'] = tbl['datetime'] / 1000000.
+        # tbl['sasdatetime'] = tbl['datetime'] / 1000000.
 
         with self.assertRaises(TypeError):
             self.table['Model'].dt.year
@@ -3595,85 +3798,133 @@ class TestCASTable(tm.TestCase):
 
         # microsecond
         # TODO: Needs to be implemented yet
-        self.assertColsEqual(df.date.dt.microsecond, tbl.date.dt.microsecond, sort=True)
-        self.assertColsEqual(df.time.dt.microsecond, tbl.time.dt.microsecond, sort=True)
-        self.assertColsEqual(df.datetime.dt.microsecond, tbl.datetime.dt.microsecond, sort=True)
+        self.assertColsEqual(df.date.dt.microsecond,
+                             tbl.date.dt.microsecond, sort=True)
+        self.assertColsEqual(df.time.dt.microsecond,
+                             tbl.time.dt.microsecond, sort=True)
+        self.assertColsEqual(df.datetime.dt.microsecond,
+                             tbl.datetime.dt.microsecond, sort=True)
 
         # nanosecond
         # NOTE: nanosecond precision is not supported
-        self.assertColsEqual(df.date.dt.nanosecond, tbl.date.dt.nanosecond, sort=True)
-        self.assertColsEqual(df.time.dt.nanosecond, tbl.time.dt.nanosecond, sort=True)
-        self.assertColsEqual(df.datetime.dt.nanosecond, tbl.datetime.dt.nanosecond, sort=True)
+        self.assertColsEqual(df.date.dt.nanosecond,
+                             tbl.date.dt.nanosecond, sort=True)
+        self.assertColsEqual(df.time.dt.nanosecond,
+                             tbl.time.dt.nanosecond, sort=True)
+        self.assertColsEqual(df.datetime.dt.nanosecond,
+                             tbl.datetime.dt.nanosecond, sort=True)
 
         # week
-        self.assertColsEqual(df.date.dt.week, tbl.date.dt.week, sort=True)
-        self.assertColsEqual(df.time.dt.week, tbl.time.dt.week, sort=True)
-        self.assertColsEqual(df.datetime.dt.week, tbl.datetime.dt.week, sort=True)
+        self.assertColsEqual(df.date.dt.week,
+                             tbl.date.dt.week, sort=True)
+        self.assertColsEqual(df.time.dt.week,
+                             tbl.time.dt.week, sort=True)
+        self.assertColsEqual(df.datetime.dt.week,
+                             tbl.datetime.dt.week, sort=True)
 
         # weekofyear
-        self.assertColsEqual(df.date.dt.weekofyear, tbl.date.dt.weekofyear, sort=True)
-        self.assertColsEqual(df.time.dt.weekofyear, tbl.time.dt.weekofyear, sort=True)
-        self.assertColsEqual(df.datetime.dt.weekofyear, tbl.datetime.dt.weekofyear, sort=True)
+        self.assertColsEqual(df.date.dt.weekofyear,
+                             tbl.date.dt.weekofyear, sort=True)
+        self.assertColsEqual(df.time.dt.weekofyear,
+                             tbl.time.dt.weekofyear, sort=True)
+        self.assertColsEqual(df.datetime.dt.weekofyear,
+                             tbl.datetime.dt.weekofyear, sort=True)
 
         # dayofweek
-        self.assertColsEqual(df.date.dt.dayofweek, tbl.date.dt.dayofweek, sort=True)
-        self.assertColsEqual(df.time.dt.dayofweek, tbl.time.dt.dayofweek, sort=True)
-        self.assertColsEqual(df.datetime.dt.dayofweek, tbl.datetime.dt.dayofweek, sort=True)
+        self.assertColsEqual(df.date.dt.dayofweek,
+                             tbl.date.dt.dayofweek, sort=True)
+        self.assertColsEqual(df.time.dt.dayofweek,
+                             tbl.time.dt.dayofweek, sort=True)
+        self.assertColsEqual(df.datetime.dt.dayofweek,
+                             tbl.datetime.dt.dayofweek, sort=True)
 
         # weekday
-        self.assertColsEqual(df.date.dt.weekday, tbl.date.dt.weekday, sort=True)
-        self.assertColsEqual(df.time.dt.weekday, tbl.time.dt.weekday, sort=True)
-        self.assertColsEqual(df.datetime.dt.weekday, tbl.datetime.dt.weekday, sort=True)
+        self.assertColsEqual(df.date.dt.weekday,
+                             tbl.date.dt.weekday, sort=True)
+        self.assertColsEqual(df.time.dt.weekday,
+                             tbl.time.dt.weekday, sort=True)
+        self.assertColsEqual(df.datetime.dt.weekday,
+                             tbl.datetime.dt.weekday, sort=True)
 
         # dayofyear
-        self.assertColsEqual(df.date.dt.dayofyear, tbl.date.dt.dayofyear, sort=True)
-        self.assertColsEqual(df.time.dt.dayofyear, tbl.time.dt.dayofyear, sort=True)
-        self.assertColsEqual(df.datetime.dt.dayofyear, tbl.datetime.dt.dayofyear, sort=True)
+        self.assertColsEqual(df.date.dt.dayofyear,
+                             tbl.date.dt.dayofyear, sort=True)
+        self.assertColsEqual(df.time.dt.dayofyear,
+                             tbl.time.dt.dayofyear, sort=True)
+        self.assertColsEqual(df.datetime.dt.dayofyear,
+                             tbl.datetime.dt.dayofyear, sort=True)
 
         # quarter
-        self.assertColsEqual(df.date.dt.quarter, tbl.date.dt.quarter, sort=True)
-        self.assertColsEqual(df.time.dt.quarter, tbl.time.dt.quarter, sort=True)
-        self.assertColsEqual(df.datetime.dt.quarter, tbl.datetime.dt.quarter, sort=True)
+        self.assertColsEqual(df.date.dt.quarter,
+                             tbl.date.dt.quarter, sort=True)
+        self.assertColsEqual(df.time.dt.quarter,
+                             tbl.time.dt.quarter, sort=True)
+        self.assertColsEqual(df.datetime.dt.quarter,
+                             tbl.datetime.dt.quarter, sort=True)
 
         # is_month_start
-        self.assertColsEqual(df.date.dt.is_month_start, tbl.date.dt.is_month_start, sort=True)
-        self.assertColsEqual(df.time.dt.is_month_start, tbl.time.dt.is_month_start, sort=True)
-        self.assertColsEqual(df.datetime.dt.is_month_start, tbl.datetime.dt.is_month_start, sort=True)
+        self.assertColsEqual(df.date.dt.is_month_start,
+                             tbl.date.dt.is_month_start, sort=True)
+        self.assertColsEqual(df.time.dt.is_month_start,
+                             tbl.time.dt.is_month_start, sort=True)
+        self.assertColsEqual(df.datetime.dt.is_month_start,
+                             tbl.datetime.dt.is_month_start, sort=True)
 
         # is_month_end
-        self.assertColsEqual(df.date.dt.is_month_end, tbl.date.dt.is_month_end, sort=True)
-        self.assertColsEqual(df.time.dt.is_month_end, tbl.time.dt.is_month_end, sort=True)
-        self.assertColsEqual(df.datetime.dt.is_month_end, tbl.datetime.dt.is_month_end, sort=True)
+        self.assertColsEqual(df.date.dt.is_month_end,
+                             tbl.date.dt.is_month_end, sort=True)
+        self.assertColsEqual(df.time.dt.is_month_end,
+                             tbl.time.dt.is_month_end, sort=True)
+        self.assertColsEqual(df.datetime.dt.is_month_end,
+                             tbl.datetime.dt.is_month_end, sort=True)
 
         # is_quarter_start
-        self.assertColsEqual(df.date.dt.is_quarter_start, tbl.date.dt.is_quarter_start, sort=True)
-        self.assertColsEqual(df.time.dt.is_quarter_start, tbl.time.dt.is_quarter_start, sort=True)
-        self.assertColsEqual(df.datetime.dt.is_quarter_start, tbl.datetime.dt.is_quarter_start, sort=True)
+        self.assertColsEqual(df.date.dt.is_quarter_start,
+                             tbl.date.dt.is_quarter_start, sort=True)
+        self.assertColsEqual(df.time.dt.is_quarter_start,
+                             tbl.time.dt.is_quarter_start, sort=True)
+        self.assertColsEqual(df.datetime.dt.is_quarter_start,
+                             tbl.datetime.dt.is_quarter_start, sort=True)
 
         # is_quarter_end
-        self.assertColsEqual(df.date.dt.is_quarter_end, tbl.date.dt.is_quarter_end, sort=True)
-        self.assertColsEqual(df.time.dt.is_quarter_end, tbl.time.dt.is_quarter_end, sort=True)
-        self.assertColsEqual(df.datetime.dt.is_quarter_end, tbl.datetime.dt.is_quarter_end, sort=True)
+        self.assertColsEqual(df.date.dt.is_quarter_end,
+                             tbl.date.dt.is_quarter_end, sort=True)
+        self.assertColsEqual(df.time.dt.is_quarter_end,
+                             tbl.time.dt.is_quarter_end, sort=True)
+        self.assertColsEqual(df.datetime.dt.is_quarter_end,
+                             tbl.datetime.dt.is_quarter_end, sort=True)
 
         # is_year_start
-        self.assertColsEqual(df.date.dt.is_year_start, tbl.date.dt.is_year_start, sort=True)
-        self.assertColsEqual(df.time.dt.is_year_start, tbl.time.dt.is_year_start, sort=True)
-        self.assertColsEqual(df.datetime.dt.is_year_start, tbl.datetime.dt.is_year_start, sort=True)
+        self.assertColsEqual(df.date.dt.is_year_start,
+                             tbl.date.dt.is_year_start, sort=True)
+        self.assertColsEqual(df.time.dt.is_year_start,
+                             tbl.time.dt.is_year_start, sort=True)
+        self.assertColsEqual(df.datetime.dt.is_year_start,
+                             tbl.datetime.dt.is_year_start, sort=True)
 
         # is_year_end
-        self.assertColsEqual(df.date.dt.is_year_end, tbl.date.dt.is_year_end, sort=True)
-        self.assertColsEqual(df.time.dt.is_year_end, tbl.time.dt.is_year_end, sort=True)
-        self.assertColsEqual(df.datetime.dt.is_year_end, tbl.datetime.dt.is_year_end, sort=True)
+        self.assertColsEqual(df.date.dt.is_year_end,
+                             tbl.date.dt.is_year_end, sort=True)
+        self.assertColsEqual(df.time.dt.is_year_end,
+                             tbl.time.dt.is_year_end, sort=True)
+        self.assertColsEqual(df.datetime.dt.is_year_end,
+                             tbl.datetime.dt.is_year_end, sort=True)
 
         # daysinmonth
-        self.assertColsEqual(df.date.dt.daysinmonth, tbl.date.dt.daysinmonth, sort=True)
-        self.assertColsEqual(df.time.dt.daysinmonth, tbl.time.dt.daysinmonth, sort=True)
-        self.assertColsEqual(df.datetime.dt.daysinmonth, tbl.datetime.dt.daysinmonth, sort=True)
+        self.assertColsEqual(df.date.dt.daysinmonth,
+                             tbl.date.dt.daysinmonth, sort=True)
+        self.assertColsEqual(df.time.dt.daysinmonth,
+                             tbl.time.dt.daysinmonth, sort=True)
+        self.assertColsEqual(df.datetime.dt.daysinmonth,
+                             tbl.datetime.dt.daysinmonth, sort=True)
 
         # days_in_month
-        self.assertColsEqual(df.date.dt.days_in_month, tbl.date.dt.days_in_month, sort=True)
-        self.assertColsEqual(df.time.dt.days_in_month, tbl.time.dt.days_in_month, sort=True)
-        self.assertColsEqual(df.datetime.dt.days_in_month, tbl.datetime.dt.days_in_month, sort=True)
+        self.assertColsEqual(df.date.dt.days_in_month,
+                             tbl.date.dt.days_in_month, sort=True)
+        self.assertColsEqual(df.time.dt.days_in_month,
+                             tbl.time.dt.days_in_month, sort=True)
+        self.assertColsEqual(df.datetime.dt.days_in_month,
+                             tbl.datetime.dt.days_in_month, sort=True)
 
     @unittest.skipIf(pd_version >= (0, 21, 0), 'Deprecated in pandas')
     def test_from_csv(self):
@@ -3684,7 +3935,7 @@ class TestCASTable(tm.TestCase):
         tmp = tempfile.NamedTemporaryFile(delete=False)
         tmp.close()
 
-        dfcsv = df.to_csv(tmp.name, index=False)
+        df.to_csv(tmp.name, index=False)
 
         df2 = df.from_csv(tmp.name, index_col=None)
         tbl = self.table.from_csv(self.s, tmp.name, index_col=None)
@@ -3701,9 +3952,9 @@ class TestCASTable(tm.TestCase):
         self.assertTablesEqual(df2, tbl, sortby=SORT_KEYS)
 
         if self.s._protocol in ['http', 'https']:
-           self.assertTrue(set(tbl.dtypes.unique()), set(['double', 'varchar']))
+            self.assertTrue(set(tbl.dtypes.unique()), set(['double', 'varchar']))
         else:
-           self.assertTrue(set(tbl.dtypes.unique()), set(['double', 'int64', 'varchar']))
+            self.assertTrue(set(tbl.dtypes.unique()), set(['double', 'int64', 'varchar']))
 
         os.remove(tmp.name)
 
@@ -3726,9 +3977,9 @@ class TestCASTable(tm.TestCase):
         self.assertTablesEqual(df2, tbl, sortby=SORT_KEYS)
 
         if self.s._protocol in ['http', 'https']:
-           self.assertTrue(set(tbl.dtypes.unique()), set(['double', 'varchar']))
+            self.assertTrue(set(tbl.dtypes.unique()), set(['double', 'varchar']))
         else:
-           self.assertTrue(set(tbl.dtypes.unique()), set(['double', 'int64', 'varchar']))
+            self.assertTrue(set(tbl.dtypes.unique()), set(['double', 'int64', 'varchar']))
 
     @unittest.skipIf(pd_version >= (0, 23, 0), 'Deprecated in pandas')
     def test_from_items(self):
@@ -3750,9 +4001,9 @@ class TestCASTable(tm.TestCase):
         self.assertTablesEqual(df2, tbl, sortby=SORT_KEYS)
 
         if self.s._protocol in ['http', 'https']:
-           self.assertTrue(set(tbl.dtypes.unique()), set(['double', 'varchar']))
+            self.assertTrue(set(tbl.dtypes.unique()), set(['double', 'varchar']))
         else:
-           self.assertTrue(set(tbl.dtypes.unique()), set(['double', 'int64', 'varchar']))
+            self.assertTrue(set(tbl.dtypes.unique()), set(['double', 'int64', 'varchar']))
 
     def test_from_records(self):
         df = self.get_cars_df()
@@ -3772,12 +4023,12 @@ class TestCASTable(tm.TestCase):
         self.assertTablesEqual(df2, tbl, sortby=SORT_KEYS)
 
         if self.s._protocol in ['http', 'https']:
-           self.assertTrue(set(tbl.dtypes.unique()), set(['double', 'varchar']))
+            self.assertTrue(set(tbl.dtypes.unique()), set(['double', 'varchar']))
         else:
-           self.assertTrue(set(tbl.dtypes.unique()), set(['double', 'int64', 'varchar']))
+            self.assertTrue(set(tbl.dtypes.unique()), set(['double', 'int64', 'varchar']))
 
     def test_info(self):
-        df = self.get_cars_df()
+        # df = self.get_cars_df()
         tbl = self.table
 
         try:
@@ -3894,8 +4145,9 @@ class TestCASTable(tm.TestCase):
 
         df2 = pd.read_excel(tmp.name)
 
-        self.assertEqual(sorted(re.split(df.to_csv(index=False).replace('.0', ''), r'[\r\n]+')),
-                         sorted(re.split(df2.to_csv(index=False).replace('.0', ''), r'[\r\n]+')))
+        self.assertEqual(
+            sorted(re.split(df.to_csv(index=False).replace('.0', ''), r'[\r\n]+')),
+            sorted(re.split(df2.to_csv(index=False).replace('.0', ''), r'[\r\n]+')))
 
         os.remove(tmp.name)
 
@@ -3912,11 +4164,10 @@ class TestCASTable(tm.TestCase):
 
         tbl.to_json(tmp.name)
 
-        df2 = pd.read_json(tmp.name)[
-                   ['Make', 'Model', 'Type', 'Origin', 'DriveTrain',
-                   'MSRP', 'Invoice', 'EngineSize', 'Cylinders',
-                   'Horsepower', 'MPG_City', 'MPG_Highway', 'Weight',
-                   'Wheelbase', 'Length']]
+        df2 = pd.read_json(tmp.name)[['Make', 'Model', 'Type', 'Origin', 'DriveTrain',
+                                      'MSRP', 'Invoice', 'EngineSize', 'Cylinders',
+                                      'Horsepower', 'MPG_City', 'MPG_Highway', 'Weight',
+                                      'Wheelbase', 'Length']]
         df2.sort_values(SORT_KEYS, inplace=True)
         df2.index = range(len(df2))
 
@@ -3967,11 +4218,10 @@ class TestCASTable(tm.TestCase):
 
         tbl.to_stata(tmp.name)
 
-        df2 = pd.read_stata(tmp.name)[
-                   ['Make', 'Model', 'Type', 'Origin', 'DriveTrain',
-                   'MSRP', 'Invoice', 'EngineSize', 'Cylinders',
-                   'Horsepower', 'MPG_City', 'MPG_Highway', 'Weight',
-                   'Wheelbase', 'Length']]
+        df2 = pd.read_stata(tmp.name)[['Make', 'Model', 'Type', 'Origin', 'DriveTrain',
+                                       'MSRP', 'Invoice', 'EngineSize', 'Cylinders',
+                                       'Horsepower', 'MPG_City', 'MPG_Highway', 'Weight',
+                                       'Wheelbase', 'Length']]
 
         self.assertTablesEqual(df, df2)
 
@@ -4096,8 +4346,8 @@ class TestCASTable(tm.TestCase):
         df = self.get_cars_df()
         tbl = self.table
 
-        grptbl = tbl.groupby('Make')
-        grpdf = df.groupby('Make')
+        tbl.groupby('Make')
+        df.groupby('Make')
 
     def test_groupby_iter(self):
         df = self.get_cars_df()
@@ -4138,7 +4388,8 @@ class TestCASTable(tm.TestCase):
         tbl2 = tbl.drop(['MPG_City', 'MPG_Highway'], axis=1)
 
         self.assertEqual(list(tbl.columns), all_cols)
-        self.assertEqual(list(tbl2.columns), [x for x in all_cols if x not in ['MPG_City', 'MPG_Highway']])
+        self.assertEqual(list(tbl2.columns),
+                         [x for x in all_cols if x not in ['MPG_City', 'MPG_Highway']])
 
         # Drop from selected list
         tbl2 = tbl[['Make', 'Model', 'Type', 'Origin']]
@@ -4186,24 +4437,29 @@ class TestCASTable(tm.TestCase):
                              tbl['Make'].isin({'Acura', 'BMW', 'Porsche'}))
 
         self.assertColsEqual(
-            df['Make'].isin(df.query('Make == "Acura" or Make == "BMW" or Make == "Porsche"')['Make']),
-            tbl['Make'].isin(tbl.query('Make = "Acura" or Make = "BMW" or Make = "Porsche"')['Make']))
+            df['Make'].isin(df.query('Make == "Acura" or Make == "BMW" '
+                                     'or Make == "Porsche"')['Make']),
+            tbl['Make'].isin(tbl.query('Make = "Acura" or Make = "BMW" '
+                                       'or Make = "Porsche"')['Make']))
 
         self.assertColsEqual(
-            df['Make'].isin(df.query('Make == "Acura" or Make == "BMW" or Make == "Porsche"')['Make']),
-            tbl['Make'].isin(df.query('Make == "Acura" or Make == "BMW" or Make == "Porsche"')['Make']))
+            df['Make'].isin(df.query('Make == "Acura" or Make == "BMW" '
+                                     'or Make == "Porsche"')['Make']),
+            tbl['Make'].isin(df.query('Make == "Acura" or Make == "BMW" '
+                                      'or Make == "Porsche"')['Make']))
 
     def test_droptable(self):
         import swat.tests as st
 
-        pathname = os.path.join(os.path.dirname(st.__file__), 'datasources', 'cars_single.sashdat')
+        pathname = os.path.join(os.path.dirname(st.__file__),
+                                'datasources', 'cars_single.sashdat')
 
         cars1 = tm.load_data(self.s, pathname, self.server_type,
-                             casout={'name':'cars1', 'caslib':self.srcLib}).casTable
-        cars2 = tm.load_data(self.s, pathname, self.server_type,
-                             casout={'name':'cars2', 'caslib':self.srcLib}).casTable
+                             casout={'name': 'cars1', 'caslib': self.srcLib}).casTable
+        cars2 = tm.load_data(self.s, pathname, self.server_type,  # noqa: F841
+                             casout={'name': 'cars2', 'caslib': self.srcLib}).casTable
         cars3 = tm.load_data(self.s, pathname, self.server_type,
-                             casout={'name':'cars3', 'caslib':self.srcLib}).casTable
+                             casout={'name': 'cars3', 'caslib': self.srcLib}).casTable
 
         out = self.s.tableinfo(caslib=self.srcLib).TableInfo['Name'].tolist()
         self.assertTrue('CARS1' in out)
@@ -4248,7 +4504,7 @@ class TestCASTable(tm.TestCase):
             with self.assertRaises(swat.SWATError):
                 sortview.head()
         else:
-            sortview.head()        
+            sortview.head()
 
     def test_to_frame_ordering(self):
         df = self.get_cars_df().sort_values(SORT_KEYS)
@@ -4262,19 +4518,21 @@ class TestCASTable(tm.TestCase):
         self.assertTablesEqual(df.fillna(value=50),
                                sorttbl.fillna(value=50))
 
-        self.assertTablesEqual(df.fillna(value={'Cylinders':50}),
-                               sorttbl.fillna(value={'Cylinders':50}))
+        self.assertTablesEqual(df.fillna(value={'Cylinders': 50}),
+                               sorttbl.fillna(value={'Cylinders': 50}))
 
         self.assertTablesEqual(df.fillna(value=pd.Series([50], index=['Cylinders'])),
                                sorttbl.fillna(value=pd.Series([50], index=['Cylinders'])))
 
         # TODO: This should work according to the Pandas doc, but I can't
         #       figure out what form it wants the arguments in.
-#       self.assertTablesEqual(df.fillna(value=pd.DataFrame([[50, 40]], columns=['Cylinders', 'Foo'])),
-#                              sorttbl.fillna(value=pd.DataFrame([[50, 40]], columns=['Cylinders', 'Foo'])))
+        # self.assertTablesEqual(df.fillna(value=pd.DataFrame([[50, 40]],
+        #                                  columns=['Cylinders', 'Foo'])),
+        #                        sorttbl.fillna(value=pd.DataFrame([[50, 40]],
+        #                                       columns=['Cylinders', 'Foo'])))
 
-        df.fillna(value={'Cylinders':50}, inplace=True),
-        self.assertTrue(sorttbl.fillna(value={'Cylinders':50}, inplace=True) is None)
+        df.fillna(value={'Cylinders': 50}, inplace=True),
+        self.assertTrue(sorttbl.fillna(value={'Cylinders': 50}, inplace=True) is None)
         self.assertTablesEqual(df, sorttbl)
 
     def test_dropna(self):
@@ -4301,7 +4559,6 @@ class TestCASTable(tm.TestCase):
         df2 = df.replace(8.00, '3000')
         df2['Cylinders'] = df2['Cylinders'].astype(float)
         self.assertTablesEqual(df2, sorttbl.replace(8.00, '3000'))
-
 
         if pd_version < (0, 20, 0):
             self.assertTablesEqual(df.replace('6.00', 4000),
@@ -4357,16 +4614,21 @@ class TestCASTable(tm.TestCase):
         import re
 
         # Scalars
-        self.assertTablesEqual(df.replace(r'B(\w+W)', r'Q\1AAA', regex=True),
-                               sorttbl.replace(r'B(\w+W)', r'Q\1AAA', regex=True))
-        self.assertTablesEqual(df.replace(regex=r'B(\w+W)', value=r'Q\1BBB'),
-                               sorttbl.replace(regex=r'B(\w+W)', value=r'Q\1BBB'))
-        self.assertTablesEqual(df.replace(re.compile(r'B(\w+W)', re.I), r'Q\1CCC'),
-                               sorttbl.replace(re.compile(r'B(\w+W)', re.I), r'Q\1CCC'))
-        self.assertTablesEqual(df.replace(re.compile(r'b(\w+w)', re.I), r'Q\1DDD'),
-                               sorttbl.replace(re.compile(r'b(\w+w)', re.I), r'Q\1DDD'))
-        self.assertTablesEqual(df.replace(regex=re.compile(r'b(\w+w)', re.I), value=r'Q\1EEE'),
-                               sorttbl.replace(regex=re.compile(r'b(\w+w)', re.I), value=r'Q\1EEE'))
+        self.assertTablesEqual(
+            df.replace(r'B(\w+W)', r'Q\1AAA', regex=True),
+            sorttbl.replace(r'B(\w+W)', r'Q\1AAA', regex=True))
+        self.assertTablesEqual(
+            df.replace(regex=r'B(\w+W)', value=r'Q\1BBB'),
+            sorttbl.replace(regex=r'B(\w+W)', value=r'Q\1BBB'))
+        self.assertTablesEqual(
+            df.replace(re.compile(r'B(\w+W)', re.I), r'Q\1CCC'),
+            sorttbl.replace(re.compile(r'B(\w+W)', re.I), r'Q\1CCC'))
+        self.assertTablesEqual(
+            df.replace(re.compile(r'b(\w+w)', re.I), r'Q\1DDD'),
+            sorttbl.replace(re.compile(r'b(\w+w)', re.I), r'Q\1DDD'))
+        self.assertTablesEqual(
+            df.replace(regex=re.compile(r'b(\w+w)', re.I), value=r'Q\1EEE'),
+            sorttbl.replace(regex=re.compile(r'b(\w+w)', re.I), value=r'Q\1EEE'))
 
         self.assertTablesEqual(df.replace(8, 1000, regex=True),
                                sorttbl.replace(8, 1000, regex=True)),
@@ -4382,13 +4644,16 @@ class TestCASTable(tm.TestCase):
         return
 
         # Lists
-        self.assertTablesEqual(df.replace([re.compile(r'B(\w+)W'), 'Audi'], [r'F\1F', 'GGGGG']),
-                               sorttbl.replace([re.compile(r'B(\w+)W'), 'Audi'], [r'F\1F', 'GGGGG']))
-        self.assertTablesEqual(df.replace([6, 8], [5000, 6000], regex=True),
-                               sorttbl.replace([6, 8], [5000, 6000], regex=True))
+        self.assertTablesEqual(
+            df.replace([re.compile(r'B(\w+)W'), 'Audi'], [r'F\1F', 'GGGGG']),
+            sorttbl.replace([re.compile(r'B(\w+)W'), 'Audi'], [r'F\1F', 'GGGGG']))
+        self.assertTablesEqual(
+            df.replace([6, 8], [5000, 6000], regex=True),
+            sorttbl.replace([6, 8], [5000, 6000], regex=True))
 
-        self.assertTablesEqual(df.replace([re.compile(r'B(\w+)W'), re.compile(r'A[ud]*i')], 'HHHHH'),
-                               sorttbl.replace([re.compile(r'B(\w+)W'), re.compile(r'A[ud*]i')], 'HHHHH'))
+        self.assertTablesEqual(
+            df.replace([re.compile(r'B(\w+)W'), re.compile(r'A[ud]*i')], 'HHHHH'),
+            sorttbl.replace([re.compile(r'B(\w+)W'), re.compile(r'A[ud*]i')], 'HHHHH'))
         self.assertTablesEqual(df.replace([6, 8], 7000, regex=True),
                                sorttbl.replace([6, 8], 7000, regex=True))
 
@@ -4397,25 +4662,27 @@ class TestCASTable(tm.TestCase):
         with self.assertRaises(TypeError):
             sorttbl.replace(6, [8000], regex=True)
 
-# TODO: This works for data step, but I can't figure out how Pandas works
+        # TODO: This works for data step, but I can't figure out how Pandas works
         # Series
-#       before = pd.Series(['BMW', 'Audi'])
-#       after = pd.Series(['IIIII', 'JJJJJ'])
-#       self.assertTablesEqual(df.replace(before, after),
-#                              sorttbl.replace(before, after))
-#       before = pd.Series([6, 8])
-#       after = pd.Series([8000, 9000])
-#       self.assertTablesEqual(df.replace(before, after),
-#                              sorttbl.replace(before, after))
+        # before = pd.Series(['BMW', 'Audi'])
+        # after = pd.Series(['IIIII', 'JJJJJ'])
+        # self.assertTablesEqual(df.replace(before, after),
+        #                        sorttbl.replace(before, after))
+        # before = pd.Series([6, 8])
+        # after = pd.Series([8000, 9000])
+        # self.assertTablesEqual(df.replace(before, after),
+        #                        sorttbl.replace(before, after))
 
         # Dictionaries
-        self.assertTablesEqual(df.replace({'Make': {re.compile(r'B\w+W'): r'J\1J', 'Foo': 'Bar'}}),
-                               sorttbl.replace({'Make': {re.compile(r'B\w+W'): r'J\1J', 'Foo': 'Bar'}}))
+        self.assertTablesEqual(
+            df.replace({'Make': {re.compile(r'B\w+W'): r'J\1J', 'Foo': 'Bar'}}),
+            sorttbl.replace({'Make': {re.compile(r'B\w+W'): r'J\1J', 'Foo': 'Bar'}}))
 
-        self.assertTablesEqual(df.replace({'Make': {'BMW': 'KKKKK'},
-                                           'Model': {re.compile(r'[456]dr'): 'L'}}),
-                               sorttbl.replace({'Make': {'BMW': 'KKKKK'},
-                                                'Model': {re.compile(r'[456]dr'): 'L'}}))
+        self.assertTablesEqual(
+            df.replace({'Make': {'BMW': 'KKKKK'},
+                        'Model': {re.compile(r'[456]dr'): 'L'}}),
+            sorttbl.replace({'Make': {'BMW': 'KKKKK'},
+                             'Model': {re.compile(r'[456]dr'): 'L'}}))
 
         # Mixed types - This doesn't work well.  Numbers get padded.
         df2 = df.replace({'Make': {re.compile(r'B\w+W'): '           20'}})
@@ -4435,12 +4702,14 @@ class TestCASTable(tm.TestCase):
 
         colinfo = colinfo.drop('ID', errors='ignore').drop('Label', errors='ignore')
 
-        out = tbl[['Model', 'MSRP']].partition(casout=dict(name='test_partition_table', replace=True))
+        out = tbl[['Model', 'MSRP']].partition(casout=dict(name='test_partition_table',
+                                                           replace=True))
         pcolinfo = out.casTable.columninfo()['ColumnInfo'].set_index('Column').T
         pcolinfo = pcolinfo.drop('ID', errors='ignore').drop('Label', errors='ignore')
         self.assertTablesEqual(colinfo[['Model', 'MSRP']], pcolinfo)
 
-        out = tbl[['Two', 'Model', 'One', 'MSRP']].partition(casout=dict(name='test_partition_table', replace=True))
+        out = tbl[['Two', 'Model', 'One', 'MSRP']].partition(
+            casout=dict(name='test_partition_table', replace=True))
         pcolinfo = out.casTable.columninfo()['ColumnInfo'].set_index('Column').T
         pcolinfo = pcolinfo.drop('ID', errors='ignore').drop('Label', errors='ignore')
         self.assertTablesEqual(colinfo[['Two', 'Model', 'One', 'MSRP']], pcolinfo)
@@ -4522,7 +4791,8 @@ class TestCASTable(tm.TestCase):
         swat.options.cas.dataset.max_rows_fetched = 5
 
         # to_frame forces everything to get pulled down, so use _fetch here.
-        # All internal calls to pull data use _fetch and will obey the max_rows_fetched option.
+        # All internal calls to pull data use _fetch and will obey the
+        # max_rows_fetched option.
         num_tables = len(tbl.tableinfo().TableInfo)
         samp = tbl._fetch(sample_pct=0.02, fetchvars=['Make', 'Model'])
         self.assertEqual(len(samp), 5)
@@ -4533,8 +4803,10 @@ class TestCASTable(tm.TestCase):
 
         # Test seed
         num_tables = len(tbl.tableinfo().TableInfo)
-        samp1 = tbl.to_frame(sample_pct=0.01, sample_seed=123, fetchvars=['Make', 'Model'])
-        samp2 = tbl.to_frame(sample_pct=0.01, sample_seed=123, fetchvars=['Make', 'Model'])
+        samp1 = tbl.to_frame(sample_pct=0.01, sample_seed=123,
+                             fetchvars=['Make', 'Model'])
+        samp2 = tbl.to_frame(sample_pct=0.01, sample_seed=123,
+                             fetchvars=['Make', 'Model'])
         self.assertEqual(len(samp1), 4)
         self.assertEqual(len(samp2), 4)
         self.assertEqual(list(samp1.columns), ['Make', 'Model'])
@@ -4592,8 +4864,8 @@ class TestCASTable(tm.TestCase):
         del tbl.params.groupby
 
         num_tables = len(tbl.tableinfo().TableInfo)
-        samp = tbl.groupby('Origin', as_index=True).to_frame(sample_pct=0.01,
-                                                  fetchvars=['Make', 'Model'])
+        samp = tbl.groupby('Origin', as_index=True)\
+                  .to_frame(sample_pct=0.01, fetchvars=['Make', 'Model'])
         self.assertEqual(len(samp), 4)
         self.assertEqual(list(samp.columns), ['Make', 'Model'])
         self.assertEqual(list(samp.index.names), ['Origin'])
@@ -4668,30 +4940,40 @@ class TestCASTable(tm.TestCase):
         try:
             # Basic plot
             self.assertPlotsEqual(
-                tbl.sort_values(['MSRP', 'Invoice']).plot('Make', ['MSRP', 'Invoice']),
-                df.sort_values(['MSRP', 'Invoice']).plot('Make', ['MSRP', 'Invoice'])
+                tbl.sort_values(['MSRP', 'Invoice'])
+                   .plot('Make', ['MSRP', 'Invoice']),
+                df.sort_values(['MSRP', 'Invoice'])
+                  .plot('Make', ['MSRP', 'Invoice'])
             )
 
             # Must reset index here because it uses that as X axis
             self.assertPlotsEqual(
-                tbl.sort_values(['MSRP', 'Invoice']).plot(y=['MSRP', 'Invoice']),
-                df.sort_values(['MSRP', 'Invoice']).reset_index().plot(y=['MSRP', 'Invoice'])
+                tbl.sort_values(['MSRP', 'Invoice'])
+                   .plot(y=['MSRP', 'Invoice']),
+                df.sort_values(['MSRP', 'Invoice'])
+                  .reset_index().plot(y=['MSRP', 'Invoice'])
             )
 
             # Test kind= parameter
             self.assertPlotsEqual(
-                tbl.sort_values(['MSRP', 'Invoice']).plot('MSRP', 'Invoice', 'scatter'),
-                df.sort_values(['MSRP', 'Invoice']).plot('MSRP', 'Invoice', 'scatter')
+                tbl.sort_values(['MSRP', 'Invoice'])
+                   .plot('MSRP', 'Invoice', 'scatter'),
+                df.sort_values(['MSRP', 'Invoice'])
+                  .plot('MSRP', 'Invoice', 'scatter')
             )
 
             self.assertPlotsEqual(
-                tbl.sort_values(['MSRP', 'Invoice']).plot('MSRP', 'Invoice', kind='scatter'),
-                df.sort_values(['MSRP', 'Invoice']).plot('MSRP', 'Invoice', kind='scatter')
+                tbl.sort_values(['MSRP', 'Invoice'])
+                   .plot('MSRP', 'Invoice', kind='scatter'),
+                df.sort_values(['MSRP', 'Invoice'])
+                  .plot('MSRP', 'Invoice', kind='scatter')
             )
 
             self.assertPlotsEqual(
-                tbl.sort_values(['MSRP', 'Invoice']).plot('Make', ['MSRP', 'Invoice'], kind='bar'),
-                df.sort_values(['MSRP', 'Invoice']).plot('Make', ['MSRP', 'Invoice'], kind='bar')
+                tbl.sort_values(['MSRP', 'Invoice'])
+                   .plot('Make', ['MSRP', 'Invoice'], kind='bar'),
+                df.sort_values(['MSRP', 'Invoice'])
+                  .plot('Make', ['MSRP', 'Invoice'], kind='bar')
             )
 
         except Exception as msg:
@@ -4704,9 +4986,9 @@ class TestCASTable(tm.TestCase):
 
         try:
             self.assertPlotsEqual(
-                tbl.sort_values(['MSRP', 'Invoice'])\
+                tbl.sort_values(['MSRP', 'Invoice'])
                    .plot('MSRP', 'Invoice', sample_pct=0.05, sample_seed=123),
-                tbl._fetch(sample_pct=0.05, sample_seed=123)\
+                tbl._fetch(sample_pct=0.05, sample_seed=123)
                    .sort_values(['MSRP', 'Invoice']).plot('MSRP', 'Invoice')
             )
 
@@ -4721,8 +5003,10 @@ class TestCASTable(tm.TestCase):
 
         try:
             self.assertPlotsEqual(
-                tbl.sort_values(['MSRP', 'Invoice']).plot.area('Make', ['MSRP', 'Invoice']),
-                df.sort_values(['MSRP', 'Invoice']).plot.area('Make', ['MSRP', 'Invoice'])
+                tbl.sort_values(['MSRP', 'Invoice'])
+                   .plot.area('Make', ['MSRP', 'Invoice']),
+                df.sort_values(['MSRP', 'Invoice'])
+                  .plot.area('Make', ['MSRP', 'Invoice'])
             )
 
         except Exception as msg:
@@ -4923,24 +5207,25 @@ class TestCASTable(tm.TestCase):
             df = df.iloc[:limit]
 
         tbl = self.s.upload_frame(df,
-          importoptions=dict(vars=[
-              dict(name='Origin', type='varchar'),
-              dict(name='A', type='double'),
-              dict(name='B', type='double'),
-              dict(name='C', type='double'),
-              dict(name='D', type='double'),
-              dict(name='E', type='double'),
-              dict(name='X', type='varchar'),
-              dict(name='Y', type='varchar'),
-              dict(name='Z', type='varchar')
-          ]))
+                                  importoptions=dict(vars=[
+                                      dict(name='Origin', type='varchar'),
+                                      dict(name='A', type='double'),
+                                      dict(name='B', type='double'),
+                                      dict(name='C', type='double'),
+                                      dict(name='D', type='double'),
+                                      dict(name='E', type='double'),
+                                      dict(name='X', type='varchar'),
+                                      dict(name='Y', type='varchar'),
+                                      dict(name='Z', type='varchar')
+                                  ]))
 
         return df, tbl
 
     def test_abs(self):
         df, tbl = self._get_comp_data()
-        self.assertTablesEqual(df[['A', 'B', 'C', 'D', 'E']].abs().sort_values(['A', 'B']),
-                               tbl[['A', 'B', 'C', 'D', 'E']].abs().sort_values(['A', 'B']))
+        self.assertTablesEqual(
+            df[['A', 'B', 'C', 'D', 'E']].abs().sort_values(['A', 'B']),
+            tbl[['A', 'B', 'C', 'D', 'E']].abs().sort_values(['A', 'B']))
 
     def test_all(self):
         df, tbl = self._get_comp_data()
@@ -4949,19 +5234,24 @@ class TestCASTable(tm.TestCase):
         self.assertColsEqual(df.all(skipna=True), tbl.all(skipna=True))
 
         # When skipna=False, pandas doesn't use booleans anymore
-        self.assertColsEqual(df.all(skipna=False).apply(lambda x: pd.isnull(x) and x or bool(x)),
-                             tbl.all(skipna=False))
+        self.assertColsEqual(
+            df.all(skipna=False).apply(lambda x: pd.isnull(x) and x or bool(x)),
+            tbl.all(skipna=False))
 
         # By groups
-        self.assertTablesEqual(df.groupby('Origin').all(), tbl.groupby('Origin').all())
-        self.assertTablesEqual(df.groupby('Origin').all(skipna=True), tbl.groupby('Origin').all(skipna=True))
+        self.assertTablesEqual(df.groupby('Origin').all(),
+                               tbl.groupby('Origin').all())
+        self.assertTablesEqual(df.groupby('Origin').all(skipna=True),
+                               tbl.groupby('Origin').all(skipna=True))
 
         # When skipna=False, pandas doesn't use booleans anymore
-# TODO: Pandas seems inconsitent here.  It uses True without by groups, but if
-#       a column contains an NaN and by groups, it uses NaN as the result... ?
-#       all = df.groupby('Origin').all(skipna=False).applymap(lambda x: pd.isnull(x) and x or bool(x))
-#       all.loc['Europe', 'D'] = True
-#       self.assertTablesEqual(all, tbl.groupby('Origin').all(skipna=False))
+        # TODO: Pandas seems inconsitent here.  It uses True without by groups,
+        # but if a column contains an NaN and by groups, it uses NaN as
+        # the result... ?
+        # all = df.groupby('Origin').all(skipna=False).applymap(
+        #    lambda x: pd.isnull(x) and x or bool(x))
+        # all.loc['Europe', 'D'] = True
+        # self.assertTablesEqual(all, tbl.groupby('Origin').all(skipna=False))
 
     def test_any(self):
         df, tbl = self._get_comp_data()
@@ -4970,17 +5260,22 @@ class TestCASTable(tm.TestCase):
         self.assertColsEqual(df.any(skipna=True), tbl.any(skipna=True))
 
         # When skipna=False, pandas doesn't use booleans anymore
-        self.assertColsEqual(df.any(skipna=False).apply(lambda x: pd.isnull(x) and x or bool(x)),
-                             tbl.any(skipna=False))
+        self.assertColsEqual(
+            df.any(skipna=False).apply(lambda x: pd.isnull(x) and x or bool(x)),
+            tbl.any(skipna=False))
 
         # By groups
-        self.assertTablesEqual(df.groupby('Origin').any(), tbl.groupby('Origin').any())
-        self.assertTablesEqual(df.groupby('Origin').any(skipna=True), tbl.groupby('Origin').any(skipna=True))
+        self.assertTablesEqual(df.groupby('Origin').any(),
+                               tbl.groupby('Origin').any())
+        self.assertTablesEqual(df.groupby('Origin').any(skipna=True),
+                               tbl.groupby('Origin').any(skipna=True))
 
         # When skipna=False, pandas doesn't use booleans anymore
         if pd_version < (0, 23, 0):
-            self.assertTablesEqual(df.groupby('Origin').any(skipna=False).applymap(lambda x: pd.isnull(x) and x or bool(x)),
-                                   tbl.groupby('Origin').any(skipna=False))
+            self.assertTablesEqual(
+                df.groupby('Origin').any(skipna=False).applymap(
+                    lambda x: pd.isnull(x) and x or bool(x)),
+                tbl.groupby('Origin').any(skipna=False))
 
     def test_clip(self):
         df, tbl = self._get_comp_data()
@@ -5007,18 +5302,20 @@ class TestCASTable(tm.TestCase):
     def _get_merge_data(self):
         import swat.tests as st
 
-        finance = os.path.join(os.path.dirname(st.__file__), 'datasources', 'merge_finance.csv')
-        repertory = os.path.join(os.path.dirname(st.__file__), 'datasources', 'merge_repertory.csv')
+        finance = os.path.join(os.path.dirname(st.__file__),
+                               'datasources', 'merge_finance.csv')
+        repertory = os.path.join(os.path.dirname(st.__file__),
+                                 'datasources', 'merge_repertory.csv')
 
         df_finance = pd.read_csv(finance)
         df_repertory = pd.read_csv(repertory)
 
-        tbl_finance = self.s.read_csv(finance, casout=dict(name='unittest.merge_finance',
-                                                           caslib=self.srcLib,
-                                                           replace=True))
-        tbl_repertory = self.s.read_csv(repertory, casout=dict(name='unittest.merge_repertory',
-                                                               caslib=self.srcLib,
-                                                               replace=True))
+        tbl_finance = self.s.read_csv(
+            finance, casout=dict(name='unittest.merge_finance',
+                                 caslib=self.srcLib, replace=True))
+        tbl_repertory = self.s.read_csv(
+            repertory, casout=dict(name='unittest.merge_repertory',
+                                   caslib=self.srcLib, replace=True))
 
         return (df_finance, df_repertory), (tbl_finance, tbl_repertory)
 
@@ -5055,8 +5352,10 @@ class TestCASTable(tm.TestCase):
             tbl_out.droptable()
 
         # inner -- ((*))
-        df_out = fill_char(df_finance.merge(df_repertory, on='IdNumber', how='inner', indicator=True))
-        tbl_out = tbl_finance.merge(tbl_repertory, on='IdNumber', how='inner', indicator=True)
+        df_out = fill_char(df_finance.merge(df_repertory, on='IdNumber',
+                                            how='inner', indicator=True))
+        tbl_out = tbl_finance.merge(tbl_repertory, on='IdNumber',
+                                    how='inner', indicator=True)
         try:
             self.assertTablesEqual(df_out, tbl_out, sortby=['IdNumber', 'Play'])
         finally:
@@ -5065,24 +5364,30 @@ class TestCASTable(tm.TestCase):
         # outer -- (*(*)*)
         # TODO: Windows server merge adds FinanceIds
         if self.server_type != 'windows.smp':
-            df_out = fill_char(df_finance.merge(df_repertory, on='IdNumber', how='outer', indicator=True))
-            tbl_out = tbl_finance.merge(tbl_repertory, on='IdNumber', how='outer', indicator=True)
+            df_out = fill_char(df_finance.merge(df_repertory, on='IdNumber',
+                                                how='outer', indicator=True))
+            tbl_out = tbl_finance.merge(tbl_repertory, on='IdNumber',
+                                        how='outer', indicator=True)
             try:
                 self.assertTablesEqual(df_out, tbl_out, sortby=['IdNumber', 'Play'])
             finally:
                 tbl_out.droptable()
 
         # left -- (*(*))
-        df_out = fill_char(df_finance.merge(df_repertory, on='IdNumber', how='left', indicator=True))
-        tbl_out = tbl_finance.merge(tbl_repertory, on='IdNumber', how='left', indicator=True)
+        df_out = fill_char(df_finance.merge(df_repertory, on='IdNumber',
+                                            how='left', indicator=True))
+        tbl_out = tbl_finance.merge(tbl_repertory, on='IdNumber',
+                                    how='left', indicator=True)
         try:
             self.assertTablesEqual(df_out, tbl_out, sortby=['IdNumber', 'Play'])
         finally:
             tbl_out.droptable()
 
         # right -- ((*)*)
-        df_out = fill_char(df_finance.merge(df_repertory, on='IdNumber', how='right', indicator=True))
-        tbl_out = tbl_finance.merge(tbl_repertory, on='IdNumber', how='right', indicator=True)
+        df_out = fill_char(df_finance.merge(df_repertory, on='IdNumber',
+                                            how='right', indicator=True))
+        tbl_out = tbl_finance.merge(tbl_repertory, on='IdNumber',
+                                    how='right', indicator=True)
         try:
             self.assertTablesEqual(df_out, tbl_out, sortby=['IdNumber', 'Play'])
         finally:
@@ -5093,24 +5398,28 @@ class TestCASTable(tm.TestCase):
         #
 
         # left-minus-right -- (*())
-        tbl_out = tbl_finance.merge(tbl_repertory, on='IdNumber', how='left-minus-right', indicator='Which')
+        tbl_out = tbl_finance.merge(tbl_repertory, on='IdNumber',
+                                    how='left-minus-right', indicator='Which')
         try:
             self.assertEqual(len(tbl_out[tbl_out['Which'] == 'left_only']), len(tbl_out))
         finally:
             tbl_out.droptable()
 
         # right-minus-left -- (()*)
-        tbl_out = tbl_finance.merge(tbl_repertory, on='IdNumber', how='right-minus-left', indicator='Which')
+        tbl_out = tbl_finance.merge(tbl_repertory, on='IdNumber',
+                                    how='right-minus-left', indicator='Which')
         try:
             self.assertEqual(len(tbl_out[tbl_out['Which'] == 'right_only']), len(tbl_out))
         finally:
             tbl_out.droptable()
 
         # outer-minus-inner -- (*()*)
-        tbl_out = tbl_finance.merge(tbl_repertory, on='IdNumber', how='outer-minus-inner', indicator='Which')
+        tbl_out = tbl_finance.merge(tbl_repertory, on='IdNumber',
+                                    how='outer-minus-inner', indicator='Which')
         try:
-            self.assertEqual(len(tbl_out[tbl_out['Which'] == 'right_only']) +
-                             len(tbl_out[tbl_out['Which'] == 'left_only']), len(tbl_out))
+            self.assertEqual(len(tbl_out[tbl_out['Which'] == 'right_only'])
+                             + len(tbl_out[tbl_out['Which'] == 'left_only']),
+                             len(tbl_out))
         finally:
             tbl_out.droptable()
 
@@ -5119,42 +5428,61 @@ class TestCASTable(tm.TestCase):
         #
 
         # defaults / inner -- ((*))
-        df_out = fill_char(df_finance.merge(df_repertory, left_on='FinanceId', right_on='RepId', indicator=True))
-        tbl_out = tbl_finance.merge(tbl_repertory, left_on='FinanceId', right_on='RepId', indicator=True)
+        df_out = fill_char(df_finance.merge(df_repertory, left_on='FinanceId',
+                                            right_on='RepId', indicator=True))
+        tbl_out = tbl_finance.merge(tbl_repertory, left_on='FinanceId',
+                                    right_on='RepId', indicator=True)
         try:
-            self.assertTablesEqual(df_out, tbl_out, sortby=['IdNumber_x', 'IdNumber_y', 'Play'])
+            self.assertTablesEqual(df_out, tbl_out,
+                                   sortby=['IdNumber_x', 'IdNumber_y', 'Play'])
         finally:
             tbl_out.droptable()
 
         # inner -- ((*))
-        df_out = fill_char(df_finance.merge(df_repertory, left_on='FinanceId', right_on='RepId', how='inner', indicator=True))
-        tbl_out = tbl_finance.merge(tbl_repertory, left_on='FinanceId', right_on='RepId', how='inner', indicator=True)
+        df_out = fill_char(df_finance.merge(df_repertory, left_on='FinanceId',
+                                            right_on='RepId', how='inner',
+                                            indicator=True))
+        tbl_out = tbl_finance.merge(tbl_repertory, left_on='FinanceId',
+                                    right_on='RepId', how='inner', indicator=True)
         try:
-            self.assertTablesEqual(df_out, tbl_out, sortby=['IdNumber_x', 'IdNumber_y', 'Play'])
+            self.assertTablesEqual(
+                df_out, tbl_out, sortby=['IdNumber_x', 'IdNumber_y', 'Play'])
         finally:
             tbl_out.droptable()
 
         # outer -- (*(*)*)
-        df_out = fill_char(df_finance.merge(df_repertory, left_on='FinanceId', right_on='RepId', how='outer', indicator=True))
-        tbl_out = tbl_finance.merge(tbl_repertory, left_on='FinanceId', right_on='RepId', how='outer', indicator=True)
+        df_out = fill_char(df_finance.merge(df_repertory, left_on='FinanceId',
+                                            right_on='RepId', how='outer',
+                                            indicator=True))
+        tbl_out = tbl_finance.merge(tbl_repertory, left_on='FinanceId',
+                                    right_on='RepId', how='outer', indicator=True)
         try:
-            self.assertTablesEqual(df_out, tbl_out, sortby=['_merge', 'Play', 'Role', 'Name'])
+            self.assertTablesEqual(
+                df_out, tbl_out, sortby=['_merge', 'Play', 'Role', 'Name'])
         finally:
             tbl_out.droptable()
 
         # left -- (*(*))
-        df_out = fill_char(df_finance.merge(df_repertory, left_on='FinanceId', right_on='RepId', how='left', indicator=True))
-        tbl_out = tbl_finance.merge(tbl_repertory, left_on='FinanceId', right_on='RepId', how='left', indicator=True)
+        df_out = fill_char(df_finance.merge(df_repertory, left_on='FinanceId',
+                                            right_on='RepId', how='left',
+                                            indicator=True))
+        tbl_out = tbl_finance.merge(tbl_repertory, left_on='FinanceId',
+                                    right_on='RepId', how='left', indicator=True)
         try:
-            self.assertTablesEqual(df_out, tbl_out, sortby=['IdNumber_x', 'IdNumber_y', 'Play'])
+            self.assertTablesEqual(
+                df_out, tbl_out, sortby=['IdNumber_x', 'IdNumber_y', 'Play'])
         finally:
             tbl_out.droptable()
 
         # right -- ((*)*)
-        df_out = fill_char(df_finance.merge(df_repertory, left_on='FinanceId', right_on='RepId', how='right', indicator=True))
-        tbl_out = tbl_finance.merge(tbl_repertory, left_on='FinanceId', right_on='RepId', how='right', indicator=True)
+        df_out = fill_char(df_finance.merge(df_repertory, left_on='FinanceId',
+                                            right_on='RepId', how='right',
+                                            indicator=True))
+        tbl_out = tbl_finance.merge(tbl_repertory, left_on='FinanceId',
+                                    right_on='RepId', how='right', indicator=True)
         try:
-            self.assertTablesEqual(df_out, tbl_out, sortby=['IdNumber_x', 'IdNumber_y', 'Play'])
+            self.assertTablesEqual(
+                df_out, tbl_out, sortby=['IdNumber_x', 'IdNumber_y', 'Play'])
         finally:
             tbl_out.droptable()
 
@@ -5162,17 +5490,24 @@ class TestCASTable(tm.TestCase):
         # casout=
         #
         try:
-            tbl_out = tbl_finance.merge(tbl_repertory, on='IdNumber', indicator=True, casout='join_out')
+            tbl_out = tbl_finance.merge(tbl_repertory, on='IdNumber',
+                                        indicator=True, casout='join_out')
             self.assertEqual(tbl_out.params['name'], 'join_out')
 
-            tbl_out = tbl_finance.merge(tbl_repertory, on='IdNumber', indicator=True, casout=dict(name='join_out', replace=True))
+            tbl_out = tbl_finance.merge(tbl_repertory, on='IdNumber',
+                                        indicator=True,
+                                        casout=dict(name='join_out', replace=True))
             self.assertEqual(tbl_out.params['name'], 'join_out')
 
-            tbl_out = tbl_finance.merge(tbl_repertory, on='IdNumber', indicator=True, casout=self.s.CASTable('join_out', replace=True))
+            tbl_out = tbl_finance.merge(tbl_repertory, on='IdNumber',
+                                        indicator=True,
+                                        casout=self.s.CASTable('join_out', replace=True))
             self.assertEqual(tbl_out.params['name'], 'join_out')
 
             with self.assertRaises(swat.SWATError):
-                tbl_out = tbl_finance.merge(tbl_repertory, on='IdNumber', indicator=True, casout=dict(name='join_out', replace=False))
+                tbl_out = tbl_finance.merge(tbl_repertory, on='IdNumber',
+                                            indicator=True,
+                                            casout=dict(name='join_out', replace=False))
 
         finally:
             tbl_out.droptable()

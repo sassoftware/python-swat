@@ -533,7 +533,7 @@ def check_boolean(value):
         if value.lower() in ['y', 'yes', 'on', 't', 'true', 'enable', 'enabled', '1']:
             return True
         if value.lower() in ['n', 'no', 'off', 'f', 'false', 'disable', 'disabled', '0']:
-            return False 
+            return False
 
     raise SWATOptionError('%s is not a recognized boolean value')
 

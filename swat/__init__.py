@@ -66,7 +66,7 @@ if sys.hexversion < 0x02070000:
     raise RuntimeError('Python 2.7 or newer is required to use this package.')
 
 # C extension
-from .clib import InitializeTK, TKVersion
+from .clib import InitializeTK, TKVersion  # noqa: E402
 
 # Configuration
 from . import config    # noqa: E402

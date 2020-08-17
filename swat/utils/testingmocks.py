@@ -55,4 +55,3 @@ def mock_getone_session_aborted(connection, datamsghandler=None):
         response.disposition.status = SESSION_ABORTED_MESSAGE
         response.disposition.status_code = swat.cas.connection.SESSION_ABORTED_CODE
         return response, connection
-

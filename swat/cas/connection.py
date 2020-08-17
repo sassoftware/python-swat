@@ -32,8 +32,9 @@ import json
 import os
 import random
 import re
-import weakref
 import six
+import warnings
+import weakref
 from six.moves.urllib.parse import urlparse
 from . import rest
 from .. import clib
@@ -244,7 +245,7 @@ class CAS(object):
         ''' Expand [...] groups in URL to all linear combinations '''
         if not isinstance(url, items_types):
             url = [url]
-        
+
         out = []
 
         for item in url:
@@ -311,7 +312,7 @@ class CAS(object):
             elif protocol == 'https':
                 port = 443
             elif protocol == 'cas':
-                port = 5570 
+                port = 5570
             else:
                 raise SWATError('Port number was not specified')
 
@@ -327,7 +328,7 @@ class CAS(object):
             urls = []
             for name in hostname:
                 url = '%s://%s:%s' % (protocol, name, port)
-                if path: 
+                if path:
                     url = '%s/%s' % (url, re.sub(r'^/+', r'', path))
                 urls.append(url)
             hostname = ' '.join(urls)
@@ -603,11 +604,11 @@ class CAS(object):
                         cas_socket.settimeout(timeout)
                         cas_socket.connect((host, port))
                         cas_socket.sendall(bytearray([0, 0x53, 0x41, 0x43,
-                                                0x10, 0, 0, 0, 0, 0, 0, 0,
-                                                0x10, 0, 0, 0,
-                                                0, 0, 0, 0,
-                                                2, 0, 0, 0,
-                                                5, 0, 0, 0]))
+                                                      0x10, 0, 0, 0, 0, 0, 0, 0,
+                                                      0x10, 0, 0, 0,
+                                                      0, 0, 0, 0,
+                                                      2, 0, 0, 0,
+                                                      5, 0, 0, 0]))
 
                         if cas_socket.recv(4) == b'\x00SAC':
                             proto = 'cas'
@@ -626,13 +627,15 @@ class CAS(object):
                         ssl_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                         ssl_socket.settimeout(timeout)
                         ssl_context = ssl.create_default_context(ssl.Purpose.SERVER_AUTH)
-                        ssl_conn = ssl_context.wrap_socket(ssl_socket, server_hostname=host)
+                        ssl_conn = ssl_context.wrap_socket(ssl_socket,
+                                                           server_hostname=host)
                         ssl_conn.connect((host, port))
-                        ssl_conn.write(('GET /cas HTTP/1.1\r\n' +
-                                        ('Host: %s\r\n' % host) +
-                                        'Connection: close\r\n' +
-                                        'User-Agent: Python-SWAT\r\n' +
-                                        'Cache-Control: no-cache\r\n\r\n').encode('utf8'))
+                        ssl_conn.write(('GET /cas HTTP/1.1\r\n'
+                                        + ('Host: %s\r\n' % host)
+                                        + 'Connection: close\r\n'
+                                        + 'User-Agent: Python-SWAT\r\n'
+                                        + 'Cache-Control: no-cache\r\n\r\n')
+                                       .encode('utf8'))
 
                     except ssl.SSLError as exc:
                         if 'certificate verify failed' in str(exc):
@@ -653,11 +656,12 @@ class CAS(object):
                         http_socket.settimeout(timeout)
                         http_socket.connect((host, port))
 
-                        http_socket.send(('GET /cas HTTP/1.1\r\n' +
-                                   ('Host: %s\r\n' % host) +
-                                   'Connection: close\r\n' +
-                                   'User-Agent: Python-SWAT\r\n' +
-                                   'Cache-Control: no-cache\r\n\r\n').encode('utf8'))
+                        http_socket.send(('GET /cas HTTP/1.1\r\n'
+                                          + ('Host: %s\r\n' % host)
+                                          + 'Connection: close\r\n'
+                                          + 'User-Agent: Python-SWAT\r\n'
+                                          + 'Cache-Control: no-cache\r\n\r\n')
+                                         .encode('utf8'))
 
                         txt = http_socket.recv(16).decode('utf-8').lower()
                         if txt.startswith('http') and txt.split()[1] != '400':
@@ -1989,7 +1993,8 @@ class CAS(object):
                 if response.disposition.status_code == RETRY_ACTION_CODE:
                     raise SWATCASActionRetry(response.disposition.status)
                 elif response.disposition.status_code == SESSION_ABORTED_CODE:
-                    # Any new requests sent to the session will never return, so just close the connection now
+                    # Any new requests sent to the session will never return,
+                    # so just close the connection now.
                     self.close()
                     raise SWATCASActionError(response.disposition.status, response, conn)
 
@@ -3580,7 +3585,7 @@ def dir_actions(obj):
 
 
 def dir_members(obj):
-    ''' Return list of object members, not including associated CAS actionsets / actions '''
+    ''' Return list of members not including associated CAS actionsets / actions '''
     if hasattr(obj, '__dir_members__'):
         return obj.__dir_members__()
     return dir(obj)

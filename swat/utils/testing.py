@@ -124,17 +124,21 @@ class TestCase(unittest.TestCase):
 
 def get_casout_lib(server_type):
     ''' Get the name of the output CASLib '''
-    out_lib = os.environ.get('CAS_OUT_LIB', os.environ.get('CASOUTLIB', 'CASUSER'))
+    out_lib = os.environ.get('CAS_OUT_LIB',
+                             os.environ.get('CASOUTLIB', 'CASUSER'))
     if '.mpp' in server_type:
-        out_lib = os.environ.get('CAS_MPP_OUT_LIB', os.environ.get('CASMPPOUTLIB', out_lib))
+        out_lib = os.environ.get('CAS_MPP_OUT_LIB',
+                                 os.environ.get('CASMPPOUTLIB', out_lib))
     return out_lib
 
 
 def get_cas_data_lib(server_type):
     ''' Get the name of data CASLib '''
-    data_lib = os.environ.get('CAS_DATA_LIB', os.environ.get('CASDATALIB', 'CASTestTmp'))
+    data_lib = os.environ.get('CAS_DATA_LIB',
+                              os.environ.get('CASDATALIB', 'CASTestTmp'))
     if '.mpp' in server_type:
-        data_lib = os.environ.get('CAS_MPP_DATA_LIB', os.environ.get('CASMPPDATALIB', 'HPS'))
+        data_lib = os.environ.get('CAS_MPP_DATA_LIB',
+                                  os.environ.get('CASMPPDATALIB', 'HPS'))
     return data_lib
 
 
@@ -179,16 +183,19 @@ def get_host_port_proto():
     casprotocol = None
 
     url = None
-    for name in ['CAS_URL', 'CASURL', 'CAS_HOST', 'CASHOST', 'CAS_HOSTNAME', 'CASHOSTNAME']:
+    for name in ['CAS_URL', 'CASURL', 'CAS_HOST', 'CASHOST',
+                 'CAS_HOSTNAME', 'CASHOSTNAME']:
         if name in os.environ:
             url = os.environ[name]
             break
 
-    casport = casport or os.environ.get('CAS_PORT', os.environ.get('CASPORT'))
+    casport = casport or os.environ.get('CAS_PORT',
+                                        os.environ.get('CASPORT'))
     if casport:
         casport = int(casport)
 
-    casprotocol = casprotocol or os.environ.get('CAS_PROTOCOL', os.environ.get('CASPROTOCOL'))
+    casprotocol = casprotocol or os.environ.get('CAS_PROTOCOL',
+                                                os.environ.get('CASPROTOCOL'))
 
     if url:
         cashost, casport, username, password, casprotocol = \
@@ -201,7 +208,7 @@ def get_host_port_proto():
     casrc = None
     rcname = '.casrc'
     homepath = os.path.abspath(os.path.normpath(
-                   os.path.join(os.path.expanduser(os.environ.get('HOME', '~')), rcname)))
+        os.path.join(os.path.expanduser(os.environ.get('HOME', '~')), rcname)))
     upath = os.path.join(r'u:', rcname)
     cfgfile = os.path.abspath(os.path.normpath(rcname))
 
