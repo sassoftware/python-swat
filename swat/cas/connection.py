@@ -1590,6 +1590,8 @@ class CAS(object):
         elif data.startswith('http://') or \
                 data.startswith('https://') or \
                 data.startswith('ftp://'):
+            import certifi
+            import ssl
             import tempfile
             from six.moves.urllib.request import urlopen
             from six.moves.urllib.parse import urlparse
@@ -1597,7 +1599,11 @@ class CAS(object):
             ext = os.path.splitext(parts.path)[-1].lower()
             with tempfile.NamedTemporaryFile(delete=False, suffix=ext) as tmp:
                 delete = True
-                tmp.write(urlopen(data).read())
+                tmp.write(
+                    urlopen(
+                        data,
+                        context=ssl.create_default_context(cafile=certifi.where())
+                    ).read())
                 filename = tmp.name
                 if parts.path:
                     name = os.path.splitext(parts.path.split('/')[-1])[0]
