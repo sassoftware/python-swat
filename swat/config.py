@@ -242,10 +242,16 @@ register_option('cas.dataset.datetime_formats', 'string or list of strings',
                  'B8601TM', 'B8601TX', 'B8601TZ', 'DATEAMPM', 'DATETIME', 'DTDATE',
                  'DTMONYY', 'DTWEEKV', 'DTWKDATX', 'DTYEAR', 'DTYYQC', 'E8601DN',
                  'E8601DT', 'E8601DX', 'E8601DZ', 'E8601LX', 'E8601LZ', 'E8601TM',
-                 'E8601TX', 'E8601TZ', 'EURDFDT', 'HHMM', 'HOUR', 'MDYAMPM', 'MMSS',
-                 'NLDATM[A-Z]*', 'NLTIMAP', 'NLTIME', 'TIMEAMPM', 'TIME', 'TOD'],
+                 'E8601TX', 'E8601TZ', 'EURDFDT', 'MDYAMPM', 'NLDATM[A-Z]*'],
                 'Format names used to indicate the column should be converted\n'
                 'to a Python datetime object.')
+
+register_option('cas.dataset.time_formats', 'string or list of strings',
+                check_string_list,
+                ['HHMM', 'HOUR', 'MMSS', 'NLTIMAP', 'NLTIME', 'TIMEAMPM',
+                 'TIME', 'TOD'],
+                'Format names used to indicate the column should be converted\n'
+                'to a Python time object.')
 
 register_option('cas.dataset.index_name', 'string or list of strings',
                 check_string_list, '_Index_',

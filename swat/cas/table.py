@@ -43,6 +43,7 @@ from ..exceptions import SWATError
 from ..utils import dict2kwargs, getattr_safe_property, xdict
 from ..utils.compat import (int_types, binary_types, text_types, items_types,
                             patch_pandas_sort, char_types, num_types)
+from ..utils.datetime import is_date_format, is_datetime_format, is_time_format
 from ..utils.keyword import dekeywordify
 
 # pylint: disable=W0212, W0221, W0613, R0904, C0330
@@ -8854,10 +8855,25 @@ class DatetimeColumnMethods(object):
 
     def __init__(self, column):
         self._column = column
-        self._dtype = column.dtype
-        if self._dtype not in ['date', 'datetime', 'time']:
+
+        columninfo = column._columninfo
+
+        self._dtype = columninfo['Type'][0]
+        if self._dtype not in ['date', 'datetime', 'time', 'double']:
             raise TypeError('datetime methods are only usable on CAS dates, '
-                            'times, and datetimes')
+                            'times, datetimes, and doubles')
+
+        fmt = columninfo['Format'][0]
+        if self._dtype == 'double':
+            if is_date_format(fmt):
+                self._dtype = 'sas-date'
+            elif is_datetime_format(fmt):
+                self._dtype = 'sas-datetime'
+            elif is_time_format(fmt):
+                self._dtype = 'sas-time'
+            else:
+                raise TypeError('double columns must have a date, time, or '
+                                'datetime format')
 
     def _compute(self, *args, **kwargs):
         ''' Call the _compute method on the table column '''
@@ -8865,11 +8881,11 @@ class DatetimeColumnMethods(object):
 
     def _get_part(self, func):
         ''' Get the specified part of the datetime '''
-        if self._dtype == 'date':
+        if self._dtype in ['date', 'sas-date']:
             if func in ['hour', 'minute']:
                 return self._compute(func, '0')
             return self._compute(func, '%s({value})' % func)
-        if self._dtype == 'time':
+        if self._dtype in ['time', 'sas-time']:
             if func in ['hour', 'minute']:
                 return self._compute(func, '%s({value})' % func)
             return self._compute(func, '%s(today())' % func)
@@ -8905,14 +8921,14 @@ class DatetimeColumnMethods(object):
     @property
     def second(self):
         ''' The second of the datetime '''
-        if self._dtype == 'date':
+        if self._dtype in ['date', 'sas-date']:
             return self._compute('second', '0')
         return self._compute('second', 'int(second({value}))')
 
     @property
     def microsecond(self):
         ''' The microsecond of the datetime '''
-        if self._dtype == 'date':
+        if self._dtype in ['date', 'sas-date']:
             return self._compute('microsecond', '0')
         return self._compute('microsecond', 'int(mod(second({value}), 1) * 1000000)')
 
@@ -8923,9 +8939,9 @@ class DatetimeColumnMethods(object):
 
     def _get_date(self):
         ''' Return an expression that will return the date only '''
-        if self._dtype == 'date':
+        if self._dtype in ['date', 'sas-date']:
             return '{value}'
-        if self._dtype == 'time':
+        if self._dtype in ['time', 'sas-time']:
             return 'today()'
         return 'datepart({value})'
 

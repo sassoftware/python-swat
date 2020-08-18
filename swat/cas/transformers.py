@@ -235,12 +235,17 @@ def ctb2tabular(_sw_table, soptions='', connection=None):
     dt_formats = get_option('cas.dataset.datetime_formats')
     if isinstance(dt_formats, six.string_types):
         dt_formats = [dt_formats]
-    datetime_regex = re.compile(r'^(%s)\d*\.\d*$' % '|'.join(dt_formats), flags=re.I)
+    datetime_regex = re.compile(r'^(%s)(\d*\.\d*)?$' % '|'.join(dt_formats), flags=re.I)
 
     d_formats = get_option('cas.dataset.date_formats')
-    if isinstance(dt_formats, six.string_types):
+    if isinstance(d_formats, six.string_types):
         d_formats = [d_formats]
-    date_regex = re.compile(r'^(%s)\d*\.\d*$' % '|'.join(d_formats), flags=re.I)
+    date_regex = re.compile(r'^(%s)(\d*\.\d*)?$' % '|'.join(d_formats), flags=re.I)
+
+    t_formats = get_option('cas.dataset.time_formats')
+    if isinstance(t_formats, six.string_types):
+        t_formats = [t_formats]
+    time_regex = re.compile(r'^(%s)(\d*\.\d*)?$' % '|'.join(t_formats), flags=re.I)
 
     # Construct columns
     ncolumns = check(_sw_table.getNColumns(), _sw_table)
@@ -278,7 +283,9 @@ def ctb2tabular(_sw_table, soptions='', connection=None):
             dtypes.append((col.name, 'f8'))
             colinfo[col.name] = col
             if col.format:
-                if datetime_regex.match(col.format):
+                # Times are converted to datetime because datetimes are native
+                # DataFrame types whereas times are simply Python time objects.
+                if datetime_regex.match(col.format) or time_regex.match(col.format):
                     datetimes.append(col.name)
                 elif date_regex.match(col.format):
                     dates.append(col.name)
