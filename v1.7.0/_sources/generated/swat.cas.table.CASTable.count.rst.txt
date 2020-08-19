@@ -1,0 +1,6 @@
+swat.cas.table.CASTable.count
+=============================
+
+.. currentmodule:: swat.cas.table
+
+.. automethod:: CASTable.count

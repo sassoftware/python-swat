@@ -1,0 +1,6 @@
+swat.cas.connection.CAS.upload\_file
+====================================
+
+.. currentmodule:: swat.cas.connection
+
+.. automethod:: CAS.upload_file
