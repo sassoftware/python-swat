@@ -389,7 +389,7 @@ class REST_CASConnection(object):
             self._current_hostname = ''
             self._current_baseurl = ''
             self._current_port = -1
-            raise SWATError('Unable to connect to any URL: %s' %
+            raise SWATError('Unable to connect to any URL in the list: %s' %
                             ', '.join(self._baseurl))
 
     def invoke(self, action_name, kwargs):
