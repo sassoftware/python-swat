@@ -1,6 +1,12 @@
 
 # Change Log
 
+## 1.7.0 - 2020-08-19
+
+- Add Python 3.8 support
+- Improve connection parameter handling (add CAS_URL= connection variable)
+- Improve connection protocol auto-detection
+
 ## 1.6.1 - 2020-02-10
 
 - Add pandas v1.0.0 support

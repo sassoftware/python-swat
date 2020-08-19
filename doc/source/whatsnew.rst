@@ -9,10 +9,19 @@ What's New
 
 This document outlines features and improvements from each release.
 
+1.7.0 (August 19, 2020)
+=======================
+
+- Add Python 3.8 support
+- Improve connection parameter handling (add CAS_URL= connection variable)
+- Improve connection protocol auto-detection
+
+
 1.6.1 (February 10, 2020)
 =========================
 
 - Add pandas v1.0.0 support
+
 
 1.6.0 (November 21, 2019)
 =========================
