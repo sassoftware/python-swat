@@ -260,6 +260,7 @@ def ctb2tabular(_sw_table, soptions='', connection=None):
     mimetypes = {}
     dates = []
     datetimes = []
+    times = []
     intmiss = {}
     for i in range(ncolumns):
         col = SASColumnSpec.fromtable(_sw_table, i)
@@ -283,12 +284,12 @@ def ctb2tabular(_sw_table, soptions='', connection=None):
             dtypes.append((col.name, 'f8'))
             colinfo[col.name] = col
             if col.format:
-                # Times are converted to datetime because datetimes are native
-                # DataFrame types whereas times are simply Python time objects.
-                if datetime_regex.match(col.format) or time_regex.match(col.format):
+                if datetime_regex.match(col.format):
                     datetimes.append(col.name)
                 elif date_regex.match(col.format):
                     dates.append(col.name)
+                elif time_regex.match(col.format):
+                    times.append(col.name)
         elif dtype in set(['char', 'varchar']):
             dtypes.append((col.name, '|U%d' % (col.width or 1)))
             colinfo[col.name] = col
@@ -376,6 +377,8 @@ def ctb2tabular(_sw_table, soptions='', connection=None):
         cdf[item] = cdf[item].apply(casdt.sas2python_date)
     for item in datetimes:
         cdf[item] = cdf[item].apply(casdt.sas2python_datetime)
+    for item in times:
+        cdf[item] = cdf[item].apply(casdt.sas2python_time)
 
     # Check for By group information
     optbycol = get_option('cas.dataset.bygroup_columns')

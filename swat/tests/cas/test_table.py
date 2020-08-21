@@ -29,6 +29,7 @@ import os
 import matplotlib
 import numpy as np
 import pandas as pd
+import pytz
 import re
 import six
 import swat
@@ -3738,6 +3739,147 @@ class TestCASTable(tm.TestCase):
 
 #       self.assertTrue(tbl3 is None)
 #       self.assertEqual(set(df.Model.tolist()), set(tbl.Model.tolist()))
+
+    @unittest.skipIf(pd_version <= (0, 14, 0), 'Need newer version of Pandas')
+    def test_timezones(self):
+        if self.s._protocol in ['http', 'https']:
+            tm.TestCase.skipTest(self, 'REST does not support data messages')
+
+        import swat.tests as st
+
+        utc_tz = pytz.timezone('UTC')
+
+        myFile = os.path.join(os.path.dirname(st.__file__), 'datasources', 'datetime.csv')
+
+        df = pd.read_csv(myFile, parse_dates=[0, 1, 2])
+        df['date'] = df['date'].apply(lambda x: x.date())
+        df['time'] = df['time'].apply(lambda x: x.time())
+        df.sort_values(['datetime'], inplace=True)
+
+        from swat.cas import datamsghandlers as dmh
+
+        def add_table():
+            pd_dmh = dmh.PandasDataFrame(
+                df, dtype={'date': 'date', 'time': 'time'},
+                formats={'date': 'nldate', 'time': 'nltime', 'datetime': 'nldatm'},
+                labels={'date': 'Date', 'time': 'Time', 'datetime': 'Datetime'})
+
+            return self.s.addtable(table='datetime', caslib=self.srcLib,
+                                   replace=True, **pd_dmh.args.addtable).casTable
+
+        #
+        # Ensure date/times remain timezone-naive
+        #
+        swat.options.timezone = None
+
+        tbl = add_table()
+        tblf = tbl.to_frame()
+
+        self.assertEqual(
+            sorted([x.year for x in df.date]),
+            sorted([x.year for x in tblf.date]))
+        self.assertEqual(
+            sorted(df.datetime.dt.year),
+            sorted(tblf.datetime.dt.year))
+
+        self.assertEqual(
+            sorted([x.month for x in df.date]),
+            sorted([x.month for x in tblf.date]))
+        self.assertEqual(
+            sorted(df.datetime.dt.month),
+            sorted(tblf.datetime.dt.month))
+
+        self.assertEqual(
+            sorted([x.day for x in df.date]),
+            sorted([x.day for x in tblf.date]))
+        self.assertEqual(
+            sorted(df.datetime.dt.day),
+            sorted(tblf.datetime.dt.day))
+
+        self.assertEqual(
+            sorted([x.hour for x in df.time]),
+            sorted([x.hour for x in tblf.time]))
+        self.assertEqual(
+            sorted(df.datetime.dt.hour),
+            sorted(tblf.datetime.dt.hour))
+
+        self.assertEqual(
+            sorted([x.minute for x in df.time]),
+            sorted([x.minute for x in tblf.time]))
+        self.assertEqual(
+            sorted(df.datetime.dt.minute),
+            sorted(tblf.datetime.dt.minute))
+
+        self.assertEqual(
+            sorted([x.second for x in df.time]),
+            sorted([x.second for x in tblf.time]))
+        self.assertEqual(
+            sorted(df.datetime.dt.second),
+            sorted(tblf.datetime.dt.second))
+
+        tzs = [None] * 4
+        self.assertEqual([x.tzinfo for x in df.time], tzs)
+        self.assertEqual([x.tzinfo for x in tblf.time], tzs)
+        self.assertEqual([x.tzinfo for x in df.datetime], tzs)
+        self.assertEqual([x.tzinfo for x in tblf.datetime], tzs)
+
+        #
+        # Ensure downloaded data is in correct timezone
+        #
+        swat.options.timezone = 'US/Pacific'
+
+        tbl = add_table()
+        tblf = tbl.to_frame()
+
+        df_pac = df[:]
+        df_pac['datetime'] = df_pac['datetime'].apply(
+            lambda x: utc_tz.localize(x).astimezone(pytz.timezone('US/Pacific')))
+
+        self.assertEqual(
+            sorted([x.year for x in df_pac.date]),
+            sorted([x.year for x in tblf.date]))
+        self.assertEqual(
+            sorted(df_pac.datetime.dt.year),
+            sorted(tblf.datetime.dt.year))
+
+        self.assertEqual(
+            sorted([x.month for x in df_pac.date]),
+            sorted([x.month for x in tblf.date]))
+        self.assertEqual(
+            sorted(df_pac.datetime.dt.month),
+            sorted(tblf.datetime.dt.month))
+
+        self.assertEqual(
+            sorted([x.day for x in df_pac.date]),
+            sorted([x.day for x in tblf.date]))
+        self.assertEqual(
+            sorted(df_pac.datetime.dt.day),
+            sorted(tblf.datetime.dt.day))
+
+        self.assertEqual(
+            sorted([x.hour for x in df_pac.time]),
+            sorted([x.hour for x in tblf.time]))
+        self.assertEqual(
+            sorted(df_pac.datetime.dt.hour),
+            sorted(tblf.datetime.dt.hour))
+
+        self.assertEqual(
+            sorted([x.minute for x in df_pac.time]),
+            sorted([x.minute for x in tblf.time]))
+        self.assertEqual(
+            sorted(df_pac.datetime.dt.minute),
+            sorted(tblf.datetime.dt.minute))
+
+        self.assertEqual(
+            sorted([x.second for x in df_pac.time]),
+            sorted([x.second for x in tblf.time]))
+        self.assertEqual(
+            sorted(df_pac.datetime.dt.second),
+            sorted(tblf.datetime.dt.second))
+
+        tzs = ['PST', 'PDT', 'PDT', 'PST']
+        self.assertEqual([x.tzname() for x in df_pac.datetime], tzs)
+        self.assertEqual([x.tzname() for x in tblf.datetime], tzs)
 
     @unittest.skipIf(pd_version <= (0, 14, 0), 'Need newer version of Pandas')
     def test_dt_methods(self):

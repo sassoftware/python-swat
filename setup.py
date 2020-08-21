@@ -47,6 +47,7 @@ setup(
     },
     install_requires=[
         'pandas >= 0.16.0',
+        'pytz',
         'six >= 1.9.0',
         'requests',
     ],

@@ -25,6 +25,7 @@ from __future__ import print_function, division, absolute_import, unicode_litera
 
 import base64
 import copy
+import pytz
 import re
 import datetime
 import warnings
@@ -243,11 +244,21 @@ class CASDataMsgHandler(object):
             # populate buffer
             for row in range(nbuffrows):
                 inputrow = inputrow + 1
-                values = self.getrow(inputrow)
+                try:
+                    values = self.getrow(inputrow)
+                except:  # noqa: E722
+                    import traceback
+                    traceback.print_exc()
+                    break
                 if values is None:
                     row = row - 1
                     break
-                self.write(row, values)
+                try:
+                    self.write(row, values)
+                except:  # noqa: E722
+                    import traceback
+                    traceback.print_exc()
+                    break
                 written = True
 
             # send it
@@ -326,7 +337,7 @@ class CASDataMsgHandler(object):
                 elif vtype == 'DATETIME' and isinstance(value, (datetime.date,
                                                                 datetime.time,
                                                                 datetime.datetime)):
-                    value = python2cas_datetime(value)
+                    value = python2cas_datetime(value, tz='UTC')
             if vrtype == 'CHAR' or vtype in ['VARCHAR', 'CHAR', 'BINARY', 'VARBINARY']:
                 if vtype in ['BINARY', 'VARBINARY'] \
                         and hasattr(self._sw_databuffer, 'setBinaryFromBase64'):

@@ -23,6 +23,7 @@ Initialization of SWAT options
 
 from __future__ import print_function, division, absolute_import, unicode_literals
 
+import datetime
 import functools
 import logging
 import warnings
@@ -95,6 +96,27 @@ register_option('interactive_mode', 'boolean', check_boolean, True,
                 'the server.  This may give a performance improvement in batch jobs\n'
                 'that don\'t need interactive features.',
                 environ='SWAT_INTERACTIVE_MODE')
+
+
+def check_tz(value):
+    ''' Verify that the value is a tzinfo object '''
+    if value is None:
+        return
+    if isinstance(value, datetime.tzinfo):
+        return value
+    try:
+        import pytz
+    except ImportError:
+        raise SWATOptionError('The pytz package must be installed to convert '
+                              'timezone names to tzinfo objects.')
+    return pytz.timezone(value)
+
+
+register_option('timezone', 'string or tzinfo', check_tz, None,
+                'Specifies the timezone to use when computing dates and times.\n'
+                'The default behavior is to treat dates and times as timezone-naive.',
+                environ=['CAS_TIMEZONE', 'SAS_TIMEZONE'])
+
 
 #
 # CAS connection options
