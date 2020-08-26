@@ -630,7 +630,7 @@ class SASDataFrame(pd.DataFrame):
 
         See Also
         --------
-        `pandas.DataFrame.to_string`
+        :meth:`pandas.DataFrame.to_string`
 
         Returns
         -------
@@ -708,7 +708,7 @@ class SASDataFrame(pd.DataFrame):
 
         See Also
         --------
-        `pandas.DataFrame.to_html`
+        :meth:`pandas.DataFrame.to_html`
 
         Returns
         -------
