@@ -1022,14 +1022,15 @@ class CAS(object):
         if name in self._results_hooks:
             del self._results_hooks[name]
 
-    def close(self):
+    def close(self, close_session=False):
         ''' Close the CAS connection '''
+        if close_session:
+            self.retrieve('session.endsession', _messagelevel='error', _apptag='UI')
         errorcheck(self._sw_connection.close(), self._sw_connection)
 
     def terminate(self):
         ''' End the session and close the CAS connection '''
-        self.retrieve('session.endsession', _messagelevel='error', _apptag='UI')
-        self.close()
+        self.close(close_session=True)
 
     def _set_option(self, **kwargs):
         '''

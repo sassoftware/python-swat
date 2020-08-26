@@ -783,6 +783,64 @@ class TestDataFrame(tm.TestCase):
         self.assertEqual(list(out.columns),
                          ['Horsepower', '3', '4', '5', '6', '8', '10', '12'])
 
+    def test_apply_formats(self):
+        swat.options.display.apply_formats = True
+
+        out = self.table.to_frame().sort_values(['Make', 'Model']).head(1)
+        out.colinfo['Cylinders'].format = 'int'
+        out.colinfo['Horsepower'].format = 'int'
+        out.colinfo['MPG_City'].format = 'int'
+        out.colinfo['MPG_Highway'].format = 'int'
+        out.colinfo['Weight'].format = 'best'
+        out.colinfo['Wheelbase'].format = 'best'
+        out.colinfo['Length'].format = 'best'
+
+        f = ['Acura', '3.5', 'RL', '4dr', 'Sedan', 'Asia', 'Front', '$43,755',
+             '$39,014', '3.5', '6', '225', '18', '24', '3880', '115', '197']
+        ft = ['Acura', '3.5', 'RL', '4dr', 'Sedan', 'Asia', 'Front', '...',
+              '18', '24', '3880', '115', '197']
+
+        # __str__
+        pd.set_option('display.max_columns', 10000)
+        s = [re.split(r'\s+', x[1:].strip())
+             for x in str(out).split('\n') if x.startswith('4')]
+        s = [item for sublist in s for item in sublist]
+        self.assertEqual(s, f)
+
+        # truncated __str__
+        pd.set_option('display.max_columns', 10)
+        s = [re.split(r'\s+', x[1:].strip())
+             for x in str(out).split('\n') if x.startswith('4')]
+        s = [item for sublist in s for item in sublist]
+        self.assertEqual(s, ft)
+
+        pd.set_option('display.max_columns', 10000)
+
+        # __repr__
+        s = [re.split(r'\s+', x[1:].strip())
+             for x in repr(out).split('\n') if x.startswith('4')]
+        s = [item for sublist in s for item in sublist]
+        self.assertEqual(s, f)
+
+        # to_string
+        s = [re.split(r'\s+', x[1:].strip())
+             for x in out.to_string().split('\n') if x.startswith('4')]
+        s = [item for sublist in s for item in sublist]
+        self.assertEqual(s, f)
+
+        f = ('''<tr> <td>4</td> <td>Acura</td> <td>3.5 RL 4dr</td> <td>Sedan</td> '''
+             '''<td>Asia</td> <td>Front</td> <td>$43,755</td> <td>$39,014</td> '''
+             '''<td>3.5</td> <td>6</td> <td>225</td> <td>18</td> <td>24</td> '''
+             '''<td>3880</td> <td>115</td> <td>197</td> </tr>''')
+
+        # to_html
+        s = re.sub(r'\s+', r' ', out.to_html()).replace('th>', 'td>')
+        self.assertTrue(f in s)
+
+        # _repr_html_
+        s = re.sub(r'\s+', r' ', out._repr_html_()).replace('th>', 'td>')
+        self.assertTrue(f in s)
+
 
 # NOTE: Javascript will not be supported at this time
 #   def test_alltypes_javascript(self):

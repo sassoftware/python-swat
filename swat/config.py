@@ -95,7 +95,9 @@ register_option('interactive_mode', 'boolean', check_boolean, True,
                 'strings for objects automatically generated from information from\n'
                 'the server.  This may give a performance improvement in batch jobs\n'
                 'that don\'t need interactive features.',
-                environ='SWAT_INTERACTIVE_MODE')
+                environ=['SWAT_INTERACTIVE_MODE',
+                         'CAS_INTERACTIVE_MODE',
+                         'SAS_INTERACTIVE_MODE'])
 
 
 def check_tz(value):
@@ -115,7 +117,7 @@ def check_tz(value):
 register_option('timezone', 'string or tzinfo', check_tz, None,
                 'Specifies the timezone to use when computing dates and times.\n'
                 'The default behavior is to treat dates and times as timezone-naive.',
-                environ=['CAS_TIMEZONE', 'SAS_TIMEZONE'])
+                environ=['SWAT_TIMEZONE', 'CAS_TIMEZONE', 'SAS_TIMEZONE'])
 
 
 #
@@ -372,7 +374,7 @@ def check_log_level(val):
 
 register_option('log.level', 'string', check_log_level, swat_logging.default_level,
                 'Set the level of displayed log messages.',
-                environ='SWAT_LOG_LEVEL')
+                environ=['SWAT_LOG_LEVEL', 'CAS_LOG_FORMAT', 'SAS_LOG_FORMAT'])
 
 
 def check_log_format(val):
@@ -384,7 +386,21 @@ def check_log_format(val):
 
 register_option('log.format', 'string', check_string, swat_logging.default_format,
                 'Set the format of the displayed log messages.',
-                environ='SWAT_LOG_FORMAT')
+                environ=['SWAT_LOG_FORMAT', 'CAS_LOG_FORMAT', 'SAS_LOG_FORMAT'])
+
+
+#
+# Display options
+#
+
+register_option('display.apply_formats', 'boolean', check_boolean, False,
+                'Format displayed values using SAS format. Full support for SAS\n'
+                'formats is only available in SWAT installations that include the\n'
+                'C extension (currently Linux and Windows).  Other platforms have\n'
+                'limited format support.',
+                environ=['SWAT_DISPLAY_APPLY_FORMATS',
+                         'CAS_DISPLAY_APPLY_FORMATS',
+                         'SAS_DISPLAY_APPLY_FORMATS'])
 
 
 #

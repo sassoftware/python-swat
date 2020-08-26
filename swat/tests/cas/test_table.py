@@ -4592,8 +4592,8 @@ class TestCASTable(tm.TestCase):
         df = self.get_cars_df().sort_values(SORT_KEYS)
         tbl = self.table.sort_values(SORT_KEYS)
 
-        tblstr = tbl.to_string(index=False)
-        dfstr = df.to_string(index=False)
+        tblstr = re.sub(r'^.*(Make)', r'\1', tbl.to_string(index=False), flags=re.S)
+        dfstr = re.sub(r'^.*(Make)', r'\1', df.to_string(index=False), flags=re.S)
 
         self.assertEqual(len(tblstr), len(dfstr))
         self.assertEqual(dfstr[:5000], tblstr[:5000])

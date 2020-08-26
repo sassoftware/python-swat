@@ -237,13 +237,18 @@ class SASFormatter(object):
             return '$' + out
         if name in ['euro']:
             return '\u20ac' + out
+        if name in ['best', 'int']:
+            return re.sub(r'\.0*$', r'', out)
         return out
 
     def _generic_format(self, value, sasfmt=None, width=12):
         ''' Generic formatter for when tkefmt isn't available '''
         out = None
 
-        num_fmts = r'^[df]?\d*\.\d*$'
+        if sasfmt and '.' not in sasfmt:
+            sasfmt = sasfmt + '.'
+
+        num_fmts = r'^(d|f|int|best)?\d*\.\d*$'
         money_fmts = r'^(nl)?(comma|mny|mny|dollar|euro)\d*\.\d*$'
 
         if isinstance(value, float64_types):
