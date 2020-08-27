@@ -57,7 +57,8 @@ def set_tkpath(val):
 def _initialize_tkpath():
     ''' Check for TKPATH locations '''
     import os
-    if 'TKPATH' in os.environ:
+    # Ignore ';' as a path, it's most likely set by InitializeTK.
+    if 'TKPATH' in os.environ and os.environ['TKPATH'].strip() != ';':
         return os.environ['TKPATH']
 
     import sys
