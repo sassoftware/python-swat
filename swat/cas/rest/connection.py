@@ -375,6 +375,9 @@ class REST_CASConnection(object):
             except requests.ConnectionError:
                 self._set_next_connection()
 
+            except KeyError:
+                raise SWATError(str(out))
+
             except Exception as exc:
                 raise SWATError(str(exc))
 
