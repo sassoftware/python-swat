@@ -30,7 +30,17 @@ import json
 import re
 import pandas as pd
 import six
-from pandas.io.formats import console as pdconsole, format as pdfmt
+try:
+    from pandas.io.formats import console as pdconsole
+    get_console_size = pdconsole.get_console_size
+except ImportError:
+    from pandas.core.format import get_console_size
+try:
+    from pandas.io.formats import format as pdfmt
+    notebook_opts = {'notebook': True}
+except ImportError:
+    from pandas.core import format as pdfmt
+    notebook_opts = {}
 from .cas.table import CASTable
 from .config import get_option
 from .utils.compat import (a2u, a2n, int32, int64, float64, int32_types,
@@ -583,7 +593,7 @@ class SASDataFrame(pd.DataFrame):
         max_cols = pd.get_option('display.max_columns')
         show_dimensions = pd.get_option('display.show_dimensions')
         if pd.get_option('display.expand_frame_repr'):
-            width, _ = pdconsole.get_console_size()
+            width, _ = get_console_size()
         else:
             width = None
 
@@ -691,7 +701,7 @@ class SASDataFrame(pd.DataFrame):
             # NOTE: Patch for bug in pandas DataFrameFormatter when using
             #       formatters on a DataFrame that is truncated in the console.
             formatter.columns = formatter.tr_frame.columns
-            formatter.to_html(notebook=True)
+            formatter.to_html(**notebook_opts)
             return self._post_process_html(formatter.buf.getvalue())
 
         return None

@@ -786,7 +786,7 @@ class TestDataFrame(tm.TestCase):
     def test_apply_formats(self):
         swat.options.display.apply_formats = True
 
-        out = self.table.to_frame().sort_values(['Make', 'Model']).head(1)
+        out = self.table.to_frame(from_=1, to=1, sortby=['Make', 'Model'])
         out.colinfo['Cylinders'].format = 'int'
         out.colinfo['Horsepower'].format = 'int'
         out.colinfo['MPG_City'].format = 'int'
@@ -803,14 +803,14 @@ class TestDataFrame(tm.TestCase):
         # __str__
         pd.set_option('display.max_columns', 10000)
         s = [re.split(r'\s+', x[1:].strip())
-             for x in str(out).split('\n') if x.startswith('4')]
+             for x in str(out).split('\n') if x.startswith('0')]
         s = [item for sublist in s for item in sublist]
         self.assertEqual(s, f)
 
         # truncated __str__
         pd.set_option('display.max_columns', 10)
         s = [re.split(r'\s+', x[1:].strip())
-             for x in str(out).split('\n') if x.startswith('4')]
+             for x in str(out).split('\n') if x.startswith('0')]
         s = [item for sublist in s for item in sublist]
         self.assertEqual(s, ft)
 
@@ -818,17 +818,17 @@ class TestDataFrame(tm.TestCase):
 
         # __repr__
         s = [re.split(r'\s+', x[1:].strip())
-             for x in repr(out).split('\n') if x.startswith('4')]
+             for x in repr(out).split('\n') if x.startswith('0')]
         s = [item for sublist in s for item in sublist]
         self.assertEqual(s, f)
 
         # to_string
         s = [re.split(r'\s+', x[1:].strip())
-             for x in out.to_string().split('\n') if x.startswith('4')]
+             for x in out.to_string().split('\n') if x.startswith('0')]
         s = [item for sublist in s for item in sublist]
         self.assertEqual(s, f)
 
-        f = ('''<tr> <td>4</td> <td>Acura</td> <td>3.5 RL 4dr</td> <td>Sedan</td> '''
+        f = ('''<tr> <td>0</td> <td>Acura</td> <td>3.5 RL 4dr</td> <td>Sedan</td> '''
              '''<td>Asia</td> <td>Front</td> <td>$43,755</td> <td>$39,014</td> '''
              '''<td>3.5</td> <td>6</td> <td>225</td> <td>18</td> <td>24</td> '''
              '''<td>3880</td> <td>115</td> <td>197</td> </tr>''')
