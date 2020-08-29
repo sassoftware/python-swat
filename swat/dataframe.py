@@ -668,9 +668,10 @@ class SASDataFrame(pd.DataFrame):
 
     def _repr_html_(self):
         ''' Return a html representation for a particular DataFrame  '''
+        buf = six.StringIO('')
+
         # Calling a private DataFrame method here, so protect it.
         if getattr(self, '_info_repr', lambda: False)():
-            buf = six.StringIO('')
             self.info(buf=buf)
             # need to escape the <class>, should be the first line.
             val = buf.getvalue().replace('<', r'&lt;', 1)
@@ -693,6 +694,7 @@ class SASDataFrame(pd.DataFrame):
 
             formatter = pdfmt.DataFrameFormatter(
                 self,
+                buf=buf,
                 max_rows=max_rows,
                 max_cols=max_cols,
                 show_dimensions=show_dimensions,
@@ -702,7 +704,7 @@ class SASDataFrame(pd.DataFrame):
             #       formatters on a DataFrame that is truncated in the console.
             formatter.columns = formatter.tr_frame.columns
             formatter.to_html(**notebook_opts)
-            return self._post_process_html(formatter.buf.getvalue())
+            return self._post_process_html(buf.getvalue())
 
         return None
 
