@@ -34,12 +34,12 @@ try:
     from pandas.io.formats import console as pdconsole
     get_console_size = pdconsole.get_console_size
 except ImportError:
-    from pandas.core.format import get_console_size
+    from pandas.formats.format import get_console_size
 try:
     from pandas.io.formats import format as pdfmt
     notebook_opts = {'notebook': True}
 except ImportError:
-    from pandas.core import format as pdfmt
+    from pandas.formats import format as pdfmt
     notebook_opts = {}
 from .cas.table import CASTable
 from .config import get_option
@@ -576,13 +576,13 @@ class SASDataFrame(pd.DataFrame):
         ''' Return a string representation for a particular DataFrame '''
         buf = six.StringIO('')
 
-        if self.label:
-            buf.write('%s\n\n' % self.label)
-
         # Calling a private DataFrame method here, so protect it.
         if getattr(self, '_info_repr', lambda: False)():
             self.info(buf=buf)
             return buf.getvalue()
+
+        if self.label:
+            buf.write('%s\n\n' % self.label)
 
         kwargs = {}
         try:
@@ -604,7 +604,6 @@ class SASDataFrame(pd.DataFrame):
 
         formatter = pdfmt.DataFrameFormatter(
             self,
-            buf=buf,
             max_rows=max_rows,
             max_cols=max_cols,
             line_width=width,
@@ -614,7 +613,13 @@ class SASDataFrame(pd.DataFrame):
         # NOTE: Patch for bug in pandas DataFrameFormatter when using
         #       formatters on a DataFrame that is truncated in the console.
         formatter.columns = formatter.tr_frame.columns
-        formatter.to_string()
+
+        txt = formatter.to_string()
+        if txt is None:
+            if getattr(formatter, 'buf', None) is not None:
+                buf.write(formatter.buf.getvalue())
+        else:
+            buf.write(txt)
 
         return buf.getvalue()
 
@@ -658,20 +663,26 @@ class SASDataFrame(pd.DataFrame):
             if 'na_rep' not in kwargs:
                 kwargs['na_rep'] = '.'
 
-        formatter = pdfmt.DataFrameFormatter(self, buf=buf, **kwargs)
+        formatter = pdfmt.DataFrameFormatter(self, **kwargs)
         # NOTE: Patch for bug in pandas DataFrameFormatter when using
         #       formatters on a DataFrame that is truncated in the console.
         formatter.columns = formatter.tr_frame.columns
-        formatter.to_string()
+
+        txt = formatter.to_string()
+        if txt is None:
+            if getattr(formatter, 'buf', None) is not None:
+                buf.write(formatter.buf.getvalue())
+        else:
+            buf.write(txt)
 
         return buf.getvalue()
 
     def _repr_html_(self):
         ''' Return a html representation for a particular DataFrame  '''
-        buf = six.StringIO('')
 
         # Calling a private DataFrame method here, so protect it.
         if getattr(self, '_info_repr', lambda: False)():
+            buf = six.StringIO('')
             self.info(buf=buf)
             # need to escape the <class>, should be the first line.
             val = buf.getvalue().replace('<', r'&lt;', 1)
@@ -694,7 +705,6 @@ class SASDataFrame(pd.DataFrame):
 
             formatter = pdfmt.DataFrameFormatter(
                 self,
-                buf=buf,
                 max_rows=max_rows,
                 max_cols=max_cols,
                 show_dimensions=show_dimensions,
@@ -703,8 +713,13 @@ class SASDataFrame(pd.DataFrame):
             # NOTE: Patch for bug in pandas DataFrameFormatter when using
             #       formatters on a DataFrame that is truncated in the console.
             formatter.columns = formatter.tr_frame.columns
-            formatter.to_html(**notebook_opts)
-            return self._post_process_html(buf.getvalue())
+            html = formatter.to_html(**notebook_opts)
+            if html is None:
+                if getattr(formatter, 'buf', None) is not None:
+                    html = formatter.buf.getvalue()
+                else:
+                    return None
+            return self._post_process_html(html)
 
         return None
 
@@ -735,7 +750,7 @@ class SASDataFrame(pd.DataFrame):
 
         html = pd.DataFrame.to_html(self, **kwargs)
         if html is None:
-            return
+            return None
 
         return self._post_process_html(html)
 
