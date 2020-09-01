@@ -34,13 +34,19 @@ try:
     from pandas.io.formats import console as pdconsole
     get_console_size = pdconsole.get_console_size
 except ImportError:
-    from pandas.formats.format import get_console_size
+    try:
+        from pandas.formats.format import get_console_size
+    except ImportError:
+        from pandas.core.format import get_console_size
 try:
     from pandas.io.formats import format as pdfmt
     notebook_opts = {'notebook': True}
 except ImportError:
-    from pandas.formats import format as pdfmt
     notebook_opts = {}
+    try:
+        from pandas.formats import format as pdfmt
+    except ImportError:
+        from pandas.core import format as pdfmt
 from .cas.table import CASTable
 from .config import get_option
 from .utils.compat import (a2u, a2n, int32, int64, float64, int32_types,
