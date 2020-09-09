@@ -639,12 +639,16 @@ class SASDataFrame(pd.DataFrame):
             return
         p.text(self.to_string())
 
-    def to_string(self, **kwargs):
+    def to_string(self, apply_formats=None, **kwargs):
         '''
         Return a string representation of a DataFrame
 
         Parameters
         ----------
+        apply_formats : bool or None, optional
+            Should SAS formats be applied to the data values in the
+            rendered output?  If None, the `display.apply_formats`
+            option value will be used.
         **kwargs : keyword-parameters, optional
             All keyword parameters for the `pandas.DataFrame.to_string`
             method are accepted here as well.
@@ -664,7 +668,8 @@ class SASDataFrame(pd.DataFrame):
             buf.write('%s\n\n' % self.label)
 
         formatters = kwargs.get('formatters', None)
-        if get_option('display.apply_formats'):
+        if apply_formats or (apply_formats is None
+                             and get_option('display.apply_formats')):
             kwargs['formatters'] = self._get_formatters(formatters)
             if 'na_rep' not in kwargs:
                 kwargs['na_rep'] = '.'
@@ -729,12 +734,16 @@ class SASDataFrame(pd.DataFrame):
 
         return None
 
-    def to_html(self, **kwargs):
+    def to_html(self, apply_formats=None, **kwargs):
         '''
         Return a html representation of a DataFrame
 
         Parameters
         ----------
+        apply_formats : bool or None, optional
+            Should SAS formats be applied to the data values in the
+            rendered output?  If None, the `display.apply_formats`
+            option value will be used.
         **kwargs : keyword-parameters, optional
             All keyword parameters for the `pandas.DataFrame.to_html`
             method are accepted here as well.
@@ -749,7 +758,8 @@ class SASDataFrame(pd.DataFrame):
 
         '''
         formatters = kwargs.get('formatters', None)
-        if get_option('display.apply_formats'):
+        if apply_formats or (apply_formats is None
+                             and get_option('display.apply_formats')):
             kwargs['formatters'] = self._get_formatters(formatters)
             if 'na_rep' not in kwargs:
                 kwargs['na_rep'] = '.'
