@@ -364,9 +364,18 @@ class CAS(object):
             warnings.warn('Unrecognized keys in connection parameters: %s' %
                           ', '.join(unknown_keys))
 
-        # Distill connection information from parameters, config, and environment
-        hostname, port, username, password, protocol = \
-            self._get_connection_info(hostname, port, username, password, protocol, path)
+        # If a prototype exists, use it for the connection config
+        prototype = kwargs.get('prototype')
+        if prototype is not None:
+            soptions = a2n(prototype._soptions)
+            protocol = a2n(prototype._protocol)
+        else:
+            # Distill connection information from parameters, config, and environment
+            hostname, port, username, password, protocol = \
+                self._get_connection_info(hostname, port, username,
+                                          password, protocol, path)
+            soptions = a2n(getsoptions(session=session, locale=locale,
+                                       nworkers=nworkers, protocol=protocol))
 
         # Check for SSL certificate
         if ssl_ca_list is None:
@@ -382,15 +391,6 @@ class CAS(object):
                     authinfo = [authinfo]
                 raise OSError('None of the specified authinfo files from'
                               'list exist: %s' % ', '.join(authinfo))
-
-        # If a prototype exists, use it for the connection config
-        prototype = kwargs.get('prototype')
-        if prototype is not None:
-            soptions = a2n(prototype._soptions)
-            protocol = a2n(prototype._protocol)
-        else:
-            soptions = a2n(getsoptions(session=session, locale=locale,
-                                       nworkers=nworkers, protocol=protocol))
 
         # Create error handler
         try:
@@ -2295,6 +2295,8 @@ class CAS(object):
         if asname:
             asname = asname.lower()
             query = {'showhidden': showhidden, 'actionset': asname}
+            if not get_option('interactive_mode'):
+                query['showlabels'] = False
             idx = 0
             out = {}
             for response in self._invoke_without_signature('builtins.reflect',
