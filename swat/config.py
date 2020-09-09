@@ -375,7 +375,7 @@ def check_log_level(val):
 
 register_option('log.level', 'string', check_log_level, swat_logging.default_level,
                 'Set the level of displayed log messages.',
-                environ=['SWAT_LOG_LEVEL', 'CAS_LOG_FORMAT', 'SAS_LOG_FORMAT'])
+                environ=['SWAT_LOG_LEVEL', 'CAS_LOG_LEVEL', 'SAS_LOG_LEVEL'])
 
 
 def check_log_format(val):
