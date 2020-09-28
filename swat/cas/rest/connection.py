@@ -62,7 +62,7 @@ def _print_request(rtype, url, headers, data=None):
 
 
 def _print_response(text):
-    ''' Print the respnose for debugging '''
+    ''' Print the response for debugging '''
     sys.stderr.write(a2u(text, 'utf-8'))
     sys.stderr.write('\n')
 
