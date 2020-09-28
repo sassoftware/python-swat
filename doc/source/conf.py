@@ -82,7 +82,7 @@ author = 'SAS'
 # built documents.
 #
 
-import swat  # noqa: W291
+import swat  # noqa: W291,E402
 
 # The short X.Y version.
 version = swat.__version__
