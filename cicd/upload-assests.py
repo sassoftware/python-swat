@@ -57,7 +57,7 @@ def upload_asset(url, filename):
 
 
 def delete_asset(asset_id):
-    ''' Delete the resource at the given ID ''' 
+    ''' Delete the resource at the given ID '''
     requests.delete(
         'https://api.github.com/repos/{}/releases/assets/{}'.format(get_repo(), asset_id),
         headers=dict(Authorization='token {}'.format(GITHUB_TOKEN),

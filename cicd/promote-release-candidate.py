@@ -67,7 +67,6 @@ def copy_assets(url, assets):
             )
 
 
-
 def git_tag(tag, sha=None):
     ''' Add a tag '''
     cmd = ['git', 'tag', tag]
@@ -107,11 +106,12 @@ def delete_release(tag_name):
                          Accept='application/vnd.github.v3+json'))
 
     # Delete tags
+    del_tags = [tag_name, tag_name.replace('-rc', '-snapshot')]
     cmd = ['git', 'show-ref', '--tags']
     for line in subprocess.check_output(cmd).decode('utf-8').strip().split('\n'):
         sha, tag = re.split(r'\s+', line.strip())
         tag = tag.split('/')[-1]
-        if tag == tag_name:
+        if tag in del_tags:
             cmd = ['git', 'tag', '-d', tag]
             subprocess.check_call(cmd)
             cmd = ['git', 'push', 'origin', ':refs/tags/{}'.format(tag)]
@@ -170,6 +170,7 @@ def main(args):
 
     # Delete rc release
     delete_release(args.tag)
+    delete_release(args.tag.replace('-rc', '-snapshot'))
 
     return 0
 

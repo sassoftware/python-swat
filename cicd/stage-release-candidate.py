@@ -176,7 +176,7 @@ def generate_whatsnew(md, rst):
             r"# What's New\n\nThis document outlines features and "
             + r"improvements from each release.", md_txt, flags=re.M)
         md_txt = re.sub(r'^(##\s+\d+\.\d+\.\d+)\s+\-\s+(\d+\-\d+\-\d+)',
-                        change_section_headings, md_txt, flags=re.M|re.I) 
+                        change_section_headings, md_txt, flags=re.M | re.I)
 
     with tempfile.TemporaryDirectory() as tmp_dir:
         changelog = os.path.join(tmp_dir, 'CHANGELOG.md')
