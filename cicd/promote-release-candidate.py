@@ -5,14 +5,17 @@
 import argparse
 import datetime
 import glob
+import io
 import os
 import re
 import requests
+import shutil
 import sys
 import subprocess
+import tarfile
 import tempfile
 from urllib.parse import quote
-from urllib.request import urlopen
+from urllib.request import urlopen, urlretrieve
 
 
 GITHUB_TOKEN = os.environ['GITHUB_TOKEN']
@@ -125,6 +128,66 @@ def checkout_main(tag=None):
     subprocess.check_call(cmd)
 
 
+def rotate_doc(tag_name):
+    ''' Rotate documentation in the gh-pages branch '''
+    cmd = ['git', 'checkout', 'gh-pages']
+    subprocess.check_call(cmd)
+
+    release = get_release(tag_name)
+    assets = release['assets']
+
+    doc_url = None
+    for asset in assets:
+        asset_url = asset['browser_download_url']
+        if asset_url.endswith('-doc.tar.gz'):
+            doc_url = asset_url
+            break
+
+    if not doc_url:
+        raise RuntimeError('Could not locate documentation file')
+
+    # Change to production tag
+    tag_name = tag_name.replace('-rc', '')
+
+    # Remove existing directory if it exists
+    shutil.rmtree(tag_name, ignore_errors=True)
+
+    with urlopen(doc_url) as doc_file:
+        try:
+            tar_file = tarfile.open(fileobj=doc_file, mode='r|gz')
+            tar_file.extractall()
+        finally:
+            tar_file.close()
+
+    for f in glob.glob('python-swat-*-doc'):
+        shutil.move(f, tag_name)
+
+    # Clear out existing top-level doc
+    for f in (glob.glob('*.html') + glob.glob('*.js')
+              + glob.glob('*.inv') + ['.buildinfo']):
+        os.remove(f)
+    for f in ['_images', '_sources', '_static', 'generated']:
+        shutil.rmtree(f)
+
+    # Copy new doc to the top-level
+    from distutils.dir_util import copy_tree
+    copy_tree(tag_name, '.')
+
+    cmd = ['git', 'add', '*.html', '*.js', '*.inv', '_images',
+           '_sources', '_static', 'generated', '.buildinfo', tag_name]
+    subprocess.check_call(cmd)
+
+    subprocess.check_call(['git', 'status'])
+
+    # See if anything needs to be committed
+    cmd = ['git', 'status', '--untracked-files=no', '--porcelain']
+    txt = subprocess.check_output(cmd)
+
+    if txt:
+        cmd = ['git', 'commit', '-m', 'Rotate documentation to {}'.format(tag_name)]
+        subprocess.check_call(cmd)
+
+
 def get_release(tag_name):
     ''' Retrieve the upload URL for the given tag '''
     res = requests.get(
@@ -163,12 +226,18 @@ def main(args):
     # Retrieve rc release info
     rc_release = get_release(args.tag)
 
+    # Rotate documentation
+    try:
+        rotate_doc(args.tag)
+    finally:
+        checkout_main()
+
     # Push release
     git_tag(release_tag, sha=release_sha)
     git_push(tag=release_tag)
     create_release(release_tag, release_sha, rc_release)
 
-    # Delete rc release
+    # Delete rc release and snapshots
     delete_release(args.tag)
     delete_release(args.tag.replace('-rc', '-snapshot'))
 
