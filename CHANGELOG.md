@@ -1,6 +1,12 @@
 
 # Change Log
 
+## 1.7.1 - 2020-09-29
+
+- Add ability to apply SAS formats to columns in a `SASDataFrame`
+- Support timezones in data uploaded and downloaded from CAS tables
+- Fix issue with TK path on Windows when using flask
+
 ## 1.7.0 - 2020-08-19
 
 - Add Python 3.8 support
