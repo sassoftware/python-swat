@@ -186,6 +186,7 @@ def rotate_doc(tag_name):
     if txt:
         cmd = ['git', 'commit', '-m', 'Rotate documentation to {}'.format(tag_name)]
         subprocess.check_call(cmd)
+        git_push()
 
 
 def get_release(tag_name):
