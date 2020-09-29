@@ -1,0 +1,178 @@
+swat.cas.table.CASTable
+=======================
+
+.. currentmodule:: swat.cas.table
+
+.. autoclass:: CASTable
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~CASTable.__init__
+      ~CASTable.abs
+      ~CASTable.all
+      ~CASTable.any
+      ~CASTable.append
+      ~CASTable.append_columns
+      ~CASTable.append_computed_columns
+      ~CASTable.append_computedvars
+      ~CASTable.append_computedvarsprogram
+      ~CASTable.append_groupby
+      ~CASTable.append_orderby
+      ~CASTable.append_where
+      ~CASTable.as_matrix
+      ~CASTable.boxplot
+      ~CASTable.clip
+      ~CASTable.clip_lower
+      ~CASTable.clip_upper
+      ~CASTable.copy
+      ~CASTable.corr
+      ~CASTable.count
+      ~CASTable.css
+      ~CASTable.cv
+      ~CASTable.datastep
+      ~CASTable.del_action_params
+      ~CASTable.del_param
+      ~CASTable.del_params
+      ~CASTable.describe
+      ~CASTable.drop
+      ~CASTable.dropna
+      ~CASTable.eval
+      ~CASTable.exists
+      ~CASTable.fillna
+      ~CASTable.from_csv
+      ~CASTable.from_dict
+      ~CASTable.from_items
+      ~CASTable.from_records
+      ~CASTable.get
+      ~CASTable.get_action_names
+      ~CASTable.get_action_params
+      ~CASTable.get_actionset_names
+      ~CASTable.get_connection
+      ~CASTable.get_dtype_counts
+      ~CASTable.get_fetch_params
+      ~CASTable.get_ftype_counts
+      ~CASTable.get_groupby_vars
+      ~CASTable.get_inputs_param
+      ~CASTable.get_param
+      ~CASTable.get_params
+      ~CASTable.get_value
+      ~CASTable.groupby
+      ~CASTable.has_groupby_vars
+      ~CASTable.has_param
+      ~CASTable.has_params
+      ~CASTable.head
+      ~CASTable.hist
+      ~CASTable.info
+      ~CASTable.invoke
+      ~CASTable.iteritems
+      ~CASTable.iterrows
+      ~CASTable.itertuples
+      ~CASTable.kurt
+      ~CASTable.kurtosis
+      ~CASTable.lookup
+      ~CASTable.max
+      ~CASTable.mean
+      ~CASTable.median
+      ~CASTable.merge
+      ~CASTable.min
+      ~CASTable.mode
+      ~CASTable.next
+      ~CASTable.nlargest
+      ~CASTable.nmiss
+      ~CASTable.nsmallest
+      ~CASTable.nth
+      ~CASTable.pop
+      ~CASTable.probt
+      ~CASTable.quantile
+      ~CASTable.query
+      ~CASTable.replace
+      ~CASTable.reset_index
+      ~CASTable.retrieve
+      ~CASTable.sample
+      ~CASTable.select_dtypes
+      ~CASTable.set_action_params
+      ~CASTable.set_connection
+      ~CASTable.set_param
+      ~CASTable.set_params
+      ~CASTable.skew
+      ~CASTable.skewness
+      ~CASTable.slice
+      ~CASTable.sort
+      ~CASTable.sort_values
+      ~CASTable.std
+      ~CASTable.stderr
+      ~CASTable.sum
+      ~CASTable.tail
+      ~CASTable.to_clipboard
+      ~CASTable.to_csv
+      ~CASTable.to_datastep_params
+      ~CASTable.to_dense
+      ~CASTable.to_dict
+      ~CASTable.to_excel
+      ~CASTable.to_frame
+      ~CASTable.to_gbq
+      ~CASTable.to_hdf
+      ~CASTable.to_html
+      ~CASTable.to_input_datastep_params
+      ~CASTable.to_json
+      ~CASTable.to_latex
+      ~CASTable.to_msgpack
+      ~CASTable.to_outtable
+      ~CASTable.to_outtable_params
+      ~CASTable.to_params
+      ~CASTable.to_pickle
+      ~CASTable.to_records
+      ~CASTable.to_sparse
+      ~CASTable.to_sql
+      ~CASTable.to_stata
+      ~CASTable.to_string
+      ~CASTable.to_table
+      ~CASTable.to_table_name
+      ~CASTable.to_table_params
+      ~CASTable.to_view
+      ~CASTable.to_xarray
+      ~CASTable.tvalue
+      ~CASTable.uss
+      ~CASTable.var
+      ~CASTable.with_params
+      ~CASTable.xs
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~CASTable.all_params
+      ~CASTable.at
+      ~CASTable.axes
+      ~CASTable.columns
+      ~CASTable.created_date
+      ~CASTable.dtypes
+      ~CASTable.ftypes
+      ~CASTable.getdoc
+      ~CASTable.iat
+      ~CASTable.iloc
+      ~CASTable.index
+      ~CASTable.ix
+      ~CASTable.last_accessed_date
+      ~CASTable.last_modified_date
+      ~CASTable.loc
+      ~CASTable.ndim
+      ~CASTable.outtable_params
+      ~CASTable.param_names
+      ~CASTable.plot
+      ~CASTable.shape
+      ~CASTable.size
+      ~CASTable.table_params
+      ~CASTable.values
+   
+   
