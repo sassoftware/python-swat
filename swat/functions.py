@@ -43,6 +43,10 @@ def concat(objs, **kwargs):
     --------
     :func:`pd.concat`
 
+    Notes
+    -----
+    All input objects must be of the same type.
+
     Returns
     -------
     :class:`CASTable`
@@ -84,6 +88,10 @@ def merge(left, right, **kwargs):
     See Also
     --------
     :func:`pd.merge`
+
+    Notes
+    -----
+    All input objects must be of the same type.
 
     Returns
     -------
