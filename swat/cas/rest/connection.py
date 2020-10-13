@@ -31,12 +31,13 @@ import requests
 import six
 import ssl
 import sys
+import time
 from six.moves import urllib
 from .message import REST_CASMessage
 from .response import REST_CASResponse
 from ..types import blob
 from ..table import CASTable
-from ...config import options, get_option
+from ...config import get_option
 from ...exceptions import SWATError
 from ...logging import logger
 from ...utils.args import parsesoptions
@@ -200,6 +201,8 @@ class REST_CASConnection(object):
 
     def __init__(self, hostname, port, username, password, soptions, error):
 
+        logger.debug('Creating REST connection for user {} at {} with options {}'
+                     .format(username, hostname, soptions))
         _soptions = parsesoptions(soptions)
         protocol = _soptions.get('protocol', 'http')
         session = _soptions.get('session')
@@ -303,92 +306,98 @@ class REST_CASConnection(object):
             'Authorization': self._auth,
         })
 
+        self._connect(session=session, locale=locale, wait_until_idle=False)
+
+    def _connect(self, session=None, locale=None, wait_until_idle=True):
+        '''
+        Connect to CAS server
+
+        Parameters
+        ----------
+        session : string, optional
+            Session ID to connect to
+        locale : string, optional
+            Locale of the session.  Only used if a new session is
+            being created.
+        wait_until_idle : bool, optional
+            Wait until the session is idle before returning?
+
+        Returns
+        -------
+        dict
+
+        '''
+        connection_retries = get_option('cas.connection_retries')
+        connection_retry_interval = get_option('cas.connection_retry_interval')
+        num_retries = 0
+
         while True:
             try:
-                if session:
-                    url = urllib.parse.urljoin(self._current_baseurl,
-                                               'cas/sessions/%s' % session)
+                url = urllib.parse.urljoin(self._current_baseurl,
+                                           'cas/sessions')
+                params = {}
 
+                if session:
+                    url = '{}/{}'.format(url, session)
                     if get_option('cas.debug.requests'):
                         _print_request('GET', url, self._req_sess.headers)
-
+                    logger.debug('Reconnecting to session at {}'.format(url))
                     res = self._req_sess.get(url, data=b'')
 
-                    if 'tkhttp-id' in res.cookies:
-                        self._req_sess.headers.update({
-                            'tkhttp-id': res.cookies['tkhttp-id'].strip()
-                        })
-
-                    if get_option('cas.debug.responses'):
-                        _print_response(res.text)
-
-                    try:
-                        txt = a2u(res.text, 'utf-8')
-                        out = json.loads(txt, strict=False)
-                    except Exception:
-                        sys.stderr.write(txt)
-                        sys.stderr.write('\n')
-                        raise
-
-                    if out.get('error', None):
-                        if out.get('details', None):
-                            raise SWATError('%s (%s)' % (out['error'], out['details']))
-                        raise SWATError(out['error'])
-
-                    self._session = out['uuid']
-                    break
-
                 else:
-                    url = urllib.parse.urljoin(self._current_baseurl,
-                                               'cas/sessions')
-
                     if get_option('cas.debug.requests'):
                         _print_request('PUT', url, self._req_sess.headers)
+                    if locale:
+                        params['locale'] = locale
+                    logger.debug('Creating new session at {} with parms {}'
+                                 .format(url, params))
+                    res = self._req_sess.put(url, data=b'', params=params)
 
-                    res = self._req_sess.put(url, data=b'')
+                if 'tkhttp-id' in res.cookies:
+                    self._req_sess.headers.update({
+                        'tkhttp-id': res.cookies['tkhttp-id'].strip()
+                    })
 
-                    if 'tkhttp-id' in res.cookies:
-                        self._req_sess.headers.update({
-                            'tkhttp-id': res.cookies['tkhttp-id'].strip()
-                        })
+                if get_option('cas.debug.responses'):
+                    _print_response(res.text)
 
-                    if get_option('cas.debug.responses'):
-                        _print_response(res.text)
+                try:
+                    txt = a2u(res.text, 'utf-8')
+                    out = json.loads(txt, strict=False)
+                except Exception:
+                    sys.stderr.write(txt)
+                    sys.stderr.write('\n')
+                    raise
 
-                    try:
-                        txt = a2u(res.text, 'utf-8')
-                        out = json.loads(txt, strict=False)
-                    except Exception:
-                        sys.stderr.write(txt)
-                        sys.stderr.write('\n')
-                        raise
+                if out.get('error', None):
+                    if out.get('details', None):
+                        raise SWATError('%s (%s)' % (out['error'], out['details']))
+                    raise SWATError(out['error'])
 
-                    if out.get('error', None):
-                        if out.get('details', None):
-                            raise SWATError('%s (%s)' % (out['error'], out['details']))
-                        raise SWATError(out['error'])
-
+                if session:
+                    self._session = out['uuid']
+                else:
                     self._session = out['session']
 
-                    if locale:
-                        self.invoke('session.setlocale', dict(locale=locale))
-                        if self._results.get('disposition', {})\
-                                .get('severity', '') == 'Error':
-                            raise SWATError(self._results.get('disposition', {})
-                                            .get('formattedStatus',
-                                                 'Invalid locale: %s' % locale))
-                        self._results.clear()
+                logger.debug('Connection succeeded to {}'.format(url))
 
-                    break
+                break
 
             except requests.ConnectionError:
-                self._set_next_connection()
+                if num_retries > connection_retries:
+                    self._set_next_connection()
+                logger.debug('Connection error, attempting retry')
+                num_retries += 1
+                time.sleep(connection_retry_interval)
 
             except KeyError:
                 raise SWATError(str(out))
 
             except Exception as exc:
                 raise SWATError(str(exc))
+
+        if wait_until_idle:
+            self._wait_until_idle()
 
     def _set_next_connection(self):
         ''' Iterate to the next available controller '''
@@ -403,6 +412,33 @@ class REST_CASConnection(object):
             self._current_port = -1
             raise SWATError('Unable to connect to any URL in the list: %s' %
                             ', '.join(self._baseurl))
+
+    def _wait_until_idle(self):
+        ''' Wait loop to check for idle connection '''
+        connection_retries = get_option('cas.connection_retries')
+        connection_retry_interval = get_option('cas.connection_retry_interval')
+        num_retries = 0
+
+        while True:
+            try:
+                url = urllib.parse.urljoin(self._current_baseurl,
+                                           'cas/sessions/%s' % self._session)
+                logger.debug('Checking for idle session: {}'
+                             .format(self._session))
+                out = self._req_sess.get(url).json()
+                if out.get('isIdle', False):
+                    logger.debug('Session {} is idle'.format(self._session))
+                    break
+
+            except requests.ConnectionError:
+                if num_retries > connection_retries:
+                    self._set_next_connection()
+                    num_retries = 0
+                logger.debug('Waiting for controller at {}'
+                             .format(self._current_baseurl))
+                num_retries += 1
+
+            time.sleep(connection_retry_interval)
 
     def invoke(self, action_name, kwargs):
         '''
@@ -423,8 +459,8 @@ class REST_CASConnection(object):
         is_ui = kwargs.get('_apptag', '') == 'UI'
         kwargs = json.dumps(_normalize_params(kwargs))
 
-        if options.cas.trace_actions and \
-                (not(is_ui) or (is_ui and options.cas.trace_ui_actions)):
+        if get_option('cas.trace_actions') and \
+                (not(is_ui) or (is_ui and get_option('cas.trace_ui_actions'))):
             print('[%s]' % action_name)
             _print_params(json.loads(kwargs), prefix='    ')
             print('')
@@ -444,6 +480,7 @@ class REST_CASConnection(object):
                                            'cas/sessions/%s/actions/%s' %
                                            (self._session, action_name))
 
+                logger.debug('POST {} {}'.format(url, post_data))
                 if get_option('cas.debug.requests'):
                     _print_request('POST', url, self._req_sess.headers, post_data)
 
@@ -455,7 +492,7 @@ class REST_CASConnection(object):
                 break
 
             except requests.ConnectionError:
-                self._set_next_connection()
+                self._connect(session=self._session)
 
                 # Get ID of results
                 action_name = 'session.listresults'
@@ -469,8 +506,10 @@ class REST_CASConnection(object):
                                            'cas/sessions/%s/actions/%s' %
                                            (self._session, action_name))
 
+                logger.debug('POST {} {}'.format(url, post_data))
                 if get_option('cas.debug.requests'):
-                    _print_request('POST', url, self._req_sess.headers, post_data)
+                    _print_request('POST', url, self._req_sess.headers,
+                                   post_data)
 
                 res = self._req_sess.post(url, data=post_data)
 
@@ -485,15 +524,37 @@ class REST_CASConnection(object):
                     sys.stderr.write('\n')
                     raise
 
-                result_id = out['results']['Queued Results']['rows'][0][0]
+                if out.get('results'):
+                    logger.debug('Queued results: {}'.format(out['results']))
+                else:
+                    logger.debug('No queued results')
 
-                # Setup retrieval of results from ID
-                action_name = 'session.fetchresult'
-                post_data = a2u('{"id":%s}' % result_id).encode('utf-8')
-                self._req_sess.headers.update({
-                    'Content-Type': 'application/json',
-                    'Content-Length': str(len(post_data)),
-                })
+                results = out.get('results', {'Queued Results': {'rows': []}})
+                rows = results.get('Queued Results', {'rows': []})['rows']
+                if rows:
+                    result_id = rows[0][0]
+
+                    # Setup retrieval of results from ID
+                    action_name = 'session.fetchresult'
+                    post_data = a2u('{"id":%s}' % result_id).encode('utf-8')
+                    self._req_sess.headers.update({
+                        'Content-Type': 'application/json',
+                        'Content-Length': str(len(post_data)),
+                    })
+
+                    if get_option('cas.debug.requests'):
+                        _print_request('POST', url, self._req_sess.headers,
+                                       post_data)
+
+                    res = self._req_sess.post(url, data=post_data)
+
+                    if get_option('cas.debug.responses'):
+                        _print_response(res.text)
+
+                    break
+
+                else:
+                    raise SWATError('Could not retrieve results of action call')
 
             except Exception as exc:
                 raise SWATError(str(exc))
@@ -509,7 +570,10 @@ class REST_CASConnection(object):
         try:
             if self._results.get('disposition', None) is None:
                 if self._results.get('error'):
-                    raise SWATError(self._results['error'])
+                    msg = self._results['error']
+                    if self._results.get('details'):
+                        msg = '{}: {}'.format(msg, self._results['details'])
+                    raise SWATError(msg)
                 else:
                     raise SWATError('Unknown error')
         except ValueError as exc:

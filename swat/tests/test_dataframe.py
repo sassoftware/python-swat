@@ -834,11 +834,15 @@ class TestDataFrame(tm.TestCase):
              '''<td>3880</td> <td>115</td> <td>197</td> </tr>''')
 
         # to_html
-        s = re.sub(r'\s+', r' ', out.to_html()).replace('th>', 'td>')
+        s = out.to_html()
+        self.assertTrue(s is not None)
+        s = re.sub(r'\s+', r' ', s).replace('th>', 'td>')
         self.assertTrue(f in s)
 
         # _repr_html_
-        s = re.sub(r'\s+', r' ', out._repr_html_()).replace('th>', 'td>')
+        s = out._repr_html_()
+        self.assertTrue(s is not None)
+        s = re.sub(r'\s+', r' ', s).replace('th>', 'td>')
         self.assertTrue(f in s)
 
 

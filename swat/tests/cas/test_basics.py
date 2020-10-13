@@ -209,6 +209,9 @@ class TestBasics(tm.TestCase):
         u.endsession()
 
     def test_set_bad_session_locale(self):
+        if self.s._protocol in ['http', 'https']:
+            tm.TestCase.skipTest(self, 'REST does not raise an error for bad locales')
+
         user, passwd = tm.get_user_pass()
         with captured_stderr() as out:  # noqa: F841
             with self.assertRaises(swat.SWATError):

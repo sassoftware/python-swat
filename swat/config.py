@@ -357,6 +357,18 @@ register_option('cas.debug.responses', 'boolean', check_boolean, False,
 
 
 #
+# Connection retry options
+#
+register_option('cas.connection_retries', 'int', check_int, 3,
+                'Number of retries to attempt on a REST connection if a network\n'
+                'error occurs.',
+                environ='CAS_CONNECTION_RETRIES')
+register_option('cas.connection_retry_interval', 'int', check_int, 10,
+                'Number of seconds to wait before each REST connection retry.',
+                environ='CAS_CONNECTION_RETRY_INTERVAL')
+
+
+#
 # Logging options
 #
 def check_log_level(val):
