@@ -26,6 +26,7 @@ from __future__ import print_function, division, absolute_import, unicode_litera
 import datetime
 import functools
 import logging
+import sys
 import warnings
 from . import logging as swat_logging
 from .clib import InitializeTK
@@ -90,7 +91,8 @@ register_option('encoding_errors', 'string', check_string, 'strict',
                 'documentation.  Typical values are strict, ignore, replace, or\n'
                 'xmlcharrefreplace.')
 
-register_option('interactive_mode', 'boolean', check_boolean, True,
+register_option('interactive_mode', 'boolean', check_boolean,
+                bool(getattr(sys, 'ps1', sys.flags.interactive)),
                 'Indicates whether all interactive mode features should be enabled.\n'
                 'Interactive features include things like generating formatted help\n'
                 'strings for objects automatically generated from information from\n'
