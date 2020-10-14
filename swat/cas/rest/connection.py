@@ -38,9 +38,10 @@ from ..types import blob
 from ..table import CASTable
 from ...config import options, get_option
 from ...exceptions import SWATError
+from ...logging import logger
 from ...utils.args import parsesoptions
 from ...utils.keyword import keywordify
-from ...utils.compat import (a2u, int_types, int32_types, int64_types, dict_types,
+from ...utils.compat import (a2u, a2b, int_types, int32_types, int64_types, dict_types,
                              float64_types, items_types, int32, int64, float64)
 from ...utils.authinfo import query_authinfo
 
@@ -268,8 +269,16 @@ class REST_CASConnection(object):
         self._error = error
         self._results = None
 
-        self._auth = b'Basic ' + base64.b64encode(
-            ('%s:%s' % (username, password)).encode('utf-8')).strip()
+        if username and password:
+            logger.debug('Using Basic authentication')
+            self._auth = b'Basic ' + base64.b64encode(
+                ('%s:%s' % (username, password)).encode('utf-8')).strip()
+        elif password:
+            logger.debug('Using Bearer token authentication')
+            self._auth = b'Bearer ' + a2b(password).strip()
+        else:
+            raise SWATError('Either username and password, or OAuth token in the '
+                            'password parameter must be specified.')
 
         self._req_sess = requests.Session()
 
