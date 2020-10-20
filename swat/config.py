@@ -75,6 +75,11 @@ def _initialize_tkpath():
         return path
 
 
+def _is_interactive():
+    ''' See if Python is running in interactive mode '''
+    return bool(getattr(sys, 'ps1', sys.flags.interactive))
+
+
 register_option('tkpath', 'string', set_tkpath, _initialize_tkpath(),
                 'Displays the path for SAS TK components.  This is determined\n'
                 'when SWAT is imported.  By default, it points to the platform\n'
@@ -91,8 +96,7 @@ register_option('encoding_errors', 'string', check_string, 'strict',
                 'documentation.  Typical values are strict, ignore, replace, or\n'
                 'xmlcharrefreplace.')
 
-register_option('interactive_mode', 'boolean', check_boolean,
-                bool(getattr(sys, 'ps1', sys.flags.interactive)),
+register_option('interactive_mode', 'boolean', check_boolean, _is_interactive(),
                 'Indicates whether all interactive mode features should be enabled.\n'
                 'Interactive features include things like generating formatted help\n'
                 'strings for objects automatically generated from information from\n'
@@ -138,9 +142,18 @@ register_option('cas.trace_actions', 'boolean', check_boolean, False,
 
 register_option('cas.trace_ui_actions', 'boolean', check_boolean, False,
                 'Indicates whether or not CAS action names and parameters from\n'
-                'actions invoked by the interface itself. should be printed.\n'
+                'actions invoked by the interface itself should be printed.\n'
                 'This option is only honored if cas.trace_actions is also enabled.',
                 environ='CAS_TRACE_UI_ACTIONS')
+
+register_option('cas.reflection_levels', 'int', functools.partial(check_int, minimum=1),
+                get_option('interactive_mode') and 10 or 1,
+                'Sets the level of reflection data returned when reflecting action sets\n'
+                'and actions. This data is downloaded at the start of each connection\n'
+                'as well as whenever a new action set is loaded. Reducing the number of\n'
+                'levels downloaded can reduce the amount of data downloaded, but will\n'
+                'also limit the amount of documentation shown in action doc strings.',
+                environ='CAS_REFLECTION_LEVELS')
 
 register_option('cas.hostname', 'string', check_string,
                 'localhost',

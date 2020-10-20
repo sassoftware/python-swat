@@ -97,5 +97,4 @@ class TestCall(tm.TestCase):
 
 
 if __name__ == '__main__':
-    from swat.utils.testing import runtests
-    runtests()
+    tm.runtests()

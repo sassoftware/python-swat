@@ -383,20 +383,32 @@ def runtests(xmlrunner=False):
     ''' Run unit tests '''
     import sys
 
-    if '--profile' in sys.argv:
-        import profile
+    profile_opt = [x for x in sys.argv
+                   if x == '--profile' or x.startswith('--profile=')]
+    sys.argv = [x for x in sys.argv
+                if x != '--profile' and not x.startswith('--profile=')]
+
+    if profile_opt:
+        import cProfile as profile
+        import os
         import pstats
 
-        sys.argv = [x for x in sys.argv if x != '--profile']
+        profile_opt = profile_opt[-1]
+
+        if '=' in profile_opt:
+            name = profile_opt.split('=')[-1]
+        else:
+            name = '%s.prof' % ([os.path.splitext(os.path.basename(x))[0]
+                                 for x in sys.argv if x.endswith('.py')][0])
 
         if xmlrunner:
             import xmlrunner as xr
             profile.run('unittest.main(testRunner=xr.XMLTestRunner('
-                        'output=\'test-reports\', verbosity=2))', '_stats.txt')
+                        'output=\'test-reports\', verbosity=2))', name)
         else:
-            profile.run('unittest.main()', '_stats.txt')
+            profile.run('unittest.main()', name)
 
-        stats = pstats.Stats('_stats.txt')
+        stats = pstats.Stats(name)
         # stats.strip_dirs()
         stats.sort_stats('cumulative', 'calls')
         stats.print_stats(25)

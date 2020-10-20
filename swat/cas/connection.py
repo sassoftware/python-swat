@@ -463,6 +463,11 @@ class CAS(object):
         # Dictionary of result hook functions
         self._results_hooks = {}
 
+        # Get server attributes
+        (self.server_type,
+         self.server_version,
+         self.server_features) = self._get_server_features()
+
         # Preload __dir__ information.  It will be extended later with action names
         self._dir = set([x for x in super_dir(CAS, self)])
 
@@ -518,10 +523,6 @@ class CAS(object):
                 num = num + 1
         self._id_generator = _id_generator()
 
-        (self.server_type,
-         self.server_version,
-         self.server_features) = self._get_server_features()
-
     def _gen_id(self):
         ''' Generate an ID unique to the session '''
         import numpy
@@ -538,13 +539,17 @@ class CAS(object):
         '''
         out = set()
 
-        info = self.retrieve('builtins.serverstatus', _messagelevel='error',
-                             _apptag='UI')
+        info = self._raw_retrieve('builtins.serverstatus', _messagelevel='error',
+                                  _apptag='UI')
         version = tuple([int(x) for x in info['About']['Version'].split('.')][:2])
         stype = info['About']['System']['OS Name'].lower()
 
-#       if version >= (3, 4):
-#           out.add('csv-ints')
+        # Check for reflection levels feature
+        res = self._raw_retrieve('builtins.reflect', _messagelevel='error',
+                                 _apptag='UI', action='builtins.reflect',
+                                 showlabels=False)
+        if [x for x in res[0]['actions'][0]['params'] if x['name'] == 'levels']:
+            out.add('reflection-levels')
 
         return stype, version, out
 
@@ -2154,16 +2159,18 @@ class CAS(object):
 
         raise AttributeError(origname)
 
-    def _get_action_info(self, name, showhidden=True):
+    def _get_action_info(self, name, showhidden=True, levels=None):
         '''
         Get the reflection information for the given action name
 
         Parameters
         ----------
         name : string
-           Name of the action
+            Name of the action
         showhidden : boolean
-           Should hidden actions be shown?
+            Should hidden actions be shown?
+        levels : int, optional
+            Number of levels of reflection data to return. Default is all.
 
         Returns
         -------
@@ -2175,7 +2182,9 @@ class CAS(object):
         if name in self._action_info:
             return self._action_info[name]
 
-        asname, actname, asinfo = self._get_reflection_info(name, showhidden=showhidden)
+        asname, actname, asinfo = self._get_reflection_info(name,
+                                                            showhidden=showhidden,
+                                                            levels=levels)
 
         # If action name is None, it is the same as the action set name
         if actname is None:
@@ -2195,7 +2204,7 @@ class CAS(object):
 
         return asname, actname, actinfo
 
-    def _get_actionset_info(self, name, atype=None, showhidden=True):
+    def _get_actionset_info(self, name, atype=None, showhidden=True, levels=None):
         '''
         Get the reflection information for the given action set / action name
 
@@ -2204,11 +2213,13 @@ class CAS(object):
         Parameters
         ----------
         name : string
-           Name of the action set or action
+            Name of the action set or action
         atype : string, optional
-           Specifies the type of the name ('action' or 'actionset')
+            Specifies the type of the name ('action' or 'actionset')
         showhidden : boolean, optional
-           Should hidden actions be shown?
+            Should hidden actions be shown?
+        levels : int, optional
+            Number of levels of reflection data to return. Default is all.
 
         Returns
         -------
@@ -2224,7 +2235,8 @@ class CAS(object):
             return asname, aname, self._actionset_info[asname.lower()][-1]
 
         asname, actname, asinfo = self._get_reflection_info(name, atype=atype,
-                                                            showhidden=showhidden)
+                                                            showhidden=showhidden,
+                                                            levels=levels)
 
         # Populate action set info
         self._actionset_info[asname.lower()] = asname, None, asinfo
@@ -2237,18 +2249,20 @@ class CAS(object):
 
         return asname, actname, asinfo
 
-    def _get_reflection_info(self, name, atype=None, showhidden=True):
+    def _get_reflection_info(self, name, atype=None, showhidden=True, levels=None):
         '''
         Get the full action name of the called action including the action set information
 
         Parameters
         ----------
         name : string
-           Name of the argument
+            Name of the argument
         atype : string, optional
-           Specifies the type of the name ('action' or 'actionset')
+            Specifies the type of the name ('action' or 'actionset')
         showhidden : boolean, optional
-           Should hidden actions be shown?
+            Should hidden actions be shown?
+        levels : int, optional
+            Number of levels of reflection data to return. Default is all.
 
         Returns
         -------
@@ -2295,8 +2309,16 @@ class CAS(object):
         if asname:
             asname = asname.lower()
             query = {'showhidden': showhidden, 'actionset': asname}
+
             if not get_option('interactive_mode'):
                 query['showlabels'] = False
+
+            if 'reflection-levels' in self.server_features:
+                if levels is not None:
+                    query['levels'] = levels
+                else:
+                    query['levels'] = get_option('cas.reflection_levels')
+
             idx = 0
             out = {}
             for response in self._invoke_without_signature('builtins.reflect',

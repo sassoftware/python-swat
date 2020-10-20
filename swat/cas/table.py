@@ -1659,7 +1659,7 @@ class CASTable(ParamManager, ActionParamManager):
         if not cls.table_params or not cls.outtable_params:
             param_names = []
 
-            actinfo = connection._get_action_info('builtins.cascommon')
+            actinfo = connection._get_action_info('builtins.cascommon', levels=100)
 
             for item in actinfo[-1].get('params'):
                 if 'parmList' in item:

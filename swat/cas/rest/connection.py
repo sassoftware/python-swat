@@ -642,22 +642,12 @@ class REST_CASConnection(object):
 
     def close(self):
         ''' Close the connection '''
-        if self._session and self._req_sess is not None:
-            self._req_sess.headers.update({
-                'Content-Type': 'application/json',
-                'Content-Length': '0',
-            })
+        self._session = None
+        if self._req_sess is not None:
+            self._req_sess.close()
 
-            url = urllib.parse.urljoin(self._current_baseurl,
-                                       'cas/sessions/%s' % self._session)
-
-            if get_option('cas.debug.requests'):
-                _print_request('DELETE', url, self._req_sess.headers)
-
-            res = self._req_sess.delete(url, data=b'')
-
-            self._session = None
-            return res.status_code
+    def __del__(self):
+        self.close()
 
     def upload(self, file_name, params):
         ''' Upload a data file '''

@@ -40,9 +40,6 @@ UUID_RE = r'^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$'
 
 class TestConnection(tm.TestCase):
 
-    # Create a class attribute to hold the cas host type
-    server_type = None
-
     def setUp(self):
         swat.reset_option()
         swat.options.cas.print_messages = False
@@ -54,12 +51,11 @@ class TestConnection(tm.TestCase):
 
         self.s = swat.CAS(HOST, PORT, USER, PASSWD, protocol=PROTOCOL)
 
-        if type(self).server_type is None:
-            type(self).server_type = tm.get_cas_host_type(self.s)
+        server_type = tm.get_cas_host_type(self.s)
 
-        self.srcLib = tm.get_casout_lib(self.server_type)
+        self.srcLib = tm.get_casout_lib(server_type)
 
-        r = tm.load_data(self.s, 'datasources/cars_single.sashdat', self.server_type)
+        r = tm.load_data(self.s, 'datasources/cars_single.sashdat', server_type)
 
         self.tablename = r['tableName']
         self.assertNotEqual(self.tablename, None)
@@ -1386,19 +1382,4 @@ class TestConnectionInfo(tm.TestCase):
 
 
 if __name__ == '__main__':
-    unittest.main()
-#   import xmlrunner
-#   unittest.main(testRunner=xmlrunner.XMLTestRunner(output='test-reports', verbosity=2))
-
-#   import profile, pstats
-
-#   profile.run(
-#       "unittest.main(testRunner=xmlrunner.XMLTestRunner(output='test-reports'))",
-#       'stats.txt')
-
-#   stats = pstats.Stats('stats.txt')
-#   stats.strip_dirs()
-#   stats.sort_stats('cumulative', 'calls')
-#   stats.print_stats(25)
-#   stats.sort_stats('time', 'calls')
-#   stats.print_stats(25)
+    tm.runtests()
