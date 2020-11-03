@@ -48,11 +48,14 @@ def main(args):
                 for line in f_in:
                     m = re.search(r'''^\s*version\s*=\s*['"]([^'"]+)['"]''', line)
                     if m:
+                        version = m.group(1)
+                        if version.endswith('-dev'):
+                            version = version.replace('-dev', '.dev0')
                         if args.release:
                             print('python-swat-{}+{}-{}'
-                                  .format(m.group(1), args.release, args.platform))
+                                  .format(version, args.release, args.platform))
                         else:
-                            print('python-swat-{}'.format(m.group(1)))
+                            print('python-swat-{}'.format(version))
                         return 0
 
     sys.stderr.write('ERROR: Could not find setup.py file.\n')
