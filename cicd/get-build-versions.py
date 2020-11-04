@@ -78,6 +78,9 @@ def main(args):
     ''' Main routine '''
     c_ext_versions = set()
 
+    if args.platform == 'win-64':
+        args.tk_root = args.tk_root.replace('unix', 'win')
+
     for url in TK_URLS:
         url = url.format(tk_root=args.tk_root, release=args.release,
                          platform=PLATFORM_MAP[args.platform])
