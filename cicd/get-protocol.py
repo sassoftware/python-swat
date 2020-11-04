@@ -46,6 +46,12 @@ def main(args):
     if args.platform == 'win-64':
         args.tk_root = args.tk_root.replace('unix', 'win')
 
+    # Fix TK versions (Linux-only at vb015; Windows-only at vb020)
+    if args.release == 'vb020' and args.platform != 'win-64':
+        args.release = 'vb015'
+    elif args.release == 'vb015' and args.platform == 'win-64':
+        args.release = 'vb020'
+
     url = TK_URL.format(tk_root=args.tk_root, release=args.release,
                         platform=PLATFORM_MAP[args.platform])
 
