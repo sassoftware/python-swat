@@ -21,10 +21,10 @@ import zipfile
 
 # Possible locations for CAS client TK packages
 TK_URLS = [x + '/release/caspythnclnt/caspythnclnt_en.zip' for x in [
-    '{root}/sashpa/dev/mva-{release}f/cda/zippkg/{platform}',
-    '{root}/sashpa/day/mva-{release}/cda/zippkg/{platform}',
-    '{root}/sashpa/dev/mva-{release}f/cda/zippkg/lax',
-    '{root}/sashpa/day/mva-{release}/cda/zippkg/lax',
+    '{tk_root}/sashpa/dev/mva-{release}f/cda/zippkg/{platform}',
+    '{tk_root}/sashpa/day/mva-{release}/cda/zippkg/{platform}',
+    '{tk_root}/sashpa/dev/mva-{release}f/cda/zippkg/lax',
+    '{tk_root}/sashpa/day/mva-{release}/cda/zippkg/lax',
 ]]
 
 # Map of conda platform names to SAS platform names
@@ -79,7 +79,7 @@ def main(args):
     c_ext_versions = set()
 
     for url in TK_URLS:
-        url = url.format(root=args.root, release=args.release,
+        url = url.format(tk_root=args.tk_root, release=args.release,
                          platform=PLATFORM_MAP[args.platform])
 
         resp = requests.head(url)
@@ -111,7 +111,7 @@ def main(args):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__.strip())
 
-    parser.add_argument('--root', type=str, metavar='url', required=True,
+    parser.add_argument('--tk-root', type=str, metavar='url', required=True,
                         help='root path / URL of the CAS client packages')
     parser.add_argument('-p', '--platform', type=str, metavar='name',
                         default=get_platform(),
