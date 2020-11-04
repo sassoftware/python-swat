@@ -53,9 +53,9 @@ def get_platform():
 
 
 def get_python_versions(platform):
-    ''' 
+    '''
     Retrieve all possible Python versions for the given platform
-    
+
     This function actually uses information about the pandas library
     instead of Python itself. Pandas is the primary dependency of
     SWAT, so it is the limiting factor on what Python versions can
