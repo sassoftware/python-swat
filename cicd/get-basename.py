@@ -38,6 +38,12 @@ def get_platform():
     return 'unknown'
 
 
+def print_err(*args, **kwargs):
+    ''' Print a message to stderr '''
+    sys.stderr.write(*args, **kwargs)
+    sys.stderr.write('\n')
+
+
 def main(args):
     ''' Main routine '''
 
@@ -66,7 +72,8 @@ def main(args):
             print('python-swat-{}'.format(version))
         return 0
 
-    print('ERROR: Could not find __init__.py file.', file=sys.stderr)
+    print_err('ERROR: Could not find __init__.py file.')
+
     return 1
 
 

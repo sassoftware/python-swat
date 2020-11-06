@@ -17,6 +17,12 @@ from urllib.parse import quote
 GITHUB_TOKEN = os.environ['GITHUB_TOKEN']
 
 
+def print_err(*args, **kwargs):
+    ''' Print a message to stderr '''
+    sys.stderr.write(*args, **kwargs)
+    sys.stderr.write('\n')
+
+
 def get_repo():
     ''' Retrieve the repo part of the git URL '''
     cmd = ['git', 'remote', 'get-url', 'origin']
@@ -79,7 +85,7 @@ def main(args):
             if args.force:
                 delete_asset(assets[filename]['id'])
             else:
-                sys.stderr.write('WARNING: Asset already exists: {}\n'.format(asset))
+                print_err('WARNING: Asset already exists: {}'.format(asset))
                 continue
         upload_asset(upload_url, asset)
 
@@ -101,7 +107,7 @@ if __name__ == '__main__':
     try:
         sys.exit(main(args))
     except argparse.ArgumentTypeError as exc:
-        sys.stderr.write('ERROR: {}\n'.format(exc))
+        print_err('ERROR: {}'.format(exc))
         sys.exit(1)
     except KeyboardInterrupt:
         sys.exit(1)

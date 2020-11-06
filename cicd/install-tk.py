@@ -66,6 +66,12 @@ PLATFORM_MAP = {
 }
 
 
+def print_err(*args, **kwargs):
+    ''' Print a message to stderr '''
+    sys.stderr.write(*args, **kwargs)
+    sys.stderr.write('\n')
+
+
 def get_platform():
     ''' Return the Anaconda platform name for the current platform '''
     plat = platform.system().lower()
@@ -194,7 +200,7 @@ def get_packages(lib_root, tk_base, release, platform, pkgs, versions_only=False
                 raise RuntimeError('{} code occurred during download of {}'
                                    .format(resp.status_code, url))
 
-            print(url, file=sys.stderr)
+            print_err(url)
 
             resp = requests.get(url, allow_redirects=True)
 

@@ -39,6 +39,12 @@ def setup2json(**kwargs):
     print(json.dumps(kwargs))
 
 
+def print_err(*args, **kwargs):
+    ''' Print a message to stderr '''
+    sys.stderr.write(*args, **kwargs)
+    sys.stderr.write('\n')
+
+
 def setup2str(**kwargs):
     '''
     Print metadata from setup.py:setup(...) call
@@ -202,7 +208,7 @@ def main(url, args):
 
     download = False
     if url.startswith('http:') or url.startswith('https:'):
-        print('Downloading %s' % url, file=sys.stderr)
+        print_err('Downloading %s' % url)
         download = True
         url, headers = urlretrieve(url)
 
@@ -282,7 +288,7 @@ def main(url, args):
 
             tar_name = '%s-%s' % (top_level, version)
 
-            print('Creating %s.tar.gz' % tar_name, file=sys.stderr)
+            print_err('Creating %s.tar.gz' % tar_name)
 
             with tarfile.TarFile('%s.tar' % tar_name, mode='w') as tar:
                 tar.add(root, recursive=True,
@@ -378,7 +384,7 @@ def main(url, args):
             zip_name = '%s-%s-%s-%s.whl' % (top_level, version, args.build, tag % pyver)
             zip_name = os.path.join(outdir, zip_name)
 
-            print('Creating %s' % zip_name, file=sys.stderr)
+            print_err('Creating %s' % zip_name)
 
             with zipfile.ZipFile(zip_name, 'w', compression=zipfile.ZIP_DEFLATED) as zip:
 
@@ -459,5 +465,5 @@ if __name__ == '__main__':
 
     for url in args.urls:
         main(url, args)
-        print(file=sys.stderr)
+        print_err('')
         args.source_dist = False

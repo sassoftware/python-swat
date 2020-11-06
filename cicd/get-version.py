@@ -14,6 +14,12 @@ import re
 import sys
 
 
+def print_err(*args, **kwargs):
+    ''' Print a message to stderr '''
+    sys.stderr.write(*args, **kwargs)
+    sys.stderr.write('\n')
+
+
 def main(args):
     ''' Main routine '''
 
@@ -35,7 +41,8 @@ def main(args):
             print(version)
         return
 
-    print('ERROR: Could not find __init__.py file.', file=sys.stderr)
+    print_err('ERROR: Could not find __init__.py file.')
+
     return 1
 
 

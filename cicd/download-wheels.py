@@ -10,6 +10,12 @@ from urllib.parse import urljoin
 from urllib.request import urlopen, urlretrieve
 
 
+def print_err(*args, **kwargs):
+    ''' Print a message to stderr '''
+    sys.stderr.write(*args, **kwargs)
+    sys.stderr.write('\n')
+
+
 def main(args):
     ''' Main routine '''
     if not args.version:
@@ -44,7 +50,7 @@ if __name__ == '__main__':
     try:
         sys.exit(main(args))
     except argparse.ArgumentTypeError as exc:
-        sys.stderr.write('ERROR: {}\n'.format(exc))
+        print_err('ERROR: {}'.format(exc))
         sys.exit(1)
     except KeyboardInterrupt:
         sys.exit(1)

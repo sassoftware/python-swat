@@ -18,6 +18,12 @@ import sys
 import time
 
 
+def print_err(*args, **kwargs):
+    ''' Print a message to stderr '''
+    sys.stderr.write(*args, **kwargs)
+    sys.stderr.write('\n')
+
+
 def main(args):
     '''
     Main routine
@@ -29,7 +35,7 @@ def main(args):
 
     '''
     if not os.path.isfile(args.log_file):
-        sys.stderr.write('error: file not found: {}'.format(args.log_file))
+        print_err('ERROR: File not found: {}'.format(args.log_file))
         sys.exit(1)
 
     iters = 0
@@ -37,7 +43,7 @@ def main(args):
         iters += 1
         time.sleep(args.interval)
         if iters > args.retries:
-            sys.stderr.write('error: could not locate CAS log file\n')
+            print_err('ERROR: Could not locate CAS log file.')
             sys.exit(1)
 
         with open(args.log_file, 'r') as logf:

@@ -15,6 +15,12 @@ import subprocess
 import sys
 
 
+def print_err(*args, **kwargs):
+    ''' Print a message to stderr '''
+    sys.stderr.write(*args, **kwargs)
+    sys.stderr.write('\n')
+
+
 def get_platform():
     ''' Return the Anaconda platform name for the current platform '''
     plat = platform.system().lower()
@@ -57,8 +63,7 @@ def main(args):
 
     supported = get_supported_versions(args.root)
     if not supported:
-        print('ERROR: Could not determine supported versions of Python.',
-              file=sys.stderr)
+        print_err('ERROR: Could not determine supported versions of Python.')
         return 1
 
     final = {}
@@ -87,11 +92,11 @@ def main(args):
             subset.append((pyvers[i], pdvers[0]))
 
     if not pyvers:
-        print('ERROR: No Python versions were found.', file=sys.stderr)
+        print_err('ERROR: No Python versions were found.')
         return 1
 
     if not pdvers:
-        print('ERROR: No pandas versions were found.', file=sys.stderr)
+        print_err('ERROR: No pandas versions were found.')
         return 1
 
     # Generate Tox configurations for testenvs

@@ -30,6 +30,12 @@ except NameError:
             exec(code, global_vars, local_vars)
 
 
+def print_err(*args, **kwargs):
+    ''' Print a message to stderr '''
+    sys.stderr.write(*args, **kwargs)
+    sys.stderr.write('\n')
+
+
 def tar_filter(tar_name, tar_info):
     '''
     Filter out compiled pieces of tar file
@@ -211,7 +217,7 @@ def main(url, args):
 
     download = False
     if url.startswith('http:') or url.startswith('https:'):
-        print('> download %s' % url, file=sys.stderr)
+        print_err('> download %s' % url)
         download = True
         url, headers = urlretrieve(url)
     elif os.path.exists(url):
@@ -289,14 +295,14 @@ def main(url, args):
                 extbase = '_py{}swat'.format(info['pyversion'].replace('.', '')
                                                               .replace('27', ''))
                 for ext in glob.glob(os.path.join(tmpext, extbase + '.*')):
-                    print('> copy %s' % ext, file=sys.stderr)
+                    print_err('> copy %s' % ext)
                     shutil.copy(ext, os.path.join('swat', 'lib', platform, ext))
 
-                print('>', ' '.join(cmd), file=sys.stderr)
+                print_err('>', ' '.join(cmd))
                 subprocess.check_output(cmd)
 
                 for ext in glob.glob(os.path.join(tmpext, extbase + '.*')):
-                    print('> remove %s' % ext, file=sys.stderr)
+                    print_err('> remove %s' % ext)
                     os.remove(os.path.join('swat', 'lib', platform, ext))
 
     os.chdir(cwd)
