@@ -184,6 +184,13 @@ def redirect_stdout(target):
     sys.stdout = original
 
 
+def ensure_dot_separator(version):
+    ''' Make sure that Python versions have a dot separator '''
+    if '.' not in version:
+        return '%s.%s' % (version[0], version[1:])
+    return version
+
+
 open = io.open
 
 
@@ -196,13 +203,15 @@ def main(url, args):
 
     args.output_folder = os.path.abspath(args.output_folder)
 
+    os.makedirs(args.output_folder, exist_ok=True)
+
     args.recipe_dir = os.path.abspath(args.recipe_dir)
     if os.path.isfile(args.recipe_dir):
         args.recipe_dir = os.path.dirname(args.recipe_dir)
 
     download = False
     if url.startswith('http:') or url.startswith('https:'):
-        print('> download %s' % url)
+        print('> download %s' % url, file=sys.stderr)
         download = True
         url, headers = urlretrieve(url)
     elif os.path.exists(url):
@@ -238,18 +247,19 @@ def main(url, args):
                 versions.append(dict(extension=m.group(2),
                                      pyversion='.'.join(list(m.group(3) or '27'))))
 
-        # Filter version list
-        if not versions:
-            for ver in re.split(r'[,\s+]', args.python):
-                versions.append(dict(pyversion=ver))
-        else:
-            arg_versions = re.split(r'[,\s+]', args.python)
-            new_versions = []
-            for ver in versions:
-                if ver['pyversion'] not in arg_versions:
-                    continue
-                new_versions.append(ver)
-            versions = new_versions
+#       # Filter version list
+#       if not versions:
+#           for ver in re.split(r'[,\s+]', args.python):
+#               versions.append(dict(pyversion=ensure_dot_separator(ver)))
+#       else:
+#           arg_versions = [ensure_dot_separator(x)
+#                           for x in re.split(r'[,\s+]', args.python)]
+#           new_versions = []
+#           for ver in versions:
+#               if ver['pyversion'] not in arg_versions:
+#                   continue
+#               new_versions.append(ver)
+#           versions = new_versions
 
         # Anaconda only has one build for Python 2.7
         versions = [x for x in versions if x['pyversion'] != '2.7u']
@@ -279,14 +289,14 @@ def main(url, args):
                 extbase = '_py{}swat'.format(info['pyversion'].replace('.', '')
                                                               .replace('27', ''))
                 for ext in glob.glob(os.path.join(tmpext, extbase + '.*')):
-                    print('> copy %s' % ext)
+                    print('> copy %s' % ext, file=sys.stderr)
                     shutil.copy(ext, os.path.join('swat', 'lib', platform, ext))
 
-                print('>', ' '.join(cmd))
+                print('>', ' '.join(cmd), file=sys.stderr)
                 subprocess.check_output(cmd)
 
                 for ext in glob.glob(os.path.join(tmpext, extbase + '.*')):
-                    print('> remove %s' % ext)
+                    print('> remove %s' % ext, file=sys.stderr)
                     os.remove(os.path.join('swat', 'lib', platform, ext))
 
     os.chdir(cwd)
@@ -311,9 +321,9 @@ if __name__ == '__main__':
                       help='disable searching default or .condarc channels')
     opts.add_argument('--recipe-dir', '-r', required=True, type=str,
                       help='path to recipe file')
-    opts.add_argument('--python', default='2.7,2.7u,3.5,3.6,3.7,3.8', type=str,
-                      help='python package versions (for filtering packages with '
-                           'extensions or forcing for non-binary platforms)')
+#   opts.add_argument('--python', default='2.7,2.7u,3.5,3.6,3.7,3.8', type=str,
+#                     help='python package versions (for filtering packages with '
+#                          'extensions or forcing for non-binary platforms)')
 
     args = opts.parse_args()
 

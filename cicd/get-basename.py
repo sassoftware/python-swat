@@ -40,40 +40,50 @@ def get_platform():
 
 def main(args):
     ''' Main routine '''
-    files = glob.glob(os.path.join(args.directory, 'setup.py'))
 
-    for f in files:
-        if os.path.isfile(f):
-            with open(f, 'r') as f_in:
-                for line in f_in:
-                    m = re.search(r'''^\s*version\s*=\s*['"]([^'"]+)['"]''', line)
-                    if m:
-                        version = m.group(1)
-                        if version.endswith('-dev'):
-                            version = version.replace('-dev', '.dev0')
-                        if args.release:
-                            print('python-swat-{}+{}-{}'
-                                  .format(version, args.release, args.platform))
-                        else:
-                            print('python-swat-{}'.format(version))
-                        return 0
+    version = None
+    tk_version = None
 
-    sys.stderr.write('ERROR: Could not find setup.py file.\n')
+    init = glob.glob(os.path.join(args.root, 'swat', '__init__.py'))[0]
+    with open(init, 'r') as init_in:
+        for line in init_in:
+            m = re.search(r'''^__version__\s*=\s*['"]([^'"]+)['"]''', line)
+            if m:
+                version = m.group(1)
+                if version.endswith('-dev'):
+                    version = version.replace('-dev', '.dev0')
+
+            m = re.search(r'''^__tk_version__\s*=\s*['"]([^'"]+)['"]''', line)
+            if m:
+                tk_version = m.group(1)
+                if tk_version == 'none':
+                    tk_version = 'REST-only'
+
+    if version:
+        if args.full:
+            print('python-swat-{}+{}-{}'.format(version, tk_version, args.platform))
+        else:
+            print('python-swat-{}'.format(version))
+        return 0
+
+    print('ERROR: Could not find __init__.py file.', file=sys.stderr)
     return 1
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__.strip())
 
-    parser.add_argument('directory', type=str, metavar='dir', nargs='?', default='.',
-                        help='directory to retrieve version information from')
+    parser.add_argument('root', type=str, metavar='<directory>', nargs='?', default='.',
+                        help='root directory of Python package')
 
-    parser.add_argument('--release', '-r', type=str, metavar='tk-release',
-                        help='TK release to use in output name')
-    parser.add_argument('--platform', '-p', type=str, metavar='platform',
+    parser.add_argument('--platform', '-p', type=str, metavar='<platform>',
+                        choices=['linux-64', 'osx-64', 'win-64', 'linux-ppc64le'],
                         default=get_platform(),
-                        help='platform name to use in output name')
+                        help='platform of the resulting package')
+    parser.add_argument('--full', '-f', action='store_true',
+                        help='return the full variant of the basename '
+                             'including TK version and platform')
 
     args = parser.parse_args()
 
-    sys.exit(main(args))
+    sys.exit(main(args) or 0)

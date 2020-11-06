@@ -6,75 +6,35 @@ Return the preferred CAS protocol ('cas' if TK is available; 'http' otherwise)
 '''
 
 import argparse
+import glob
 import os
-import platform
 import re
-import requests
 import sys
-
-# Possible locations for CAS client TK packages
-TK_URL = '{tk_root}/sashpa/day/mva-{release}/cda/zippkg/{platform}' + \
-         '/release/caspythnclnt/caspythnclnt_en.zip'
-
-# Map of conda platform names to SAS platform names
-PLATFORM_MAP = {
-    'linux-64': 'lax',
-    'linux-ppc64le': 'plx',
-    'osx-64': 'm64',
-    'win-64': 'wx6',
-}
-
-
-def get_platform():
-    ''' Return the Anaconda platform name for the current platform '''
-    plat = platform.system().lower()
-    if 'darwin' in plat:
-        return 'osx-64'
-    if plat.startswith('win'):
-        return 'win-64'
-    if 'linux' in plat:
-        machine = platform.machine().lower()
-        if 'x86' in machine:
-            return 'linux-64'
-        if 'ppc' in machine:
-            return 'linux-ppc64le'
-    return 'unknown'
 
 
 def main(args):
     ''' Main routine '''
-    if args.platform == 'win-64':
-        args.tk_root = args.tk_root.replace('unix', 'win')
+    version = None
 
-    # Fix TK versions (Linux-only at vb015; Windows-only at vb020)
-    if args.release == 'vb020' and args.platform != 'win-64':
-        args.release = 'vb015'
-    elif args.release == 'vb015' and args.platform == 'win-64':
-        args.release = 'vb020'
+    init = glob.glob(os.path.join(args.root, 'swat', '__init__.py'))[0]
+    with open(init, 'r') as init_in:
+        for line in init_in:
+            m = re.match(r'''__tk_version__\s*=\s*['"]([^'"]+)['"]''', line)
+            if m:
+                version = m.group(1)
+                if version == 'none':
+                    version = None
+                break
 
-    url = TK_URL.format(tk_root=args.tk_root, release=args.release,
-                        platform=PLATFORM_MAP[args.platform])
-
-    resp = requests.head(url)
-    if resp.status_code > 200:
-        print('http')
-        return
-
-    print('cas')
+    print(version and 'cas' or 'http')
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__.strip())
 
-    parser.add_argument('--tk-root', type=str, metavar='url', required=True,
-                        help='root path / URL of the CAS client packages')
-    parser.add_argument('-p', '--platform', type=str, metavar='name',
-                        default=get_platform(),
-                        choices=['linux-64', 'linux-ppc64le', 'osx-64', 'win-64'],
-                        help='platform to query files for')
-    parser.add_argument('-r', '--release', type=str, metavar='vbXXXX',
-                        default='vbviya',
-                        help='TK library release')
+    parser.add_argument('root', type=str, metavar='<directory>',
+                        default='.', nargs='?',
+                        help='root directory of Python package')
 
     args = parser.parse_args()
 

@@ -202,7 +202,7 @@ def main(url, args):
 
     download = False
     if url.startswith('http:') or url.startswith('https:'):
-        print('Downloading %s' % url)
+        print('Downloading %s' % url, file=sys.stderr)
         download = True
         url, headers = urlretrieve(url)
 
@@ -217,6 +217,8 @@ def main(url, args):
             urlcleanup()
 
         outdir = os.path.abspath(args.dir)
+
+        os.makedirs(outdir, exist_ok=True)
 
         os.chdir(temp)
 
@@ -280,7 +282,7 @@ def main(url, args):
 
             tar_name = '%s-%s' % (top_level, version)
 
-            print('Creating %s.tar.gz' % tar_name)
+            print('Creating %s.tar.gz' % tar_name, file=sys.stderr)
 
             with tarfile.TarFile('%s.tar' % tar_name, mode='w') as tar:
                 tar.add(root, recursive=True,
@@ -329,25 +331,25 @@ def main(url, args):
                 if int(versions[-1]['pyversion'].replace('cp', '')) >= 38:
                     versions[-1]['abi'] = versions[-1]['abi'].replace('m', '')
 
-        # Filter version list
-        if not versions:
-            for ver in re.split(r'[,\s+]', args.python):
-                m = re.search(r'(\d+\.\d+)(u?)', ver)
-                if m:
-                    versions.append(
-                        dict(pyversion='cp%s' % m.group(1).replace('.', ''),
-                             abi='cp%sm%s' % (m.group(1).replace('.', ''), m.group(2))))
-                    if int(versions[-1]['pyversion'].replace('cp', '')) >= 38:
-                        versions[-1]['abi'] = versions[-1]['abi'].replace('m', '')
-        else:
-            arg_versions = ['cp{}'.format(x.replace('.', ''))
-                            for x in re.split(r'[,\s+]', args.python)]
-            new_versions = []
-            for ver in versions:
-                if ver['pyversion'] not in arg_versions:
-                    continue
-                new_versions.append(ver)
-            versions = new_versions
+#       # Filter version list
+#       if not versions:
+#           for ver in re.split(r'[,\s+]', args.python):
+#               m = re.search(r'(\d\.?\d)(u?)', ver)
+#               if m:
+#                   versions.append(
+#                       dict(pyversion='cp%s' % m.group(1).replace('.', ''),
+#                            abi='cp%sm%s' % (m.group(1).replace('.', ''), m.group(2))))
+#                   if int(versions[-1]['pyversion'].replace('cp', '')) >= 38:
+#                       versions[-1]['abi'] = versions[-1]['abi'].replace('m', '')
+#       else:
+#           arg_versions = ['cp{}'.format(x.replace('.', ''))
+#                           for x in re.split(r'[,\s+]', args.python)]
+#           new_versions = []
+#           for ver in versions:
+#               if ver['pyversion'] not in arg_versions:
+#                   continue
+#               new_versions.append(ver)
+#           versions = new_versions
 
         # Setup platform tag
         tag = 'py2.py3-none-any'
@@ -376,7 +378,7 @@ def main(url, args):
             zip_name = '%s-%s-%s-%s.whl' % (top_level, version, args.build, tag % pyver)
             zip_name = os.path.join(outdir, zip_name)
 
-            print('Creating %s' % zip_name)
+            print('Creating %s' % zip_name, file=sys.stderr)
 
             with zipfile.ZipFile(zip_name, 'w', compression=zipfile.ZIP_DEFLATED) as zip:
 
@@ -448,14 +450,14 @@ if __name__ == '__main__':
                       help='create source distribution in addition')
     opts.add_argument('--pypi', action='store_true',
                       help='generate a PyPI directory structure')
-    opts.add_argument('--python', default='2.7,2.7u,3.5,3.6,3.7,3.8',
-                      type=str, metavar='<X.Y<,X.Z...>>',
-                      help='python versions (for filtering packages with extensions '
-                           'or forcing for non-binary platforms)')
+#   opts.add_argument('--python', default='2.7,2.7u,3.5,3.6,3.7,3.8',
+#                     type=str, metavar='<X.Y<,X.Z...>>',
+#                     help='python versions (for filtering packages with extensions '
+#                          'or forcing for non-binary platforms)')
 
     args = opts.parse_args()
 
     for url in args.urls:
         main(url, args)
-        print()
+        print(file=sys.stderr)
         args.source_dist = False
