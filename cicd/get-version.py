@@ -29,7 +29,10 @@ def main(args):
                     version = version.replace('-dev', '.dev0')
 
     if version:
-        print(version)
+        if args.as_expr:
+            print('={}'.format(version))
+        else:
+            print(version)
         return
 
     print('ERROR: Could not find __init__.py file.', file=sys.stderr)
@@ -41,6 +44,9 @@ if __name__ == '__main__':
 
     parser.add_argument('root', type=str, metavar='<directory>', nargs='?',
                         default='.', help='root directory of Python package')
+
+    parser.add_argument('-e', '--as-expr', action='store_true',
+                        help='format the version as a dependency expression')
 
     args = parser.parse_args()
 
