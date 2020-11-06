@@ -5,6 +5,8 @@ Return the version of the package
 
 '''
 
+from __future__ import print_function, division, absolute_import, unicode_literals
+
 import argparse
 import glob
 import os
@@ -37,8 +39,8 @@ def main(args):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__.strip())
 
-    parser.add_argument('root', type=str, metavar='<directory>', nargs='?', default='.',
-                        help='root directory of Python package')
+    parser.add_argument('root', type=str, metavar='<directory>', nargs='?',
+                        default='.', help='root directory of Python package')
 
     args = parser.parse_args()
 
