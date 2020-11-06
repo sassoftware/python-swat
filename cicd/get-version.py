@@ -36,7 +36,7 @@ def main(args):
 
     if version:
         if args.as_expr:
-            print('={}'.format(version))
+            print('=={}'.format(version))
         else:
             print(version)
         return
