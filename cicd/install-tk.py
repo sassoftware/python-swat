@@ -172,7 +172,7 @@ def get_packages(lib_root, tk_base, release, platform, pkgs, versions_only=False
         C extensions? This is used on platforms where TK components
         do not exist, but we need to know which versions of Python
         to build packages for.
-    
+
     '''
     py_versions = []
     resp = None
@@ -203,7 +203,7 @@ def get_packages(lib_root, tk_base, release, platform, pkgs, versions_only=False
                                for x in get_python_versions(platform)]
 
             if versions_only:
-                create_placeholders(lib_root, resp.content, py_versions=py_versions) 
+                create_placeholders(lib_root, resp.content, py_versions=py_versions)
             else:
                 extract_zip(lib_root, resp.content, py_versions=py_versions)
 

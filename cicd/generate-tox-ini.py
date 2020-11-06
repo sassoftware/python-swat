@@ -106,7 +106,7 @@ def main(args):
                 out.append('#')
             prev_pyver = pyver
 
-            name = 'py{}-pd{}'.format(pyver.replace('.', ''), pdver.replace('.', ''))
+            name = 'py{}-{}'.format(pyver.replace('.', ''), pkg)
             envlist.append(name)
             out.append('[testenv:{}]'.format(name))
             out.append('commands = {{[testenv:{}]commands}}'.format(pkg))
