@@ -298,7 +298,7 @@ def main(url, args):
                     print_err('> copy %s' % ext)
                     shutil.copy(ext, os.path.join('swat', 'lib', platform, ext))
 
-                print_err('>', ' '.join(cmd))
+                print_err('>' + ' '.join(cmd))
                 subprocess.check_output(cmd)
 
                 for ext in glob.glob(os.path.join(tmpext, extbase + '.*')):
