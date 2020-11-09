@@ -161,7 +161,7 @@ def dir2pypi(directory, pkg_name='swat'):
         index.write('''<html><head>''')
         index.write('''<title>Simple Index</title>''')
         index.write('''<meta name='api-version' value='2' />''')
-        index.write(''''</head><body>\n''')
+        index.write('''</head><body>\n''')
         index.write('''<a href='{0}/'>{0}</a><br />\n'''.format(pkg_name))
         index.write('''</body></html>\n''')
 
