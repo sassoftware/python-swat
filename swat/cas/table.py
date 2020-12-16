@@ -1251,7 +1251,12 @@ class CASTable(ParamManager, ActionParamManager):
     getdoc = None
 
     def __init__(self, name, **table_params):
-        ParamManager.__init__(self, name=name, **table_params)
+        if isinstance(name, CASTable):
+            params = name.to_params()
+            params.update(table_params)
+            ParamManager.__init__(self, **params)
+        else:
+            ParamManager.__init__(self, name=name, **table_params)
         ActionParamManager.__init__(self)
         self._pandas_enabled = True
         self._connection = None
