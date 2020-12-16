@@ -182,7 +182,20 @@ register_option('cas.protocol', 'string',
                 'Using "http" or "https" will use the REST interface.',
                 environ='CAS_PROTOCOL')
 
-register_option('cas.ssl_ca_list', 'string', check_string, None,
+
+def get_default_cafile():
+    ''' Retrieve the default CA file in the ssl module '''
+    import ssl
+    get_paths = getattr(ssl, 'get_default_verify_paths', None)
+    if get_paths:
+        paths = get_paths()
+        if hasattr(paths, 'openssl_cafile'):
+            return paths.openssl_cafile
+        if hasattr(paths, 'cafile'):
+            return paths.cafile
+
+
+register_option('cas.ssl_ca_list', 'string', check_string, get_default_cafile(),
                 'Sets the path to the SSL certificates for the CAS server.',
                 environ=['CAS_CLIENT_SSL_CA_LIST',
                          'SAS_TRUSTED_CA_CERTIFICATES_PEM_FILE',
