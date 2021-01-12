@@ -1,6 +1,13 @@
 
 # Change Log
 
+## 1.8.0 - 2021-01-12
+
+- Use ssl module's CA list as default
+- Improve initial connection performance
+- Fix OAuth authentication in REST connections
+- Fix log truncation with messages >1000 characters
+
 ## 1.7.1 - 2020-09-29
 
 - Add ability to apply SAS formats to columns in a `SASDataFrame`

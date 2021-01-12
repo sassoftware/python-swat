@@ -9,6 +9,14 @@ What’s New
 
 This document outlines features and improvements from each release.
 
+1.8.0 (January 12, 2021)
+------------------------
+
+-  Use ssl module’s CA list as default
+-  Improve initial connection performance
+-  Fix OAuth authentication in REST connections
+-  Fix log truncation with messages >1000 characters
+
 1.7.1 (September 29, 2020)
 --------------------------
 
