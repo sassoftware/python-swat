@@ -351,7 +351,7 @@ if __name__ == '__main__':
     parser.add_argument('--version', '-v', type=version_type, metavar='version',
                         help='version of the package')
     parser.add_argument('--title', '-t', type=str, metavar='release-title',
-                        default='{tag}', help='title of the release')
+                        default='SWAT {tag}', help='title of the release')
     parser.add_argument('--snapshot', '-s', action='store_true',
                         help='create a snapshot release (--version is ignored)')
     parser.add_argument('assets', type=str, metavar='filename', nargs='*',
