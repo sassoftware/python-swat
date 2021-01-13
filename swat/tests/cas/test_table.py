@@ -4473,7 +4473,7 @@ class TestCASTable(tm.TestCase):
 
         try:
             tbl.to_excel(tmp.name)
-        except ImportError:
+        except Exception:
             tm.TestCase.skipTest(self, 'Need openpyxl installed')
 
         df2 = pd.read_excel(tmp.name)
