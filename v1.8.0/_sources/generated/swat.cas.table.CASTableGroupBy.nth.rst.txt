@@ -1,0 +1,6 @@
+swat.cas.table.CASTableGroupBy.nth
+==================================
+
+.. currentmodule:: swat.cas.table
+
+.. automethod:: CASTableGroupBy.nth

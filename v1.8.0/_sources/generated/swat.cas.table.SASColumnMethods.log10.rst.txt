@@ -1,0 +1,6 @@
+swat.cas.table.SASColumnMethods.log10
+=====================================
+
+.. currentmodule:: swat.cas.table
+
+.. automethod:: SASColumnMethods.log10
