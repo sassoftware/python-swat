@@ -230,11 +230,19 @@ def concat(objs, axis=0, join='outer', join_axes=None, ignore_index=False, keys=
     :class:`CASTable`
 
     '''
+    for item in objs:
+        if item is None:
+            continue
+        if not isinstance(item, CASTable):
+            raise TypeError('All input objects must be CASTable instances')
+
     try:
         views = []
         for item in objs:
             if item is None:
                 continue
+            if not isinstance(item, CASTable):
+                raise TypeError('All input objects must be CASTable instances')
             views.append(item.to_view())
 
         if not views:
@@ -318,6 +326,11 @@ def merge(left, right, how='inner', on=None, left_on=None, right_on=None,
     :class:`CASTable`
 
     '''
+    if not isinstance(left, CASTable):
+        raise TypeError('`left` parameter must be a CASTable object')
+    if not isinstance(right, CASTable):
+        raise TypeError('`right` parameter must be a CASTable object')
+
     how = how.lower()
 
     # Setup join column names
