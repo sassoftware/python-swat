@@ -165,7 +165,8 @@ def rotate_doc(tag_name):
     # Clear out existing top-level doc
     for f in (glob.glob('*.html') + glob.glob('*.js')
               + glob.glob('*.inv') + ['.buildinfo']):
-        os.remove(f)
+        if os.path.isfile(f):
+            os.remove(f)
     for f in ['_images', '_sources', '_static', 'generated']:
         shutil.rmtree(f)
 
@@ -173,8 +174,11 @@ def rotate_doc(tag_name):
     from distutils.dir_util import copy_tree
     copy_tree(tag_name, '.')
 
+    if os.path.isfile('.buildinfo'):
+        os.remove('.buildinfo')
+
     cmd = ['git', 'add', '*.html', '*.js', '*.inv', '_images',
-           '_sources', '_static', 'generated', '.buildinfo', tag_name]
+           '_sources', '_static', 'generated', tag_name]
     subprocess.check_call(cmd)
 
     subprocess.check_call(['git', 'status'])
