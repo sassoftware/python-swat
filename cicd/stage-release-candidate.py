@@ -54,7 +54,7 @@ def get_repo():
     ''' Retrieve the repo part of the git URL '''
     cmd = ['git', 'remote', 'get-url', 'origin']
     repo = subprocess.check_output(cmd).decode('utf-8').strip()
-    repo = re.search(r'github.com/(.+?)\.git$', repo).group(1)
+    repo = re.search(r'github.com[/:](.+?)\.git$', repo).group(1)
     return repo
 
 
