@@ -960,7 +960,7 @@ class CASActionOrActionSet(ParamManager):
         '''
         return type(self).get_connection()._raw_retrieve(self._name,
                                                          **mergedefined(self.to_params(),
-                                                         kwargs))
+                                                                        kwargs))
 
     retrieve = __call__
 
