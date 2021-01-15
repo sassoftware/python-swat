@@ -48,7 +48,7 @@ from ..utils.compat import (a2u, a2n, int32, int64, float64, text_types,
 from ..utils import getsoptions
 from ..utils.args import iteroptions
 from ..formatter import SASFormatter
-from .actions import CASAction, CASActionSet
+from .actions import CASAction, CASActionSet, CASActionOrActionSet
 from .table import CASTable
 from .transformers import py2cas
 from .request import CASRequest
@@ -2137,7 +2137,13 @@ class CAS(object):
             return self._action_classes[name]()
 
         # See if the action/action set exists
-        asname, actname, asinfo = self._get_actionset_info(name.lower(), atype=atype)
+        try:
+            asname, actname, asinfo = self._get_actionset_info(name.lower(), atype=atype)
+        except AttributeError:
+            enabled = ['yes', 'y', 'on', 't', 'true', '1']
+            if os.environ.get('CAS_ACTION_TEST_MODE', '').lower() in enabled:
+                return CASActionOrActionSet(name, self)
+            raise
 
         # Generate a new actionset class
         ascls = CASActionSet.from_reflection(asinfo, self)

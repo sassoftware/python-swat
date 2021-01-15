@@ -25,6 +25,7 @@ from __future__ import print_function, division, absolute_import, unicode_litera
 
 import json
 import keyword
+import os
 import re
 import textwrap
 import weakref
@@ -533,6 +534,7 @@ class CASActionSet(object):
     def __getattr__(self, name):
         origname = name
         name = name.lower()
+        enabled = ['yes', 'y', 'on', 't', 'true', '1']
 
         if name in type(self).actions:
 
@@ -548,6 +550,12 @@ class CASActionSet(object):
 
             # Return action instance
             return cls()
+
+        elif os.environ.get('CAS_ACTION_TEST_MODE', '').lower() in enabled:
+            out = CASActionOrActionSet('%s.%s' % (type(self).__name__.lower(), origname),
+                                       type(self).get_connection())
+            out._atype = 'action'
+            return out
 
         raise AttributeError(origname)
 
@@ -838,6 +846,121 @@ class CASAction(ParamManager):
         return type(self).get_connection().retrieve(type(self).__name__.lower(),
                                                     **mergedefined(self.to_params(),
                                                     kwargs))
+
+    retrieve = __call__
+
+
+class CASActionOrActionSet(ParamManager):
+    '''
+    Generic action or actionset object
+
+    This object can be created to call a CAS action without knowing the
+    reflection information. It will simply call the action with the given
+    parameters without any processing at all.
+
+    Parameters
+    ----------
+    name : string
+        The name of the action or action set.
+    connection : CAS
+        The CAS connection object.
+    *args, **kwargs : additional parameters
+        Parameters for the action.
+
+    '''
+
+    trait_names = None  # Block IPython's lookup of this
+    _connection = None
+
+    def __init__(self, name, connection, *args, **kwargs):
+        super(CASActionOrActionSet, self).__init__(*args, **kwargs)
+        self._name = name
+        self._atype = None
+        type(self)._connection = weakref.ref(connection)
+
+    @classmethod
+    def get_connection(cls):
+        '''
+        Return the registered connection
+
+        The connection is only held by a weak reference.  If the
+        connection no longer exists, a SWATError is raised.
+
+        Raises
+        ------
+        SWATError
+            If the registered connection no longer exists
+
+        '''
+        try:
+            if cls._connection is not None:
+                conn = cls._connection()
+        except AttributeError:
+            pass
+        if conn is None:
+            raise SWATError('Connection object is no longer valid')
+        return conn
+
+    def __getattr__(self, name):
+        if self._atype != 'action':
+            return CASActionOrActionSet('%s.%s' % (self._name, name),
+                                        type(self).get_connection())
+        raise AttributeError(name)
+
+    def __iter__(self):
+        ''' Call the action and iterate over the results '''
+        return iter(self.invoke())
+
+    def invoke(self, **kwargs):
+        '''
+        Invoke the action
+
+        Parameters
+        ----------
+        **kwargs : any, optional
+            Arbitrary key/value pairs to add to the arguments sent to the
+            action.  These key/value pairs are not added to the collection
+            of parameters set on the action object.  They are only used in
+            this call.
+
+        Returns
+        -------
+        self
+            Returns the CASAction object itself
+
+        '''
+        # Decode from JSON as needed
+        if '_json' in kwargs:
+            newargs = json.loads(kwargs['_json'])
+            newargs.update(kwargs)
+            del newargs['_json']
+            kwargs = newargs
+
+        conn = type(self).get_connection()
+        conn._raw_invoke(self._name, **mergedefined(self.to_params(), kwargs))
+        return conn
+
+    def __call__(self, **kwargs):
+        '''
+        Call the action
+
+        Parameters
+        ----------
+        **kwargs : any, optional
+            Arbitrary key/value pairs to add to the arguments sent to the
+            action.  These key/value pairs are not added to the collection
+            of parameters set on the action object.  They are only used in
+            this call.
+
+        Returns
+        -------
+        CASResults object
+            Collection of results from the action call
+
+        '''
+        return type(self).get_connection()._raw_retrieve(self._name,
+                                                         **mergedefined(self.to_params(),
+                                                         kwargs))
 
     retrieve = __call__
 
