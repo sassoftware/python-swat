@@ -32,6 +32,7 @@ import six
 import ssl
 import sys
 import time
+import urllib3
 from six.moves import urllib
 from .message import REST_CASMessage
 from .response import REST_CASResponse
@@ -342,7 +343,16 @@ class REST_CASConnection(object):
                     if get_option('cas.debug.requests'):
                         _print_request('GET', url, self._req_sess.headers)
                     logger.debug('Reconnecting to session at {}'.format(url))
-                    res = self._req_sess.get(url, data=b'')
+
+                    get_retries = 0
+                    while get_retries < connection_retries:
+                        res = self._req_sess.get(url, data=b'')
+                        if res.status_code == 502:
+                            logger.debug('HTTP 502 error, retrying...')
+                            time.sleep(connection_retry_interval)
+                            get_retries += 1
+                            continue
+                        break
 
                 else:
                     if get_option('cas.debug.requests'):
@@ -351,7 +361,16 @@ class REST_CASConnection(object):
                         params['locale'] = locale
                     logger.debug('Creating new session at {} with parms {}'
                                  .format(url, params))
-                    res = self._req_sess.put(url, data=b'', params=params)
+
+                    put_retries = 0
+                    while put_retries < connection_retries:
+                        res = self._req_sess.put(url, data=b'', params=params)
+                        if res.status_code == 502:
+                            logger.debug('HTTP 502 error, retrying...')
+                            time.sleep(connection_retry_interval)
+                            put_retries += 1
+                            continue
+                        break
 
                 if 'tkhttp-id' in res.cookies:
                     self._req_sess.headers.update({
@@ -383,18 +402,23 @@ class REST_CASConnection(object):
 
                 break
 
-            except requests.ConnectionError:
+            except (requests.ConnectionError, urllib3.exceptions.ProtocolError):
+                logger.debug('Connection error, retrying...')
                 if num_retries > connection_retries:
                     self._set_next_connection()
-                logger.debug('Connection error, attempting retry')
-                num_retries += 1
-                time.sleep(connection_retry_interval)
+                    num_retries = 0
+                else:
+                    time.sleep(connection_retry_interval)
+                    num_retries += 1
 
             except KeyError:
                 raise SWATError(str(out))
 
             except Exception as exc:
                 raise SWATError(str(exc))
+
+            except SWATError:
+                raise
 
         if wait_until_idle:
             self._wait_until_idle()
@@ -473,6 +497,10 @@ class REST_CASConnection(object):
 
         result_id = None
 
+        connection_retries = get_option('cas.connection_retries')
+        connection_retry_interval = get_option('cas.connection_retry_interval')
+        num_retries = 0
+
         txt = ''
         while True:
             try:
@@ -484,14 +512,22 @@ class REST_CASConnection(object):
                 if get_option('cas.debug.requests'):
                     _print_request('POST', url, self._req_sess.headers, post_data)
 
-                res = self._req_sess.post(url, data=post_data)
+                post_retries = 0
+                while post_retries < connection_retries:
+                    res = self._req_sess.post(url, data=post_data)
+                    if res.status_code == 502:
+                        logger.debug('HTTP 502 error code, retrying...')
+                        time.sleep(connection_retry_interval)
+                        post_retries += 1
+                        continue
+                    break
 
                 if get_option('cas.debug.responses'):
                     _print_response(res.text)
 
                 break
 
-            except requests.ConnectionError:
+            except (requests.ConnectionError, urllib3.exceptions.ProtocolError):
                 self._connect(session=self._session)
 
                 # Get ID of results
@@ -511,7 +547,15 @@ class REST_CASConnection(object):
                     _print_request('POST', url, self._req_sess.headers,
                                    post_data)
 
-                res = self._req_sess.post(url, data=post_data)
+                post_retries = 0
+                while post_retries < connection_retries:
+                    res = self._req_sess.post(url, data=post_data)
+                    if res.status_code == 502:
+                        logger.debug('HTTP 502 error code, retrying...')
+                        time.sleep(connection_retry_interval)
+                        post_retries += 1
+                        continue
+                    break
 
                 if get_option('cas.debug.responses'):
                     _print_response(res.text)
@@ -546,7 +590,17 @@ class REST_CASConnection(object):
                         _print_request('POST', url, self._req_sess.headers,
                                        post_data)
 
-                    res = self._req_sess.post(url, data=post_data)
+                    post_retries = 0
+                    while post_retries < connection_retries:
+                        res = self._req_sess.post(url, data=post_data)
+                        if res.status_code == 502:
+                            logger.debug('HTTP 502 error code, retrying...')
+                            time.sleep(connection_retry_interval)
+                            post_retries += 1
+                            continue
+                        break
+
+                    num_retries = 0
 
                     if get_option('cas.debug.responses'):
                         _print_response(res.text)
