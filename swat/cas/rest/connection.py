@@ -499,7 +499,6 @@ class REST_CASConnection(object):
 
         connection_retries = get_option('cas.connection_retries')
         connection_retry_interval = get_option('cas.connection_retry_interval')
-        num_retries = 0
 
         txt = ''
         while True:
