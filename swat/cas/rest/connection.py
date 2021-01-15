@@ -600,8 +600,6 @@ class REST_CASConnection(object):
                             continue
                         break
 
-                    num_retries = 0
-
                     if get_option('cas.debug.responses'):
                         _print_response(res.text)
 
