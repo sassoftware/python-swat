@@ -602,6 +602,8 @@ class SASDataFrame(pd.DataFrame):
             width, _ = get_console_size()
         else:
             width = None
+        if not hasattr(pdfmt, 'DataFrameRenderer'):
+            kwargs['line_width'] = width
 
         if get_option('display.apply_formats'):
             kwargs['formatters'] = self._get_formatters()
@@ -612,7 +614,6 @@ class SASDataFrame(pd.DataFrame):
             self,
             max_rows=max_rows,
             max_cols=max_cols,
-            line_width=width,
             show_dimensions=show_dimensions,
             **kwargs
         )
@@ -620,7 +621,13 @@ class SASDataFrame(pd.DataFrame):
         #       formatters on a DataFrame that is truncated in the console.
         formatter.columns = formatter.tr_frame.columns
 
-        txt = formatter.to_string()
+        # pandas 1.2.0 uses a renderer instead of just a formatter
+        if hasattr(pdfmt, 'DataFrameRenderer'):
+            formatter = pdfmt.DataFrameRenderer(formatter)
+            txt = formatter.to_string(line_width=width)
+        else:
+            txt = formatter.to_string()
+
         if txt is None:
             if getattr(formatter, 'buf', None) is not None:
                 buf.write(formatter.buf.getvalue())
@@ -679,6 +686,10 @@ class SASDataFrame(pd.DataFrame):
         #       formatters on a DataFrame that is truncated in the console.
         formatter.columns = formatter.tr_frame.columns
 
+        # pandas 1.2.0 uses a renderer instead of just a formatter
+        if hasattr(pdfmt, 'DataFrameRenderer'):
+            formatter = pdfmt.DataFrameRenderer(formatter)
+
         txt = formatter.to_string()
         if txt is None:
             if getattr(formatter, 'buf', None) is not None:
@@ -724,6 +735,11 @@ class SASDataFrame(pd.DataFrame):
             # NOTE: Patch for bug in pandas DataFrameFormatter when using
             #       formatters on a DataFrame that is truncated in the console.
             formatter.columns = formatter.tr_frame.columns
+
+            # pandas 1.2.0 uses a renderer instead of just a formatter
+            if hasattr(pdfmt, 'DataFrameRenderer'):
+                formatter = pdfmt.DataFrameRenderer(formatter)
+
             html = formatter.to_html(**notebook_opts)
             if html is None:
                 if getattr(formatter, 'buf', None) is not None:
