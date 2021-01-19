@@ -48,7 +48,7 @@ from ..utils.compat import (a2u, a2n, int32, int64, float64, text_types,
 from ..utils import getsoptions
 from ..utils.args import iteroptions
 from ..formatter import SASFormatter
-from .actions import CASAction, CASActionSet, CASActionOrActionSet
+from .actions import CASAction, CASActionSet
 from .table import CASTable
 from .transformers import py2cas
 from .request import CASRequest
@@ -2137,13 +2137,7 @@ class CAS(object):
             return self._action_classes[name]()
 
         # See if the action/action set exists
-        try:
-            asname, actname, asinfo = self._get_actionset_info(name.lower(), atype=atype)
-        except AttributeError:
-            enabled = ['yes', 'y', 'on', 't', 'true', '1']
-            if os.environ.get('CAS_ACTION_TEST_MODE', '').lower() in enabled:
-                return CASActionOrActionSet(name, self)
-            raise
+        asname, actname, asinfo = self._get_actionset_info(name.lower(), atype=atype)
 
         # Generate a new actionset class
         ascls = CASActionSet.from_reflection(asinfo, self)
@@ -2162,6 +2156,18 @@ class CAS(object):
             if class_requested:
                 return self._action_classes[name]
             return self._action_classes[name]()
+
+        # Look for actions that can't be reflected
+        if asname and actname:
+            enabled = ['yes', 'y', 'on', 't', 'true', '1']
+            if os.environ.get('CAS_ACTION_TEST_MODE', '').lower() in enabled:
+                if asname not in self._actionset_classes:
+                    self._actionset_classes[asname.lower()] = ascls
+                else:
+                    ascls = self._actionset_classes[asname.lower()]
+                if actname not in ascls.actions:
+                    ascls.actions[actname.lower()] = None
+                return getattr(ascls(), actname)
 
         raise AttributeError(origname)
 

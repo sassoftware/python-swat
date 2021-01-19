@@ -534,28 +534,29 @@ class CASActionSet(object):
     def __getattr__(self, name):
         origname = name
         name = name.lower()
-        enabled = ['yes', 'y', 'on', 't', 'true', '1']
 
         if name in type(self).actions:
 
             cls = type(self).actions[name]
+
+            # Check for un-reflected actions
+            if cls is None:
+                enabled = ['yes', 'y', 'on', 't', 'true', '1']
+                if os.environ.get('CAS_ACTION_TEST_MODE', '').lower() in enabled:
+                    return CASActionRaw('%s.%s' % (type(self).__name__.lower(), name),
+                                        self.get_connection())
 
             # Create action class
             if hasattr(self, 'default_params') and self.default_params is not None:
                 members = {'default_params': getattr(self, 'default_params', {})}
                 cls = type(cls.__name__, (cls,), members)
 
+            # Return action class
             if re.match(r'^[A-Z]', origname):
                 return cls
 
             # Return action instance
             return cls()
-
-        elif os.environ.get('CAS_ACTION_TEST_MODE', '').lower() in enabled:
-            out = CASActionOrActionSet('%s.%s' % (type(self).__name__.lower(), origname),
-                                       type(self).get_connection())
-            out._atype = 'action'
-            return out
 
         raise AttributeError(origname)
 
@@ -850,9 +851,9 @@ class CASAction(ParamManager):
     retrieve = __call__
 
 
-class CASActionOrActionSet(ParamManager):
+class CASActionRaw(ParamManager):
     '''
-    Generic action or actionset object
+    Generic action object
 
     This object can be created to call a CAS action without knowing the
     reflection information. It will simply call the action with the given
@@ -861,7 +862,7 @@ class CASActionOrActionSet(ParamManager):
     Parameters
     ----------
     name : string
-        The name of the action or action set.
+        The name of the action.
     connection : CAS
         The CAS connection object.
     *args, **kwargs : additional parameters
@@ -873,9 +874,8 @@ class CASActionOrActionSet(ParamManager):
     _connection = None
 
     def __init__(self, name, connection, *args, **kwargs):
-        super(CASActionOrActionSet, self).__init__(*args, **kwargs)
+        super(CASActionRaw, self).__init__(*args, **kwargs)
         self._name = name
-        self._atype = None
         type(self)._connection = weakref.ref(connection)
 
     @classmethod
@@ -900,12 +900,6 @@ class CASActionOrActionSet(ParamManager):
         if conn is None:
             raise SWATError('Connection object is no longer valid')
         return conn
-
-    def __getattr__(self, name):
-        if self._atype != 'action':
-            return CASActionOrActionSet('%s.%s' % (self._name, name),
-                                        type(self).get_connection())
-        raise AttributeError(name)
 
     def __iter__(self):
         ''' Call the action and iterate over the results '''
