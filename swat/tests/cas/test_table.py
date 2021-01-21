@@ -5265,7 +5265,9 @@ class TestCASTable(tm.TestCase):
             )
 
         except Exception as msg:
-            if isinstance(msg, ImportError) or type(msg).__name__ in ['TclError']:
+            if isinstance(msg, ImportError) or \
+                    type(msg).__name__ in ['TclError'] or \
+                    type(msg).__name__ in ['FixedLocator']:
                 tm.TestCase.skipTest(self, '%s' % msg)
             raise
 
