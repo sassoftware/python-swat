@@ -25,6 +25,7 @@ from __future__ import print_function, division, absolute_import, unicode_litera
 
 import glob
 import os
+import itertools
 import platform
 import struct
 import sys
@@ -69,27 +70,43 @@ def _import_pyswat():
                          'platform-dependent install file, or use the REST interface '
                          'as an alternative.')
 
+    libssl_locs = [
+        '/usr/lib64/libssl.so.10',
+        '/usr/lib64/libssl.so.1.0*',
+        '/usr/lib64/x86_64-linux-gnu/libssl.so.1.0*',
+        os.path.join(sys.prefix, 'lib', 'libssl.so.10'),
+        os.path.join(sys.prefix, 'lib', 'libssl.so.1.0*'),
+        '/usr/lib64/libssl.so.1.1*',
+        '/usr/lib64/x86_64-linux-gnu/libssl.so.1.1*',
+        os.path.join(sys.prefix, 'lib', 'libssl.so.1.1*'),
+    ]
+
+    libcrypto_locs = [
+        '/usr/lib64/libcrypto.so*',
+        '/usr/lib64/x86_64-linux-gnu/libcrypto.so*',
+        os.path.join(sys.prefix, 'lib', 'libcrypto.so*'),
+    ]
+
     if not os.environ.get('TKESSL_OPENSSL_LIB', '').strip():
         # Make sure the correct libssl.so is used
-        libssl = list(sorted(glob.glob(os.path.join('/usr/lib64/libssl.so.10')))) + \
-            list(sorted(glob.glob(os.path.join('/usr/lib64/libssl.so.1.0*')))) + \
-            list(sorted(glob.glob(os.path.join(sys.prefix, 'lib', 'libssl.so.10')))) + \
-            list(sorted(glob.glob(os.path.join(sys.prefix, 'lib', 'libssl.so.1.0*')))) + \
-            list(sorted(glob.glob(os.path.join('/usr/lib64/libssl.so.1.1*')))) + \
-            list(sorted(glob.glob(os.path.join(sys.prefix, 'lib', 'libssl.so.1.1*'))))
+        libssl = list(itertools.chain(*[list(sorted(glob.glob(x)))
+                                        for x in libssl_locs]))
         if libssl:
             os.environ['TKESSL_OPENSSL_LIB'] = libssl[-1]
 
     if not os.environ.get('TKERSA2_OPENSSL_LIB', '').strip():
         # Make sure the correct libssl.so is used
-        libssl = list(sorted(glob.glob(os.path.join('/usr/lib64/libssl.so.10')))) + \
-            list(sorted(glob.glob(os.path.join('/usr/lib64/libssl.so.1.0*')))) + \
-            list(sorted(glob.glob(os.path.join(sys.prefix, 'lib', 'libssl.so.10')))) + \
-            list(sorted(glob.glob(os.path.join(sys.prefix, 'lib', 'libssl.so.1.0*')))) + \
-            list(sorted(glob.glob(os.path.join('/usr/lib64/libssl.so.1.1*')))) + \
-            list(sorted(glob.glob(os.path.join(sys.prefix, 'lib', 'libssl.so.1.1*'))))
+        libssl = list(itertools.chain(*[list(sorted(glob.glob(x)))
+                                        for x in libssl_locs]))
         if libssl:
             os.environ['TKERSA2_OPENSSL_LIB'] = libssl[-1]
+
+    if not os.environ.get('TKECERT_CRYPTO_LIB', '').strip():
+        # Make sure the correct libcrypto.so is used
+        libcrypto = list(itertools.chain(*[list(sorted(glob.glob(x)))
+                                           for x in libcrypto_locs]))
+        if libcrypto:
+            os.environ['TKECERT_CRYPTO_LIB'] = libcrypto[-1]
 
     if struct.calcsize('P') < 8:
         raise RuntimeError('A 64-bit build of Python is required for the '
