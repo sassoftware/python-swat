@@ -4476,7 +4476,10 @@ class TestCASTable(tm.TestCase):
         except Exception:
             tm.TestCase.skipTest(self, 'Need openpyxl installed')
 
-        df2 = pd.read_excel(tmp.name)
+        try:
+            df2 = pd.read_excel(tmp.name)
+        except Exception:
+            tm.TestCase.skipTest(self, 'Need openpyxl installed')
 
         self.assertEqual(
             sorted(re.split(df.to_csv(index=False).replace('.0', ''), r'[\r\n]+')),
