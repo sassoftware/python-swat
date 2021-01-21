@@ -1,6 +1,11 @@
 
 # Change Log
 
+## 1.8.1 - 2021-01-21
+
+- Fix compatibility with pandas 1.2 DataFrame rendering
+- Fix TKECERT error by locating libcrypto automatically
+
 ## 1.8.0 - 2021-01-12
 
 - Use ssl module's CA list as default

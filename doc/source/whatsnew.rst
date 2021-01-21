@@ -3,11 +3,16 @@
 
 .. _whatsnew:
 
-
 What’s New
 ==========
 
 This document outlines features and improvements from each release.
+
+1.8.1 (January 21, 2021)
+------------------------
+
+-  Fix compatibility with pandas 1.2 DataFrame rendering
+-  Fix TKECERT error by locating libcrypto automatically
 
 1.8.0 (January 12, 2021)
 ------------------------
