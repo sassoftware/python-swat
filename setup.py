@@ -50,6 +50,7 @@ setup(
         'pytz',
         'six >= 1.9.0',
         'requests',
+        'urllib3',
     ],
     platforms='any',
     classifiers=[
