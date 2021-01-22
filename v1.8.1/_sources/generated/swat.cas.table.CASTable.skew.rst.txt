@@ -1,0 +1,6 @@
+swat.cas.table.CASTable.skew
+============================
+
+.. currentmodule:: swat.cas.table
+
+.. automethod:: CASTable.skew

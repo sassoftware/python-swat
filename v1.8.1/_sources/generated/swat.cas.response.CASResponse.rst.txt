@@ -1,0 +1,31 @@
+swat.cas.response.CASResponse
+=============================
+
+.. currentmodule:: swat.cas.response
+
+.. autoclass:: CASResponse
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~CASResponse.__init__
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~CASResponse.disposition
+      ~CASResponse.messages
+      ~CASResponse.performance
+      ~CASResponse.updateflags
+   
+   

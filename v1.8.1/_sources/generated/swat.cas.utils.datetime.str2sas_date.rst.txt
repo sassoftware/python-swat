@@ -1,0 +1,6 @@
+swat.cas.utils.datetime.str2sas\_date
+=====================================
+
+.. currentmodule:: swat.cas.utils.datetime
+
+.. autofunction:: str2sas_date
