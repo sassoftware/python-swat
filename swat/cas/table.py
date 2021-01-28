@@ -799,7 +799,7 @@ class CASTablePlotter(object):
     def __init__(self, table):
         self._table = table
 
-    def _get_fetchvars(self, x=None, y=None, by=None):
+    def _get_fetchvars(self, x=None, y=None, by=None, c=None, C=None, s=None):
         '''
         Return a list of variables needed for the plot
 
@@ -821,7 +821,19 @@ class CASTablePlotter(object):
         else:
             by = self._table.get_groupby_vars()
 
-        return list(by) + list(x) + list(y)
+        c = c or []
+        if isinstance(c, six.string_types):
+            c = [c]
+
+        C = C or []
+        if isinstance(C, six.string_types):
+            C = [C]
+
+        s = s or []
+        if isinstance(s, six.string_types):
+            s = [s]
+
+        return list(by) + list(x) + list(y) + list(c) + list(C) + list(s)
 
     def _get_sampling_params(self, **kwargs):
         '''
@@ -838,14 +850,15 @@ class CASTablePlotter(object):
             samp['stratify_by'] = kwargs.pop('stratify_by')
         return samp, kwargs
 
-    def _get_plot_params(self, x=None, y=None, by=None, **kwargs):
+    def _get_plot_params(self, x=None, y=None, by=None, c=None,
+                         C=None, s=None, **kwargs):
         '''
         Split parameters into fetch and plot parameter groups
 
         '''
         params, kwargs = self._get_sampling_params(**kwargs)
         params['grouped'] = True
-        params['fetchvars'] = self._get_fetchvars(x=x, y=y, by=by)
+        params['fetchvars'] = self._get_fetchvars(x=x, y=y, by=by, c=c, C=C, s=s)
         return params, kwargs
 
     def __call__(self, x=None, y=None, kind='line', **kwargs):
@@ -989,7 +1002,7 @@ class CASTablePlotter(object):
         :class:`matplotlib.AxesSubplot` or :func:`numpy.array` of them.
 
         '''
-        params, kwargs = self._get_plot_params(x=x, y=y, **kwargs)
+        params, kwargs = self._get_plot_params(x=x, y=y, C=C, **kwargs)
         if reduce_C_function is not None:
             kwargs['reduce_C_function'] = reduce_C_function
         if gridsize is not None:
@@ -1102,7 +1115,7 @@ class CASTablePlotter(object):
         :class:`matplotlib.AxesSubplot` or :func:`numpy.array` of them.
 
         '''
-        params, kwargs = self._get_plot_params(x=x, y=y, **kwargs)
+        params, kwargs = self._get_plot_params(x=x, y=y, s=s, c=c, **kwargs)
         return self._table._fetch(**params).plot(x, y, s=s, c=c,
                                                  kind='scatter', **kwargs)
 
