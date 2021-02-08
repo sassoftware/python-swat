@@ -228,6 +228,7 @@ class TestDataMsgHandlers(tm.TestCase):
         tbl = self.s.addtable(table='dtypes', **dmh.args.addtable).casTable
 
         data = tbl.fetch(sastypes=False).Fetch
+        data = data.sort_values('bool8', ascending=False)
 
         self.assertTrue(data['bool8'][0])
         self.assertFalse(data['bool8'][1])
