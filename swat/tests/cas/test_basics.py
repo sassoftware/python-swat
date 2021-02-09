@@ -185,6 +185,9 @@ class TestBasics(tm.TestCase):
         if self.s._protocol == 'http':
             self.assertIn(t._soptions, ['session=%s protocol=http' % self.s._session,
                                         'protocol=http session=%s' % self.s._session])
+        elif self.s._protocol == 'https':
+            self.assertIn(t._soptions, ['session=%s protocol=https' % self.s._session,
+                                        'protocol=https session=%s' % self.s._session])
         else:
             self.assertIn(t._soptions, ['session=%s' % self.s._session,
                                         'session=%s protocol=cas' % self.s._session,
@@ -203,6 +206,9 @@ class TestBasics(tm.TestCase):
         if self.s._protocol == 'http':
             self.assertIn(u._soptions, ['locale=es_US protocol=http',
                                         'protocol=http locale=es_US'])
+        elif self.s._protocol == 'https':
+            self.assertIn(u._soptions, ['locale=es_US protocol=https',
+                                        'protocol=https locale=es_US'])
         else:
             self.assertIn(u._soptions, ['locale=es_US', 'locale=es_US protocol=cas',
                                         'protocol=cas locale=es_US'])
