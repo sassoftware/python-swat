@@ -275,7 +275,9 @@ class TestDataMsgHandlers(tm.TestCase):
         tbl.vars[0].nfl = 20
         tbl.vars[0].nfd = 0
 
-        data = tbl.fetch(sastypes=True, format=True).Fetch
+        data = tbl.fetch(sastypes=True, format=True,
+                         sortby=[dict(name='datetime', formatted='raw',
+                                      order='descending')]).Fetch
 
         self.assertEqual(
             [pd.to_datetime(x) for x in df['datetime'].tolist()],
