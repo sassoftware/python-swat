@@ -1507,7 +1507,7 @@ class CAS(object):
                 else:
                     vars.append(item)
 
-    def upload(self, data, importoptions=None, casout=None, **kwargs):
+    def upload(self, data, importoptions=None, casout=None, date_format=None, **kwargs):
         '''
         Upload data from a local file into a CAS table
 
@@ -1543,6 +1543,8 @@ class CAS(object):
             Import options for the ``table.loadtable`` action.
         casout : dict, optional
             Output table definition for the ``table.loadtable`` action.
+        date_format : string, optional
+            Format string for datetime objects.
         **kwargs : keyword arguments, optional
             Additional parameters to the ``table.loadtable`` action.
 
@@ -1589,6 +1591,7 @@ class CAS(object):
                 data.to_csv(filename, encoding='utf-8',
                             index=False, sep=a2n(',', 'utf-8'),
                             decimal=a2n('.', 'utf-8'),
+                            date_format=a2n(date_format, 'utf-8'),
                             line_terminator=a2n('\r\n', 'utf-8'))
                 df_dtypes = self._extract_dtypes(data)
                 importoptions['locale'] = 'EN-us'
