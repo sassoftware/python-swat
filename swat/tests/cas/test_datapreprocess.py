@@ -32,10 +32,10 @@ HOST, PORT, PROTOCOL = tm.get_host_port_proto()
 
 
 class TestDataPreprocess(tm.TestCase):
-    
+
     # Create a class attribute to hold the cas host type
-    server_type = None    
-    
+    server_type = None
+
     def setUp(self):
         swat.reset_option()
         swat.options.cas.print_messages = False
@@ -43,38 +43,41 @@ class TestDataPreprocess(tm.TestCase):
 
         self.s = swat.CAS(HOST, PORT, USER, PASSWD, protocol=PROTOCOL)
 
-        if type(self).server_type is None: 
-            # Set once per class and have every test use it. No need to change between tests.    
-            type(self).server_type = tm.get_cas_host_type(self.s)        
-        
+        if type(self).server_type is None:
+            # Set once per class and have every test use it.
+            # No need to change between tests.
+            type(self).server_type = tm.get_cas_host_type(self.s)
+
         self.srcLib = tm.get_casout_lib(self.server_type)
 
         r = self.s.loadactionset(actionset='table')
-        self.assertEqual(r, {'actionset':'table'})
-        
+        self.assertEqual(r, {'actionset': 'table'})
+
         r = self.s.loadactionset(actionset='datapreprocess')
-        self.assertEqual(r, {'actionset':'datapreprocess'})
-                          
+        self.assertEqual(r, {'actionset': 'datapreprocess'})
+
         r = tm.load_data(self.s, 'datasources/cars_single.sashdat', self.server_type)
 
         self.tablename = r['tableName']
-        self.assertNotEqual(self.tablename, None)                                                                 
+        self.assertNotEqual(self.tablename, None)
+
     def tearDown(self):
         # tear down tests
-        self.s.droptable(caslib=self.srcLib, table=self.tablename) 
+        self.s.droptable(caslib=self.srcLib, table=self.tablename)
         self.s.endsession()
         del self.s
         self.pathname = None
         self.hdfs = None
         self.tablename = None
         swat.reset_option()
-           
-    def test_histogram(self):  
-        r = self.s.datapreprocess.histogram(table={'caslib':self.srcLib, 'name':self.tablename},
-                                            vars={'MPG_City','MPG_Highway'} )
-        self.assertEqual( r.status, None )  
-        #self.assertEqualsBench( r, 'testdatapreprocess_histogram' )  
 
-       
+    def test_histogram(self):
+        r = self.s.datapreprocess.histogram(table={'caslib': self.srcLib,
+                                                   'name': self.tablename},
+                                            vars={'MPG_City', 'MPG_Highway'})
+        self.assertEqual(r.status, None)
+        # self.assertEqualsBench(r, 'testdatapreprocess_histogram')
+
+
 if __name__ == '__main__':
     tm.runtests()

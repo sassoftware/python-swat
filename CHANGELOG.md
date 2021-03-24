@@ -1,6 +1,47 @@
 
 # Change Log
 
+## 1.8.1 - 2021-01-21
+
+- Fix compatibility with pandas 1.2 DataFrame rendering
+- Fix TKECERT error by locating libcrypto automatically
+
+## 1.8.0 - 2021-01-12
+
+- Use ssl module's CA list as default
+- Improve initial connection performance
+- Fix OAuth authentication in REST connections
+- Fix log truncation with messages >1000 characters
+
+## 1.7.1 - 2020-09-29
+
+- Add ability to apply SAS formats to columns in a `SASDataFrame`
+- Support timezones in data uploaded and downloaded from CAS tables
+- Fix issue with TK path on Windows when using flask
+
+## 1.7.0 - 2020-08-19
+
+- Add Python 3.8 support
+- Improve connection parameter handling (add CAS_URL= connection variable)
+- Improve connection protocol auto-detection
+
+## 1.6.1 - 2020-02-10
+
+- Add pandas v1.0.0 support
+
+## 1.6.0 - 2019-11-21
+
+- Fix letter-casing in `has_action` and `has_actionset` methods
+- Remove usage of deprecated `ix` accessor
+- Explicitly specify column and line delimiters and locale in uploaded CSV files
+- Fix TKPATH issues in Windows and PPC
+
+## 1.5.2 - 2019-09-09
+
+- Fix issue with nulls in REST parameters
+- Add fallback default configuration for SSL
+- Add `CASTable.get` method
+
 ## 1.5.1 - 2019-03-01
 
 - Fix Authinfo matching when using base URLs in REST interface

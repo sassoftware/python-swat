@@ -36,7 +36,7 @@ If you are using the binary protocol on Windows, you must import the
 certificate into the Windows Certificate Store.  Documentation on this
 process is located at:
 
-    http://www.databasemart.com/howto/SQLoverssl/How_To_Install_Trusted_Root_Certification_Authority_With_MMC.aspx
+    https://go.documentation.sas.com/?docsetId=secref&docsetTarget=n12036intelplatform00install.htm&docsetVersion=9.4&locale=en
 
 
 Troubleshooting

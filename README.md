@@ -28,7 +28,7 @@ To view updates to this project see the [Change Log](https://github.com/sassoftw
 
 To access the CAS binary protocol (recommended), you need the following:
 
-* **64-bit** Python 2.7.x or 3.4+ on Windows or Linux (see shared library notes below)
+* **64-bit** Python 2.7.x or 3.5+ on Windows or Linux (see shared library notes below)
 
 The binary protocol requires pre-compiled components found in the
 `pip` installer only.  These pieces are not available as source code and
@@ -38,7 +38,7 @@ amounts of data.  It also offers more advanced data loading from the client
 and data formatting features.
 
 To access the CAS REST interface only, you can use the pure Python code
-which runs in Python 2.7/3.4+ on all platforms.  While not as fast as the
+which runs in Python 2.7/3.5+ on all platforms.  While not as fast as the
 binary protocol, the pure Python interface is more portable.
 
 ## Linux Library Dependencies

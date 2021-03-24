@@ -33,7 +33,7 @@ def get_file(fname):
 setup(
     zip_safe=False,
     name='swat',
-    version='1.5.2-dev',
+    version='1.8.2-dev',
     description='SAS Scripting Wrapper for Analytics Transfer (SWAT)',
     long_description=get_file('README.md'),
     long_description_content_type='text/markdown',
@@ -47,11 +47,12 @@ setup(
     },
     install_requires=[
         'pandas >= 0.16.0',
+        'pytz',
         'six >= 1.9.0',
         'requests',
+        'urllib3',
     ],
     platforms='any',
-#   python_requires='>=2.7,!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*',
     classifiers=[
         'Development Status :: 5 - Production/Stable',
         'Environment :: Console',
@@ -60,9 +61,10 @@ setup(
         'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 2.7',
-        'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
         'Topic :: Scientific/Engineering',
     ],
 )

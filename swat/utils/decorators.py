@@ -58,4 +58,5 @@ class getattr_safe_property(object):
             raise RuntimeError(str(exc))
 
     def __set__(self, obj, value):
-        raise RuntimeError("Setting the '%s' attribute is not allowed" % self._func.__name__)
+        raise RuntimeError("Setting the '%s' attribute is not allowed" %
+                           self._func.__name__)

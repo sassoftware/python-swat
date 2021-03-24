@@ -24,13 +24,41 @@ Datetime utilities for interfacing with CAS
 from __future__ import print_function, division, absolute_import, unicode_literals
 
 import datetime
+import pytz
 import time
 import numpy as np
 import pandas as pd
-from ...utils.compat import int64, int32
+from ...config import get_option
+from ...utils.compat import int64, int32, text_types, binary_types
 
 
 CAS_EPOCH = datetime.datetime(month=1, day=1, year=1960)
+UTC_TZ = pytz.timezone('UTC')
+
+
+def _astimezone(dt, tz):
+    '''
+    Convert date/time to given timezone
+
+    Parameters
+    ----------
+    dt : date or time or datetime
+        The timestamp to convert
+    tz : tzinfo
+        The timezone to apply
+
+    Returns
+    -------
+    date or time or datetime
+
+    '''
+    if not isinstance(dt, datetime.datetime):
+        return dt
+    if tz is None:
+        return dt.replace(tzinfo=tz)
+    if dt.tzinfo is None:
+        dt = UTC_TZ.localize(dt)
+    return dt.astimezone(tz)
 
 
 # str to CAS/SAS
@@ -60,7 +88,7 @@ def str2cas_timestamp(dts):
         CAS timestamp
 
     '''
-    return python2cas_datetime(pd.to_datetime(dts))
+    return python2cas_datetime(_astimezone(pd.to_datetime('%s' % dts), UTC_TZ))
 
 
 str2cas_datetime = str2cas_timestamp
@@ -90,7 +118,7 @@ def str2cas_date(dts):
         CAS date
 
     '''
-    return python2cas_date(pd.to_datetime(dts))
+    return python2cas_date(_astimezone(pd.to_datetime('%s' % dts), UTC_TZ))
 
 
 def str2cas_time(dts):
@@ -117,7 +145,7 @@ def str2cas_time(dts):
         CAS time
 
     '''
-    return python2cas_time(pd.to_datetime(dts))
+    return python2cas_time(_astimezone(pd.to_datetime('%s' % dts), UTC_TZ))
 
 
 def str2sas_timestamp(dts):
@@ -144,7 +172,7 @@ def str2sas_timestamp(dts):
         SAS timestamp
 
     '''
-    return python2sas_datetime(pd.to_datetime(dts))
+    return python2sas_datetime(_astimezone(pd.to_datetime('%s' % dts), UTC_TZ))
 
 
 str2sas_datetime = str2sas_timestamp
@@ -174,7 +202,7 @@ def str2sas_date(dts):
         SAS date
 
     '''
-    return python2sas_date(pd.to_datetime(dts))
+    return python2sas_date(_astimezone(pd.to_datetime('%s' % dts), UTC_TZ))
 
 
 def str2sas_time(dts):
@@ -201,13 +229,13 @@ def str2sas_time(dts):
         SAS time
 
     '''
-    return python2sas_time(pd.to_datetime(dts))
+    return python2sas_time(_astimezone(pd.to_datetime('%s' % dts), UTC_TZ))
 
 
 # SAS to Python/CAS
 
 
-def sas2python_timestamp(sts):
+def sas2python_timestamp(sts, tz=None):
     '''
     Convert a SAS datetime to Python datetime
 
@@ -228,7 +256,7 @@ def sas2python_timestamp(sts):
     '''
     if pd.isnull(sts):
         return pd.NaT
-    return cas2python_timestamp(sas2cas_timestamp(sts))
+    return cas2python_timestamp(sas2cas_timestamp(sts), tz=tz)
 
 
 sas2python_datetime = sas2python_timestamp
@@ -357,7 +385,7 @@ def sas2cas_time(sts):
 # CAS to Python/SAS
 
 
-def cas2python_timestamp(cts):
+def cas2python_timestamp(cts, tz=None):
     '''
     Convert a CAS datetime to Python datetime
 
@@ -376,7 +404,11 @@ def cas2python_timestamp(cts):
     :class:`datetime.datetime`
 
     '''
-    return CAS_EPOCH + datetime.timedelta(microseconds=cts)
+    if tz is None:
+        tz = get_option('timezone')
+    elif isinstance(tz, (text_types, binary_types)):
+        tz = pytz.timezone(tz)
+    return _astimezone(CAS_EPOCH + datetime.timedelta(microseconds=cts), tz)
 
 
 cas2python_datetime = cas2python_timestamp
@@ -423,7 +455,7 @@ def cas2python_time(ctm):
     :class:`datetime.time`
 
     '''
-    return cas2python_datetime(ctm).time()
+    return _astimezone(cas2python_datetime(ctm), UTC_TZ).time()
 
 
 def cas2sas_timestamp(cdt):
@@ -521,12 +553,12 @@ def python2cas_timestamp(pyts):
         CAS timestamp
 
     '''
-    delta = pyts - CAS_EPOCH
+    delta = _astimezone(pyts, UTC_TZ) - _astimezone(CAS_EPOCH, UTC_TZ)
     if isinstance(delta, type(pd.NaT)):
         # TODO: Change when integers support missing values
         return 0
-    return int64((delta.days * 24 * 60 * 60 * 10**6) +
-                 (delta.seconds * 10**6) + delta.microseconds)
+    return int64((delta.days * 24 * 60 * 60 * 10**6)
+                 + (delta.seconds * 10**6) + delta.microseconds)
 
 
 python2cas_datetime = python2cas_timestamp
@@ -552,8 +584,10 @@ def python2cas_time(pytm):
         CAS time
 
     '''
-    return int64(pytm.hour * (60 * 60 * 10**6) + (pytm.minute * 60 * 10**6) +
-                 (pytm.second * 10**6) + pytm.microsecond)
+    if isinstance(pytm, datetime.datetime):
+        pytm = _astimezone(pytm, UTC_TZ)
+    return int64(pytm.hour * (60 * 60 * 10**6) + (pytm.minute * 60 * 10**6)
+                 + (pytm.second * 10**6) + pytm.microsecond)
 
 
 def python2cas_date(pydt):
@@ -577,7 +611,7 @@ def python2cas_date(pydt):
 
     '''
     if isinstance(pydt, datetime.datetime):
-        delta = pydt.date() - CAS_EPOCH.date()
+        delta = _astimezone(pydt, UTC_TZ).date() - CAS_EPOCH.date()
     elif isinstance(pydt, datetime.time):
         delta = datetime.date.today() - CAS_EPOCH.date()
     else:
@@ -588,7 +622,7 @@ def python2cas_date(pydt):
     return int32(delta.days)
 
 
-def python2sas_timestamp(pyts):
+def python2sas_timestamp(pyts, tz=None):
     '''
     Convert a Python datetime to SAS datetime
 
@@ -635,7 +669,7 @@ def python2sas_date(pydt):
 
     '''
     if isinstance(pydt, datetime.datetime):
-        delta = pydt.date() - CAS_EPOCH.date()
+        delta = _astimezone(pydt, UTC_TZ).date() - CAS_EPOCH.date()
     elif isinstance(pydt, datetime.time):
         delta = datetime.date.today() - CAS_EPOCH.date()
     else:

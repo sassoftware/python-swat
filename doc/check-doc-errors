@@ -1,0 +1,23 @@
+#!/usr/bin/env python
+
+'''
+Check the generated HTML for CAS / ESP connection errors
+
+'''
+
+import glob
+import os
+import sys
+
+if '-h' in sys.argv or '--help' in sys.argv or len(sys.argv) != 2:
+    print('usage: %s root' % os.path.basename(sys.argv[0]))
+    sys.exit(1)
+
+root = sys.argv[1]
+
+for html in glob.glob(os.path.join(root, '*.html')):
+    with open(html, 'r') as html_file:
+        txt = html_file.read()
+        if 'Traceback (most recent call last)' in txt:
+            sys.stderr.write("ERROR: Found unexpected exception in '%s'\n" % html)
+            sys.exit(1)

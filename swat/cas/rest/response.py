@@ -97,6 +97,8 @@ class REST_CASResponse(object):
             ''' Iterator for getting next message '''
             status_code = self._disposition['status_code']
             for item in self._messages:
+                if not item:
+                    continue
                 item = process_parameter_indexes(status_code, item)
                 if options.cas.print_messages:
                     print(item)

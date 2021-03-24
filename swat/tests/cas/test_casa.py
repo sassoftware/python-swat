@@ -36,14 +36,14 @@ class TestCall(tm.TestCase):
     server_type = None
 
     def setUp(self):
-        swat.reset_option() 
+        swat.reset_option()
         swat.options.cas.print_messages = False
         swat.options.interactive_mode = False
 
         user, passwd = tm.get_user_pass()
 
         self.s = swat.CAS(HOST, PORT, USER, PASSWD, protocol=PROTOCOL)
-        
+
         if type(self).server_type is None:
             type(self).server_type = tm.get_cas_host_type(self.s)
 
@@ -53,10 +53,13 @@ class TestCall(tm.TestCase):
         # tear down tests
         self.s.endsession()
         del self.s
-        swat.reset_option() 
+        swat.reset_option()
 
     def test_dynamic_table_open(self):
         r = self.s.loadactionset(actionset='actionTest')
+        if r.severity != 0:
+            self.skipTest("actionTest failed to load")
+
         r = self.s.loadactionset(actionset='sessionProp')
 
         r = tm.load_data(self.s, 'datasources/cars_single.sashdat', self.server_type)
@@ -64,30 +67,34 @@ class TestCall(tm.TestCase):
         self.tablename = r['tableName']
         self.assertNotEqual(self.tablename, None)
 
-        r = self.s.sessionProp.setsessopt(caslib=self.srcLib) 
-        
+        r = self.s.sessionProp.setsessopt(caslib=self.srcLib)
+
         r = self.s.actionTest.testdynamictable(tableinfo=self.tablename)
         self.assertIn("NOTE: Table '" + self.tablename + "':", r.messages)
         self.assertIn("NOTE: -->Name: " + self.tablename, r.messages)
         self.assertIn("NOTE: -->nRecs: 428", r.messages)
-        self.assertIn( "NOTE: -->nVars: 15", r.messages)
-        
-        self.s.droptable(caslib=self.srcLib, table=self.tablename)        
+        self.assertIn("NOTE: -->nVars: 15", r.messages)
+
+        self.s.droptable(caslib=self.srcLib, table=self.tablename)
 
     def test_reflect(self):
         r = self.s.loadactionset(actionset='actionTest')
-        self.assertEqual(r, {'actionset':'actionTest'})
+        if r.severity != 0:
+            self.skipTest("actionTest failed to load")
+
+        self.assertEqual(r, {'actionset': 'actionTest'})
         r = self.s.builtins.reflect(actionset="actionTest")
         self.assertEqual(r[0]['name'], 'actionTest')
         self.assertEqual(r[0]['label'], 'Test')
         if 'autoRetry' in r[0]['actions'][0]:
             del r[0]['actions'][0]['autoRetry']
-        self.assertEqual(r[0]['actions'][0], {'desc': 'Test function that calls other actions', 'name': 'testCall', 'params': []})
+        self.assertEqual(r[0]['actions'][0],
+                         {'desc': 'Test function that calls other actions',
+                          'name': 'testCall', 'params': []})
 
-        self.assertEqual( r.status, None )
-        self.assertNotEqual( r.performance, None )             
-                                           
+        self.assertEqual(r.status, None)
+        self.assertNotEqual(r.performance, None)
+
 
 if __name__ == '__main__':
-   from swat.utils.testing import runtests
-   runtests()
+    tm.runtests()

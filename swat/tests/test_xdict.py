@@ -39,6 +39,7 @@ flatout1 = {
     'c.four.nest.double': 4
 }
 
+
 class TestXDict(tm.TestCase):
 
     def test_constructor(self):
@@ -54,7 +55,8 @@ class TestXDict(tm.TestCase):
             }
         })
 
-        x = xdict([('a.one', 1), ('b.two', 2), ('c.three.nest', 3), ('c.four.nest.double', 4)])
+        x = xdict([('a.one', 1), ('b.two', 2), ('c.three.nest', 3),
+                   ('c.four.nest.double', 4)])
         self.assertEqual(x, out1)
 
         x = xdict(out1)
@@ -65,7 +67,7 @@ class TestXDict(tm.TestCase):
 
         x = xdict(**out1)
         self.assertEqual(x, out1)
-      
+
         x = xdict(**flatout1)
         self.assertEqual(x, out1)
 
@@ -100,7 +102,7 @@ class TestXDict(tm.TestCase):
         self.assertEqual(x['c.three'], {'nest': 3})
         self.assertEqual(x['c.four'], {'nest': {'double': 4}})
         self.assertEqual(x['c.four.nest'], {'double': 4})
-        
+
         self.assertEqual(x['a'], {'one': 1})
         self.assertEqual(x['a']['one'], 1)
         self.assertEqual(x['b'], {'two': 2})
@@ -111,10 +113,10 @@ class TestXDict(tm.TestCase):
         self.assertEqual(x['c']['four'], {'nest': {'double': 4}})
         self.assertEqual(x['c']['four']['nest'], {'double': 4})
         self.assertEqual(x['c']['four']['nest']['double'], 4)
-        
+
     def test_get(self):
         x = xdict(out1)
-        
+
         self.assertEqual(x.get('a', 1000), {'one': 1})
         self.assertEqual(x.get('a.one', 1000), 1)
         self.assertEqual(x.get('a.does.not.exist', 1000), 1000)
@@ -133,10 +135,10 @@ class TestXDict(tm.TestCase):
 
         with self.assertRaises(KeyError):
             del x['a.does.not.exist']
-        
+
     def test_flattened(self):
         x = xdict(out1)
-        self.assertEqual(x.flattened(), flatout1)        
+        self.assertEqual(x.flattened(), flatout1)
 
     def test_setdefault(self):
         x = xdict(out1)
@@ -196,14 +198,14 @@ class TestXDict(tm.TestCase):
         self.assertFalse('z' in x)
         self.assertFalse('four' in x)
 
-        self.assertTrue(x.has_key('a'))
-        self.assertTrue(x.has_key('a.one'))
-        self.assertTrue(x.has_key('b'))
-        self.assertTrue(x.has_key('c.four'))
-        self.assertTrue(x.has_key('c.four.nest'))
-        self.assertTrue(x.has_key('c.four.nest.double'))
-        self.assertFalse(x.has_key('z'))
-        self.assertFalse(x.has_key('four'))
+        self.assertTrue(x.has_key('a'))  # noqa: W601
+        self.assertTrue(x.has_key('a.one'))  # noqa: W601
+        self.assertTrue(x.has_key('b'))  # noqa: W601
+        self.assertTrue(x.has_key('c.four'))  # noqa: W601
+        self.assertTrue(x.has_key('c.four.nest'))  # noqa: W601
+        self.assertTrue(x.has_key('c.four.nest.double'))  # noqa: W601
+        self.assertFalse(x.has_key('z'))  # noqa: W601
+        self.assertFalse(x.has_key('four'))  # noqa: W601
 
     def test_pop(self):
         x = xdict(out1)
@@ -310,7 +312,7 @@ class TestXDict(tm.TestCase):
         self.assertEqual(x, out1int)
 
         # Flat
-        flatout1int = dict(flatout1) 
+        flatout1int = dict(flatout1)
         flatout1int['d[0].hi'] = 'there'
         flatout1int['d[0].bye'] = 'now'
         flatout1int['d[1].test'] = 'value'
@@ -320,5 +322,5 @@ class TestXDict(tm.TestCase):
 
 
 if __name__ == '__main__':
-   from swat.utils.testing import runtests
-   runtests()
+    from swat.utils.testing import runtests
+    runtests()

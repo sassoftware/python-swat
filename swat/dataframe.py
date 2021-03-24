@@ -25,14 +25,33 @@ from __future__ import print_function, division, absolute_import, unicode_litera
 
 import collections
 import datetime
+import functools
 import json
 import re
 import pandas as pd
 import six
+try:
+    from pandas.io.formats import console as pdconsole
+    get_console_size = pdconsole.get_console_size
+except ImportError:
+    try:
+        from pandas.formats.format import get_console_size
+    except ImportError:
+        from pandas.core.format import get_console_size
+try:
+    from pandas.io.formats import format as pdfmt
+    notebook_opts = {'notebook': True}
+except ImportError:
+    notebook_opts = {}
+    try:
+        from pandas.formats import format as pdfmt
+    except ImportError:
+        from pandas.core import format as pdfmt
 from .cas.table import CASTable
+from .config import get_option
 from .utils.compat import (a2u, a2n, int32, int64, float64, int32_types,
                            int64_types, float64_types, bool_types, text_types,
-                           binary_types)
+                           binary_types, dict_types)
 from .utils import dict2kwargs
 from .clib import errorcheck
 from .formatter import SASFormatter
@@ -415,9 +434,7 @@ class SASDataFrame(pd.DataFrame):
         self.label = a2u(label)
         self.title = a2u(title)
         # TODO: Should attrs be walked and converted to unicode?
-        self.attrs = attrs
-        if self.attrs is None:
-            self.attrs = {}
+        self.attrs = attrs or {}
         self.formatter = formatter
         if self.formatter is None:
             self.formatter = SASFormatter()
@@ -530,41 +547,247 @@ class SASDataFrame(pd.DataFrame):
     # End dictionary methods
     #
 
-    def __str__(self):
+    def _get_formatters(self, formatters=None):
+        ''' Retrieve formatter functions for DataFrame formatters= '''
+        format = self.formatter.format
+
+        out = {}
+
+        formatters = formatters or {}
+
+        if isinstance(formatters, dict_types):
+            for col in self.columns:
+                if col in formatters:
+                    out[col] = formatters[col]
+                elif col in self.colinfo:
+                    info = self.colinfo[col]
+                    if info.format:
+                        out[col] = functools.partial(format,
+                                                     sasfmt=info.format,
+                                                     width=info.width)
+        else:
+            for col, fmter in zip(self.columns, formatters):
+                if fmter is not None:
+                    out[col] = fmter
+                elif col in self.colinfo:
+                    info = self.colinfo[col]
+                    if info.format:
+                        out[col] = functools.partial(format,
+                                                     sasfmt=info.format,
+                                                     width=info.width)
+
+        return out
+
+    def __repr__(self):
+        ''' Return a string representation for a particular DataFrame '''
+        buf = six.StringIO('')
+
+        # Calling a private DataFrame method here, so protect it.
+        if getattr(self, '_info_repr', lambda: False)():
+            self.info(buf=buf)
+            return buf.getvalue()
+
+        if self.label:
+            buf.write('%s\n\n' % self.label)
+
+        kwargs = {}
         try:
-            from IPython.lib.pretty import pretty
-            return pretty(self)
-        except ImportError:
-            if self.label:
-                return '%s\n\n%s' % (self.label, pd.DataFrame.to_string(self))
-            return pd.DataFrame.to_string(self)
+            kwargs['min_rows'] = pd.get_option('display.min_rows')
+        except Exception:  # noqa: E722
+            pass
+        max_rows = pd.get_option('display.max_rows')
+        max_cols = pd.get_option('display.max_columns')
+        show_dimensions = pd.get_option('display.show_dimensions')
+        if pd.get_option('display.expand_frame_repr'):
+            width, _ = get_console_size()
+        else:
+            width = None
+        if not hasattr(pdfmt, 'DataFrameRenderer'):
+            kwargs['line_width'] = width
+
+        if get_option('display.apply_formats'):
+            kwargs['formatters'] = self._get_formatters()
+            if 'na_rep' not in kwargs:
+                kwargs['na_rep'] = '.'
+
+        formatter = pdfmt.DataFrameFormatter(
+            self,
+            max_rows=max_rows,
+            max_cols=max_cols,
+            show_dimensions=show_dimensions,
+            **kwargs
+        )
+        # NOTE: Patch for bug in pandas DataFrameFormatter when using
+        #       formatters on a DataFrame that is truncated in the console.
+        formatter.columns = formatter.tr_frame.columns
+
+        # pandas 1.2.0 uses a renderer instead of just a formatter
+        if hasattr(pdfmt, 'DataFrameRenderer'):
+            formatter = pdfmt.DataFrameRenderer(formatter)
+            txt = formatter.to_string(line_width=width)
+        else:
+            txt = formatter.to_string()
+
+        if txt is None:
+            if getattr(formatter, 'buf', None) is not None:
+                buf.write(formatter.buf.getvalue())
+        else:
+            buf.write(txt)
+
+        return buf.getvalue()
+
+    def __str__(self):
+        ''' Return a string representation for a particular DataFrame '''
+        return repr(self)
 
     def _repr_pretty_(self, p, cycle):
         if cycle:
             p.text('...')
             return
+        p.text(self.to_string())
 
-        if self.label:
-            p.text(self.label)
-            p.break_()
-            p.break_()
-
-        p.pretty(pd.DataFrame(self))
-
-    def _repr_html_(self):
+    def to_string(self, apply_formats=None, **kwargs):
         '''
-        Render the SASDataFrame to HTML for IPython
+        Return a string representation of a DataFrame
+
+        Parameters
+        ----------
+        apply_formats : bool or None, optional
+            Should SAS formats be applied to the data values in the
+            rendered output?  If None, the `display.apply_formats`
+            option value will be used.
+        **kwargs : keyword-parameters, optional
+            All keyword parameters for the `pandas.DataFrame.to_string`
+            method are accepted here as well.
+
+        See Also
+        --------
+        :meth:`pandas.DataFrame.to_string`
 
         Returns
         -------
         string
-           HTML representation of SASDataFrame
 
         '''
-        html = pd.DataFrame._repr_html_(self)
-        if html is None:
-            return
+        buf = six.StringIO('')
 
+        if self.label:
+            buf.write('%s\n\n' % self.label)
+
+        formatters = kwargs.get('formatters', None)
+        if apply_formats or (apply_formats is None
+                             and get_option('display.apply_formats')):
+            kwargs['formatters'] = self._get_formatters(formatters)
+            if 'na_rep' not in kwargs:
+                kwargs['na_rep'] = '.'
+
+        formatter = pdfmt.DataFrameFormatter(self, **kwargs)
+        # NOTE: Patch for bug in pandas DataFrameFormatter when using
+        #       formatters on a DataFrame that is truncated in the console.
+        formatter.columns = formatter.tr_frame.columns
+
+        # pandas 1.2.0 uses a renderer instead of just a formatter
+        if hasattr(pdfmt, 'DataFrameRenderer'):
+            formatter = pdfmt.DataFrameRenderer(formatter)
+
+        txt = formatter.to_string()
+        if txt is None:
+            if getattr(formatter, 'buf', None) is not None:
+                buf.write(formatter.buf.getvalue())
+        else:
+            buf.write(txt)
+
+        return buf.getvalue()
+
+    def _repr_html_(self):
+        ''' Return a html representation for a particular DataFrame  '''
+
+        # Calling a private DataFrame method here, so protect it.
+        if getattr(self, '_info_repr', lambda: False)():
+            buf = six.StringIO('')
+            self.info(buf=buf)
+            # need to escape the <class>, should be the first line.
+            val = buf.getvalue().replace('<', r'&lt;', 1)
+            val = val.replace('>', r'&gt;', 1)
+            return '<pre>' + val + '</pre>'
+
+        kwargs = {}
+        if get_option('display.apply_formats'):
+            kwargs['formatters'] = self._get_formatters()
+            kwargs['na_rep'] = '.'
+
+        if pd.get_option('display.notebook_repr_html'):
+            try:
+                kwargs['min_rows'] = pd.get_option('display.min_rows')
+            except:  # noqa: E722
+                pass
+            max_rows = pd.get_option('display.max_rows')
+            max_cols = pd.get_option('display.max_columns')
+            show_dimensions = pd.get_option('display.show_dimensions')
+
+            formatter = pdfmt.DataFrameFormatter(
+                self,
+                max_rows=max_rows,
+                max_cols=max_cols,
+                show_dimensions=show_dimensions,
+                **kwargs
+            )
+            # NOTE: Patch for bug in pandas DataFrameFormatter when using
+            #       formatters on a DataFrame that is truncated in the console.
+            formatter.columns = formatter.tr_frame.columns
+
+            # pandas 1.2.0 uses a renderer instead of just a formatter
+            if hasattr(pdfmt, 'DataFrameRenderer'):
+                formatter = pdfmt.DataFrameRenderer(formatter)
+
+            html = formatter.to_html(**notebook_opts)
+            if html is None:
+                if getattr(formatter, 'buf', None) is not None:
+                    html = formatter.buf.getvalue()
+                else:
+                    return None
+            return self._post_process_html(html)
+
+        return None
+
+    def to_html(self, apply_formats=None, **kwargs):
+        '''
+        Return a html representation of a DataFrame
+
+        Parameters
+        ----------
+        apply_formats : bool or None, optional
+            Should SAS formats be applied to the data values in the
+            rendered output?  If None, the `display.apply_formats`
+            option value will be used.
+        **kwargs : keyword-parameters, optional
+            All keyword parameters for the `pandas.DataFrame.to_html`
+            method are accepted here as well.
+
+        See Also
+        --------
+        :meth:`pandas.DataFrame.to_html`
+
+        Returns
+        -------
+        string or None
+
+        '''
+        formatters = kwargs.get('formatters', None)
+        if apply_formats or (apply_formats is None
+                             and get_option('display.apply_formats')):
+            kwargs['formatters'] = self._get_formatters(formatters)
+            if 'na_rep' not in kwargs:
+                kwargs['na_rep'] = '.'
+
+        html = pd.DataFrame.to_html(self, **kwargs)
+        if html is None:
+            return None
+
+        return self._post_process_html(html)
+
+    def _post_process_html(self, html):
+        ''' Add SAS-isms to generated HTML table '''
         try:
             from html import escape
         except ImportError:
@@ -832,21 +1055,19 @@ class SASDataFrame(pd.DataFrame):
         if not self.attrs.get('ByVar1'):
             return dframe
 
-        attrs = dframe.attrs
-
         # 'attributes', 'index', or 'columns'
-        attrs.setdefault('ByGroupMode', 'attributes')
+        dframe.attrs.setdefault('ByGroupMode', 'attributes')
 
         # 'none', 'raw', 'formatted', or 'both'
-        attrs.setdefault('ByGroupColumns', 'none')
+        dframe.attrs.setdefault('ByGroupColumns', 'none')
 
         # Short circuit if possible
-        if bygroup_columns == attrs['ByGroupColumns']:
-            if attrs['ByGroupMode'] == 'attributes':
+        if bygroup_columns == dframe.attrs['ByGroupColumns']:
+            if dframe.attrs['ByGroupMode'] == 'attributes':
                 return dframe
-            if bygroup_as_index and attrs['ByGroupMode'] == 'index':
+            if bygroup_as_index and dframe.attrs['ByGroupMode'] == 'index':
                 return dframe
-            if not bygroup_as_index and attrs['ByGroupMode'] == 'columns':
+            if not bygroup_as_index and dframe.attrs['ByGroupMode'] == 'columns':
                 return dframe
 
         # Get the names of all of the By variables
@@ -858,40 +1079,40 @@ class SASDataFrame(pd.DataFrame):
         while True:
             byvar = 'ByVar%d' % i
 
-            if byvar not in attrs:
+            if byvar not in dframe.attrs:
                 break
 
-            byvars.append(attrs[byvar])
-            byvals.append(attrs[byvar + 'Value'])
-            byvalsfmt.append(attrs[byvar + 'ValueFormatted'])
+            byvars.append(dframe.attrs[byvar])
+            byvals.append(dframe.attrs[byvar + 'Value'])
+            byvalsfmt.append(dframe.attrs[byvar + 'ValueFormatted'])
 
-            attrs.pop(byvar + 'Formatted', None)
+            dframe.attrs.pop(byvar + 'Formatted', None)
 
             numbycols = numbycols + 1
-            if attrs['ByGroupColumns'] == 'both':
+            if dframe.attrs['ByGroupColumns'] == 'both':
                 numbycols = numbycols + 1
 
             i = i + 1
 
         # Drop existing indexes
-        if attrs['ByGroupMode'] == 'index':
+        if dframe.attrs['ByGroupMode'] == 'index':
             dframe = dframe.reset_index(level=list(range(numbycols)), drop=True)
 
         # Drop existing columns
-        elif attrs['ByGroupMode'] == 'columns':
+        elif dframe.attrs['ByGroupMode'] == 'columns':
             dframe = dframe.iloc[:, :numbycols]
 
-        # Bail out of we are doing attributes
+        # Bail out if we are doing attributes
         if bygroup_columns == 'none':
-            attrs['ByGroupMode'] = 'attributes'
-            attrs['ByGroupColumns'] = 'none'
+            dframe.attrs['ByGroupMode'] = 'attributes'
+            dframe.attrs['ByGroupColumns'] = 'none'
             return dframe
 
         # Construct By group columns
-        attrs['ByGroupColumns'] = bygroup_columns
+        dframe.attrs['ByGroupColumns'] = bygroup_columns
 
         if bygroup_as_index:
-            attrs['ByGroupMode'] = 'index'
+            dframe.attrs['ByGroupMode'] = 'index'
             nlevels = len([x for x in dframe.index.names if x])
             appendlevels = nlevels > 0
             bylevels = 0
@@ -899,8 +1120,8 @@ class SASDataFrame(pd.DataFrame):
             i = 1
             for byname, byval, byvalfmt in zip(byvars, byvals, byvalsfmt):
                 bykey = 'ByVar%d' % i
-                bylabel = attrs.get(bykey + 'Label')
-                sasfmt = attrs.get(bykey + 'Format')
+                bylabel = dframe.attrs.get(bykey + 'Label')
+                sasfmt = dframe.attrs.get(bykey + 'Format')
                 sasfmtwidth = split_format(sasfmt).width
                 if bygroup_columns in ['both', 'raw']:
                     dframe = dframe.set_index(pd.Series(data=[byval] * len(dframe),
@@ -928,19 +1149,19 @@ class SASDataFrame(pd.DataFrame):
 
             # Set the index level order
             if nlevels:
-                dframe = dframe.reorder_levels(list(range(nlevels, nlevels + bylevels)) +
-                                               list(range(nlevels)))
+                dframe = dframe.reorder_levels(list(range(nlevels, nlevels + bylevels))
+                                               + list(range(nlevels)))
 
         else:
-            attrs['ByGroupMode'] = 'columns'
+            dframe.attrs['ByGroupMode'] = 'columns'
             allcolnames = list(dframe.columns)
             bycols = []
 
             i = 1
             for byname, byval, byvalfmt in zip(byvars, byvals, byvalsfmt):
                 bykey = 'ByVar%d' % i
-                bylabel = attrs.get(bykey + 'Label')
-                sasfmt = attrs.get(bykey + 'Format')
+                bylabel = dframe.attrs.get(bykey + 'Label')
+                sasfmt = dframe.attrs.get(bykey + 'Format')
                 sasfmtwidth = split_format(sasfmt).width
                 if bygroup_columns in ['both', 'raw']:
                     if byname in allcolnames:

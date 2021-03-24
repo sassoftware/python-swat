@@ -7,7 +7,7 @@ Installation
 The SWAT package is installed using the ``pip`` command.  The requirements
 for using the binary protocol of CAS (recommended) are as follows.
 
-* **64-bit** Python 2.7 or 3.4-3.6 on Linux
+* **64-bit** Python 2.7 or 3.5+ on Linux or Windows
 
 See additional shared library notes below.
 
@@ -19,7 +19,7 @@ amounts of data.  It also offers more advanced data loading from the client
 and data formatting features.
 
 To access the CAS REST interface only, you can use the pure Python code which
-runs in Python 2.7/3.4+.  You will still need Pandas installed.  While not as
+runs in Python 2.7/3.5+.  You will still need Pandas installed.  While not as
 fast as the binary protocol, the pure Python interface is more portable.
 For more information, see :ref:`Binary vs. REST <binaryvsrest>`.
 
@@ -44,18 +44,37 @@ make binary protocol connections to CAS.  If you do not have this library on
 your machine you can install the ``numactl`` package for your distribution
 to make it available to SWAT.
 
+Note that if you use an Anaconda distribution of Python, ``libnuma.so.1`` will
+be installed as a dependency automatically.
+
 
 Python Dependencies
 -------------------
 
 The SWAT package uses many features of the Pandas Python package and other
-dependencies of Pandas.  If you do not already have version 0.16.0 or greater
-of Pandas installed, ``pip`` will install or update it for you when you
+dependencies of Pandas.  If you do not already have version 0.16 or greater
+of Pandas installed, ``pip`` or ``conda`` will install or update it for you when you
 install SWAT.
 
 
-Pip
----
+PyPI
+----
+
+SWAT can be installed from PyPI using ``pip`` as follows:
+
+   pip install swat
+
+
+Conda
+-----
+
+If you use an Anaconda distribution of Python, you can use ``conda`` to install SWAT:
+
+    conda install -c sas-institute swat
+
+
+Github
+------
 
 SWAT can be installed from `<https://github.com/sassoftware/python-swat/releases>`_.
 Simply locate the file for your platform and install it using ``pip`` as

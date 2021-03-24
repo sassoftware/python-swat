@@ -28,8 +28,18 @@ import re
 import sys
 import unittest
 import pandas as pd
+import warnings
+from six.moves.urllib.parse import urlparse
+from swat.config import OptionWarning
+from swat.cas.connection import CAS
 
 UUID_RE = r'^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$'
+
+RE_TYPE = type(re.compile(r''))
+
+
+warnings.filterwarnings('ignore', category=OptionWarning)
+warnings.filterwarnings('ignore', category=RuntimeWarning)
 
 
 class TestCase(unittest.TestCase):
@@ -55,9 +65,14 @@ class TestCase(unittest.TestCase):
 
     def assertContainsMessage(self, results, expectedMsg):
         ''' See if expected message is in results '''
-        for i in range(len(results.messages)):
-            if expectedMsg in results.messages[i]:
-                return
+        if isinstance(expectedMsg, RE_TYPE):
+            for msg in results.messages:
+                if expectedMsg.match(msg):
+                    return
+        else:
+            for i in range(len(results.messages)):
+                if expectedMsg in results.messages[i]:
+                    return
         raise ValueError('Expected message not found: ' + expectedMsg)
 
     def replaceNaN(self, row, nan):
@@ -109,17 +124,21 @@ class TestCase(unittest.TestCase):
 
 def get_casout_lib(server_type):
     ''' Get the name of the output CASLib '''
-    out_lib = os.environ.get('CASOUTLIB', 'CASUSER')
+    out_lib = os.environ.get('CAS_OUT_LIB',
+                             os.environ.get('CASOUTLIB', 'CASUSER'))
     if '.mpp' in server_type:
-        out_lib = os.environ.get('CASMPPOUTLIB', out_lib)
+        out_lib = os.environ.get('CAS_MPP_OUT_LIB',
+                                 os.environ.get('CASMPPOUTLIB', out_lib))
     return out_lib
 
 
 def get_cas_data_lib(server_type):
     ''' Get the name of data CASLib '''
-    data_lib = os.environ.get('CASDATALIB', 'CASTestTmp')
+    data_lib = os.environ.get('CAS_DATA_LIB',
+                              os.environ.get('CASDATALIB', 'CASTestTmp'))
     if '.mpp' in server_type:
-        data_lib = os.environ.get('CASMPPDATALIB', 'HPS')
+        data_lib = os.environ.get('CAS_MPP_DATA_LIB',
+                                  os.environ.get('CASMPPDATALIB', 'HPS'))
     return data_lib
 
 
@@ -133,9 +152,17 @@ def get_user_pass():
     '''
     username = None
     password = None
-    if 'CASUSER' in os.environ:
+    if 'CAS_USER' in os.environ:
+        username = os.environ['CAS_USER']
+    elif 'CASUSER' in os.environ:
         username = os.environ['CASUSER']
-    if 'CASPASSWORD' in os.environ:
+    if 'CAS_TOKEN' in os.environ:
+        password = os.environ['CAS_TOKEN']
+    elif 'CASTOKEN' in os.environ:
+        password = os.environ['CASTOKEN']
+    elif 'CAS_PASSWORD' in os.environ:
+        password = os.environ['CAS_PASSWORD']
+    elif 'CASPASSWORD' in os.environ:
         password = os.environ['CASPASSWORD']
     return username, password
 
@@ -151,12 +178,28 @@ def get_host_port_proto():
     (cashost, casport, casprotocol)
 
     '''
-    cashost = os.environ.get('CASHOST')
-    casport = os.environ.get('CASPORT')
-    casprotocol = os.environ.get('CASPROTOCOL')
+    cashost = None
+    casport = None
+    casprotocol = None
 
-    if casport is not None:
+    url = None
+    for name in ['CAS_URL', 'CASURL', 'CAS_HOST', 'CASHOST',
+                 'CAS_HOSTNAME', 'CASHOSTNAME']:
+        if name in os.environ:
+            url = os.environ[name]
+            break
+
+    casport = casport or os.environ.get('CAS_PORT',
+                                        os.environ.get('CASPORT'))
+    if casport:
         casport = int(casport)
+
+    casprotocol = casprotocol or os.environ.get('CAS_PROTOCOL',
+                                                os.environ.get('CASPROTOCOL'))
+
+    if url:
+        cashost, casport, username, password, casprotocol = \
+            CAS._get_connection_info(url, casport, casprotocol, None, None, None)
 
     if cashost and casport:
         return cashost, casport, casprotocol
@@ -165,7 +208,7 @@ def get_host_port_proto():
     casrc = None
     rcname = '.casrc'
     homepath = os.path.abspath(os.path.normpath(
-                   os.path.join(os.path.expanduser(os.environ.get('HOME', '~')), rcname)))
+        os.path.join(os.path.expanduser(os.environ.get('HOME', '~')), rcname)))
     upath = os.path.join(r'u:', rcname)
     cfgfile = os.path.abspath(os.path.normpath(rcname))
 
@@ -257,20 +300,20 @@ def _read_casrc(path):
 
     try:
         cashost = str(lg.cashost)
-    except:
+    except Exception:
         sys.sterr.write('ERROR: Could not access cashost setting\n')
         sys.exit(1)
 
     try:
         casport = int(lg.casport)
-    except:
+    except Exception:
         sys.sterr.write('ERROR: Could not access casport setting\n')
         sys.exit(1)
 
     try:
         if lg.casprotocol:
             casprotocol = str(lg.casprotocol)
-    except:
+    except Exception:
         pass
 
     return cashost, casport, casprotocol
@@ -340,20 +383,32 @@ def runtests(xmlrunner=False):
     ''' Run unit tests '''
     import sys
 
-    if '--profile' in sys.argv:
-        import profile
+    profile_opt = [x for x in sys.argv
+                   if x == '--profile' or x.startswith('--profile=')]
+    sys.argv = [x for x in sys.argv
+                if x != '--profile' and not x.startswith('--profile=')]
+
+    if profile_opt:
+        import cProfile as profile
+        import os
         import pstats
 
-        sys.argv = [x for x in sys.argv if x != '--profile']
+        profile_opt = profile_opt[-1]
+
+        if '=' in profile_opt:
+            name = profile_opt.split('=')[-1]
+        else:
+            name = '%s.prof' % ([os.path.splitext(os.path.basename(x))[0]
+                                 for x in sys.argv if x.endswith('.py')][0])
 
         if xmlrunner:
             import xmlrunner as xr
             profile.run('unittest.main(testRunner=xr.XMLTestRunner('
-                        'output=\'test-reports\', verbosity=2))', '_stats.txt')
+                        'output=\'test-reports\', verbosity=2))', name)
         else:
-            profile.run('unittest.main()', '_stats.txt')
+            profile.run('unittest.main()', name)
 
-        stats = pstats.Stats('_stats.txt')
+        stats = pstats.Stats(name)
         # stats.strip_dirs()
         stats.sort_stats('cumulative', 'calls')
         stats.print_stats(25)
@@ -374,7 +429,7 @@ def get_cas_host_type(conn):
     ostype = out['About']['System']['OS Family']
     stype = 'mpp'
     htype = 'nohdfs'
-    if out['server'].ix[0, 'nodes'] == 1:
+    if out['server'].iloc[0]['nodes'] == 1:
         stype = 'smp'
     if ostype.startswith('LIN'):
         ostype = 'linux'

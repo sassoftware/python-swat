@@ -25,6 +25,7 @@ from __future__ import print_function, division, absolute_import, unicode_litera
 
 import copy
 import keyword
+import inspect
 import numbers
 import re
 import sys
@@ -42,6 +43,7 @@ from ..exceptions import SWATError
 from ..utils import dict2kwargs, getattr_safe_property, xdict
 from ..utils.compat import (int_types, binary_types, text_types, items_types,
                             patch_pandas_sort, char_types, num_types)
+from ..utils.datetime import is_date_format, is_datetime_format, is_time_format
 from ..utils.keyword import dekeywordify
 
 # pylint: disable=W0212, W0221, W0613, R0904, C0330
@@ -126,7 +128,7 @@ def _get_unique(seq, lowercase=False):
     Parameters
     ----------
     lowercase : boolean
-        Should values be compared in a case-insensitive way?
+        If True, compare elements in a case-insensitive way
 
     Returns
     -------
@@ -228,11 +230,19 @@ def concat(objs, axis=0, join='outer', join_axes=None, ignore_index=False, keys=
     :class:`CASTable`
 
     '''
+    for item in objs:
+        if item is None:
+            continue
+        if not isinstance(item, CASTable):
+            raise TypeError('All input objects must be CASTable instances')
+
     try:
         views = []
         for item in objs:
             if item is None:
                 continue
+            if not isinstance(item, CASTable):
+                raise TypeError('All input objects must be CASTable instances')
             views.append(item.to_view())
 
         if not views:
@@ -256,7 +266,7 @@ def concat(objs, axis=0, join='outer', join_axes=None, ignore_index=False, keys=
             except Exception:
                 pass
 
-    return out['OutputCasTables'].ix[0, 'casTable']
+    return out['OutputCasTables'].iloc[0]['casTable']
 
 
 def merge(left, right, how='inner', on=None, left_on=None, right_on=None,
@@ -301,8 +311,7 @@ def merge(left, right, how='inner', on=None, left_on=None, right_on=None,
     copy : boolean, optional
         Not supported.
     indicator : boolean or string, optional
-        Should a column be created that indicates which table the
-        key came from?  If True, a column named '_merge' will be
+        If True, a column named '_merge' will be
         created with the values: 'left_only', 'right_only', or
         'both'.  If False, no column is created.  If a string is
         specified, a column is created using that name containing
@@ -317,6 +326,11 @@ def merge(left, right, how='inner', on=None, left_on=None, right_on=None,
     :class:`CASTable`
 
     '''
+    if not isinstance(left, CASTable):
+        raise TypeError('`left` parameter must be a CASTable object')
+    if not isinstance(right, CASTable):
+        raise TypeError('`right` parameter must be a CASTable object')
+
     how = how.lower()
 
     # Setup join column names
@@ -367,8 +381,8 @@ def merge(left, right, how='inner', on=None, left_on=None, right_on=None,
     left_rename = ' rename=(%s=__by_var%s)' % (_nlit(left_on), left_rename)
     right_rename = ' rename=(%s=__by_var%s)' % (_nlit(right_on), right_rename)
 
-    columns = ' '.join([_nlit(left_map[x]) for x in left_columns] +
-                       [_nlit(right_map[x]) for x in right_columns])
+    columns = ' '.join([_nlit(left_map[x]) for x in left_columns]
+                       + [_nlit(right_map[x]) for x in right_columns])
 
     left_missval = '.'
     right_missval = '.'
@@ -491,7 +505,8 @@ def merge(left, right, how='inner', on=None, left_on=None, right_on=None,
                         '        delete;'
                         '    end;')
         elif how in ['outer-minus-inner']:
-            code.append('    if (__in_left and ^__in_right) or (^__in_left and __in_right) then do;'
+            code.append('    if (__in_left and ^__in_right) or '
+                        '       (^__in_left and __in_right) then do;'
                         '        if __in_left then do;'
                         '            %(left_on)s = __by_var;'
                         '        end;'
@@ -540,7 +555,7 @@ def merge(left, right, how='inner', on=None, left_on=None, right_on=None,
         if right_view is not None:
             right_view._retrieve('table.droptable')
 
-    return out['OutputCasTables'].ix[0, 'casTable']
+    return out['OutputCasTables'].iloc[0]['casTable']
 
 
 class CASTableAccessor(object):
@@ -784,7 +799,7 @@ class CASTablePlotter(object):
     def __init__(self, table):
         self._table = table
 
-    def _get_fetchvars(self, x=None, y=None, by=None):
+    def _get_fetchvars(self, x=None, y=None, by=None, c=None, C=None, s=None):
         '''
         Return a list of variables needed for the plot
 
@@ -806,7 +821,19 @@ class CASTablePlotter(object):
         else:
             by = self._table.get_groupby_vars()
 
-        return list(by) + list(x) + list(y)
+        c = c or []
+        if isinstance(c, six.string_types):
+            c = [c]
+
+        C = C or []
+        if isinstance(C, six.string_types):
+            C = [C]
+
+        s = s or []
+        if isinstance(s, six.string_types):
+            s = [s]
+
+        return list(by) + list(x) + list(y) + list(c) + list(C) + list(s)
 
     def _get_sampling_params(self, **kwargs):
         '''
@@ -823,14 +850,15 @@ class CASTablePlotter(object):
             samp['stratify_by'] = kwargs.pop('stratify_by')
         return samp, kwargs
 
-    def _get_plot_params(self, x=None, y=None, by=None, **kwargs):
+    def _get_plot_params(self, x=None, y=None, by=None, c=None,
+                         C=None, s=None, **kwargs):
         '''
         Split parameters into fetch and plot parameter groups
 
         '''
         params, kwargs = self._get_sampling_params(**kwargs)
         params['grouped'] = True
-        params['fetchvars'] = self._get_fetchvars(x=x, y=y, by=by)
+        params['fetchvars'] = self._get_fetchvars(x=x, y=y, by=by, c=c, C=C, s=s)
         return params, kwargs
 
     def __call__(self, x=None, y=None, kind='line', **kwargs):
@@ -974,7 +1002,7 @@ class CASTablePlotter(object):
         :class:`matplotlib.AxesSubplot` or :func:`numpy.array` of them.
 
         '''
-        params, kwargs = self._get_plot_params(x=x, y=y, **kwargs)
+        params, kwargs = self._get_plot_params(x=x, y=y, C=C, **kwargs)
         if reduce_C_function is not None:
             kwargs['reduce_C_function'] = reduce_C_function
         if gridsize is not None:
@@ -1087,7 +1115,7 @@ class CASTablePlotter(object):
         :class:`matplotlib.AxesSubplot` or :func:`numpy.array` of them.
 
         '''
-        params, kwargs = self._get_plot_params(x=x, y=y, **kwargs)
+        params, kwargs = self._get_plot_params(x=x, y=y, s=s, c=c, **kwargs)
         return self._table._fetch(**params).plot(x, y, s=s, c=c,
                                                  kind='scatter', **kwargs)
 
@@ -1249,7 +1277,12 @@ class CASTable(ParamManager, ActionParamManager):
     getdoc = None
 
     def __init__(self, name, **table_params):
-        ParamManager.__init__(self, name=name, **table_params)
+        if isinstance(name, CASTable):
+            params = name.to_params()
+            params.update(table_params)
+            ParamManager.__init__(self, **params)
+        else:
+            ParamManager.__init__(self, name=name, **table_params)
         ActionParamManager.__init__(self)
         self._pandas_enabled = True
         self._connection = None
@@ -1353,7 +1386,7 @@ class CASTable(ParamManager, ActionParamManager):
 
     def append_computedvars(self, *items, **kwargs):
         '''
-        Append variable names to tbl.computedvars parameter
+        Append variable names to computedvars parameter
 
         Parameters
         ----------
@@ -1389,7 +1422,7 @@ class CASTable(ParamManager, ActionParamManager):
 
     def append_groupby(self, *items, **kwargs):
         '''
-        Append variable names to tbl.groupby parameter
+        Append variable names to groupby parameter
 
         Parameters
         ----------
@@ -1423,7 +1456,7 @@ class CASTable(ParamManager, ActionParamManager):
 
     def append_computedvarsprogram(self, *items, **kwargs):
         '''
-        Append code to tbl.computedvarsprogram parameter
+        Append code to computedvarsprogram parameter
 
         Parameters
         ----------
@@ -1617,15 +1650,18 @@ class CASTable(ParamManager, ActionParamManager):
             pass
 
         if not column._columns:
-            column._columns = [column._columninfo.ix[0, 'Column']]
+            column._columns = [column._columninfo.iloc[0]['Column']]
 
         return column
 
     def __dir__(self):
+        # Short-circuit PyCharm's introspection
+        if 'get_names' in [x[3] for x in inspect.stack()]:
+            return ['params']
         try:
             conn = self.get_connection()
             return list(sorted(list(self._dir) + list(conn.get_action_names())))
-        except:
+        except Exception:
             pass
         return list(sorted(self._dir))
 
@@ -1633,7 +1669,7 @@ class CASTable(ParamManager, ActionParamManager):
         try:
             conn = self.get_connection()
             return list(sorted(conn.get_action_names()))
-        except:
+        except Exception:
             pass
         return []
 
@@ -1654,7 +1690,7 @@ class CASTable(ParamManager, ActionParamManager):
         if not cls.table_params or not cls.outtable_params:
             param_names = []
 
-            actinfo = connection._get_action_info('builtins.cascommon')
+            actinfo = connection._get_action_info('builtins.cascommon', levels=100)
 
             for item in actinfo[-1].get('params'):
                 if 'parmList' in item:
@@ -2190,7 +2226,8 @@ class CASTable(ParamManager, ActionParamManager):
         '''
         out = {}
         for key, value in six.iteritems(super(CASTable, self).to_params()):
-            if key.lower() in ['where', 'replace', 'promote'] and isinstance(self.params[key], xdict.xadict):
+            if key.lower() in ['where', 'replace', 'promote'] \
+                    and isinstance(self.params[key], xdict.xadict):
                 continue
             out[key] = value
         return out
@@ -2214,7 +2251,8 @@ class CASTable(ParamManager, ActionParamManager):
         if type(self).table_params:
             out = {}
             for key in self.params.keys():
-                if key.lower() in ['where', 'replace', 'promote'] and isinstance(self.params[key], xdict.xadict):
+                if key.lower() in ['where', 'replace', 'promote'] \
+                        and isinstance(self.params[key], xdict.xadict):
                     continue
                 if key.lower() in type(self).table_params:
                     out[key] = copy.deepcopy(self.params[key])
@@ -2269,7 +2307,8 @@ class CASTable(ParamManager, ActionParamManager):
         if type(self).outtable_params:
             out = {}
             for key in self.params.keys():
-                if key.lower() in ['where', 'replace', 'promote'] and isinstance(self.params[key], xdict.xadict):
+                if key.lower() in ['where', 'replace', 'promote'] \
+                        and isinstance(self.params[key], xdict.xadict):
                     continue
                 if key.lower() in type(self).outtable_params:
                     out[key] = copy.deepcopy(self.params[key])
@@ -2364,7 +2403,7 @@ class CASTable(ParamManager, ActionParamManager):
     @getattr_safe_property
     def _numrows(self):
         ''' Return number of rows in the table '''
-        return self.copy(exclude='groupby')._retrieve('simple.numrows')['numrows']
+        return int(self.copy(exclude='groupby')._retrieve('simple.numrows')['numrows'])
 
     def __len__(self):
         if self._pandas_enabled:
@@ -2417,7 +2456,7 @@ class CASTable(ParamManager, ActionParamManager):
         computedvars = self.get_param('computedvars', [])
         if computedvars and not isinstance(computedvars, items_types):
             computedvars = [computedvars]
-        return tblinfo.ix[0, 'Columns'] + len(computedvars)
+        return tblinfo.iloc[0]['Columns'] + len(computedvars)
 
     @getattr_safe_property
     def columns(self):
@@ -2478,7 +2517,7 @@ class CASTable(ParamManager, ActionParamManager):
 
     def as_matrix(self, columns=None, n=None):
         '''
-        Convert the CASTable to its Numpy-array representation
+        Represent CASTable as a Numpy array
 
         Parameters
         ----------
@@ -2500,9 +2539,10 @@ class CASTable(ParamManager, ActionParamManager):
         if n is None:
             n = get_option('cas.dataset.max_rows_fetched')
             if self._numrows > n:
-                warnings.warn(('Data downloads are limited to %d rows.  To change this limit, '
-                               'set swat.options.cas.dataset.max_rows_fetched to the desired limit.')
-                               % n, RuntimeWarning)
+                warnings.warn(('Data downloads are limited to %d rows.  '
+                               'To change this limit, set '
+                               'swat.options.cas.dataset.max_rows_fetched '
+                               'to the desired limit.') % n, RuntimeWarning)
         tbl = self.copy()
         tbl._intersect_columns(columns, inplace=True)
         return tbl._fetch(to=n).values
@@ -2528,6 +2568,26 @@ class CASTable(ParamManager, ActionParamManager):
         out.index = index
         out.name = None
         return out
+
+    def get(self, key, default=None):
+        '''
+        Get item from object for given key (ex: DataFrame column)
+
+        Returns default value if not found.
+
+        Parameters
+        ----------
+        key : object
+
+        Returns
+        -------
+        value : same type as items contained in object
+
+        '''
+        try:
+            return self[key]
+        except (KeyError, ValueError, IndexError):
+            return default
 
     def get_dtype_counts(self):
         ''' Retrieve the frequency of CAS table column data types '''
@@ -2625,7 +2685,7 @@ class CASTable(ParamManager, ActionParamManager):
 
     def select_dtypes(self, include=None, exclude=None, inplace=False):
         '''
-        Return a subset :class:`CASTable` including/excluding columns based on data type
+        Return a subset CASTable including/excluding columns based on data type
 
         Parameters
         ----------
@@ -2634,7 +2694,7 @@ class CASTable(ParamManager, ActionParamManager):
         exclude : list-of-strings, optional
             List of data type names to exclude from result
         inplace : boolean, optional
-            Should the table be modified in place?
+            If True, the table is modified in place
 
         Notes
         -----
@@ -2703,12 +2763,12 @@ class CASTable(ParamManager, ActionParamManager):
 
     def copy(self, deep=True, exclude=None):
         '''
-        Make a copy of the `CASTable` object
+        Make a copy of the CASTable object
 
         Parameters
         ----------
         deep : boolean, optional
-            Should all list / dict-type objects be deep copied?
+            If True, all lists and dict-type objects are deep copied
         exclude : list-of-strings, optional
             Parameters that should be excluded (top-level only).
 
@@ -2759,7 +2819,7 @@ class CASTable(ParamManager, ActionParamManager):
         columns : list-of-strings, optional
             A subset of columns to return.
         bygroup_as_index : boolean
-            If By groups are specified, should they be converted to an index?
+            When by_group_index is True, By groups are converted to an index if they exist
 
         Notes
         -----
@@ -2788,7 +2848,7 @@ class CASTable(ParamManager, ActionParamManager):
         columns : list-of-strings, optional
             A subset of columns to return.
         bygroup_as_index : boolean
-            If By groups are specified, should they be converted to an index?
+            When by_group_index is True, By groups are converted to an index if they exist
 
         Notes
         -----
@@ -2802,7 +2862,7 @@ class CASTable(ParamManager, ActionParamManager):
 
         '''
         if self._use_casout_for_stat(casout):
-            raise NotImplemented('tail for casout is not implemented yet')
+            raise NotImplementedError('tail for casout is not implemented yet')
             return self._get_casout_slice(n, columns=True, ascending=False, casout=casout)
         return self.slice(start=-n, stop=-1, columns=columns,
                           bygroup_as_index=bygroup_as_index)
@@ -2821,7 +2881,7 @@ class CASTable(ParamManager, ActionParamManager):
         columns : list-of-strings, optional
             A subset of columns to return.
         bygroup_as_index : boolean
-            If By groups are specified, should they be converted to an index?
+            When by_group_index is True, By groups are converted to an index if they exist
 
         Notes
         -----
@@ -2835,7 +2895,7 @@ class CASTable(ParamManager, ActionParamManager):
 
         '''
         if self._use_casout_for_stat(casout):
-            return self._get_casout_slice(stop-start, columns=True, ascending=True,
+            return self._get_casout_slice(stop - start, columns=True, ascending=True,
                                           casout=casout, start=start)
 
         from ..dataframe import concat
@@ -2945,7 +3005,7 @@ class CASTable(ParamManager, ActionParamManager):
 
     @getattr_safe_property
     def iloc(self):
-        ''' Integer location based indexing for selection by position '''
+        ''' Integer-based indexer for selecting by position '''
         if isinstance(self, CASColumn):
             raise NotImplementedError('The `iloc` attribute is not implemented, '
                                       'but the attribute is reserved.')
@@ -3003,7 +3063,7 @@ class CASTable(ParamManager, ActionParamManager):
 
     def iteritems(self):
         '''
-        Iterate over column names and :class:`CASColumn` objects
+        Iterate over column names and CASColumn objects
 
         Yields
         ------
@@ -3137,7 +3197,7 @@ class CASTable(ParamManager, ActionParamManager):
         return out.at[out.index.values[0], col]
 
     def lookup(self, row_labels, col_labels):
-        ''' Retrieve values indicated by row_labels, col_labels positions '''
+        ''' Retrieve values indicated by `row_labels`, `col_labels` positions '''
         data = []
         for row, col in zip(row_labels, col_labels):
             data.append(self.get_value(row, col))
@@ -3204,7 +3264,7 @@ class CASTable(ParamManager, ActionParamManager):
 
     def datastep(self, code, casout=None, *args, **kwargs):
         '''
-        Execute Data step code against the CAS table
+        Execute Data step code against the table
 
         Parameters
         ----------
@@ -3400,7 +3460,7 @@ class CASTable(ParamManager, ActionParamManager):
         casout : dict, optional
             The CAS output table definition
         inplace : bool, optional
-            Should the output table be overwritten?
+            If True, the output table is overwritten if it exists
             NOTE: If `prefix` or `suffix` are used, this option is only
                   used to determine the table's base name.
         prefix : string, optional
@@ -3481,7 +3541,7 @@ class CASTable(ParamManager, ActionParamManager):
 
     def all(self, axis=None, bool_only=None, skipna=True, level=None, **kwargs):
         '''
-        Return whether all elements in the column are True
+        Return True for each column with only elements that evaluate to true
 
         Parameters
         ----------
@@ -3490,7 +3550,7 @@ class CASTable(ParamManager, ActionParamManager):
         bool_only : bool, optional
             Not supported.
         skipna : bool, optional
-            Should missing values be skipped?  If False, and the entire
+            When set to True, skips missing values. When False and the entire
             column is missing, the result will also be a missing.
         level : int, optional
             Not supported.
@@ -3530,7 +3590,7 @@ class CASTable(ParamManager, ActionParamManager):
 
     def any(self, axis=None, bool_only=None, skipna=True, level=None, **kwargs):
         '''
-        Return whether any elements in the column are True
+        Return True for each column with at least one true element
 
         Parameters
         ----------
@@ -3539,7 +3599,7 @@ class CASTable(ParamManager, ActionParamManager):
         bool_only : bool, optional
             Not supported.
         skipna : bool, optional
-            Should missing values be included?  If not, and the entire
+            When set to True, skips missing values. When False and the entire
             column is missing, the result will also be a missing.
         level : int, optional
             Not supported.
@@ -3797,9 +3857,14 @@ class CASTable(ParamManager, ActionParamManager):
         out = out.unstack()
 
         if len(out.index.names) > 1:
-            out = out.set_index(pd.MultiIndex(levels=out.index.levels,
-                                              labels=out.index.labels,
-                                              names=out.index.names[:-1] + [None]))
+            if pd_version >= (1, 0, 0):
+                out = out.set_index(pd.MultiIndex(levels=out.index.levels,
+                                                  codes=out.index.codes,
+                                                  names=out.index.names[:-1] + [None]))
+            else:
+                out = out.set_index(pd.MultiIndex(levels=out.index.levels,
+                                                  labels=out.index.labels,
+                                                  names=out.index.names[:-1] + [None]))
         else:
             out.index.name = None
 
@@ -4090,8 +4155,7 @@ class CASTable(ParamManager, ActionParamManager):
         if pd_version >= (0, 21, 0):
             from pandas.api.types import CategoricalDtype
             out[tmpname] = out[tmpname].astype(CategoricalDtype(
-                                                   categories=categories,
-                                                   ordered=True))
+                categories=categories, ordered=True))
         else:
             out[tmpname] = out[tmpname].astype('category',
                                                categories=categories,
@@ -4242,7 +4306,7 @@ class CASTable(ParamManager, ActionParamManager):
             else:
                 minmax.rename(columns=dict(CharVar='value', Column='column'),
                               inplace=True)
-            minmax = minmax.loc[:, groups + ['stat', 'column', 'value']]
+            minmax = minmax.reindex(columns=groups + ['stat', 'column', 'value'])
             if skipna:
                 minmax.dropna(inplace=True)
             if 'min' not in stats:
@@ -4251,12 +4315,12 @@ class CASTable(ParamManager, ActionParamManager):
                 minmax = minmax.set_index('stat').drop('max').reset_index()
             minmax.set_index(groups + ['stat', 'column'], inplace=True)
             if groups:
-                minmax.drop(groups, level=-1, inplace=True)
+                minmax.drop(groups, level=-1, inplace=True, errors='ignore')
             minmax = minmax.unstack()
             minmax.index.name = None
             minmax.columns.names = [None] * len(minmax.columns.names)
             minmax.columns = minmax.columns.droplevel()
-            minmax = minmax.loc[:, columns]
+            minmax = minmax.reindex(columns=columns)
 
         # Unique
         unique = None
@@ -4267,17 +4331,17 @@ class CASTable(ParamManager, ActionParamManager):
             unique = pd.concat(unique)
             unique.loc[:, 'unique'] = 'unique'
             unique.rename(columns=dict(N='value', Column='column'), inplace=True)
-            unique = unique.loc[:, groups + ['unique', 'column', 'value']]
+            unique = unique.reindex(columns=groups + ['unique', 'column', 'value'])
             if skipna:
                 unique.dropna(inplace=True)
             unique.set_index(groups + ['unique', 'column'], inplace=True)
             if groups:
-                unique.drop(groups, level=-1, inplace=True)
+                unique.drop(groups, level=-1, inplace=True, errors='ignore')
             unique = unique.unstack()
             unique.index.name = None
             unique.columns.names = [None] * len(unique.columns.names)
             unique.columns = unique.columns.droplevel()
-            unique = unique.loc[:, columns]
+            unique = unique.reindex(columns=columns)
 
         out = pd.concat(x for x in [unique, minmax] if x is not None)
         out = out.sort_index(ascending=([True] * len(groups)) + [False])
@@ -4303,11 +4367,11 @@ class CASTable(ParamManager, ActionParamManager):
         axis : int, optional
             Unsupported
         skipna : bool, optional
-            Should missing values be dropped?
+            If True, missing values are dropped
         level : int, optional
             Unsupported
         numeric_only : bool, optional
-            Should just the numeric variables be used?
+            If True, just the numeric variables will be used
         percentile_values : list-of-floats, optional
             The list of percentiles to compute
 
@@ -4381,13 +4445,13 @@ class CASTable(ParamManager, ActionParamManager):
             if not isinstance(percentile_values, (list, tuple, set)):
                 percentile_values = [percentile_values]
 
-            out = self._retrieve('percentile.percentile', # includemissing=not skipna,
+            out = self._retrieve('percentile.percentile',  # includemissing=not skipna,
                                  inputs=inputs, values=percentile_values,
                                  casout=casout, **kwargs)
 
-            return self._normalize_percentile_casout(out['OutputCasTables']['casTable'][0],
-                                                     single=(stat == 'median' or
-                                                             len(percentile_values) == 1))
+            return self._normalize_percentile_casout(
+                out['OutputCasTables']['casTable'][0],
+                single=(stat == 'median' or len(percentile_values) == 1))
 
         else:
             summ_stats = ['css', 'cv', 'kurtosis', 'mean',
@@ -4399,10 +4463,11 @@ class CASTable(ParamManager, ActionParamManager):
 
             num_cols = self._get_dtypes(include='numeric')
             inputs = [x for x in inputs if x in num_cols]
-            out = self._retrieve('simple.summary', # includemissing=not skipna,
+            out = self._retrieve('simple.summary',  # includemissing=not skipna,
                                  inputs=inputs, casout=casout, **kwargs)
 
-            return self._normalize_summary_casout(out['OutputCasTables']['casTable'][0], stat)
+            return self._normalize_summary_casout(
+                out['OutputCasTables']['casTable'][0], stat)
 
     def _normalize_bygroups(self, drop=None, rename=None):
         '''
@@ -4460,14 +4525,15 @@ class CASTable(ParamManager, ActionParamManager):
         elif bygroup_columns == 'both':
             if bygroup_formatted_suffix != '_f':
                 for i, item in enumerate(fmt_groups):
-                    newname = _nlit(re.sub(r'_f$', bygroup_formatted_suffix, fmt_groups[i]))
+                    newname = _nlit(re.sub(r'_f$', bygroup_formatted_suffix,
+                                           fmt_groups[i]))
                     rename.append('%s=%s' % (_nlit(fmt_groups[i]), newname))
                     keep.append(raw_groups[i])
                     keep.append(newname)
                     cols.append(newname)
             else:
-                    keep.extend(groups)
-                    cols.append(groups)
+                keep.extend(groups)
+                cols.append(groups)
 
         for col in list(self.columns):
             if col not in groups:
@@ -4492,8 +4558,8 @@ class CASTable(ParamManager, ActionParamManager):
         table : CASTable
             Percentile output table
         single : bool, optional
-            Is this a single quantile computation?  If so, the quantile column
-            is dropped.
+            If True, this is a single quantile computation and the quantile column
+            is dropped
 
         Returns
         -------
@@ -4523,7 +4589,7 @@ class CASTable(ParamManager, ActionParamManager):
                 set %s;
                 %s
                 %s
-            run;''' % (dstbl, retain, dstbl, drop, rename));
+            run;''' % (dstbl, retain, dstbl, drop, rename))
 
         tbl = dsout['OutputCasTables']['casTable'][0]
 
@@ -4570,7 +4636,7 @@ class CASTable(ParamManager, ActionParamManager):
                 set %s;
                 %s
                 %s
-            run;''' % (_quote(tbl), retain, _quote(tbl), drop, rename));
+            run;''' % (_quote(tbl), retain, _quote(tbl), drop, rename))
 
         tbl = dsout['OutputCasTables']['casTable'][0]
 
@@ -4662,7 +4728,7 @@ class CASTable(ParamManager, ActionParamManager):
                 set %s;
                 %s
                 %s
-            run;''' % (_quote(tbl), _quote(tbl), drop, rename));
+            run;''' % (_quote(tbl), _quote(tbl), drop, rename))
 
         dsout = dsout['OutputCasTables']['casTable'][0]
 
@@ -4748,7 +4814,7 @@ class CASTable(ParamManager, ActionParamManager):
                     set %s;
                     %s
                     %s
-                run;''' % (_quote(out_tbl), _quote(char_tbl), drop, rename));
+                run;''' % (_quote(out_tbl), _quote(char_tbl), drop, rename))
             out_tbl = dsout['OutputCasTables']['casTable'][0]
 
         elif num_tbl:
@@ -4757,7 +4823,7 @@ class CASTable(ParamManager, ActionParamManager):
                     set %s;
                     %s
                     %s
-                run;''' % (_quote(out_tbl), _quote(num_tbl), drop, rename));
+                run;''' % (_quote(out_tbl), _quote(num_tbl), drop, rename))
             out_tbl = dsout['OutputCasTables']['casTable'][0]
 
         if char_tbl:
@@ -4792,8 +4858,8 @@ class CASTable(ParamManager, ActionParamManager):
 #           num_groups = out['HighCardinalityDetails']['CardinalityEstimate'].product()
 
             if num_groups > get_option('cas.dataset.bygroup_casout_threshold'):
-                warnings.warn('The number of potential by groupings is greater than ' +
-                              'cas.dataset.bygroup_casout_threshold.  The results will ' +
+                warnings.warn('The number of potential by groupings is greater than '
+                              'cas.dataset.bygroup_casout_threshold.  The results will '
                               'be written to a CAS table.', RuntimeWarning)
                 return True
 
@@ -4907,7 +4973,7 @@ class CASTable(ParamManager, ActionParamManager):
         '''
         if self._use_casout_for_stat(casout):
             return self._get_casout_stat('median', axis=axis, skipna=skipna, level=level,
-                                         numeric_only=numeric_only, casout=casout, 
+                                         numeric_only=numeric_only, casout=casout,
                                          **kwargs)
         return self.quantile(0.5, axis=axis, interpolation='nearest')
 
@@ -4944,7 +5010,7 @@ class CASTable(ParamManager, ActionParamManager):
         '''
         if self._use_casout_for_stat(casout):
             return self._get_casout_stat('min', axis=axis, skipna=skipna, level=level,
-                                         numeric_only=numeric_only, casout=casout, 
+                                         numeric_only=numeric_only, casout=casout,
                                          **kwargs)
         return self._topk_values('min', axis=axis, skipna=skipna, level=level,
                                  numeric_only=numeric_only, **kwargs)
@@ -4961,15 +5027,15 @@ class CASTable(ParamManager, ActionParamManager):
         columns : string or list-of-strings, optional
             Names of the columns to sort by
         ascending : bool, optional
-            Should the sort order be ascending or descending?
+            If True, the sort order is ascending
         casout : bool or string or CASTable or dict, optional
             The CAS output table specification
         single : bool, optional
-            Should `n` be interpretted as a range or single value? 
+            If True, `n` is interpretted as a single value
 
         Returns
         -------
-        :class:'CASTable' 
+        :class:'CASTable'
 
         '''
         if not self.has_groupby_vars():
@@ -4990,7 +5056,6 @@ class CASTable(ParamManager, ActionParamManager):
         cols, groups, raw_groups, fmt_groups, retain, keep, drop, rename = out
 
         groups = [_nlit(x) for x in self.get_groupby_vars()]
-        sortby = [_nlit(x) for x in columns]
 
         group_str = ' '.join(groups)
         sortby_str = ' '.join(columns)
@@ -5013,11 +5078,11 @@ class CASTable(ParamManager, ActionParamManager):
         if start is None:
             comp = '__count le %s' % int(n)
         elif isinstance(n, items_types):
-            comp = '__count in (%s)' % ','.join('%s' % (int(x)+1) for x in n)
+            comp = '__count in (%s)' % ','.join('%s' % (int(x) + 1) for x in n)
         elif start == n:
-            comp = '__count eq %s' % int(n+1)
+            comp = '__count eq %s' % int(n + 1)
         else:
-            comp = '__count ge %s and __count le %s' % (int(start+1), int(start+n))
+            comp = '__count ge %s and __count le %s' % (int(start + 1), int(start + n))
 
         casin = None
         out = None
@@ -5036,10 +5101,10 @@ class CASTable(ParamManager, ActionParamManager):
                      drop __count;
                    run;
              ''' % (casout.to_datastep_params(), retain,
-                    casin.to_input_datastep_params(), sort_order, group_str, sortby_str,
-                      cond_str, comp))
+                    casin.to_input_datastep_params(), sort_order, group_str,
+                    sortby_str, cond_str, comp))
 
-        finally:  
+        finally:
             if casin is not None:
                 casin._retrieve('table.droptable')
 
@@ -5253,7 +5318,7 @@ class CASTable(ParamManager, ActionParamManager):
 
         if self._use_casout_for_stat(casout):
             return self._get_casout_stat('percentile', axis=axis,
-                                         numeric_only=numeric_only, casout=casout, 
+                                         numeric_only=numeric_only, casout=casout,
                                          percentile_values=q,
                                          **kwargs)
 
@@ -5670,7 +5735,7 @@ class CASTable(ParamManager, ActionParamManager):
 
     def drop(self, labels, axis=0, level=None, inplace=False, errors='raise'):
         '''
-        Return a new :class:`CASTable` object with the specified columns removed
+        Return a new CASTable object with the specified columns removed
 
         Parameters
         ----------
@@ -5791,7 +5856,7 @@ class CASTable(ParamManager, ActionParamManager):
     def sample(self, n=None, frac=None, replace=False, weights=None,
                random_state=None, axis=None, stratify_by=None, **kwargs):
         '''
-        Returns a random sample of the CAS table rows
+        Returns a random sample of the table rows
 
         Parameters
         ----------
@@ -5859,8 +5924,8 @@ class CASTable(ParamManager, ActionParamManager):
         subset : list-of-strings, optional
             Not supported
         inplace : boolean, optional
-            Should the table be modified in place, or should a new
-            table be created?
+            If True, the table modified in place. If False, a new
+            table is created.
 
         Returns
         -------
@@ -5908,8 +5973,8 @@ class CASTable(ParamManager, ActionParamManager):
         axis : int or string, optional
             Not supported.   The axis is always 'columns'.
         inplace : boolean, optional
-            Should the data be modified in-place, or should a new table
-            be created?
+            If True, the data is modified in place. If False, a new table
+            be created.
         limit : int, optional
             Not supported
         downcast : dict, optional
@@ -5977,7 +6042,7 @@ class CASTable(ParamManager, ActionParamManager):
             Values to use as replacements.  If a dict is specified, it takes
             the same form as a dictionary in the `to_replace=` parameter.
         inplace : boolean, optional
-            Should the table be modified in-place, or should a new table be created?
+            If True, the table is modified in-place. If False, a new table is created.
         limit : int, optional
             Not supported
         regex : boolean or same types as `to_replace`, optional
@@ -6206,7 +6271,7 @@ class CASTable(ParamManager, ActionParamManager):
         code : string or list-of-strings
             The date step code to apply
         inplace : boolean, optional
-            Should the table be modified in-place?
+            If True, the table is modified in place
         casout : dict, optional
             The output table specification
         prefix : string, optional
@@ -6243,7 +6308,7 @@ class CASTable(ParamManager, ActionParamManager):
         dscode = []
         dscode.append('data %s(caslib=%s);' % (_quote(newname), _quote(caslib)))
         dscode.append('    set %s(caslib=%s);' % (_quote(self.params.name),
-                                                  _quote(self.params.get('caslib', default_caslib))))
+                      _quote(self.params.get('caslib', default_caslib))))
         if isinstance(code, items_types):
             dscode.extend(code)
         else:
@@ -6259,7 +6324,7 @@ class CASTable(ParamManager, ActionParamManager):
         if inplace:
             return self
 
-        tbl = out['OutputCasTables'].ix[0, 'casTable']
+        tbl = out['OutputCasTables'].iloc[0]['casTable']
 
         out = copy.deepcopy(self)
 
@@ -6279,7 +6344,7 @@ class CASTable(ParamManager, ActionParamManager):
     def sort_values(self, by, axis=0, ascending=True, inplace=False,
                     kind='quicksort', na_position='last'):
         '''
-        Specify sort parameters for data in a CAS table
+        Specify sort parameters for data in a CASTable
 
         Parameters
         ----------
@@ -6288,7 +6353,7 @@ class CASTable(ParamManager, ActionParamManager):
         axis : int, optional
             Not implemented.
         ascending : boolean or list-of-booleans, optional
-            Sort ascending or descending.  Specify a list of booleanss
+            Sort ascending or descending.  Specify a list of booleans
             if sort orders are not all one type.
         inplace : boolean, optional
             If True, the sort order is embedded into the CASTable
@@ -6371,7 +6436,8 @@ class CASTable(ParamManager, ActionParamManager):
         if 'groupby' in kwargs['tables'][0]:
             kwargs['tables'][0].pop('groupby', None)
         groups = self.get_groupby_vars()
-        kwargs['tables'][0]['vars'] = groups + [x for x in self.columns if x not in groups]
+        kwargs['tables'][0]['vars'] = groups + [x for x in self.columns
+                                                if x not in groups]
         out = self._retrieve('table.view', *args, **kwargs)
         if 'caslib' in out and 'viewName' in out:
             conn = self.get_connection()
@@ -6454,8 +6520,7 @@ class CASTable(ParamManager, ActionParamManager):
         copy : boolean, optional
             Not supported.
         indicator : boolean or string, optional
-            Should a column be created that indicates which table the
-            key came from?  If True, a column named '_merge' will be
+            If True, a column named '_merge' will be
             created with the values: 'left_only', 'right_only', or
             'both'.  If False, no column is created.  If a string is
             specified, a column is created using that name containing
@@ -6516,7 +6581,7 @@ class CASTable(ParamManager, ActionParamManager):
         Parameters
         ----------
         grouped : bool, optional
-            Should the output DataFrame be returned as By groups?
+            If True, the output DataFrame is returned as By groups.
         sample_pct : int, optional
             Percentage of original data set to return as samples
         sample_seed : int, optional
@@ -6557,9 +6622,11 @@ class CASTable(ParamManager, ActionParamManager):
             max_rows_fetched = get_option('cas.dataset.max_rows_fetched')
             kwargs['to'] = min(from_ + max_rows_fetched, MAX_INT64_INDEX)
             if self._numrows > max_rows_fetched:
-                warnings.warn(('Data downloads are limited to %d rows.  To change this limit, '
-                               'set swat.options.cas.dataset.max_rows_fetched to the desired limit.')
-                               % max_rows_fetched, RuntimeWarning)
+                warnings.warn(('Data downloads are limited to %d rows.  '
+                               'To change this limit, set '
+                               'swat.options.cas.dataset.max_rows_fetched '
+                               'to the desired limit.') %
+                              max_rows_fetched, RuntimeWarning)
 
         # Compute sample percentage as needed
         if sample_pct is None and sample:
@@ -6587,8 +6654,7 @@ class CASTable(ParamManager, ActionParamManager):
 
         # Sort based on 'Fetch#' key.  This will be out of order in REST.
         values = [x[1] for x in sorted(tbl._retrieve('table.fetch', **kwargs).items(),
-                                       key=lambda x: int(x[0].replace('Fetch', '') or
-                                                         '0'))]
+                  key=lambda x: int(x[0].replace('Fetch', '') or '0'))]
         out = df.concat(values)
 
         if tbl is not self:
@@ -6639,7 +6705,7 @@ class CASTable(ParamManager, ActionParamManager):
                                 output=dict(casout=dict(name=_gen_table_name(),
                                                         replace=True),
                                             copyvars=columns),
-                                **params)['OutputCasTables'].ix[0, 'casTable']
+                                **params)['OutputCasTables'].iloc[0]['casTable']
 
         if stratify_by:
             del samptbl.params['groupby']
@@ -6706,7 +6772,7 @@ class CASTable(ParamManager, ActionParamManager):
     @getattr_safe_property
     def plot(self):
         '''
-        Make plots of the data in the CAS table
+        Plot the data in the table
 
         This method requires all of the data in the CAS table to be
         fetched to the **client side**.  The data is then plotted using
@@ -6928,20 +6994,20 @@ class CASTable(ParamManager, ActionParamManager):
     def info(self, verbose=None, buf=None, max_cols=None,
              memory_usage=None, null_counts=None):
         '''
-        Print summary of :class:`CASTable` information
+        Print summary of CASTable information
 
         Parameters
         ----------
         verbose : boolean, optional
-            Should the full summary be printed?
+            If True, the full summary is printed
         buf : writeable file-like object
             Where the summary is printed to.
         max_cols : int, optional
             The maximum number of columns to include in the summary.
         memory_usage : boolean, optional
-            Should the memory usage be displayed?
+            If True, the memory usage is displayed
         null_counts : boolean, optional
-            Should missing values be displayed?
+            If True, missing values will be displayed
 
         See Also
         --------
@@ -6996,7 +7062,7 @@ class CASTable(ParamManager, ActionParamManager):
     def to_frame(self, sample_pct=None, sample_seed=None, sample=False,
                  stratify_by=None, **kwargs):
         '''
-        Retrieve entire table as a :class:`SASDataFrame`
+        Retrieve entire table as a SASDataFrame
 
         Parameters
         ----------
@@ -7048,7 +7114,7 @@ class CASTable(ParamManager, ActionParamManager):
 
     def to_xarray(self, *args, **kwargs):
         '''
-        Return an :func:`numpy.xarray` from the CAS table
+        Represent table data as a numpy.xarray
 
         This method creates an object on the **client side**.  This means
         that **all of the data in the table must all be fetched**.
@@ -7071,7 +7137,7 @@ class CASTable(ParamManager, ActionParamManager):
 
     def to_pickle(self, *args, **kwargs):
         '''
-        Pickle (serialize) the CAS table data
+        Pickle (serialize) the table data
 
         This method writes a file on the **client side**.  This means
         that **all of the data in the table must all be fetched**.
@@ -7094,7 +7160,7 @@ class CASTable(ParamManager, ActionParamManager):
 
     def to_csv(self, *args, **kwargs):
         '''
-        Write CAS table data to comma separated values (CSV)
+        Write table data to comma-separated values (CSV)
 
         This method writes a file on the **client side**.  This means
         that **all of the data in the table must all be fetched**.
@@ -7117,7 +7183,7 @@ class CASTable(ParamManager, ActionParamManager):
 
     def to_hdf(self, *args, **kwargs):
         '''
-        Write CAS table data to HDF
+        Write table data to HDF
 
         This method writes a file on the **client side**.  This means
         that **all of the data in the table must all be fetched**.
@@ -7140,7 +7206,7 @@ class CASTable(ParamManager, ActionParamManager):
 
     def to_sql(self, *args, **kwargs):
         '''
-        Write CAS table records to SQL database
+        Write table records to SQL database
 
         This method depends on data on the **client side**.  This means
         that **all of the data in the table must all be fetched**.
@@ -7163,7 +7229,7 @@ class CASTable(ParamManager, ActionParamManager):
 
     def to_dict(self, *args, **kwargs):
         '''
-        Convert CAS table data to a Python dictionary
+        Convert table data to a Python dictionary
 
         This method writes an object on the **client side**.  This means
         that **all of the data in the table must all be fetched**.
@@ -7190,7 +7256,7 @@ class CASTable(ParamManager, ActionParamManager):
 
     def to_excel(self, *args, **kwargs):
         '''
-        Write CAS table data to an Excel spreadsheet
+        Write table data to an Excel spreadsheet
 
         This method writes a file on the **client side**.  This means
         that **all of the data in the table must all be fetched**.
@@ -7213,7 +7279,7 @@ class CASTable(ParamManager, ActionParamManager):
 
     def to_json(self, *args, **kwargs):
         '''
-        Convert the CAS table data to a JSON string
+        Convert the table data to a JSON string
 
         This method writes a file on the **client side**.  This means
         that **all of the data in the table must all be fetched**.
@@ -7236,7 +7302,7 @@ class CASTable(ParamManager, ActionParamManager):
 
     def to_html(self, *args, **kwargs):
         '''
-        Render the CAS table data to an HTML table
+        Render the table data to an HTML table
 
         This method writes a file on the **client side**.  This means
         that **all of the data in the table must all be fetched**.
@@ -7259,7 +7325,7 @@ class CASTable(ParamManager, ActionParamManager):
 
     def to_latex(self, *args, **kwargs):
         '''
-        Render the CAS table data to a LaTeX tabular environment
+        Render the table data to a LaTeX tabular environment
 
         This method writes a file on the **client side**.  This means
         that **all of the data in the table must all be fetched**.
@@ -7282,7 +7348,7 @@ class CASTable(ParamManager, ActionParamManager):
 
     def to_stata(self, *args, **kwargs):
         '''
-        Write CAS table data to Stata file
+        Write table data to Stata file
 
         This method writes a file on the **client side**.  This means
         that **all of the data in the table must all be fetched**.
@@ -7305,7 +7371,7 @@ class CASTable(ParamManager, ActionParamManager):
 
     def to_msgpack(self, *args, **kwargs):
         '''
-        Write CAS table data to msgpack object
+        Write table data to msgpack object
 
         This method writes a file on the **client side**.  This means
         that **all of the data in the table must all be fetched**.
@@ -7328,7 +7394,7 @@ class CASTable(ParamManager, ActionParamManager):
 
     def to_gbq(self, *args, **kwargs):
         '''
-        Write CAS table data to a Google BigQuery table
+        Write table data to a Google BigQuery table
 
         This method depends on data on the **client side**.  This means
         that **all of the data in the table must all be fetched**.
@@ -7351,7 +7417,7 @@ class CASTable(ParamManager, ActionParamManager):
 
     def to_records(self, *args, **kwargs):
         '''
-        Convert CAS table data to record array
+        Convert table data to record array
 
         This method writes objects on the **client side**.  This means
         that **all of the data in the table must all be fetched**.
@@ -7378,7 +7444,7 @@ class CASTable(ParamManager, ActionParamManager):
 
     def to_sparse(self, *args, **kwargs):
         '''
-        Convert CAS table data to SparseDataFrame
+        Convert table data to SparseDataFrame
 
         This method writes an object on the **client side**.  This means
         that **all of the data in the table must all be fetched**.
@@ -7405,7 +7471,7 @@ class CASTable(ParamManager, ActionParamManager):
 
     def to_dense(self, *args, **kwargs):
         '''
-        Return dense representation of CAS table data
+        Return dense representation of table data
 
         This method writes an object on the **client side**.  This means
         that **all of the data in the table must all be fetched**.
@@ -7432,7 +7498,7 @@ class CASTable(ParamManager, ActionParamManager):
 
     def to_string(self, *args, **kwargs):
         '''
-        Render the CAS table to a console-friendly tabular output
+        Render the table to a console-friendly tabular output
 
         This method writes a string on the **client side**.  This means
         that **all of the data in the table must all be fetched**.
@@ -7459,7 +7525,7 @@ class CASTable(ParamManager, ActionParamManager):
 
     def to_clipboard(self, *args, **kwargs):
         '''
-        Write the CAS table data to the clipboard
+        Write the table data to the clipboard
 
         This method writes the clipboard on the **client side**.  This means
         that **all of the data in the table must all be fetched**.
@@ -7593,11 +7659,11 @@ class CASTable(ParamManager, ActionParamManager):
 
         # tbl[rowslice]
         if isinstance(key, slice):
-            return self.ix[key]
+            return self.iloc[key]
 
         # col[row]
         if is_column and isinstance(key, int_types):
-            return self.ix[key]
+            return self.iloc[key]
 
         # Everything else
         raise KeyError(key)
@@ -7616,9 +7682,9 @@ class CASTable(ParamManager, ActionParamManager):
         level : int, optional
             Not implemented.
         as_index : boolean, optional
-            Should the grouping variables be set as index levels?
+            If True, the grouping variables are set as index levels
         sort : boolean, optional
-            Should output be sorted by group keys?
+            If True, output will be sorted by group keys.
         squeeze : boolean, optional
             Not implemented.
 
@@ -7710,7 +7776,7 @@ class CASTable(ParamManager, ActionParamManager):
         return out
 
     def has_groupby_vars(self):
-        ''' Does the table have By group variables configured? '''
+        ''' Return True if the table has By group variables configured '''
         return self.has_param('groupby') and self.get_param('groupby')
 
 
@@ -7753,7 +7819,7 @@ class CharacterColumnMethods(object):
 
         '''
         return self._compute('capitalize',
-                             'upcase(substr({value}, 1, 1)) || ' +
+                             'upcase(substr({value}, 1, 1)) || '
                              'lowcase(substr({value}, 2))',
                              add_length=True)
 
@@ -7766,20 +7832,20 @@ class CharacterColumnMethods(object):
 
     def contains(self, pat, case=True, flags=0, na=np.nan, regex=True):
         '''
-        Does the value contain the specified pattern?
+        Indicates whether the value contains the specified pattern
 
         Parameters
         ----------
         pat : string or :class:`CASColumn`
             The pattern to search for.
         case : boolean, optional
-            Should pattern matching be case-sensitive?
+            If True, the pattern matching is case-sensitive.
         flags : int, optional
             Regular expression matching flags.
         na : string, optional
             Not implemented.
         regex : boolean, optional
-            Should the pattern be treated as a regular expression?
+            If True, the pattern is treated as a regular expression
 
         See Also
         --------
@@ -7833,20 +7899,20 @@ class CharacterColumnMethods(object):
 
     def endswith(self, pat, case=True, flags=0, na=np.nan, regex=True):
         '''
-        Does the table column end with the given pattern?
+        Indicates whether the table column ends with the given pattern
 
         Parameters
         ----------
         pat : string or :class:`CASColumn`
             The string to search for.
         case : boolean, optional
-            Should the pattern matching be case-sensitive?
+            If True, the pattern matching is case-sensitive.
         flags : int, optional
             Regular expression flags.
         na : string, optional
             Not implemented.
         regex : boolean, optional
-            Should the pattern be considered a regular expression?
+            If True, the pattern is considered a regular expression.
 
         See Also
         --------
@@ -8015,7 +8081,7 @@ class CharacterColumnMethods(object):
         n : int, optional
             The maximum number of replacements.
         case : boolean, optional
-            Should the pattern matching be case-insensitive?
+            If True, the pattern matching is case-sensitive.
         flags : int, optional
             Regular expression flags.
 
@@ -8144,20 +8210,20 @@ class CharacterColumnMethods(object):
 
     def startswith(self, pat, case=True, flags=0, na=np.nan, regex=True):
         '''
-        Does the table column start with the given pattern?
+        Indicates whether the table column start with the given pattern
 
         Parameters
         ----------
         pat : string or :class:`CASColumn`
             The pattern to search for.
         case : boolean, optional
-            Should the matching be case-sensitive?
+            If True, the matching is case-sensitive.
         flags : int, optional
             Regular expression flags.
         na : string, optional
             Not implemented.
         regex : boolean, optional
-            Is the pattern a regular expression?
+            If True, the pattern is considered a regular expression.
 
         See Also
         --------
@@ -8221,7 +8287,7 @@ class CharacterColumnMethods(object):
 
     def isalnum(self):
         '''
-        Does the value contain only alphanumeric characters?
+        Indicates whether the value contains only alphanumeric characters
 
         See Also
         --------
@@ -8236,7 +8302,7 @@ class CharacterColumnMethods(object):
 
     def isalpha(self):
         '''
-        Does the value contain only alpha characters?
+        Indicates whether the value contains only alpha characters
 
         See Also
         --------
@@ -8251,7 +8317,7 @@ class CharacterColumnMethods(object):
 
     def isdigit(self):
         '''
-        Does the value contain only digits?
+        Indicates whether the value contains only digits
 
         See Also
         --------
@@ -8266,7 +8332,7 @@ class CharacterColumnMethods(object):
 
     def isspace(self):
         '''
-        Does the value contain only whitespace?
+        Indicates whether the value contains only whitespace
 
         See Also
         --------
@@ -8281,7 +8347,7 @@ class CharacterColumnMethods(object):
 
     def islower(self):
         '''
-        Does the value contain only lowercase characters?
+        Indicates whether the value contain only lowercase characters
 
         See Also
         --------
@@ -8296,7 +8362,7 @@ class CharacterColumnMethods(object):
 
     def isupper(self):
         '''
-        Does the value contain only uppercase characters?
+        Indicates whether the value contains only uppercase characters
 
         See Also
         --------
@@ -8311,7 +8377,7 @@ class CharacterColumnMethods(object):
 
     def istitle(self):
         '''
-        Is the value equivalent to the title representation?
+        Indicates whether the value is equivalent to the title representation
 
         See Also
         --------
@@ -8326,7 +8392,7 @@ class CharacterColumnMethods(object):
 
     def isnumeric(self):
         '''
-        Does the value contain a numeric representation?
+        Indicates whether the value contains a numeric representation
 
         See Also
         --------
@@ -8341,7 +8407,7 @@ class CharacterColumnMethods(object):
 
     def isdecimal(self):
         '''
-        Does the value contain a decimal representation?
+        Indicates whether the value contains a decimal representation
 
         See Also
         --------
@@ -8353,7 +8419,7 @@ class CharacterColumnMethods(object):
 
         '''
         return self._compute('isnumeric',
-                             r"prxmatch('/^\s*(0?\.\d+|\d+(\.\d*)?)\s*$/', " +
+                             r"prxmatch('/^\s*(0?\.\d+|\d+(\.\d*)?)\s*$/', "
                              r'{value}) > 0')
 
 #   def soundslike(self, arg):
@@ -8820,10 +8886,25 @@ class DatetimeColumnMethods(object):
 
     def __init__(self, column):
         self._column = column
-        self._dtype = column.dtype
-        if self._dtype not in ['date', 'datetime', 'time']:
-            raise TypeError('datetime methods are only usable on CAS dates, ' +
-                            'times, and datetimes')
+
+        columninfo = column._columninfo
+
+        self._dtype = columninfo['Type'][0]
+        if self._dtype not in ['date', 'datetime', 'time', 'double']:
+            raise TypeError('datetime methods are only usable on CAS dates, '
+                            'times, datetimes, and doubles')
+
+        fmt = columninfo['Format'][0]
+        if self._dtype == 'double':
+            if is_date_format(fmt):
+                self._dtype = 'sas-date'
+            elif is_datetime_format(fmt):
+                self._dtype = 'sas-datetime'
+            elif is_time_format(fmt):
+                self._dtype = 'sas-time'
+            else:
+                raise TypeError('double columns must have a date, time, or '
+                                'datetime format')
 
     def _compute(self, *args, **kwargs):
         ''' Call the _compute method on the table column '''
@@ -8831,11 +8912,11 @@ class DatetimeColumnMethods(object):
 
     def _get_part(self, func):
         ''' Get the specified part of the datetime '''
-        if self._dtype == 'date':
+        if self._dtype in ['date', 'sas-date']:
             if func in ['hour', 'minute']:
                 return self._compute(func, '0')
             return self._compute(func, '%s({value})' % func)
-        if self._dtype == 'time':
+        if self._dtype in ['time', 'sas-time']:
             if func in ['hour', 'minute']:
                 return self._compute(func, '%s({value})' % func)
             return self._compute(func, '%s(today())' % func)
@@ -8871,14 +8952,14 @@ class DatetimeColumnMethods(object):
     @property
     def second(self):
         ''' The second of the datetime '''
-        if self._dtype == 'date':
+        if self._dtype in ['date', 'sas-date']:
             return self._compute('second', '0')
         return self._compute('second', 'int(second({value}))')
 
     @property
     def microsecond(self):
         ''' The microsecond of the datetime '''
-        if self._dtype == 'date':
+        if self._dtype in ['date', 'sas-date']:
             return self._compute('microsecond', '0')
         return self._compute('microsecond', 'int(mod(second({value}), 1) * 1000000)')
 
@@ -8889,9 +8970,9 @@ class DatetimeColumnMethods(object):
 
     def _get_date(self):
         ''' Return an expression that will return the date only '''
-        if self._dtype == 'date':
+        if self._dtype in ['date', 'sas-date']:
             return '{value}'
-        if self._dtype == 'time':
+        if self._dtype in ['time', 'sas-time']:
             return 'today()'
         return 'datepart({value})'
 
@@ -9020,7 +9101,7 @@ class CASColumn(CASTable):
     @getattr_safe_property
     def values(self):
         ''' Return column data as :func:`numpy.ndarray` '''
-        return self._fetch().ix[:, 0].values
+        return self._fetch().iloc[:, 0].values
 
     @getattr_safe_property
     def shape(self):
@@ -9100,9 +9181,9 @@ class CASColumn(CASTable):
         axis : int, optional
             Not implemented.
         ascending : boolean, optional
-            Should the sort order be ascending?
+            If True, the order sort is ascending. If False, order sort is descending.
         inplace : boolean, optional
-            Should the :class:`CASColumn` be modified in place?
+            If True, the :class:`CASColumn` is modified in place.
         kind : string, optional
             Not implemented.
         na_position : string, optional
@@ -9144,7 +9225,7 @@ class CASColumn(CASTable):
 
     def tolist(self):
         ''' Return a list of the column values '''
-        return self._fetch().ix[:, 0].tolist()
+        return self._fetch().iloc[:, 0].tolist()
 
     def head(self, n=5, bygroup_as_index=True, casout=None):
         ''' Return first `n` rows of the column in a Series '''
@@ -9155,7 +9236,7 @@ class CASColumn(CASTable):
     def tail(self, n=5, bygroup_as_index=True, casout=None):
         ''' Return last `n` rows of the column in a Series '''
         if self._use_casout_for_stat(casout):
-            raise NotImplemented('tail is not implement for casout yet')
+            raise NotImplementedError('tail is not implement for casout yet')
             return self._get_casout_slice(n, columns=True, ascending=True, casout=casout)
         return self.slice(start=-n, stop=-1, bygroup_as_index=True)
 
@@ -9164,13 +9245,13 @@ class CASColumn(CASTable):
         if self._use_casout_for_stat(casout):
             if stop is None:
                 stop = len(self)
-            return self._get_casout_slice(stop-start, columns=True, ascending=True,
+            return self._get_casout_slice(stop - start, columns=True, ascending=True,
                                           casout=casout, start=start)
         return CASTable.slice(self, start=start, stop=stop,
                               bygroup_as_index=bygroup_as_index)[self.name]
 
     def nth(self, n, dropna=False, bygroup_as_index=True, casout=None):
-        ''' Return the nth row '''
+        ''' Return the `n`th row '''
         if self._use_casout_for_stat(casout):
             return self._get_casout_slice(n, columns=True, ascending=True,
                                           casout=casout, start=n)
@@ -9441,8 +9522,8 @@ class CASColumn(CASTable):
         dtype : string, optional
             The output data type for the computed value
         eval_values : boolean, optional
-            Should the values of CASColumn / Series values be evaluated
-            before being substituted?
+            If True, the values of CASColumn / Series will be evaluated
+            before being substituted
 
         Returns
         -------
@@ -9574,7 +9655,7 @@ class CASColumn(CASTable):
         return col._numrows == numrows
 
     def any(self, axis=None, bool_only=None, skipna=None, level=None, **kwargs):
-        ''' Return whether any elements are True '''
+        ''' Return True for each column with one or more element treated as true '''
         col = self.copy()
         if self._is_character():
             col.append_where('lengthn(%s) ^= 0' % _nlit(col.name))
@@ -9691,7 +9772,7 @@ class CASColumn(CASTable):
 
         '''
         return CASTable.describe(self, percentiles=percentiles, include=include,
-                                 exclude=exclude, stats=stats).ix[:, 0]
+                                 exclude=exclude, stats=stats).iloc[:, 0]
 
     def _get_summary_stat(self, name):
         '''
@@ -10453,12 +10534,20 @@ class CASTableGroupBy(object):
 
     def __init__(self, table, by, axis=0, level=None, as_index=True, sort=True,
                  group_keys=True, squeeze=False, **kwargs):
-        self._table = table.copy()
-        self._table.append_groupby(by)
         if isinstance(by, items_types):
             self._by = list(by)
         else:
             self._by = [by]
+
+        new_by = []
+        for item in self._by:
+            if isinstance(item, CASColumn):
+                item = item.name
+            new_by.append(item)
+        by = new_by
+
+        self._table = table.copy()
+        self._table.append_groupby(by)
         self._sort = sort
         self._plot = CASTablePlotter(self._table)
         self._as_index = as_index
@@ -10681,8 +10770,8 @@ class CASTableGroupBy(object):
         '''
         if self._as_index:
             return self._table.value_counts(*args, **kwargs)
-        return self._table.value_counts(*args, **kwargs).reset_index(
-                   self.get_groupby_vars())
+        return self._table.value_counts(*args,
+                                        **kwargs).reset_index(self.get_groupby_vars())
 
     def max(self, *args, **kwargs):
         '''
@@ -10976,8 +11065,7 @@ class CASTableGroupBy(object):
         '''
         if self._as_index:
             return self._table.nlargest(*args, **kwargs)
-        return self._table.nlargest(*args, **kwargs).reset_index(
-                   self.get_groupby_vars())
+        return self._table.nlargest(*args, **kwargs).reset_index(self.get_groupby_vars())
 
     def nsmallest(self, *args, **kwargs):
         '''
@@ -10991,8 +11079,7 @@ class CASTableGroupBy(object):
         '''
         if self._as_index:
             return self._table.nsmallest(*args, **kwargs)
-        return self._table.nsmallest(*args, **kwargs).reset_index(
-                   self.get_groupby_vars())
+        return self._table.nsmallest(*args, **kwargs).reset_index(self.get_groupby_vars())
 
     def query(self, *args, **kwargs):
         '''
