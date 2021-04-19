@@ -41,6 +41,7 @@ patch_pandas_sort()
 
 # Pick sort keys that will match across SAS and Pandas sorting orders
 SORT_KEYS = ['Origin', 'MSRP', 'Horsepower', 'Model']
+SORT_KEYSV = ['rowId']
 
 USER, PASSWD = tm.get_user_pass()
 HOST, PORT, PROTOCOL = tm.get_host_port_proto()
@@ -105,6 +106,23 @@ class TestBasics(tm.TestCase):
         # tear down tests
         self.s.endsession()
         del self.s
+
+        # some testcases create extra connections.
+        # tear them down as well
+        if hasattr(self,'s2'):
+            try:
+                self.s2.endsession()
+            except swat.SWATError:
+                pass
+            del self.s2
+
+        if hasattr(self,'s3'):
+            try:
+                self.s3.endsession()
+            except swat.SWATError:
+                pass
+            del self.s3
+
         swat.reset_option()
 
     def test_basic_connection(self):
@@ -141,6 +159,26 @@ class TestBasics(tm.TestCase):
             self.assertIn(self.s._soptions, ['', 'protocol=cas'])
 
         s2.endsession()
+
+    def test_copy_connection_with_locale(self):
+        self.s2 = swat.CAS(HOST, PORT, USER, PASSWD, protocol=PROTOCOL, locale='es_US')
+        self.s3 = self.s2.copy()
+
+        self.assertEqual(self.s3._hostname, self.s2._hostname)
+        self.assertEqual(self.s3._port, self.s2._port)
+        self.assertEqual(self.s3._username, self.s2._username)
+        self.assertNotEqual(self.s3._session, self.s2._session)        
+        self.assertRegex(self.s3._session, UUID_RE)
+        
+        if self.s2._protocol == 'http':
+            self.assertIn(self.s3._soptions, ['locale=es_US protocol=http',
+                                        'protocol=http locale=es_US'])
+        elif self.s2._protocol == 'https':
+            self.assertIn(self.s3._soptions, ['locale=es_US protocol=https',
+                                        'protocol=https locale=es_US'])
+        else:
+            self.assertIn(self.s3._soptions, ['locale=es_US', 'locale=es_US protocol=cas',
+                                        'protocol=cas locale=es_US'])
 
     def test_fork_connection(self):
         slist = self.s.fork(3)
@@ -442,7 +480,7 @@ class TestBasics(tm.TestCase):
             if f[i]._session != self.s._session:
                 f[i].endsession()
 
-    def test_addtable(self):
+    def addtabletest(self, pro):
         if self.s._protocol in ['http', 'https']:
             tm.TestCase.skipTest(self, 'REST does not support addtable')
 
@@ -455,7 +493,7 @@ class TestBasics(tm.TestCase):
         dmh = swat.datamsghandlers.CSV(myFile, nrecs=20)
 
         # Use the default caslib. Get it from the results, and use it in later actions.
-        out = self.s.addtable(table='cars', **dmh.args.addtable)
+        out = self.s.addtable(table='cars', **dmh.args.addtable, promote=pro)
         srcLib = out['caslib']
 
         out = self.s.tableinfo(caslib=srcLib, table='cars')
@@ -482,6 +520,53 @@ class TestBasics(tm.TestCase):
                                sortby=SORT_KEYS)
 
         self.s.droptable(caslib=srcLib, table='cars')
+
+    def test_addtable(self):
+       self.addtabletest(False)
+
+    # same as test_addtable, except we promote the added table
+    def test_addtable_promoted(self):
+       self.addtabletest(True)
+
+    def test_addtablevarchar1(self):
+        if self.s._protocol in ['http', 'https']:
+            tm.TestCase.skipTest(self, 'REST does not support addtable')
+
+        vc1 = tm.get_generated_vc1()
+        dmh = swat.datamsghandlers.PandasDataFrame(vc1)
+
+        # Use the default caslib. Get it from the results, and use it in later actions.
+        out = self.s.addtable(table='vc1', **dmh.args.addtable)
+        srcLib = out['caslib']
+
+        out = self.s.tableinfo(caslib=srcLib, table='vc1')
+        data = out['TableInfo']
+
+        self.assertEqual(data['Name'].iloc[0], 'VC1')
+        self.assertEqual(data['Rows'].iloc[0], 100)
+        self.assertEqual(data['Columns'].iloc[0], 21)
+
+        out = self.s.columninfo(table=self.s.CASTable('vc1', caslib=srcLib))
+        data = out['ColumnInfo']
+
+        self.assertEqual(len(data), 21)
+        self.assertEqual(data['Column'].tolist(),
+                         ('rowLen,rowId,userEmail,Vryn01Len,Vryn01Val,'
+                          'Vryn02Len,Vryn02Val,Vryn03Len,Vryn03Val,'
+                          'Vryn04Len,Vryn04Val,Vryn05Len,Vryn05Val,'
+                          'Vryn06Len,Vryn06Val,Vryn07Len,Vryn07Val,'
+                          'Vryn08Len,Vryn08Val,Vryn09Len,Vryn09Val').split(','))
+        self.assertEqual(data['Type'].tolist(),
+                         ['int64','int64','varchar','int64',
+                          'varchar','int64','varchar','int64',
+                          'varchar','int64','varchar','int64',
+                          'varchar','int64','varchar','int64',
+                          'varchar','int64','varchar','int64','varchar'])
+
+        self.assertTablesEqual(vc1, self.s.CASTable('vc1', caslib=srcLib),
+                               sortby=SORT_KEYSV)
+
+        self.s.droptable(caslib=srcLib, table='vc1')
 
     def test_attr_or_key(self):
         out = self.s.loadactionset(actionset='simple')
@@ -552,6 +637,106 @@ class TestBasics(tm.TestCase):
 
         self.assertEqual(out.getvalue(), (997 * 'foo') + '\n')
 
+    def test_server_options(self):
+        if not tm.get_cas_superuser_mode():
+            tm.TestCase.skipTest(self, 'Testcase assumes SuperUser role.')
+
+        # Without superuser access, a user should not be able to set a server option
+        info = self.s.configuration.setservopt(tag="foo_1")
+        self.assertEqual(info.severity,2)
+        
+        # Verify we were not able to set the option without permission.
+        info = self.s.configuration.getservopt(name="tag")
+        # Most installations will require SuperUser even for the getservopt
+        # but check to see if this server allowed it and check the tag if it did
+        if info.severity == 0:
+            self.assertNotEqual(info['tag'], "foo_1")        
+
+        # The rest of the testcase requires that the user be able 
+        # assume the SuperUser role.  If this user can't, exit now.
+        info = self.s.accesscontrol.showrolesallowed()
+        self.assertEqual(info.severity,0)
+        info = info['Roles']
+        for index, row in info.iterrows():
+            if row['roleName'] == 'SuperUser':
+                if row.roleValue == 'FALSE':
+                    tm.TestCase.skipTest(self, 'User cannot assume the SuperUser role.')
+            
+        # Grant superuser access
+        info = self.s.accesscontrol.assumerole(adminrole='SuperUser')
+        self.assertEqual(info.severity,0)
+        
+        # Verify we were not able to set the option without permission.
+        # We checked this already above, but without SuperUser, so try
+        # again for the servers that did not allow this to be checked 
+        # without SuperUser 
+        info = self.s.configuration.getservopt(name="tag")
+        self.assertNotEqual(info['tag'], "foo_1")
+        
+        # Ensure we can set a server option with superuser access
+        info = self.s.configuration.setservopt(tag="foo_2")
+        self.assertEqual(info.severity,0)
+        info = self.s.configuration.getservopt(name="tag")
+        self.assertEqual(info['tag'], "foo_2")
+
+        # Verify the server option is persisted in a new session
+        self.s2 = swat.CAS(HOST, PORT, USER, PASSWD, protocol=PROTOCOL)
+        info = self.s2.accesscontrol.assumerole(adminrole='SuperUser')
+        self.assertEqual(info.severity,0)
+        
+        info = self.s2.configuration.getservopt(name="tag")
+        self.assertEqual(info['tag'], "foo_2")
+
+        # Clear the server option
+        info = self.s.configuration.setservopt(tag="")
+        self.assertEqual(info.severity,0)
+        info = self.s.configuration.getservopt(name="tag")
+        self.assertEqual(info['tag'], "")
+    
+    def test_table_indexes(self):
+        out = self.s.loadactionset(actionset='simple')
+        # Check basic statistics of the non-indexed table
+        out = self.s.summary(table=self.s.CASTable(self.tablename, caslib=self.srcLib, where='Make="BMW" AND Invoice BETWEEN 20000 and 30000'))
+
+        summ = out['Summary']
+
+        self.assertEqual(summ['Column'].tolist(),
+                         ['MSRP', 'Invoice', 'EngineSize', 'Cylinders',
+                          'Horsepower', 'MPG_City', 'MPG_Highway',
+                          'Weight', 'Wheelbase', 'Length'])
+        self.assertEqual(summ['Min'].tolist(),
+                         [28495.0, 26155.0, 2.5, 6.0, 184.0, 19.0, 
+                          27.0, 3197.0, 107.0, 176.0])
+        self.assertEqual(summ['Max'].tolist(),
+                         [30795.0, 28245.0, 2.5, 6.0, 184.0, 20.0, 
+                          29.0, 3461.0, 107.0, 177.0])
+        self.assertEqual(summ['N'].tolist(),
+                         [3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0])
+        self.assertEqual(summ['NMiss'].tolist(),
+                         [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
+
+        # index the table
+        out = self.s.table.index(casout={'caslib':self.srcLib,'indexvars':['Invoice','Make'],'name':'cars_idx'},table=self.s.CASTable(self.tablename, caslib=self.srcLib))
+
+        out = self.s.summary(table=self.s.CASTable("cars_idx", caslib=self.srcLib, where='Make="BMW" AND Invoice BETWEEN 20000 and 30000'))
+
+        summi = out['Summary']
+        
+        # validate that the summary of the indexed table is the same as the non-indexed table.
+        self.assertTablesEqual(summ, summi)
+        
+        self.s.droptable(caslib=self.srcLib, table='cars_idx')
+
+    def test_options(self):
+        if self.s._protocol in ['http', 'https']:
+            unittest.TestCase.skipTest(self, 'REST does not support options')
+
+        self.assertTrue(self.s._set_option(print_messages=False))
+        
+        with self.assertRaises(swat.SWATError):
+            self.s._set_option(print_messages='bad-arg')
+        with self.assertRaises(swat.SWATError):
+            self.s._set_option(foo='bar')
 
 if __name__ == '__main__':
     tm.runtests()
