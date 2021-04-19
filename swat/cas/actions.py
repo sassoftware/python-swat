@@ -534,6 +534,7 @@ class CASActionSet(object):
     def __getattr__(self, name):
         origname = name
         name = name.lower()
+        enabled = ['yes', 'y', 'on', 't', 'true', '1']
 
         if name in type(self).actions:
 
@@ -541,7 +542,6 @@ class CASActionSet(object):
 
             # Check for un-reflected actions
             if cls is None:
-                enabled = ['yes', 'y', 'on', 't', 'true', '1']
                 if os.environ.get('CAS_ACTION_TEST_MODE', '').lower() in enabled:
                     return CASActionRaw('%s.%s' % (type(self).__name__.lower(), name),
                                         self.get_connection())
@@ -557,6 +557,10 @@ class CASActionSet(object):
 
             # Return action instance
             return cls()
+
+        elif os.environ.get('CAS_ACTION_TEST_MODE', '').lower() in enabled:
+            return CASActionRaw('%s.%s' % (type(self).__name__.lower(), name),
+                                self.get_connection())
 
         raise AttributeError(origname)
 
