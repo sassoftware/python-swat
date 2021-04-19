@@ -34,6 +34,8 @@ HOST, PORT, PROTOCOL = tm.get_host_port_proto()
 
 
 class TestBuiltins(tm.TestCase):
+    # Create a class attribute to hold the cas host type
+    server_type = None
 
     def setUp(self):
         swat.reset_option()
@@ -42,13 +44,39 @@ class TestBuiltins(tm.TestCase):
 
         self.s = swat.CAS(HOST, PORT, USER, PASSWD, protocol=PROTOCOL)
 
+        if type(self).server_type is None:
+            # Set once per class and have every test use it.
+            # No need to change between tests.
+            type(self).server_type = tm.get_cas_host_type(self.s)
+
         self.pp = pprint.PrettyPrinter(indent=4)
 
     def tearDown(self):
         self.s.endsession()
         del self.s
+        
+        # some testcases create extra connections.
+        # tear them down as well
+        if hasattr(self,'s2'):
+            try:
+                self.s2.endsession()
+            except swat.SWATError:
+                pass
+            del self.s2
+
         swat.reset_option()
 
+    def getActionList(self,conn,getall=False):
+        r = conn.actionsetinfo(all=getall)
+        if r.severity != 0:
+            self.pp.pprint(r.messages)
+            self.assertEquals(r.status, None)
+        
+        self.assertEqual(list(r.keys())[0], 'setinfo')
+        setinfo = r['setinfo']
+        # Get the actionset column
+        return setinfo['actionset'].tolist()
+    
     def test_echo(self):
         r = self.s.builtins.echo()
         self.assertEqual(r, {})
@@ -137,6 +165,13 @@ class TestBuiltins(tm.TestCase):
         # self.assertEqual(r.debug, None)
 
     def test_addnode(self):
+        if not tm.get_cas_superuser_mode():
+            tm.TestCase.skipTest(self, 'Testcase assumes SuperUser role.')
+
+        info = self.s.accesscontrol.assumerole(adminrole='SuperUser')
+        if info.severity != 0:
+            self.skipTest("Specified user does not have admin credentials")
+
         try:
             r = self.s.addnode()
         except TypeError:
@@ -151,7 +186,9 @@ class TestBuiltins(tm.TestCase):
             self.assertIn(r.status, ['Error parsing action parameters.',
                                      "Authorization",
                                      "Nodes cannot be added when the server "
-                                     + "is running with in SMP mode."])
+                                     + "is running with in SMP mode.",
+                                     "The addNode action is not supported when executing in Kubernetes. "
+                                     + "To increase workers, adjust the CAS Operator workers value."])
 
         r = self.s.addnode(salt='controller', node=['pepper'])
         self.assertContainsMessage(r, "ERROR: The action stopped due to errors.")
@@ -327,29 +364,42 @@ class TestBuiltins(tm.TestCase):
         self.assertEqual(r['unknown'], False)
 
     def test_actionsetinfo(self):
-        r = self.s.actionsetinfo()
-        self.assertEqual(list(r.keys())[0], 'setinfo')
-        setinfo = r['setinfo']
-        # Get the actionset column
-        actionsets = setinfo['actionset'].tolist()
+        actionsets = self.getActionList(self.s)    
         self.assertIn('builtins', actionsets)
+        self.assertNotIn('autotune', actionsets)
 
-        r = self.s.actionsetinfo(all=True)
-        self.assertEqual(list(r.keys())[0], 'setinfo')
-        setinfo = r['setinfo']
-        # Get the actionset column
-        allactionsets = setinfo['actionset'].tolist()
+        allactionsets = self.getActionList(self.s, True)
         self.assertIn('builtins', allactionsets)
+        self.assertIn('autotune', allactionsets)
         self.assertNotIn('unknown', allactionsets)
         self.assertTrue(len(allactionsets) > len(actionsets))
 
     def test_log(self):
+        # see if the servers logs are immutable. 
         r = self.s.log(logger='App.cas.builtins.log', level="debug")
+        # if the severity is 0, the log action can be run without 
+        # assuming the superuser role.
         if r.severity != 0:
             self.assertIn(r.status,
                           ["You must be an administrator to set logging levels. "
                            + "The logger is immutable."])
-            self.skipTest("You must be an administrator to set logging levels")
+            # Some of our loggers in the shipping logconfig.xml files are marked 'immutable'.
+            # That means you must be an administrator to change them.
+            if not tm.get_cas_superuser_mode():
+                tm.TestCase.skipTest(self, 'Testcase assumes SuperUser role.')
+
+            # Assume SuperUser
+            info = self.s.accesscontrol.assumerole(adminrole='SuperUser')
+            if info.severity != 0:
+                self.skipTest("Specified user does not have admin credentials")
+
+            # Expect that we are a SuperUser
+            info = self.s.accesscontrol.isInRole(adminRole="SuperUser")
+            self.assertEqual(info['inRole'],"TRUE")
+            # re-issue the original command as a superuser
+            r = self.s.log(logger='App.cas.builtins.log', level="debug")
+            self.assertEqual(r.severity,0)        
+        
         r = self.s.log(invalid='parameter')
         self.assertNotEqual(r.status, None)
         r = self.s.log(logger='App.cas.builtins.log', level="invalid")
@@ -405,16 +455,31 @@ class TestBuiltins(tm.TestCase):
         self.assertTrue(userInfo['uniqueId'], self.s._username.split('@')[0])
         self.assertTrue(userInfo['userId'], self.s._username.split('@')[0])
 
-# NOTE: These don't work in optimized builds
-#   def test_getusers(self):
-#       r = self.s.getusers()
-#       self.assertNotEqual(r, None)
-#       # Can we do more here?  How do we know what users are on the system?
-#
-#   def test_getgroups(self):
-#       r = self.s.getgroups()
-#       self.assertNotEqual(r, None)
-#       # Can we do more here?  How do we know what groups are on the system?
+    def test_getusers(self):
+        # This testcase executes a hidden action.
+        # If CAS_ACTION_TEST_MODE was not enabled, skip the testcase
+        if not tm.get_cas_action_test_mode():
+            tm.TestCase.skipTest(self, 'CAS_ACTION_TEST_MODE not enabled.')
+        
+        # getusers not in optimized builds
+        if 'getusers' not in self.s.builtins.actions:
+            tm.TestCase.skipTest(self, 'getusers action not supported in this build')
+        r = self.s.builtins.getusers()
+        self.assertNotEqual(r, None)
+        # Can we do more here?  How do we know what users are on the system?
+
+    def test_getgroups(self):
+        # This testcase executes a hidden action.
+        # If CAS_ACTION_TEST_MODE was not enabled, skip the testcase
+        if not tm.get_cas_action_test_mode():
+            tm.TestCase.skipTest(self, 'CAS_ACTION_TEST_MODE not enabled.')
+
+        # getgroups not in optimized builds
+        if 'getgroups' not in self.s.builtins.actions:
+            tm.TestCase.skipTest(self, 'getgroups action not supported in this build')
+        r = self.s.builtins.getgroups()
+        self.assertNotEqual(r, None)
+        # Can we do more here?  How do we know what groups are on the system?
 
     # Can't be done in unit test because it changes state:
     # def test_shutdown(self):
@@ -453,7 +518,284 @@ class TestBuiltins(tm.TestCase):
             r = self.s.builtins.ping(invalidArgument)
         except NameError:
             pass
+        # Ping with an invalid argument
+        try:
+            r = self.s.builtins.ping('invalidArgument')
+        except TypeError:
+            pass
 
+    def test_installactionset(self):
+        if not tm.get_cas_superuser_mode():
+            tm.TestCase.skipTest(self, 'Testcase assumes SuperUser role.')
+
+        # Only a superuser can install an actionset.
+        # Verify a non-superuser is prohibited from installing actionsets.
+        #
+        info = self.s.builtins.installactionset(actionset='ohcrumbs')
+        self.assertEqual(info.severity, 2)
+        self.assertEqual(info.status, 'Authorization')
+        self.assertContainsMessage(info, "ERROR: The action stopped due to errors.")
+
+        # Assume SuperUser
+        info = self.s.accesscontrol.assumerole(adminrole='SuperUser')
+        if info.severity != 0:
+            self.skipTest("Specified user does not have admin credentials")
+
+        # Expect that we are a SuperUser
+        info = self.s.accesscontrol.isInRole(adminRole="SuperUser")
+        self.assertEqual(info['inRole'],"TRUE")
+
+        info = self.s.builtins.installactionset()
+        self.assertEqual(info.severity, 2)
+        self.assertContainsMessage(info, "ERROR: Parameter 'actionSet' is required but was not specified.")
+        
+        info = self.s.builtins.installactionset(actionset='ohcrumbs')
+        self.assertEqual(info.severity, 2)
+        self.assertContainsMessage(info, "ERROR: Action set 'ohcrumbs' was not loaded due to errors.")
+
+        self.assertEqual(self.s.builtins.installactionset(actionset="Oh, 'eck! I'm on me own again! I suppose I'll have to face the fiendish foes alone! Disregarding any thought for my safety and... [DM: and stop overacting?] And stop overacting! Eh?"), {})        
+        self.assertEqual(self.s.builtins.installactionset(actionset='builtins'), {'actionset': 'builtins'})
+        # One could argue that the following should return 'builtins', but we do
+        # not believe that it is worth fixing for that one special case.
+        self.assertEqual(self.s.builtins.installactionset(actionset='tkcasablt'), {'actionset': 'tkcasablt'})
+        self.assertEqual(self.s.builtins.installactionset(actionset=None), {})
+
+        info = self.s.builtins.installactionset(actionset='actionTest')
+        if info.severity == 0:
+            # Must be running a debug build where actiontest is available to install
+            self.assertEqual(info, {'actionset': 'actionTest'})
+
+        # Install an actionSet in the orginal session. Create a second session.
+        # Verify the installed action set is loaded automatically in the second session.
+        self.assertEqual(self.s.builtins.installactionset(actionset='fedSql'), {'actionset': 'fedSql'})
+        self.assertEqual(self.s.queryactionset('fedSql'), {'fedSql': True})
+
+        self.s2 = swat.CAS(HOST, PORT, USER, PASSWD, protocol=PROTOCOL)
+        self.assertEqual(self.s2.queryactionset('fedSql'), {'fedSql': True})
+
+        actionsets = self.getActionList(self.s2)
+        self.assertIn('fedSql', actionsets)
+
+    def test_userdefactionsetinfo(self):
+        actionsets = self.getActionList(self.s, True)    
+        self.assertIn('builtins', actionsets)
+        self.assertNotIn('hack', actionsets)
+
+        # add the hack actionset
+        r = self.s.builtins.defineactionset(
+            actions=[{'name':'hello','definition':'print "Hello World!";'}],name='hack')
+        if r.severity != 0:
+            self.pp.pprint(r.messages)
+            self.assertEquals(r.status, None)
+        
+        # Defining an actionset seems to load it. Should not hurt to try loading.
+        r = self.s.builtins.loadactionset(actionset='hack')
+        if r.severity != 0:
+            self.pp.pprint(r.messages)
+            self.assertEquals(r.status, None)
+        
+        # hack should be in there now
+        
+        r = self.s.actionsetinfo(all=True)
+        if r.severity != 0:
+            self.pp.pprint(r.messages)
+            self.assertEquals(r.status, None)
+        
+        self.assertEqual(list(r.keys())[0], 'setinfo')
+        setinfo = r['setinfo']
+        # Get the actionset column
+        allactionsets = setinfo['actionset'].tolist()
+        self.assertIn('hack', allactionsets)
+        # take the table part, look for hack in it        
+        foundhack=False
+        for i, x in setinfo.iterrows():
+            if (x.actionset.lower() == "hack"):
+                self.assertEqual(x.user_defined.lower(), "true")
+                foundhack=True
+        self.assertEqual(foundhack,True)
+        
+    def test_modifyQueue(self):
+        r = self.s.builtins.modifyQueue(maxActions=0,maxSize=1)
+        self.assertContainsMessage(r, "ERROR: Value 0 was found for parameter 'maxActions', but the parameter must be greater than or equal to 1.")
+
+        r = self.s.builtins.modifyQueue(maxActions=1,maxSize=0)
+        self.assertContainsMessage(r, "ERROR: Value 0 was found for parameter 'maxSize', but the parameter must be greater than or equal to 1.")
+        
+        r = self.s.builtins.modifyQueue(maxActions=1, maxSize=1)
+        self.assertContainsMessage(r, "NOTE: Maximum number of actions in output queue now 1")
+        self.assertContainsMessage(r, "NOTE: Maximum size of results in output queue now 1")
+
+        r = self.s.builtins.modifyQueue(maxActions=2147483647, maxSize=2147483647)
+        self.assertContainsMessage(r, "NOTE: Maximum number of actions in output queue now 2147483647")
+        self.assertContainsMessage(r, "NOTE: Maximum size of results in output queue now 2147483647")
+
+        r = self.s.builtins.modifyQueue(maxActions=2147483648, maxSize=1)
+        self.assertContainsMessage(r, "ERROR: An attempt was made to convert parameter 'maxActions' from int64 to int32, but the conversion failed.")
+
+        r = self.s.builtins.modifyQueue(maxActions=1, maxSize=2147483648)
+        self.assertContainsMessage(r, "NOTE: Maximum size of results in output queue now 2147483648")
+
+        r = self.s.builtins.modifyQueue(maxActions=2147483647, maxSize=9.223372036854775807E18)
+        self.assertContainsMessage(r, "ERROR: An attempt was made to convert parameter 'maxSize' from double to int64, but the conversion failed.")
+
+    def test_getLicenseInfo(self):
+        # Only administrators can see the licenseFile.
+        # This testcase requires running as a SuperUser.
+        # If CAS_SUPERUSER_MODE was not enabled, skip the testcase
+        if not tm.get_cas_superuser_mode():
+            tm.TestCase.skipTest(self, 'Testcase assumes SuperUser role.')
+
+        # Assume SuperUser
+        info = self.s.accesscontrol.assumerole(adminrole='SuperUser')
+        if info.severity != 0:
+            self.skipTest("Specified user does not have admin credentials")
+
+        # Expect that we are a SuperUser
+        info = self.s.accesscontrol.isInRole(adminRole="SuperUser")
+        self.assertEqual(info['inRole'],"TRUE")
+
+        # Now we should be able to see the license file in the license info
+        license = self.s.builtins.getlicenseinfo()
+
+        self.assertNotEqual(license, None)
+        self.assertNotEqual(license.isExpired, None)
+        self.assertNotEqual(license.isGrace, None)
+        self.assertNotEqual(license.isWarning, None)
+        self.assertNotEqual(license.cpuCount, None)
+        self.assertNotEqual(license.cpuStart, None)
+        self.assertNotEqual(license.expDate, None)
+        self.assertNotEqual(license.expDateNum, None)
+        self.assertNotEqual(license.gracePeriod, None)
+        self.assertNotEqual(license.prodID, None)
+        self.assertNotEqual(license.serverDate, None)
+        self.assertNotEqual(license.serverDateNum, None)
+        self.assertNotEqual(license.siteNum, None)
+        self.assertNotEqual(license.warningPeriod, None)
+        self.assertNotEqual(license.licenseFile, None)
+        fileLen=len(license.licenseFile)
+        fileSuffix=license.licenseFile[fileLen-4:fileLen]
+        self.assertIn(fileSuffix, ['.sas', '.jwt', '.txt'])
+        self.assertNotEqual(license.osName, None)
+        self.assertNotEqual(license.productName, None)
+        self.assertNotEqual(license.release, None)
+        self.assertNotEqual(license.siteName, None)
+
+    def test_getLicenseInfoByProdId(self):
+        # Only administrators can see the licenseFile.
+        # This testcase requires running as a SuperUser.
+        # If CAS_SUPERUSER_MODE was not enabled, skip the testcase
+        if not tm.get_cas_superuser_mode():
+            tm.TestCase.skipTest(self, 'Testcase assumes SuperUser role.')
+
+        # Assume SuperUser
+        info = self.s.accesscontrol.assumerole(adminrole='SuperUser')
+        if info.severity != 0:
+            self.skipTest("Specified user does not have admin credentials")
+
+        # Expect that we are a SuperUser
+        info = self.s.accesscontrol.isInRole(adminRole="SuperUser")
+        self.assertEqual(info['inRole'],"TRUE")
+
+        # Now we should be able to see the license file in the license info
+        license = self.s.builtins.getlicenseinfo(prodId=1141)
+
+        self.assertNotEqual(license, None)
+        self.assertNotEqual(license.isExpired, None)
+        self.assertNotEqual(license.isGrace, None)
+        self.assertNotEqual(license.isWarning, None)
+        self.assertNotEqual(license.cpuCount, None)
+        self.assertNotEqual(license.cpuStart, None)
+        self.assertNotEqual(license.expDate, None)
+        self.assertNotEqual(license.expDateNum, None)
+        self.assertNotEqual(license.gracePeriod, None)
+        self.assertNotEqual(license.prodID, None)
+        self.assertNotEqual(license.serverDate, None)
+        self.assertNotEqual(license.serverDateNum, None)
+        self.assertNotEqual(license.siteNum, None)
+        self.assertNotEqual(license.warningPeriod, None)
+        self.assertNotEqual(license.licenseFile, None)
+        fileLen=len(license.licenseFile)
+        fileSuffix=license.licenseFile[fileLen-4:fileLen]
+        self.assertIn(fileSuffix, ['.sas', '.jwt', '.txt'])
+        self.assertNotEqual(license.osName, None)
+        self.assertNotEqual(license.productName, None)
+        self.assertNotEqual(license.release, None)
+        self.assertNotEqual(license.siteName, None)
+
+    def test_setLicenseInfoWithoutCredentialForValidProductId(self):
+        # This testcase executes a hidden action.
+        # If CAS_ACTION_TEST_MODE was not enabled, skip the testcase
+        if not tm.get_cas_action_test_mode():
+            tm.TestCase.skipTest(self, 'CAS_ACTION_TEST_MODE not enabled.')
+
+        # setLicenseInfo not in optimized builds
+        if 'setlicenseinfo' not in self.s.builtins.actions:
+            tm.TestCase.skipTest(self, 'setlicenseinfo action not supported in this build')
+    
+        # Set without argument 'extra' that provides a credential to the server
+        r = self.s.builtins.setLicenseInfo(prodId=1000)
+        self.assertNotEqual(r.severity, 0)
+        
+    def test_setLicenseInfoWithoutCredentialForUnknownProdId(self):
+        # This testcase executes a hidden action.
+        # If CAS_ACTION_TEST_MODE was not enabled, skip the testcase
+        if not tm.get_cas_action_test_mode():
+            tm.TestCase.skipTest(self, 'CAS_ACTION_TEST_MODE not enabled.')
+
+        # setLicenseInfo not in optimized builds
+        if 'setlicenseinfo' not in self.s.builtins.actions:
+            tm.TestCase.skipTest(self, 'setlicenseinfo action not supported in this build')
+
+        # Set without argument 'extra' that provides a credential to the server
+        # Set with an invalid product id
+        r = self.s.builtins.setLicenseInfo(prodId=4242.0)
+        self.assertNotEqual(r.severity, 0)
+        # python seems to always return the second message, but leaving the first message
+        # here in case there is some scenario that returns it.
+        self.assertIn(r.status, ['The product specified is not licensed.',
+                                 'Invalid attempt to set client prodid value.'])
+
+    def test_getCacheInfo(self):
+        # getCacheInfo is not support on WX6
+        if self.server_type == 'windows.smp':
+            tm.TestCase.skipTest(self, 'getCacheInfo is not support on WX6')
+
+        # This testcase requires running as a SuperUser.
+        # If CAS_SUPERUSER_MODE was not enabled, skip the testcase
+        if not tm.get_cas_superuser_mode():
+            tm.TestCase.skipTest(self, 'Testcase assumes SuperUser role.')
+
+        # Cannot run this command if the user has not assumed the SuperUser role yet
+        r = self.s.getCacheInfo()
+        self.assertEqual(r.severity, 2)
+        self.assertContainsMessage(r, "ERROR: The action stopped due to errors.")
+
+        # Assume SuperUser
+        info = self.s.accesscontrol.assumerole(adminrole='SuperUser')
+        if info.severity != 0:
+            self.skipTest("Specified user does not have admin credentials")
+
+        # Expect that we are a SuperUser
+        info = self.s.accesscontrol.isInRole(adminRole="SuperUser")
+        self.assertEqual(info['inRole'],"TRUE")
+
+        r = self.s.getCacheInfo()
+        self.assertEqual(r.severity, 0)
+        self.assertNotEqual(r, None)
+        self.assertEqual(r.diskCacheInfo.name,"diskCacheInfo")
+        self.assertEqual(r.diskCacheInfo.label,"Result table containing CAS_DISK_CACHE information")
+
+    def test_refreshTokenWithInvalidToken(self):
+        # This testcase executes a hidden action.
+        # If CAS_ACTION_TEST_MODE was not enabled, skip the testcase
+        if not tm.get_cas_action_test_mode():
+            tm.TestCase.skipTest(self, 'CAS_ACTION_TEST_MODE not enabled.')
+        # refresh token not in optimized builds
+        if 'refreshtoken' not in self.s.builtins.actions:
+            tm.TestCase.skipTest(self, 'refreshtoken action not supported in this build')
+
+        r = self.s.builtins.refreshToken(token='123456789')
+        self.assertTrue(r.severity > 1)
 
 if __name__ == '__main__':
     tm.runtests()
