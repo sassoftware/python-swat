@@ -1,6 +1,12 @@
 
 # Change Log
 
+## 1.9.0 - 2021-05-24
+
+- Add additional plotting method parameters for correct data fetches
+- Add `date_format=` to `CAS.upload` method for formatting CSV exported data to a specific format
+- Update TK subsystem
+
 ## 1.8.1 - 2021-01-21
 
 - Fix compatibility with pandas 1.2 DataFrame rendering

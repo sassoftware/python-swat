@@ -8,6 +8,14 @@ What’s New
 
 This document outlines features and improvements from each release.
 
+1.9.0 (May 24, 2021)
+--------------------
+
+-  Add additional plotting method parameters for correct data fetches
+-  Add ``date_format=`` to ``CAS.upload`` method for formatting CSV
+   exported data to a specific format
+-  Update TK subsystem
+
 1.8.1 (January 21, 2021)
 ------------------------
 
