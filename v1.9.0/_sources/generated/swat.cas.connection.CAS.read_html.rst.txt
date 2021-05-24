@@ -1,0 +1,6 @@
+swat.cas.connection.CAS.read\_html
+==================================
+
+.. currentmodule:: swat.cas.connection
+
+.. automethod:: CAS.read_html

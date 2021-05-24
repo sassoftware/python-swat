@@ -1,0 +1,6 @@
+swat.cas.table.CASTable.sort\_values
+====================================
+
+.. currentmodule:: swat.cas.table
+
+.. automethod:: CASTable.sort_values

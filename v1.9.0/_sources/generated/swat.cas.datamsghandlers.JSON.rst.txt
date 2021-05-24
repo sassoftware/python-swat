@@ -1,0 +1,33 @@
+swat.cas.datamsghandlers.JSON
+=============================
+
+.. currentmodule:: swat.cas.datamsghandlers
+
+.. autoclass:: JSON
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~JSON.__init__
+      ~JSON.finish
+      ~JSON.getone
+      ~JSON.getrow
+      ~JSON.send
+      ~JSON.write
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~JSON.args
+   
+   
