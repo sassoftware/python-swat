@@ -233,7 +233,7 @@ def get_python_versions(platform):
     be used.
 
     '''
-    cmd = ['conda', 'search', '-q', '--json', '--subdir', platform, 'anaconda::pandas']
+    cmd = ['conda', 'search', '-q', '--json', '--subdir', platform, 'defaults::pandas']
     out = subprocess.check_output(cmd)
 
     versions = set()

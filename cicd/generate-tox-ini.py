@@ -52,7 +52,7 @@ def main(args):
     info = set()
 
     cmd = ['conda', 'search', '-q', '--json',
-           '--subdir', args.platform, 'anaconda::pandas']
+           '--subdir', args.platform, 'defaults::pandas']
     out = subprocess.check_output(cmd)
 
     for item in json.loads(out)['pandas']:
