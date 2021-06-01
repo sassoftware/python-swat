@@ -491,7 +491,7 @@ class CASActionSet(object):
         doc.append('')
         doc.append('Actions')
         doc.append('-------')
-        display_width = pd.options.display.width
+        display_width = pd.options.display.width or 80
         width = 0
         for item in actions:
             width = max(width, len(item['name']))
