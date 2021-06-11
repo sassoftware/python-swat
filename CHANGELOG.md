@@ -1,6 +1,10 @@
 
 # Change Log
 
+## 1.9.1 - 2021-06-11
+
+- Add Python 3.9 support
+
 ## 1.9.0 - 2021-05-24
 
 - Add additional plotting method parameters for correct data fetches

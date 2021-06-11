@@ -8,6 +8,11 @@ What’s New
 
 This document outlines features and improvements from each release.
 
+1.9.1 (June 11, 2021)
+---------------------
+
+-  Add Python 3.9 support
+
 1.9.0 (May 24, 2021)
 --------------------
 
