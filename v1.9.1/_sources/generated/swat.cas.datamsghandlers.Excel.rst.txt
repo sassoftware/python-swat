@@ -1,0 +1,33 @@
+swat.cas.datamsghandlers.Excel
+==============================
+
+.. currentmodule:: swat.cas.datamsghandlers
+
+.. autoclass:: Excel
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~Excel.__init__
+      ~Excel.finish
+      ~Excel.getone
+      ~Excel.getrow
+      ~Excel.send
+      ~Excel.write
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~Excel.args
+   
+   

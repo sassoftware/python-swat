@@ -1,0 +1,6 @@
+swat.cas.table.CASTableGroupBy.get\_group
+=========================================
+
+.. currentmodule:: swat.cas.table
+
+.. automethod:: CASTableGroupBy.get_group

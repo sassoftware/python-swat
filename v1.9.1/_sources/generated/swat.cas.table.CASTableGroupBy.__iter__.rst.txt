@@ -1,0 +1,6 @@
+swat.cas.table.CASTableGroupBy.\_\_iter\_\_
+===========================================
+
+.. currentmodule:: swat.cas.table
+
+.. automethod:: CASTableGroupBy.__iter__
