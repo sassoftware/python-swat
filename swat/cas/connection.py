@@ -346,7 +346,7 @@ class CAS(object):
     def __init__(self, hostname=None, port=None, username=None, password=None,
                  session=None, locale=None, nworkers=None, name=None,
                  authinfo=None, protocol=None, path=None, ssl_ca_list=None,
-                 **kwargs):
+                 auth_code=None, **kwargs):
 
         # Filter session options allowed as parameters
         _kwargs = {}
@@ -364,19 +364,6 @@ class CAS(object):
             warnings.warn('Unrecognized keys in connection parameters: %s' %
                           ', '.join(unknown_keys))
 
-        # If a prototype exists, use it for the connection config
-        prototype = kwargs.get('prototype')
-        if prototype is not None:
-            soptions = a2n(prototype._soptions)
-            protocol = a2n(prototype._protocol)
-        else:
-            # Distill connection information from parameters, config, and environment
-            hostname, port, username, password, protocol = \
-                self._get_connection_info(hostname, port, username,
-                                          password, protocol, path)
-            soptions = a2n(getsoptions(session=session, locale=locale,
-                                       nworkers=nworkers, protocol=protocol))
-
         # Check for SSL certificate
         if ssl_ca_list is None:
             ssl_ca_list = cf.get_option('cas.ssl_ca_list')
@@ -391,6 +378,25 @@ class CAS(object):
                     authinfo = [authinfo]
                 raise OSError('None of the specified authinfo files from'
                               'list exist: %s' % ', '.join(authinfo))
+
+        # If a prototype exists, use it for the connection config
+        prototype = kwargs.get('prototype')
+        if prototype is not None:
+            soptions = a2n(prototype._soptions)
+            protocol = a2n(prototype._protocol)
+        else:
+            # Distill connection information from parameters, config, and environment
+            hostname, port, username, password, protocol = \
+                self._get_connection_info(hostname, port, username,
+                                          password, protocol, path)
+            soptions = a2n(getsoptions(session=session, locale=locale,
+                                       nworkers=nworkers, protocol=protocol))
+
+            # Check for auth_code authentication
+            auth_code = auth_code or cf.get_option('cas.auth_code')
+            if protocol in ['http', 'https'] and auth_code:
+                username = None
+                password = self.get_token(auth_code=auth_code, url=hostname)
 
         # Create error handler
         try:
@@ -522,6 +528,34 @@ class CAS(object):
                 yield num
                 num = num + 1
         self._id_generator = _id_generator()
+
+    def _get_token(self, username=None, password=None, auth_code=None,
+                   client_id=None, client_secret=None, base_url=None):
+        ''' Retrieve token from Viya installation '''
+        headers = {'Accept': 'application/vnd.sas.compute.session+json',
+                   'Content-Type': 'application/x-www-form-urlencoded'}
+
+        auth_code = auth_code or cf.get_option('cas.auth_code')
+        if auth_code:
+            client_id = client_id or cf.get_option('cas.client_id') or 'SWAT'
+            client_secret = client_secret or cf.get_option('cas.client_secret') or ''
+            body = {'grant_type': 'authorization_code', 'code': auth_code,
+                    'client_id': client_id, 'client_secret': client_secret}
+        else:
+            user = client_id or cf.get_option('cas.username')
+            password = client_secret or cf.get_option('cas.token')
+            body = {'grant_type': 'password', 'username': user,
+                    'password': password}
+
+        resp = requests.post(base_url + '/SASLogon/oauth/token',
+                             headers=headers, user=('sas.tkmtrb', ''),
+                             data=urlparse.quote_plus(body))
+
+        if resp.status_code >= 300:
+            raise SWATError('Token request resulted in a status of %s' %
+                            resp.status_code)
+ 
+        return resp['access_token']
 
     def _gen_id(self):
         ''' Generate an ID unique to the session '''
