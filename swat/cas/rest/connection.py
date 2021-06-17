@@ -175,6 +175,24 @@ class SSLContextAdapter(requests.adapters.HTTPAdapter):
                                                                **pool_kwargs)
 
 
+def _setup_ssl(req_sess):
+    ''' Configure a Requests session for SSL '''
+    if os.environ.get('SSLREQCERT', 'y').lower() in ['n', 'no', '0',
+                                                     'f', 'false', 'off']:
+        req_sess.verify = False
+    elif 'CAS_CLIENT_SSL_CA_LIST' in os.environ:
+        req_sess.verify = os.path.expanduser(
+            os.environ['CAS_CLIENT_SSL_CA_LIST'])
+    elif 'SAS_TRUSTED_CA_CERTIFICATES_PEM_FILE' in os.environ:
+        req_sess.verify = os.path.expanduser(
+            os.environ['SAS_TRUSTED_CA_CERTIFICATES_PEM_FILE'])
+    elif 'SSLCALISTLOC' in os.environ:
+        req_sess.verify = os.path.expanduser(
+            os.environ['SSLCALISTLOC'])
+    elif 'REQUESTS_CA_BUNDLE' not in os.environ:
+        req_sess.mount('https://', SSLContextAdapter())
+
+
 class REST_CASConnection(object):
     '''
     Create a REST CAS connection
@@ -286,22 +304,10 @@ class REST_CASConnection(object):
 
         self._req_sess = requests.Session()
 
-        if os.environ.get('SSLREQCERT', 'y').lower() in ['n', 'no', '0',
-                                                         'f', 'false', 'off']:
-            self._req_sess.verify = False
-        elif 'CAS_CLIENT_SSL_CA_LIST' in os.environ:
-            self._req_sess.verify = os.path.expanduser(
-                os.environ['CAS_CLIENT_SSL_CA_LIST'])
-        elif 'SAS_TRUSTED_CA_CERTIFICATES_PEM_FILE' in os.environ:
-            self._req_sess.verify = os.path.expanduser(
-                os.environ['SAS_TRUSTED_CA_CERTIFICATES_PEM_FILE'])
-        elif 'SSLCALISTLOC' in os.environ:
-            self._req_sess.verify = os.path.expanduser(
-                os.environ['SSLCALISTLOC'])
-        elif 'REQUESTS_CA_BUNDLE' not in os.environ:
-            self._req_sess.mount('https://', SSLContextAdapter())
+        _setup_ssl(self._req_sess)
 
         self._req_sess.headers.update({
+            'Accept': 'application/json',
             'Content-Type': 'application/json',
             'Content-Length': '0',
             'Authorization': self._auth,
@@ -491,6 +497,7 @@ class REST_CASConnection(object):
 
         post_data = a2u(kwargs).encode('utf-8')
         self._req_sess.headers.update({
+            'Accept': 'application/json',
             'Content-Type': 'application/json',
             'Content-Length': str(len(post_data)),
         })
@@ -706,6 +713,7 @@ class REST_CASConnection(object):
             data = datafile.read()
 
         self._req_sess.headers.update({
+            'Accept': 'application/json',
             'Content-Type': 'application/octet-stream',
             'Content-Length': str(len(data)),
             'JSON-Parameters': json.dumps(_normalize_params(params))

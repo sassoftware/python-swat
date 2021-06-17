@@ -32,10 +32,11 @@ import json
 import os
 import random
 import re
+import requests
 import six
 import warnings
 import weakref
-from six.moves.urllib.parse import urlparse
+from six.moves.urllib.parse import urlparse, urlencode, urljoin
 from . import rest
 from .. import clib
 from .. import config as cf
@@ -177,6 +178,8 @@ class CAS(object):
         Base path of URL when using the REST protocol.
     ssl_ca_list : string, optional
         The path to the SSL certificates for the CAS server.
+    authcode : string, optional
+        Authorization code from SASLogon used to retrieve an OAuth token.
     **kwargs : any, optional
         Arbitrary keyword arguments used for internal purposes only.
 
@@ -346,7 +349,7 @@ class CAS(object):
     def __init__(self, hostname=None, port=None, username=None, password=None,
                  session=None, locale=None, nworkers=None, name=None,
                  authinfo=None, protocol=None, path=None, ssl_ca_list=None,
-                 auth_code=None, **kwargs):
+                 authcode=None, **kwargs):
 
         # Filter session options allowed as parameters
         _kwargs = {}
@@ -392,11 +395,11 @@ class CAS(object):
             soptions = a2n(getsoptions(session=session, locale=locale,
                                        nworkers=nworkers, protocol=protocol))
 
-            # Check for auth_code authentication
-            auth_code = auth_code or cf.get_option('cas.auth_code')
-            if protocol in ['http', 'https'] and auth_code:
+            # Check for authcode authentication
+            authcode = authcode or cf.get_option('cas.authcode')
+            if protocol in ['http', 'https'] and authcode:
                 username = None
-                password = self.get_token(auth_code=auth_code, url=hostname)
+                password = type(self)._get_token(authcode=authcode, url=hostname)
 
         # Create error handler
         try:
@@ -529,33 +532,41 @@ class CAS(object):
                 num = num + 1
         self._id_generator = _id_generator()
 
-    def _get_token(self, username=None, password=None, auth_code=None,
-                   client_id=None, client_secret=None, base_url=None):
+    @classmethod
+    def _get_token(cls, username=None, password=None, authcode=None,
+                   client_id=None, client_secret=None, url=None):
         ''' Retrieve token from Viya installation '''
-        headers = {'Accept': 'application/vnd.sas.compute.session+json',
-                   'Content-Type': 'application/x-www-form-urlencoded'}
+        from .rest.connection import _print_request, _setup_ssl
 
-        auth_code = auth_code or cf.get_option('cas.auth_code')
-        if auth_code:
+        with requests.Session() as req_sess:
+
+            _setup_ssl(req_sess)
+
+            req_sess.headers.update({'Accept': 'application/vnd.sas.compute.session+json',
+                                     'Content-Type': 'application/x-www-form-urlencoded'})
+
             client_id = client_id or cf.get_option('cas.client_id') or 'SWAT'
-            client_secret = client_secret or cf.get_option('cas.client_secret') or ''
-            body = {'grant_type': 'authorization_code', 'code': auth_code,
-                    'client_id': client_id, 'client_secret': client_secret}
-        else:
-            user = client_id or cf.get_option('cas.username')
-            password = client_secret or cf.get_option('cas.token')
-            body = {'grant_type': 'password', 'username': user,
-                    'password': password}
 
-        resp = requests.post(base_url + '/SASLogon/oauth/token',
-                             headers=headers, user=('sas.tkmtrb', ''),
-                             data=urlparse.quote_plus(body))
+            authcode = authcode or cf.get_option('cas.authcode')
+            if authcode:
+                client_secret = client_secret or cf.get_option('cas.client_secret') or ''
+                body = {'grant_type': 'authorization_code', 'code': authcode,
+                        'client_id': client_id, 'client_secret': client_secret}
+            else:
+                username = username or cf.get_option('cas.username')
+                password = password or cf.get_option('cas.token')
+                body = {'grant_type': 'password', 'username': username,
+                        'password': password}
 
-        if resp.status_code >= 300:
-            raise SWATError('Token request resulted in a status of %s' %
-                            resp.status_code)
- 
-        return resp['access_token']
+            resp = req_sess.post(urljoin(url, '/SASLogon/oauth/token'),
+                                 auth=(client_id, ''),
+                                 data=urlencode(body))
+
+            if resp.status_code >= 300:
+                raise SWATError('Token request resulted in a status of %s' %
+                                resp.status_code)
+
+            return resp.json()['access_token']
 
     def _gen_id(self):
         ''' Generate an ID unique to the session '''

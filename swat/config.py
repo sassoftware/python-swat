@@ -173,20 +173,20 @@ register_option('cas.port', 'int', check_int, 0,
                 'Sets the port number for the CAS server.',
                 environ='CAS_PORT')
 
-register_option('cas.auth_code', 'string', check_string, None,
-                'Sets the auth_code for retrieving an OAuth token from '
+register_option('cas.authcode', 'string', check_string, None,
+                'Sets the authorization code for retrieving an OAuth token from '
                 'a Viya deployment.',
-                environ='CAS_AUTHCODE')
+                environ=['CAS_AUTHCODE', 'VIYA_AUTHCODE'])
 
 register_option('cas.client_id', 'string', check_string, 'SWAT',
                 'Sets the client ID for retrieving an OAuth token from '
                 'a Viya deployment.',
-                environ='CAS_CLIENT_ID')
+                environ=['CAS_CLIENT_ID', 'VIYA_CLIENT_ID'])
 
 register_option('cas.client_secret', 'string', check_string, '',
                 'Sets the client secret for retrieving an OAuth token from '
                 'a Viya deployment.',
-                environ='CAS_CLIENT_SECRET')
+                environ=['CAS_CLIENT_SECRET', 'VIYA_CLIENT_SECRET'])
 
 register_option('cas.protocol', 'string',
                 functools.partial(check_string,
