@@ -1,0 +1,6 @@
+swat.cas.table.CASTablePlotter.barh
+===================================
+
+.. currentmodule:: swat.cas.table
+
+.. automethod:: CASTablePlotter.barh

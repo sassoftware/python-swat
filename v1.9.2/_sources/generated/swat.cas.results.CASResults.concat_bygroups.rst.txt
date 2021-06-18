@@ -1,0 +1,6 @@
+swat.cas.results.CASResults.concat\_bygroups
+============================================
+
+.. currentmodule:: swat.cas.results
+
+.. automethod:: CASResults.concat_bygroups

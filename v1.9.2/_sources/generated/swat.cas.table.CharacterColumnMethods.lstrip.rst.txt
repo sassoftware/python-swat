@@ -1,0 +1,6 @@
+swat.cas.table.CharacterColumnMethods.lstrip
+============================================
+
+.. currentmodule:: swat.cas.table
+
+.. automethod:: CharacterColumnMethods.lstrip
