@@ -1,6 +1,10 @@
 
 # Change Log
 
+## 1.9.2 - 2021-06-18
+
+- Add authorization code as authentication method
+
 ## 1.9.1 - 2021-06-11
 
 - Add Python 3.9 support

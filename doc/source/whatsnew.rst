@@ -8,6 +8,11 @@ What’s New
 
 This document outlines features and improvements from each release.
 
+1.9.2 (June 18, 2021)
+---------------------
+
+-  Add authorization code as authentication method
+
 1.9.1 (June 11, 2021)
 ---------------------
 
