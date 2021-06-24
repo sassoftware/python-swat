@@ -590,9 +590,11 @@ class CAS(object):
         stype = info['About']['System']['OS Name'].lower()
 
         # Check for reflection levels feature
+        kwargs = {}
+        if version >= (3, 5):
+            kwargs['showlabels'] = False
         res = self._raw_retrieve('builtins.reflect', _messagelevel='error',
-                                 _apptag='UI', action='builtins.reflect',
-                                 showlabels=False)
+                                 _apptag='UI', action='builtins.reflect', **kwargs)
         if [x for x in res[0]['actions'][0]['params'] if x['name'] == 'levels']:
             out.add('reflection-levels')
 
@@ -2370,7 +2372,7 @@ class CAS(object):
             asname = asname.lower()
             query = {'showhidden': showhidden, 'actionset': asname}
 
-            if not get_option('interactive_mode'):
+            if not get_option('interactive_mode') and self.server_version >= (3, 5):
                 query['showlabels'] = False
 
             if 'reflection-levels' in self.server_features:
