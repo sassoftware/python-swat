@@ -24,14 +24,14 @@ from swat.utils.keyword import dekeywordify, keywordify
 class TestKeyword(tm.TestCase):
 
     def test_dekeywordify(self):
-        self.assertEqual(dekeywordify('from'), 'from_') 
-        self.assertEqual(dekeywordify('to'), 'to') 
-        self.assertEqual(dekeywordify(10), 10) 
+        self.assertEqual(dekeywordify('from'), 'from_')
+        self.assertEqual(dekeywordify('to'), 'to')
+        self.assertEqual(dekeywordify(10), 10)
 
     def test_keywordify(self):
         self.assertEqual(keywordify('from_'), 'from')
-        self.assertEqual(keywordify('to'), 'to') 
-        self.assertEqual(keywordify(10), 10) 
+        self.assertEqual(keywordify('to'), 'to')
+        self.assertEqual(keywordify(10), 10)
 
 
 if __name__ == '__main__':

@@ -235,12 +235,17 @@ def ctb2tabular(_sw_table, soptions='', connection=None):
     dt_formats = get_option('cas.dataset.datetime_formats')
     if isinstance(dt_formats, six.string_types):
         dt_formats = [dt_formats]
-    datetime_regex = re.compile(r'^(%s)\d*\.\d*$' % '|'.join(dt_formats), flags=re.I)
+    datetime_regex = re.compile(r'^(%s)(\d*\.\d*)?$' % '|'.join(dt_formats), flags=re.I)
 
     d_formats = get_option('cas.dataset.date_formats')
-    if isinstance(dt_formats, six.string_types):
+    if isinstance(d_formats, six.string_types):
         d_formats = [d_formats]
-    date_regex = re.compile(r'^(%s)\d*\.\d*$' % '|'.join(d_formats), flags=re.I)
+    date_regex = re.compile(r'^(%s)(\d*\.\d*)?$' % '|'.join(d_formats), flags=re.I)
+
+    t_formats = get_option('cas.dataset.time_formats')
+    if isinstance(t_formats, six.string_types):
+        t_formats = [t_formats]
+    time_regex = re.compile(r'^(%s)(\d*\.\d*)?$' % '|'.join(t_formats), flags=re.I)
 
     # Construct columns
     ncolumns = check(_sw_table.getNColumns(), _sw_table)
@@ -255,6 +260,7 @@ def ctb2tabular(_sw_table, soptions='', connection=None):
     mimetypes = {}
     dates = []
     datetimes = []
+    times = []
     intmiss = {}
     for i in range(ncolumns):
         col = SASColumnSpec.fromtable(_sw_table, i)
@@ -282,6 +288,8 @@ def ctb2tabular(_sw_table, soptions='', connection=None):
                     datetimes.append(col.name)
                 elif date_regex.match(col.format):
                     dates.append(col.name)
+                elif time_regex.match(col.format):
+                    times.append(col.name)
         elif dtype in set(['char', 'varchar']):
             dtypes.append((col.name, '|U%d' % (col.width or 1)))
             colinfo[col.name] = col
@@ -329,10 +337,9 @@ def ctb2tabular(_sw_table, soptions='', connection=None):
 
     # Create a np.array and fill it
     kwargs['data'] = np.array(_sw_table.toTuples(a2n(
-                         get_option('encoding_errors'), 'utf-8'),
-                         casdt.cas2python_datetime, casdt.cas2python_date,
-                         casdt.cas2python_time),
-                         dtype=dtypes)
+        get_option('encoding_errors'), 'utf-8'),
+        casdt.cas2python_datetime, casdt.cas2python_date,
+        casdt.cas2python_time), dtype=dtypes)
 
     # Short circuit for numpy arrays
 #   if tformat == 'numpy_array':
@@ -370,6 +377,8 @@ def ctb2tabular(_sw_table, soptions='', connection=None):
         cdf[item] = cdf[item].apply(casdt.sas2python_date)
     for item in datetimes:
         cdf[item] = cdf[item].apply(casdt.sas2python_datetime)
+    for item in times:
+        cdf[item] = cdf[item].apply(casdt.sas2python_time)
 
     # Check for By group information
     optbycol = get_option('cas.dataset.bygroup_columns')
@@ -591,7 +600,7 @@ def py2cas(soptions, _sw_error, **kwargs):
             _sw_sublist = errorcheck(_sw_values.createListAt(
                                      i, key, len(item)), _sw_values)
             j = 0
-            for k, v in six.iteritems(item):
+            for k, v in sorted(six.iteritems(item), key=lambda x: '%s' % x[0]):
                 if isinstance(k, (text_types, binary_types)):
                     j = set_list_value(_sw_sublist, j, k, v)
                 else:
@@ -613,7 +622,7 @@ def py2cas(soptions, _sw_error, **kwargs):
         return i
 
     i = 0
-    for skey, svalue in six.iteritems(kwargs):
+    for skey, svalue in sorted(six.iteritems(kwargs), key=lambda x: '%s' % x[0]):
         i = set_list_value(_sw_values, i, skey, svalue)
 
     return _sw_values

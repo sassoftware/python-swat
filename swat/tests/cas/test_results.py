@@ -38,9 +38,9 @@ HOST, PORT, PROTOCOL = tm.get_host_port_proto()
 
 
 class TestCASResults(tm.TestCase):
-    
+
     # Create a class attribute to hold the cas host type
-    server_type = None    
+    server_type = None
 
     def setUp(self):
         swat.reset_option()
@@ -48,9 +48,10 @@ class TestCASResults(tm.TestCase):
         swat.options.interactive_mode = False
 
         self.s = swat.CAS(HOST, PORT, USER, PASSWD, protocol=PROTOCOL)
-        if type(self).server_type is None: 
-            # Set once per class and have every test use it. No need to change between tests.    
-            type(self).server_type = tm.get_cas_host_type(self.s)        
+        if type(self).server_type is None:
+            # Set once per class and have every test use it.
+            # No need to change between tests.
+            type(self).server_type = tm.get_cas_host_type(self.s)
 
         r = tm.load_data(self.s, 'datasources/cars_single.sashdat', self.server_type)
 
@@ -73,12 +74,12 @@ class TestCASResults(tm.TestCase):
 
         self.assertEqual(len(out), 1)
         self.assertEqual(set(out.keys()), set(['Summary']))
-        
+
         self.table.groupBy = {"Make"}
 
         self.table.loadactionset('datapreprocess')
         out = self.table.histogram()
-        
+
         self.assertEqual(len(out), 39)
         self.assertTrue('ByGroupInfo' in out)
         for i in range(1, 39):
@@ -93,21 +94,22 @@ class TestCASResults(tm.TestCase):
         self.assertEqual(soup.find_all('div')[2].string, 'simple')
 
         out = self.table.summary()
-        
+
         html = out._repr_html_()
         soup = BeautifulSoup(html, 'html.parser')
         htbl = soup.find_all('table')[0]
 
-        label = 'Descriptive Statistics for DATASOURCES.CARS_SINGLE'
         headers = [x.string for x in htbl.thead.find_all('th')]
         if 'Skewness' in headers:
-            self.assertEqual(headers, 
-                 [None, 'Column', 'Min', 'Max', 'N', 'NMiss', 'Mean', 'Sum',
+            self.assertEqual(
+                headers,
+                [None, 'Column', 'Min', 'Max', 'N', 'NMiss', 'Mean', 'Sum',
                  'Std', 'StdErr', 'Var', 'USS', 'CSS', 'CV', 'TValue', 'ProbT',
                  'Skewness', 'Kurtosis'])
         else:
-            self.assertEqual(headers, 
-                 [None, 'Column', 'Min', 'Max', 'N', 'NMiss', 'Mean', 'Sum',
+            self.assertEqual(
+                headers,
+                [None, 'Column', 'Min', 'Max', 'N', 'NMiss', 'Mean', 'Sum',
                  'Std', 'StdErr', 'Var', 'USS', 'CSS', 'CV', 'TValue', 'ProbT'])
 
         caption = [x.string for x in htbl.find_all('caption')]
@@ -133,7 +135,8 @@ class TestCASResults(tm.TestCase):
         # By groups
         out = self.table.groupby(['Origin']).summary()
 
-        names = ['ByGroupInfo', 'ByGroup1.Summary', 'ByGroup2.Summary', 'ByGroup3.Summary']
+        names = ['ByGroupInfo', 'ByGroup1.Summary',
+                 'ByGroup2.Summary', 'ByGroup3.Summary']
 
         # Return new CASResults object
         self.assertEqual(set(out.keys()), set(names))
@@ -159,14 +162,15 @@ class TestCASResults(tm.TestCase):
         names = ['ByGroupSet1.ByGroupInfo', 'ByGroupSet1.ByGroup1.MDSummary',
                  'ByGroupSet1.ByGroup2.MDSummary', 'ByGroupSet1.ByGroup3.MDSummary',
                  'ByGroupSet2.ByGroupInfo'] + \
-                 ['ByGroupSet2.ByGroup%d.MDSummary' % i for i in range(1,88)]
+                ['ByGroupSet2.ByGroup%d.MDSummary' % i for i in range(1, 88)]
 
         self.assertEqual(set(out.keys()), set(names))
 
         cout = out.concat_bygroups()
 
         self.assertEqual(set(out.keys()), set(names))
-        self.assertEqual(set(cout.keys()), set(['ByGroupSet1.MDSummary', 'ByGroupSet2.MDSummary']))
+        self.assertEqual(set(cout.keys()), set(['ByGroupSet1.MDSummary',
+                                                'ByGroupSet2.MDSummary']))
         self.assertEqual(len(cout['ByGroupSet1.MDSummary']), 30)
         self.assertEqual(len(cout['ByGroupSet2.MDSummary']), 870)
 
@@ -174,7 +178,8 @@ class TestCASResults(tm.TestCase):
         iout = out.concat_bygroups(inplace=True)
 
         self.assertTrue(iout is None)
-        self.assertEqual(set(out.keys()), set(['ByGroupSet1.MDSummary', 'ByGroupSet2.MDSummary']))
+        self.assertEqual(set(out.keys()), set(['ByGroupSet1.MDSummary',
+                                               'ByGroupSet2.MDSummary']))
         self.assertEqual(len(out['ByGroupSet1.MDSummary']), 30)
         self.assertEqual(len(out['ByGroupSet2.MDSummary']), 870)
 
@@ -229,14 +234,14 @@ class TestCASResults(tm.TestCase):
 
         # Raw values (note: By groups store formatted value by default)
         grp = out.get_group(('Asia', 4))
- 
+
         self.assertEqual(set(grp.keys()), set(['Topk', 'TopkMisc']))
         self.assertEqual(set(grp.Topk.index.names), set(['Origin', 'Cylinders']))
         self.assertEqual(set(grp.Topk.index.values), set([('Asia', '4')]))
 
         # Formatted values
         grp = out.get_group(('Asia', '4'))
- 
+
         self.assertEqual(set(grp.keys()), set(['Topk', 'TopkMisc']))
         self.assertEqual(set(grp.Topk.index.names), set(['Origin', 'Cylinders']))
         self.assertEqual(set(grp.Topk.index.values), set([('Asia', '4')]))
@@ -284,23 +289,25 @@ class TestCASResults(tm.TestCase):
         out = self.table.topk()
         with self.assertRaises(IndexError):
             out.get_set(2)
-         
+
         # No By Group sets
         out = self.table.groupby('Origin').topk()
         with self.assertRaises(IndexError):
             out.get_set(2)
-         
+
         # By Group Sets
         out = self.table.mdsummary(sets=[dict(groupby=['Origin']),
                                          dict(groupby=['Make', 'Cylinders'])])
 
         sout = out.get_set(1)
-        self.assertEqual(set(sout.keys()), set(['ByGroupInfo', 'ByGroup1.MDSummary',
-                                                'ByGroup2.MDSummary', 'ByGroup3.MDSummary']))
+        self.assertEqual(set(sout.keys()),
+                         set(['ByGroupInfo', 'ByGroup1.MDSummary',
+                              'ByGroup2.MDSummary', 'ByGroup3.MDSummary']))
 
         sout = out.get_set(2)
-        self.assertEqual(set(sout.keys()), set(['ByGroupInfo'] +
-                         ['ByGroup%d.MDSummary' % i for i in range(1,88)]))
+        self.assertEqual(set(sout.keys()),
+                         set(['ByGroupInfo']
+                             + ['ByGroup%d.MDSummary' % i for i in range(1, 88)]))
 
         with self.assertRaises(IndexError):
             out.get_set(3)
@@ -355,8 +362,9 @@ class TestCASResults(tm.TestCase):
 #       js = out._my_repr_json_()
 #       data = json.loads(js)
 
-#       self.assertEqual(set(['session', 'sessionname', 'performance', 'signature','status_code',
-#                             'messages', 'debug', 'status', 'reason', 'severity']),
+#       self.assertEqual(set(['session', 'sessionname', 'performance',
+#                             'signature','status_code', 'messages', 'debug',
+#                             'status', 'reason', 'severity']),
 #                        set(data.keys()))
 
 

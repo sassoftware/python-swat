@@ -20,7 +20,7 @@ import copy
 import swat.utils.testing as tm
 import unittest
 from swat.utils.compat import text_types
-from swat.config import (get_option, set_option, reset_option, describe_option, options, 
+from swat.config import (get_option, set_option, reset_option, describe_option, options,
                          get_suboptions, SWATOptionError, get_default,
                          check_int, check_float, check_string, check_url, check_boolean)
 from swat.utils.config import subscribe, _subscribers, unsubscribe
@@ -68,7 +68,7 @@ class TestConfig(tm.TestCase):
 
         with self.assertRaises(SWATOptionError):
             reset_option('cas.foo')
- 
+
         with self.assertRaises(SWATOptionError):
             reset_option('cas')
 
@@ -90,7 +90,7 @@ class TestConfig(tm.TestCase):
         self.assertEqual(options.index_name, index_name)
 
         options.index_name = 'Foo'
-        
+
         self.assertEqual(get_option('index_name'), 'Foo')
         self.assertEqual(get_option('dataset.index_name'), 'Foo')
         self.assertEqual(options.index_name, 'Foo')
@@ -103,13 +103,13 @@ class TestConfig(tm.TestCase):
 
     def test_missing_options(self):
         with self.assertRaises(SWATOptionError):
-            set_option('cas.foo', 10) 
+            set_option('cas.foo', 10)
 
         with self.assertRaises(SWATOptionError):
             options.cas.foo = 10
 
         with self.assertRaises(SWATOptionError):
-            get_option('cas.foo') 
+            get_option('cas.foo')
 
         with self.assertRaises(SWATOptionError):
             print(options.cas.foo)
@@ -127,11 +127,11 @@ class TestConfig(tm.TestCase):
         def options_subscriber(key, value, opts=opts):
             opts[key] = value
 
-        num_subscribers = len(_subscribers) 
+        num_subscribers = len(_subscribers)
 
         subscribe(options_subscriber)
 
-        self.assertEqual(len(_subscribers), num_subscribers + 1) 
+        self.assertEqual(len(_subscribers), num_subscribers + 1)
 
         options.cas.print_messages = True
         self.assertEqual(opts, {'cas.print_messages': True})
@@ -140,33 +140,38 @@ class TestConfig(tm.TestCase):
         self.assertEqual(opts, {'cas.print_messages': False})
 
         options.cas.dataset.index_name = 'foo'
-        self.assertEqual(opts, {'cas.print_messages': False, 'cas.dataset.index_name': 'foo'})
+        self.assertEqual(opts, {'cas.print_messages': False,
+                                'cas.dataset.index_name': 'foo'})
 
         options.cas.dataset.index_name = 'bar'
-        self.assertEqual(opts, {'cas.print_messages': False, 'cas.dataset.index_name': 'bar'})
+        self.assertEqual(opts, {'cas.print_messages': False,
+                                'cas.dataset.index_name': 'bar'})
 
         options.cas.print_messages = True
-        self.assertEqual(opts, {'cas.print_messages': True, 'cas.dataset.index_name': 'bar'})
+        self.assertEqual(opts, {'cas.print_messages': True,
+                                'cas.dataset.index_name': 'bar'})
 
         options.cas.print_messages = False
         reset_option('cas.print_messages')
-        self.assertEqual(opts, {'cas.print_messages': True, 'cas.dataset.index_name': 'bar'})
+        self.assertEqual(opts, {'cas.print_messages': True,
+                                'cas.dataset.index_name': 'bar'})
 
         unsubscribe(options_subscriber)
 
-        self.assertEqual(len(_subscribers), num_subscribers) 
+        self.assertEqual(len(_subscribers), num_subscribers)
 
         subscribe(options_subscriber)
 
-        self.assertEqual(len(_subscribers), num_subscribers + 1) 
+        self.assertEqual(len(_subscribers), num_subscribers + 1)
 
         del options_subscriber
 
-        self.assertEqual(len(_subscribers), num_subscribers) 
+        self.assertEqual(len(_subscribers), num_subscribers)
 
         options.cas.print_messages = False
 
-        self.assertEqual(opts, {'cas.print_messages': True, 'cas.dataset.index_name': 'bar'})
+        self.assertEqual(opts, {'cas.print_messages': True,
+                                'cas.dataset.index_name': 'bar'})
 
     def _test_method_subscribers(self):
         opts = {}
@@ -189,16 +194,20 @@ class TestConfig(tm.TestCase):
         self.assertEqual(opts, {'cas.print_messages': True})
 
         options.cas.dataset.auto_index_style = 'sas'
-        self.assertEqual(opts, {'cas.print_messages': True, 'cas.dataset.auto_index_style': 'sas'})
+        self.assertEqual(opts, {'cas.print_messages': True,
+                                'cas.dataset.auto_index_style': 'sas'})
 
         options.cas.dataset.auto_index_style = 'pandas'
-        self.assertEqual(opts, {'cas.print_messages': True, 'cas.dataset.auto_index_style': 'pandas'})
+        self.assertEqual(opts, {'cas.print_messages': True,
+                                'cas.dataset.auto_index_style': 'pandas'})
 
         options.cas.print_messages = False
-        self.assertEqual(opts, {'cas.print_messages': False, 'cas.dataset.auto_index_style': 'pandas'})
+        self.assertEqual(opts, {'cas.print_messages': False,
+                                'cas.dataset.auto_index_style': 'pandas'})
 
         reset_option('cas.print_messages')
-        self.assertEqual(opts, {'cas.print_messages': True, 'cas.dataset.auto_index_style': 'pandas'})
+        self.assertEqual(opts, {'cas.print_messages': True,
+                                'cas.dataset.auto_index_style': 'pandas'})
 
         unsubscribe(os.options_subscriber)
 
@@ -214,7 +223,8 @@ class TestConfig(tm.TestCase):
 
         options.cas.print_messages = False
 
-        self.assertEqual(opts, {'cas.print_messages': True, 'cas.dataset.auto_index_style': 'pandas'})
+        self.assertEqual(opts, {'cas.print_messages': True,
+                                'cas.dataset.auto_index_style': 'pandas'})
 
     def test_errors(self):
         with self.assertRaises(SWATOptionError):
@@ -235,7 +245,7 @@ class TestConfig(tm.TestCase):
             self.assertRegex(line, r'^cas\.')
 
         with self.assertRaises(SWATOptionError):
-           describe_option('cas.foo')
+            describe_option('cas.foo')
 
         out = describe_option(_print_desc=False)
         self.assertRegex(out, r'\bcas\.dataset\.format :')
@@ -244,11 +254,14 @@ class TestConfig(tm.TestCase):
         self.assertRegex(out, r'\bencoding_errors :')
 
     def test_suboptions(self):
-        self.assertEqual(list(sorted(get_suboptions('cas').keys())), 
-                         ['dataset', 'debug', 'exception_on_severity',
+        self.assertEqual(list(sorted(get_suboptions('cas').keys())),
+                         ['authcode', 'client_id', 'client_secret',
+                          'connection_retries', 'connection_retry_interval',
+                          'dataset', 'debug', 'exception_on_severity',
                           'hostname', 'missing',
                           'port', 'print_messages', 'protocol',
-                          'trace_actions', 'trace_ui_actions'])
+                          'reflection_levels', 'ssl_ca_list', 'token',
+                          'trace_actions', 'trace_ui_actions', 'username'])
 
         with self.assertRaises(SWATOptionError):
             get_suboptions('cas.foo')
@@ -268,30 +281,30 @@ class TestConfig(tm.TestCase):
             get_default('cas')
 
     def test_check_int(self):
-        self.assertEqual(check_int(10), 10) 
-        self.assertEqual(check_int(999999999999), 999999999999) 
-        self.assertEqual(check_int('10'), 10) 
+        self.assertEqual(check_int(10), 10)
+        self.assertEqual(check_int(999999999999), 999999999999)
+        self.assertEqual(check_int('10'), 10)
 
         with self.assertRaises(SWATOptionError):
             check_int('foo')
 
-        self.assertEqual(check_int(10, minimum=9), 10) 
-        self.assertEqual(check_int(10, minimum=10), 10) 
+        self.assertEqual(check_int(10, minimum=9), 10)
+        self.assertEqual(check_int(10, minimum=10), 10)
         with self.assertRaises(SWATOptionError):
             check_int(10, minimum=11)
-       
-        self.assertEqual(check_int(10, minimum=9, exclusive_minimum=True), 10) 
+
+        self.assertEqual(check_int(10, minimum=9, exclusive_minimum=True), 10)
         with self.assertRaises(SWATOptionError):
             check_int(10, minimum=10, exclusive_minimum=True)
         with self.assertRaises(SWATOptionError):
             check_int(10, minimum=11, exclusive_minimum=True)
-       
-        self.assertEqual(check_int(10, maximum=11), 10) 
-        self.assertEqual(check_int(10, maximum=10), 10) 
+
+        self.assertEqual(check_int(10, maximum=11), 10)
+        self.assertEqual(check_int(10, maximum=10), 10)
         with self.assertRaises(SWATOptionError):
             check_int(10, maximum=9)
-       
-        self.assertEqual(check_int(10, maximum=11, exclusive_minimum=True), 10) 
+
+        self.assertEqual(check_int(10, maximum=11, exclusive_minimum=True), 10)
         with self.assertRaises(SWATOptionError):
             check_int(10, maximum=10, exclusive_maximum=True)
         with self.assertRaises(SWATOptionError):
@@ -299,7 +312,7 @@ class TestConfig(tm.TestCase):
 
         self.assertEqual(check_int(10, multiple_of=5), 10)
         with self.assertRaises(SWATOptionError):
-            check_int(10, multiple_of=3) 
+            check_int(10, multiple_of=3)
 
     def test_check_float(self):
         self.assertEqual(check_float(123.567), 123.567)
@@ -314,7 +327,8 @@ class TestConfig(tm.TestCase):
         with self.assertRaises(SWATOptionError):
             check_float(123.567, minimum=123.577)
 
-        self.assertEqual(check_float(123.567, minimum=123.566, exclusive_minimum=True), 123.567)
+        self.assertEqual(check_float(123.567, minimum=123.566,
+                                     exclusive_minimum=True), 123.567)
         with self.assertRaises(SWATOptionError):
             check_float(123.567, minimum=123.567, exclusive_minimum=True)
         with self.assertRaises(SWATOptionError):
@@ -325,7 +339,8 @@ class TestConfig(tm.TestCase):
         with self.assertRaises(SWATOptionError):
             check_float(123.567, maximum=123.566)
 
-        self.assertEqual(check_float(123.567, maximum=123.567, exclusive_minimum=True), 123.567)
+        self.assertEqual(check_float(123.567, maximum=123.567,
+                                     exclusive_minimum=True), 123.567)
         with self.assertRaises(SWATOptionError):
             check_float(123.567, maximum=123.567, exclusive_maximum=True)
         with self.assertRaises(SWATOptionError):
@@ -352,9 +367,10 @@ class TestConfig(tm.TestCase):
         with self.assertRaises(SWATOptionError):
             check_string('hi there', min_length=9)
 
-        self.assertEqual(check_string('hi there', valid_values=['hi there', 'bye now']), 'hi there')
+        self.assertEqual(check_string('hi there', valid_values=['hi there', 'bye now']),
+                         'hi there')
         with self.assertRaises(SWATOptionError):
-            check_string('foo', valid_values=['hi there', 'bye now']) 
+            check_string('foo', valid_values=['hi there', 'bye now'])
 
         # Invalid utf8 data
         with self.assertRaises(SWATOptionError):
@@ -373,11 +389,21 @@ class TestConfig(tm.TestCase):
         self.assertEqual(check_boolean(False), False)
         self.assertEqual(check_boolean(1), True)
         self.assertEqual(check_boolean(0), False)
+        self.assertEqual(check_boolean('yes'), True)
+        self.assertEqual(check_boolean('no'), False)
+        self.assertEqual(check_boolean('T'), True)
+        self.assertEqual(check_boolean('F'), False)
+        self.assertEqual(check_boolean('true'), True)
+        self.assertEqual(check_boolean('false'), False)
+        self.assertEqual(check_boolean('on'), True)
+        self.assertEqual(check_boolean('off'), False)
+        self.assertEqual(check_boolean('enabled'), True)
+        self.assertEqual(check_boolean('disabled'), False)
 
         with self.assertRaises(SWATOptionError):
             check_boolean(2)
         with self.assertRaises(SWATOptionError):
-            check_boolean('true')
+            check_boolean('foo')
         with self.assertRaises(SWATOptionError):
             check_boolean(1.1)
 

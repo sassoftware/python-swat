@@ -43,6 +43,7 @@ from ..exceptions import SWATError
 from ..utils import dict2kwargs, getattr_safe_property, xdict
 from ..utils.compat import (int_types, binary_types, text_types, items_types,
                             patch_pandas_sort, char_types, num_types)
+from ..utils.datetime import is_date_format, is_datetime_format, is_time_format
 from ..utils.keyword import dekeywordify
 
 # pylint: disable=W0212, W0221, W0613, R0904, C0330
@@ -229,11 +230,19 @@ def concat(objs, axis=0, join='outer', join_axes=None, ignore_index=False, keys=
     :class:`CASTable`
 
     '''
+    for item in objs:
+        if item is None:
+            continue
+        if not isinstance(item, CASTable):
+            raise TypeError('All input objects must be CASTable instances')
+
     try:
         views = []
         for item in objs:
             if item is None:
                 continue
+            if not isinstance(item, CASTable):
+                raise TypeError('All input objects must be CASTable instances')
             views.append(item.to_view())
 
         if not views:
@@ -317,6 +326,11 @@ def merge(left, right, how='inner', on=None, left_on=None, right_on=None,
     :class:`CASTable`
 
     '''
+    if not isinstance(left, CASTable):
+        raise TypeError('`left` parameter must be a CASTable object')
+    if not isinstance(right, CASTable):
+        raise TypeError('`right` parameter must be a CASTable object')
+
     how = how.lower()
 
     # Setup join column names
@@ -368,7 +382,7 @@ def merge(left, right, how='inner', on=None, left_on=None, right_on=None,
     right_rename = ' rename=(%s=__by_var%s)' % (_nlit(right_on), right_rename)
 
     columns = ' '.join([_nlit(left_map[x]) for x in left_columns]
-                     + [_nlit(right_map[x]) for x in right_columns])
+                       + [_nlit(right_map[x]) for x in right_columns])
 
     left_missval = '.'
     right_missval = '.'
@@ -785,7 +799,7 @@ class CASTablePlotter(object):
     def __init__(self, table):
         self._table = table
 
-    def _get_fetchvars(self, x=None, y=None, by=None):
+    def _get_fetchvars(self, x=None, y=None, by=None, c=None, C=None, s=None):
         '''
         Return a list of variables needed for the plot
 
@@ -807,7 +821,19 @@ class CASTablePlotter(object):
         else:
             by = self._table.get_groupby_vars()
 
-        return list(by) + list(x) + list(y)
+        c = c or []
+        if isinstance(c, six.string_types):
+            c = [c]
+
+        C = C or []
+        if isinstance(C, six.string_types):
+            C = [C]
+
+        s = s or []
+        if isinstance(s, six.string_types):
+            s = [s]
+
+        return list(by) + list(x) + list(y) + list(c) + list(C) + list(s)
 
     def _get_sampling_params(self, **kwargs):
         '''
@@ -824,14 +850,15 @@ class CASTablePlotter(object):
             samp['stratify_by'] = kwargs.pop('stratify_by')
         return samp, kwargs
 
-    def _get_plot_params(self, x=None, y=None, by=None, **kwargs):
+    def _get_plot_params(self, x=None, y=None, by=None, c=None,
+                         C=None, s=None, **kwargs):
         '''
         Split parameters into fetch and plot parameter groups
 
         '''
         params, kwargs = self._get_sampling_params(**kwargs)
         params['grouped'] = True
-        params['fetchvars'] = self._get_fetchvars(x=x, y=y, by=by)
+        params['fetchvars'] = self._get_fetchvars(x=x, y=y, by=by, c=c, C=C, s=s)
         return params, kwargs
 
     def __call__(self, x=None, y=None, kind='line', **kwargs):
@@ -975,7 +1002,7 @@ class CASTablePlotter(object):
         :class:`matplotlib.AxesSubplot` or :func:`numpy.array` of them.
 
         '''
-        params, kwargs = self._get_plot_params(x=x, y=y, **kwargs)
+        params, kwargs = self._get_plot_params(x=x, y=y, C=C, **kwargs)
         if reduce_C_function is not None:
             kwargs['reduce_C_function'] = reduce_C_function
         if gridsize is not None:
@@ -1088,7 +1115,7 @@ class CASTablePlotter(object):
         :class:`matplotlib.AxesSubplot` or :func:`numpy.array` of them.
 
         '''
-        params, kwargs = self._get_plot_params(x=x, y=y, **kwargs)
+        params, kwargs = self._get_plot_params(x=x, y=y, s=s, c=c, **kwargs)
         return self._table._fetch(**params).plot(x, y, s=s, c=c,
                                                  kind='scatter', **kwargs)
 
@@ -1250,7 +1277,12 @@ class CASTable(ParamManager, ActionParamManager):
     getdoc = None
 
     def __init__(self, name, **table_params):
-        ParamManager.__init__(self, name=name, **table_params)
+        if isinstance(name, CASTable):
+            params = name.to_params()
+            params.update(table_params)
+            ParamManager.__init__(self, **params)
+        else:
+            ParamManager.__init__(self, name=name, **table_params)
         ActionParamManager.__init__(self)
         self._pandas_enabled = True
         self._connection = None
@@ -1624,7 +1656,7 @@ class CASTable(ParamManager, ActionParamManager):
 
     def __dir__(self):
         # Short-circuit PyCharm's introspection
-        if 'get_names' in [x.function for x in inspect.stack()]:
+        if 'get_names' in [x[3] for x in inspect.stack()]:
             return ['params']
         try:
             conn = self.get_connection()
@@ -1658,7 +1690,7 @@ class CASTable(ParamManager, ActionParamManager):
         if not cls.table_params or not cls.outtable_params:
             param_names = []
 
-            actinfo = connection._get_action_info('builtins.cascommon')
+            actinfo = connection._get_action_info('builtins.cascommon', levels=100)
 
             for item in actinfo[-1].get('params'):
                 if 'parmList' in item:
@@ -2485,7 +2517,7 @@ class CASTable(ParamManager, ActionParamManager):
 
     def as_matrix(self, columns=None, n=None):
         '''
-        Represent CASTable as a Numpy array 
+        Represent CASTable as a Numpy array
 
         Parameters
         ----------
@@ -2817,7 +2849,7 @@ class CASTable(ParamManager, ActionParamManager):
             A subset of columns to return.
         bygroup_as_index : boolean
             When by_group_index is True, By groups are converted to an index if they exist
-            
+
         Notes
         -----
         Since CAS tables can be distributed across a grid of computers,
@@ -2850,7 +2882,7 @@ class CASTable(ParamManager, ActionParamManager):
             A subset of columns to return.
         bygroup_as_index : boolean
             When by_group_index is True, By groups are converted to an index if they exist
-            
+
         Notes
         -----
         Since CAS tables can be distributed across a grid of computers,
@@ -4418,8 +4450,8 @@ class CASTable(ParamManager, ActionParamManager):
                                  casout=casout, **kwargs)
 
             return self._normalize_percentile_casout(
-                    out['OutputCasTables']['casTable'][0],
-                    single=(stat == 'median' or len(percentile_values) == 1))
+                out['OutputCasTables']['casTable'][0],
+                single=(stat == 'median' or len(percentile_values) == 1))
 
         else:
             summ_stats = ['css', 'cv', 'kurtosis', 'mean',
@@ -4435,7 +4467,7 @@ class CASTable(ParamManager, ActionParamManager):
                                  inputs=inputs, casout=casout, **kwargs)
 
             return self._normalize_summary_casout(
-                    out['OutputCasTables']['casTable'][0], stat)
+                out['OutputCasTables']['casTable'][0], stat)
 
     def _normalize_bygroups(self, drop=None, rename=None):
         '''
@@ -6275,9 +6307,8 @@ class CASTable(ParamManager, ActionParamManager):
 
         dscode = []
         dscode.append('data %s(caslib=%s);' % (_quote(newname), _quote(caslib)))
-        dscode.append('    set %s(caslib=%s);' %
-                       (_quote(self.params.name),
-                        _quote(self.params.get('caslib', default_caslib))))
+        dscode.append('    set %s(caslib=%s);' % (_quote(self.params.name),
+                      _quote(self.params.get('caslib', default_caslib))))
         if isinstance(code, items_types):
             dscode.extend(code)
         else:
@@ -6405,7 +6436,8 @@ class CASTable(ParamManager, ActionParamManager):
         if 'groupby' in kwargs['tables'][0]:
             kwargs['tables'][0].pop('groupby', None)
         groups = self.get_groupby_vars()
-        kwargs['tables'][0]['vars'] = groups + [x for x in self.columns if x not in groups]
+        kwargs['tables'][0]['vars'] = groups + [x for x in self.columns
+                                                if x not in groups]
         out = self._retrieve('table.view', *args, **kwargs)
         if 'caslib' in out and 'viewName' in out:
             conn = self.get_connection()
@@ -6593,8 +6625,8 @@ class CASTable(ParamManager, ActionParamManager):
                 warnings.warn(('Data downloads are limited to %d rows.  '
                                'To change this limit, set '
                                'swat.options.cas.dataset.max_rows_fetched '
-                               'to the desired limit.') % max_rows_fetched,
-                               RuntimeWarning)
+                               'to the desired limit.') %
+                              max_rows_fetched, RuntimeWarning)
 
         # Compute sample percentage as needed
         if sample_pct is None and sample:
@@ -8854,10 +8886,25 @@ class DatetimeColumnMethods(object):
 
     def __init__(self, column):
         self._column = column
-        self._dtype = column.dtype
-        if self._dtype not in ['date', 'datetime', 'time']:
+
+        columninfo = column._columninfo
+
+        self._dtype = columninfo['Type'][0]
+        if self._dtype not in ['date', 'datetime', 'time', 'double']:
             raise TypeError('datetime methods are only usable on CAS dates, '
-                            'times, and datetimes')
+                            'times, datetimes, and doubles')
+
+        fmt = columninfo['Format'][0]
+        if self._dtype == 'double':
+            if is_date_format(fmt):
+                self._dtype = 'sas-date'
+            elif is_datetime_format(fmt):
+                self._dtype = 'sas-datetime'
+            elif is_time_format(fmt):
+                self._dtype = 'sas-time'
+            else:
+                raise TypeError('double columns must have a date, time, or '
+                                'datetime format')
 
     def _compute(self, *args, **kwargs):
         ''' Call the _compute method on the table column '''
@@ -8865,11 +8912,11 @@ class DatetimeColumnMethods(object):
 
     def _get_part(self, func):
         ''' Get the specified part of the datetime '''
-        if self._dtype == 'date':
+        if self._dtype in ['date', 'sas-date']:
             if func in ['hour', 'minute']:
                 return self._compute(func, '0')
             return self._compute(func, '%s({value})' % func)
-        if self._dtype == 'time':
+        if self._dtype in ['time', 'sas-time']:
             if func in ['hour', 'minute']:
                 return self._compute(func, '%s({value})' % func)
             return self._compute(func, '%s(today())' % func)
@@ -8905,14 +8952,14 @@ class DatetimeColumnMethods(object):
     @property
     def second(self):
         ''' The second of the datetime '''
-        if self._dtype == 'date':
+        if self._dtype in ['date', 'sas-date']:
             return self._compute('second', '0')
         return self._compute('second', 'int(second({value}))')
 
     @property
     def microsecond(self):
         ''' The microsecond of the datetime '''
-        if self._dtype == 'date':
+        if self._dtype in ['date', 'sas-date']:
             return self._compute('microsecond', '0')
         return self._compute('microsecond', 'int(mod(second({value}), 1) * 1000000)')
 
@@ -8923,9 +8970,9 @@ class DatetimeColumnMethods(object):
 
     def _get_date(self):
         ''' Return an expression that will return the date only '''
-        if self._dtype == 'date':
+        if self._dtype in ['date', 'sas-date']:
             return '{value}'
-        if self._dtype == 'time':
+        if self._dtype in ['time', 'sas-time']:
             return 'today()'
         return 'datepart({value})'
 
@@ -10487,12 +10534,20 @@ class CASTableGroupBy(object):
 
     def __init__(self, table, by, axis=0, level=None, as_index=True, sort=True,
                  group_keys=True, squeeze=False, **kwargs):
-        self._table = table.copy()
-        self._table.append_groupby(by)
         if isinstance(by, items_types):
             self._by = list(by)
         else:
             self._by = [by]
+
+        new_by = []
+        for item in self._by:
+            if isinstance(item, CASColumn):
+                item = item.name
+            new_by.append(item)
+        by = new_by
+
+        self._table = table.copy()
+        self._table.append_groupby(by)
         self._sort = sort
         self._plot = CASTablePlotter(self._table)
         self._as_index = as_index
@@ -10715,7 +10770,8 @@ class CASTableGroupBy(object):
         '''
         if self._as_index:
             return self._table.value_counts(*args, **kwargs)
-        return self._table.value_counts(*args, **kwargs).reset_index(self.get_groupby_vars())
+        return self._table.value_counts(*args,
+                                        **kwargs).reset_index(self.get_groupby_vars())
 
     def max(self, *args, **kwargs):
         '''

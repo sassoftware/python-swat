@@ -31,16 +31,19 @@ import requests
 import six
 import ssl
 import sys
+import time
+import urllib3
 from six.moves import urllib
 from .message import REST_CASMessage
 from .response import REST_CASResponse
 from ..types import blob
 from ..table import CASTable
-from ...config import options, get_option
+from ...config import get_option
 from ...exceptions import SWATError
+from ...logging import logger
 from ...utils.args import parsesoptions
 from ...utils.keyword import keywordify
-from ...utils.compat import (a2u, int_types, int32_types, int64_types, dict_types,
+from ...utils.compat import (a2u, a2b, int_types, int32_types, int64_types, dict_types,
                              float64_types, items_types, int32, int64, float64)
 from ...utils.authinfo import query_authinfo
 
@@ -62,7 +65,7 @@ def _print_request(rtype, url, headers, data=None):
 
 
 def _print_response(text):
-    ''' Print the respnose for debugging '''
+    ''' Print the response for debugging '''
     sys.stderr.write(a2u(text, 'utf-8'))
     sys.stderr.write('\n')
 
@@ -113,7 +116,7 @@ def _normalize_params(params):
 
     '''
     out = {}
-    for key, value in params.items():
+    for key, value in sorted(params.items(), key=lambda x: '%s' % x[0]):
         key = keywordify(key)
         if value is None:
             continue
@@ -172,6 +175,24 @@ class SSLContextAdapter(requests.adapters.HTTPAdapter):
                                                                **pool_kwargs)
 
 
+def _setup_ssl(req_sess):
+    ''' Configure a Requests session for SSL '''
+    if os.environ.get('SSLREQCERT', 'y').lower() in ['n', 'no', '0',
+                                                     'f', 'false', 'off']:
+        req_sess.verify = False
+    elif 'CAS_CLIENT_SSL_CA_LIST' in os.environ:
+        req_sess.verify = os.path.expanduser(
+            os.environ['CAS_CLIENT_SSL_CA_LIST'])
+    elif 'SAS_TRUSTED_CA_CERTIFICATES_PEM_FILE' in os.environ:
+        req_sess.verify = os.path.expanduser(
+            os.environ['SAS_TRUSTED_CA_CERTIFICATES_PEM_FILE'])
+    elif 'SSLCALISTLOC' in os.environ:
+        req_sess.verify = os.path.expanduser(
+            os.environ['SSLCALISTLOC'])
+    elif 'REQUESTS_CA_BUNDLE' not in os.environ:
+        req_sess.mount('https://', SSLContextAdapter())
+
+
 class REST_CASConnection(object):
     '''
     Create a REST CAS connection
@@ -199,6 +220,8 @@ class REST_CASConnection(object):
 
     def __init__(self, hostname, port, username, password, soptions, error):
 
+        logger.debug('Creating REST connection for user {} at {} with options {}'
+                     .format(username, hostname, soptions))
         _soptions = parsesoptions(soptions)
         protocol = _soptions.get('protocol', 'http')
         session = _soptions.get('session')
@@ -238,6 +261,10 @@ class REST_CASConnection(object):
                 self._hostname.append(host)
                 self._port.append(port)
 
+        for i, item in enumerate(self._baseurl):
+            if not item.endswith('/'):
+                self._baseurl[i] = '%s/' % self._baseurl[i]
+
         self._host_index = 0
         self._current_hostname = self._hostname[self._host_index]
         self._current_baseurl = self._baseurl[self._host_index]
@@ -264,110 +291,143 @@ class REST_CASConnection(object):
         self._error = error
         self._results = None
 
-        self._auth = b'Basic ' + base64.b64encode(
-            ('%s:%s' % (username, password)).encode('utf-8')).strip()
+        if username and password:
+            logger.debug('Using Basic authentication')
+            self._auth = b'Basic ' + base64.b64encode(
+                ('%s:%s' % (username, password)).encode('utf-8')).strip()
+        elif password:
+            logger.debug('Using Bearer token authentication')
+            self._auth = b'Bearer ' + a2b(password).strip()
+        else:
+            raise SWATError('Either username and password, or OAuth token in the '
+                            'password parameter must be specified.')
 
         self._req_sess = requests.Session()
 
-        if 'SSLCALISTLOC' in os.environ:
-            self._req_sess.verify = os.path.expanduser(os.environ['SSLCALISTLOC'])
-        elif 'CAS_CLIENT_SSL_CA_LIST' in os.environ:
-            self._req_sess.verify = os.path.expanduser(os.environ['CAS_CLIENT_SSL_CA_LIST'])
-        elif 'REQUESTS_CA_BUNDLE' not in os.environ:
-            self._req_sess.mount('https://', SSLContextAdapter())
-
-        if os.environ.get('SSLREQCERT', 'y').lower().startswith('n'):
-            self._req_sess.verify = False
+        _setup_ssl(self._req_sess)
 
         self._req_sess.headers.update({
+            'Accept': 'application/json',
             'Content-Type': 'application/json',
             'Content-Length': '0',
             'Authorization': self._auth,
         })
 
+        self._connect(session=session, locale=locale, wait_until_idle=False)
+
+    def _connect(self, session=None, locale=None, wait_until_idle=True):
+        '''
+        Connect to CAS server
+
+        Parameters
+        ----------
+        session : string, optional
+            Session ID to connect to
+        locale : string, optional
+            Locale of the session.  Only used if a new session is
+            being created.
+        wait_until_idle : bool, optional
+            Wait until the session is idle before returning?
+
+        Returns
+        -------
+        dict
+
+        '''
+        connection_retries = get_option('cas.connection_retries')
+        connection_retry_interval = get_option('cas.connection_retry_interval')
+        num_retries = 0
+
         while True:
             try:
-                if session:
-                    url = urllib.parse.urljoin(self._current_baseurl,
-                                               'cas/sessions/%s' % session)
+                url = urllib.parse.urljoin(self._current_baseurl,
+                                           'cas/sessions')
+                params = {}
 
+                if session:
+                    url = '{}/{}'.format(url, session)
                     if get_option('cas.debug.requests'):
                         _print_request('GET', url, self._req_sess.headers)
+                    logger.debug('Reconnecting to session at {}'.format(url))
 
-                    res = self._req_sess.get(url, data=b'')
-
-                    if 'tkhttp-id' in res.cookies:
-                        self._req_sess.headers.update({
-                            'tkhttp-id': res.cookies['tkhttp-id'].strip()
-                        })
-
-                    if get_option('cas.debug.responses'):
-                        _print_response(res.text)
-
-                    try:
-                        txt = a2u(res.text, 'utf-8')
-                        out = json.loads(txt, strict=False)
-                    except Exception:
-                        sys.stderr.write(txt)
-                        sys.stderr.write('\n')
-                        raise
-
-                    if out.get('error', None):
-                        if out.get('details', None):
-                            raise SWATError('%s (%s)' % (out['error'], out['details']))
-                        raise SWATError(out['error'])
-
-                    self._session = out['uuid']
-                    break
+                    get_retries = 0
+                    while get_retries < connection_retries:
+                        res = self._req_sess.get(url, data=b'')
+                        if res.status_code == 502:
+                            logger.debug('HTTP 502 error, retrying...')
+                            time.sleep(connection_retry_interval)
+                            get_retries += 1
+                            continue
+                        break
 
                 else:
-                    url = urllib.parse.urljoin(self._current_baseurl,
-                                               'cas/sessions')
-
                     if get_option('cas.debug.requests'):
                         _print_request('PUT', url, self._req_sess.headers)
+                    if locale:
+                        params['locale'] = locale
+                    logger.debug('Creating new session at {} with parms {}'
+                                 .format(url, params))
 
-                    res = self._req_sess.put(url, data=b'')
+                    put_retries = 0
+                    while put_retries < connection_retries:
+                        res = self._req_sess.put(url, data=b'', params=params)
+                        if res.status_code == 502:
+                            logger.debug('HTTP 502 error, retrying...')
+                            time.sleep(connection_retry_interval)
+                            put_retries += 1
+                            continue
+                        break
 
-                    if 'tkhttp-id' in res.cookies:
-                        self._req_sess.headers.update({
-                            'tkhttp-id': res.cookies['tkhttp-id'].strip()
-                        })
+                if 'tkhttp-id' in res.cookies:
+                    self._req_sess.headers.update({
+                        'tkhttp-id': res.cookies['tkhttp-id'].strip()
+                    })
 
-                    if get_option('cas.debug.responses'):
-                        _print_response(res.text)
+                if get_option('cas.debug.responses'):
+                    _print_response(res.text)
 
-                    try:
-                        txt = a2u(res.text, 'utf-8')
-                        out = json.loads(txt, strict=False)
-                    except Exception:
-                        sys.stderr.write(txt)
-                        sys.stderr.write('\n')
-                        raise
+                try:
+                    txt = a2u(res.text, 'utf-8')
+                    out = json.loads(txt, strict=False)
+                except Exception:
+                    sys.stderr.write(txt)
+                    sys.stderr.write('\n')
+                    raise
 
-                    if out.get('error', None):
-                        if out.get('details', None):
-                            raise SWATError('%s (%s)' % (out['error'], out['details']))
-                        raise SWATError(out['error'])
+                if out.get('error', None):
+                    if out.get('details', None):
+                        raise SWATError('%s (%s)' % (out['error'], out['details']))
+                    raise SWATError(out['error'])
 
+                if session:
+                    self._session = out['uuid']
+                else:
                     self._session = out['session']
 
-                    if locale:
-                        self.invoke('session.setlocale', dict(locale=locale))
-                        if self._results.get('disposition', {})\
-                                .get('severity', '') == 'Error':
-                            raise SWATError(self._results.get('disposition', {})
-                                            .get('formattedStatus',
-                                                 'Invalid locale: %s' % locale))
-                        self._results.clear()
+                logger.debug('Connection succeeded to {}'.format(url))
 
-                    break
+                break
 
-            except requests.ConnectionError:
-                self._set_next_connection()
+            except (requests.ConnectionError, urllib3.exceptions.ProtocolError):
+                logger.debug('Connection error, retrying...')
+                if num_retries > connection_retries:
+                    self._set_next_connection()
+                    num_retries = 0
+                else:
+                    time.sleep(connection_retry_interval)
+                    num_retries += 1
+
+            except KeyError:
+                raise SWATError(str(out))
 
             except Exception as exc:
                 raise SWATError(str(exc))
+
+            except SWATError:
+                raise
+
+        if wait_until_idle:
+            self._wait_until_idle()
 
     def _set_next_connection(self):
         ''' Iterate to the next available controller '''
@@ -380,8 +440,35 @@ class REST_CASConnection(object):
             self._current_hostname = ''
             self._current_baseurl = ''
             self._current_port = -1
-            raise SWATError('Unable to connect to any URL: %s' %
+            raise SWATError('Unable to connect to any URL in the list: %s' %
                             ', '.join(self._baseurl))
+
+    def _wait_until_idle(self):
+        ''' Wait loop to check for idle connection '''
+        connection_retries = get_option('cas.connection_retries')
+        connection_retry_interval = get_option('cas.connection_retry_interval')
+        num_retries = 0
+
+        while True:
+            try:
+                url = urllib.parse.urljoin(self._current_baseurl,
+                                           'cas/sessions/%s' % self._session)
+                logger.debug('Checking for idle session: {}'
+                             .format(self._session))
+                out = self._req_sess.get(url).json()
+                if out.get('isIdle', False):
+                    logger.debug('Session {} is idle'.format(self._session))
+                    break
+
+            except requests.ConnectionError:
+                if num_retries > connection_retries:
+                    self._set_next_connection()
+                    num_retries = 0
+                logger.debug('Waiting for controller at {}'
+                             .format(self._current_baseurl))
+                num_retries += 1
+
+            time.sleep(connection_retry_interval)
 
     def invoke(self, action_name, kwargs):
         '''
@@ -402,19 +489,23 @@ class REST_CASConnection(object):
         is_ui = kwargs.get('_apptag', '') == 'UI'
         kwargs = json.dumps(_normalize_params(kwargs))
 
-        if options.cas.trace_actions and \
-                (not(is_ui) or (is_ui and options.cas.trace_ui_actions)):
+        if get_option('cas.trace_actions') and \
+                (not(is_ui) or (is_ui and get_option('cas.trace_ui_actions'))):
             print('[%s]' % action_name)
             _print_params(json.loads(kwargs), prefix='    ')
             print('')
 
         post_data = a2u(kwargs).encode('utf-8')
         self._req_sess.headers.update({
+            'Accept': 'application/json',
             'Content-Type': 'application/json',
             'Content-Length': str(len(post_data)),
         })
 
         result_id = None
+
+        connection_retries = get_option('cas.connection_retries')
+        connection_retry_interval = get_option('cas.connection_retry_interval')
 
         txt = ''
         while True:
@@ -423,19 +514,27 @@ class REST_CASConnection(object):
                                            'cas/sessions/%s/actions/%s' %
                                            (self._session, action_name))
 
+                logger.debug('POST {} {}'.format(url, post_data))
                 if get_option('cas.debug.requests'):
                     _print_request('POST', url, self._req_sess.headers, post_data)
 
-                res = self._req_sess.post(url, data=post_data)
+                post_retries = 0
+                while post_retries < connection_retries:
+                    res = self._req_sess.post(url, data=post_data)
+                    if res.status_code == 502:
+                        logger.debug('HTTP 502 error code, retrying...')
+                        time.sleep(connection_retry_interval)
+                        post_retries += 1
+                        continue
+                    break
 
                 if get_option('cas.debug.responses'):
                     _print_response(res.text)
 
-                res = res.text
                 break
 
-            except requests.ConnectionError:
-                self._set_next_connection()
+            except (requests.ConnectionError, urllib3.exceptions.ProtocolError):
+                self._connect(session=self._session)
 
                 # Get ID of results
                 action_name = 'session.listresults'
@@ -449,10 +548,20 @@ class REST_CASConnection(object):
                                            'cas/sessions/%s/actions/%s' %
                                            (self._session, action_name))
 
+                logger.debug('POST {} {}'.format(url, post_data))
                 if get_option('cas.debug.requests'):
-                    _print_request('POST', url, self._req_sess.headers, post_data)
+                    _print_request('POST', url, self._req_sess.headers,
+                                   post_data)
 
-                res = self._req_sess.post(url, data=post_data)
+                post_retries = 0
+                while post_retries < connection_retries:
+                    res = self._req_sess.post(url, data=post_data)
+                    if res.status_code == 502:
+                        logger.debug('HTTP 502 error code, retrying...')
+                        time.sleep(connection_retry_interval)
+                        post_retries += 1
+                        continue
+                    break
 
                 if get_option('cas.debug.responses'):
                     _print_response(res.text)
@@ -465,31 +574,64 @@ class REST_CASConnection(object):
                     sys.stderr.write('\n')
                     raise
 
-                result_id = out['results']['Queued Results']['rows'][0][0]
+                if out.get('results'):
+                    logger.debug('Queued results: {}'.format(out['results']))
+                else:
+                    logger.debug('No queued results')
 
-                # Setup retrieval of results from ID
-                action_name = 'session.fetchresult'
-                post_data = a2u('{"id":%s}' % result_id).encode('utf-8')
-                self._req_sess.headers.update({
-                    'Content-Type': 'application/json',
-                    'Content-Length': str(len(post_data)),
-                })
+                results = out.get('results', {'Queued Results': {'rows': []}})
+                rows = results.get('Queued Results', {'rows': []})['rows']
+                if rows:
+                    result_id = rows[0][0]
+
+                    # Setup retrieval of results from ID
+                    action_name = 'session.fetchresult'
+                    post_data = a2u('{"id":%s}' % result_id).encode('utf-8')
+                    self._req_sess.headers.update({
+                        'Content-Type': 'application/json',
+                        'Content-Length': str(len(post_data)),
+                    })
+
+                    if get_option('cas.debug.requests'):
+                        _print_request('POST', url, self._req_sess.headers,
+                                       post_data)
+
+                    post_retries = 0
+                    while post_retries < connection_retries:
+                        res = self._req_sess.post(url, data=post_data)
+                        if res.status_code == 502:
+                            logger.debug('HTTP 502 error code, retrying...')
+                            time.sleep(connection_retry_interval)
+                            post_retries += 1
+                            continue
+                        break
+
+                    if get_option('cas.debug.responses'):
+                        _print_response(res.text)
+
+                    break
+
+                else:
+                    raise SWATError('Could not retrieve results of action call')
 
             except Exception as exc:
                 raise SWATError(str(exc))
 
         try:
-            txt = a2u(res, 'utf-8')
+            txt = a2u(res.text, 'utf-8')
             self._results = json.loads(txt, strict=False)
         except Exception:
-            sys.stderr.write(txt)
+            sys.stderr.write(res.text)
             sys.stderr.write('\n')
             raise
 
         try:
             if self._results.get('disposition', None) is None:
                 if self._results.get('error'):
-                    raise SWATError(self._results['error'])
+                    msg = self._results['error']
+                    if self._results.get('details'):
+                        msg = '{}: {}'.format(msg, self._results['details'])
+                    raise SWATError(msg)
                 else:
                     raise SWATError('Unknown error')
         except ValueError as exc:
@@ -533,7 +675,8 @@ class REST_CASConnection(object):
 
     def copy(self):
         ''' Copy the connection object '''
-        username, password = base64.b64decode(self._auth.split(b' ', 1)[-1]).split(b':', 1)
+        username, password = base64.b64decode(
+            self._auth.split(b' ', 1)[-1]).split(b':', 1)
         return type(self)(self._orig_hostname, self._orig_port,
                           a2u(username), a2u(password),
                           self._soptions,
@@ -557,22 +700,12 @@ class REST_CASConnection(object):
 
     def close(self):
         ''' Close the connection '''
-        if self._session and self._req_sess is not None:
-            self._req_sess.headers.update({
-                'Content-Type': 'application/json',
-                'Content-Length': '0',
-            })
+        self._session = None
+        if self._req_sess is not None:
+            self._req_sess.close()
 
-            url = urllib.parse.urljoin(self._current_baseurl,
-                                       'cas/sessions/%s' % self._session)
-
-            if get_option('cas.debug.requests'):
-                _print_request('DELETE', url, self._req_sess.headers)
-
-            res = self._req_sess.delete(url, data=b'')
-
-            self._session = None
-            return res.status_code
+    def __del__(self):
+        self.close()
 
     def upload(self, file_name, params):
         ''' Upload a data file '''
@@ -580,6 +713,7 @@ class REST_CASConnection(object):
             data = datafile.read()
 
         self._req_sess.headers.update({
+            'Accept': 'application/json',
             'Content-Type': 'application/octet-stream',
             'Content-Length': str(len(data)),
             'JSON-Parameters': json.dumps(_normalize_params(params))

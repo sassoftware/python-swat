@@ -27,16 +27,21 @@ import collections
 import contextlib
 import copy
 import inspect
+import itertools
 import json
 import os
 import random
 import re
-import weakref
+import requests
 import six
+import warnings
+import weakref
+from six.moves.urllib.parse import urlparse, urlencode, urljoin
 from . import rest
 from .. import clib
 from .. import config as cf
 from ..exceptions import SWATError, SWATCASActionError, SWATCASActionRetry
+from ..logging import logger
 from ..utils.config import subscribe, get_option
 from ..clib import errorcheck
 from ..utils.compat import (a2u, a2n, int32, int64, float64, text_types,
@@ -138,15 +143,21 @@ class CAS(object):
     Parameters
     ----------
     hostname : string or list-of-strings, optional
-        Host to connect to.  If not specified, the value will come
-        from the ``cas.hostname`` option or ``CASHOST`` environment variable.
+        Host or URL to connect to.  This parameter can also be specified
+        by a ``CAS_URL`` or ``CAS_HOST`` environment variable.
     port : int or long, optional
         Port number.  If not specified, the value will come from the
-        ``cas.port`` option or ``CASPORT`` environment variable.
+        ``cas.port`` option or ``CAS_PORT`` environment variable.
+        If a URL is specified in the first parameter, that port number
+        will be used.
     username : string, optional
-        Name of user on CAS host.
+        Name of user on CAS host.  This parameter can also be specified
+        in a ``CAS_USER`` environment variable.
     password : string, optional
-        Password of user on CAS host.
+        Password of user on CAS host or OAuth token.  If an OAuth token
+        is specified, the `username` parameter should be None.
+        This parameter can also be specified in a ``CAS_PASSWORD``
+        or ``CAS_TOKEN`` environment variable.
     session : string, optional
         ID of existing session to reconnect to.
     locale : string, optional
@@ -161,8 +172,14 @@ class CAS(object):
     protocol : string, optional
         The protocol to use for communicating with the server.
         This protocol must match the protocol spoken by the specified
-        server port.  If not specified, the value will come from the
-        ``cas.protocol`` option or ``CASPROTOCOL`` environment variable.
+        server port.  If the first parameter is a URL, that protocol will
+        be used.
+    path : string, optional
+        Base path of URL when using the REST protocol.
+    ssl_ca_list : string, optional
+        The path to the SSL certificates for the CAS server.
+    authcode : string, optional
+        Authorization code from SASLogon used to retrieve an OAuth token.
     **kwargs : any, optional
         Arbitrary keyword arguments used for internal purposes only.
 
@@ -182,91 +199,214 @@ class CAS(object):
     an example specifying a single hostname, and username and password as
     strings.
 
-    >>> conn = swat.CAS('mycashost.com', 12345, 'username', 'password')
+    >>> conn = swat.CAS('mycashost.com', 5570, 'username', 'password')
 
     If you use an authinfo file and it is in your home directory, you don't
     have to specify any username or password.  You can override the authinfo
     file location with the authinfo= parameter.  This form also works for
     Kerberos authentication.
 
-    >>> conn = swat.CAS('mycashost.com', 12345)
+    >>> conn = swat.CAS('mycashost.com', 5570)
 
     If you specify multiple hostnames, it will connect to the first available
     server in the list.
 
     >>> conn = swat.CAS(['mycashost1.com', 'mycashost2.com', 'mycashost3.com'],
-                        12345, 'username', 'password')
+                        5570, 'username', 'password')
+
+    URLs can also be used for both binary and REST protocols.  Notice that
+    you need to specify the username= and password= keywords since the
+    port number is skipped.
+
+    >>> conn = swat.CAS('cas://mycashost1.com:5570',
+    ...                 username='username', password='password')
+    >>> conn = swat.CAS('http://mycashost1.com:80',
+    ...                 username='username', password='password')
 
     To connect to an existing CAS session, you specify the session identifier.
 
-    >>> conn = swat.CAS('mycashost.com', 12345,
-                        session='ABCDEF12-ABCD-EFG1-2345-ABCDEF123456')
+    >>> conn = swat.CAS('mycashost.com', 5570,
+    ...                 session='ABCDEF12-ABCD-EFG1-2345-ABCDEF123456')
 
     If you wish to change the locale used on the server, you can use the
     locale= option.
 
-    >>> conn = swat.CAS('mycashost.com', 12345, locale='es_US')
+    >>> conn = swat.CAS('mycashost.com', 5570, locale='es_US')
 
     To limit the number of worker nodes in a grid, you use the nworkers=
     parameter.
 
-    >>> conn = swat.CAS('mycashost.com', 12345, nworkers=4)
+    >>> conn = swat.CAS('mycashost.com', 5570, nworkers=4)
 
     '''
     trait_names = None  # Block IPython's query for this
     sessions = weakref.WeakValueDictionary()
     _sessioncount = 1
 
+    @classmethod
+    def _expand_url(cls, url):
+        ''' Expand [...] groups in URL to all linear combinations '''
+        if not isinstance(url, items_types):
+            url = [url]
+
+        out = []
+
+        for item in url:
+            parts = [x for x in re.split(r'(?:\[|\])', item) if x]
+
+            for i, part in enumerate(parts):
+                if ',' in part:
+                    parts[i] = re.split(r'\s*,\s*', part)
+#               elif re.match(r'^\d+\-\d+$', part):
+#                   start, end = part.split('-')
+#                   width = len(start)
+#                   start = int(start)
+#                   end = int(end)
+#                   parts[i] = [('%%0%sd' % width) % x for x in range(start, end+1)]
+                else:
+                    parts[i] = [part]
+
+            out += list(''.join(x) for x in itertools.product(*parts))
+
+        return out
+
+    @classmethod
+    def _get_connection_info(cls, hostname, port, username, password, protocol, path):
+        ''' Distill connection information from parameters, config, and environment '''
+
+        # Get defaults from config, if needed
+        username = username or cf.get_option('cas.username')
+        password = password or cf.get_option('cas.token')
+        protocol = protocol or cf.get_option('cas.protocol')
+        hostname = hostname or cf.get_option('cas.hostname')
+        port = port or cf.get_option('cas.port')
+
+        logger.debug('Connection info: hostname=%s port=%s protocol=%s '
+                     'username=%s password=%s path=%s',
+                     hostname, port, protocol, username, password, path)
+
+        # Always make hostname a list
+        if not isinstance(hostname, items_types):
+            hostname = re.split(r'\s+', re.sub(r'\s*,\s*', r',', hostname.strip()))
+        else:
+            hostname = [re.sub(r'\s*,\s*', r',', x.strip()) for x in hostname]
+
+        # Check hostname for other components
+        new_hostname = []
+        for name in hostname:
+            if not re.match(r'^\w+://', hostname[0]):
+                new_hostname.append('%s://%s' % (protocol, name))
+            else:
+                new_hostname.append(name)
+
+        hostname = cls._expand_url(new_hostname)
+        urlp = urlparse(hostname[0])
+        protocol = urlp.scheme or protocol
+        hostname = [urlparse(x).hostname for x in hostname]
+        port = urlp.port or port
+        username = urlp.username or username
+        password = urlp.password or password
+        path = urlp.path or path
+
+        # Set port based on protocol, if port number is missing
+        if not port:
+            if protocol == 'http':
+                port = 80
+            elif protocol == 'https':
+                port = 443
+            elif protocol == 'cas':
+                port = 5570
+            else:
+                raise SWATError('Port number was not specified')
+
+        # Auto-detect protocol if still missing
+        if protocol == 'auto':
+            protocol = cls._detect_protocol(hostname, port, protocol=protocol)
+
+        if protocol not in ['http', 'https', 'cas']:
+            raise SWATError('Unrecognized protocol: %s' % protocol)
+
+        # For http(s), construct URLs
+        if protocol.startswith('http'):
+            urls = []
+            for name in hostname:
+                url = '%s://%s:%s' % (protocol, name, port)
+                if path:
+                    url = '%s/%s' % (url, re.sub(r'^/+', r'', path))
+                urls.append(url)
+            hostname = ' '.join(urls)
+            logger.debug('Distilled connection parameters: '
+                         "url='%s' username=%s", urls, username)
+
+        else:
+            hostname = ' '.join(hostname)
+            logger.debug('Distilled connection parameters: '
+                         "hostname='%s' port=%s, username=%s, protocol=%s",
+                         hostname, port, username, protocol)
+
+        return a2n(hostname), int(port), a2n(username), a2n(password), a2n(protocol)
+
     def __init__(self, hostname=None, port=None, username=None, password=None,
                  session=None, locale=None, nworkers=None, name=None,
-                 authinfo=None, protocol=None, **kwargs):
+                 authinfo=None, protocol=None, path=None, ssl_ca_list=None,
+                 authcode=None, **kwargs):
+
+        # Filter session options allowed as parameters
+        _kwargs = {}
+        sess_opts = {}
+        for k, v in kwargs.items():
+            if k.lower() in ['caslib', 'metrics', 'timeout', 'timezone']:
+                sess_opts[k] = v
+            else:
+                _kwargs[k] = v
+        kwargs = _kwargs
+
+        # Check for unknown connection parameters
+        unknown_keys = [k for k in kwargs if k not in ['prototype']]
+        if unknown_keys:
+            warnings.warn('Unrecognized keys in connection parameters: %s' %
+                          ', '.join(unknown_keys))
+
+        # Check for SSL certificate
+        if ssl_ca_list is None:
+            ssl_ca_list = cf.get_option('cas.ssl_ca_list')
+        if ssl_ca_list:
+            logger.debug('Using certificate file: %s', ssl_ca_list)
+            os.environ['CAS_CLIENT_SSL_CA_LIST'] = ssl_ca_list
 
         # Check for explicitly specified authinfo files
         if authinfo is not None:
             if not any_file_exists(authinfo):
-                if isinstance(authinfo, items_types):
-                    raise OSError('None of the specified authinfo files '
-                                  'exist: %s' % ', '.join(authinfo))
-                else:
-                    raise OSError('The specified authinfo file does not '
-                                  'exist: %s' % authinfo)
+                if not isinstance(authinfo, items_types):
+                    authinfo = [authinfo]
+                raise OSError('None of the specified authinfo files from'
+                              'list exist: %s' % ', '.join(authinfo))
 
         # If a prototype exists, use it for the connection config
         prototype = kwargs.get('prototype')
         if prototype is not None:
-            soptions = prototype._soptions
-            protocol = prototype._protocol
-
+            soptions = a2n(prototype._soptions)
+            protocol = a2n(prototype._protocol)
         else:
-            # Get connection parameters from config
-            if hostname is None:
-                hostname = cf.get_option('cas.hostname')
-            if port is None:
-                port = cf.get_option('cas.port')
+            # Distill connection information from parameters, config, and environment
+            hostname, port, username, password, protocol = \
+                self._get_connection_info(hostname, port, username,
+                                          password, protocol, path)
+            soptions = a2n(getsoptions(session=session, locale=locale,
+                                       nworkers=nworkers, protocol=protocol))
 
-            # Detect protocol
-            if (isinstance(hostname, items_types)
-                    and (hostname[0].startswith('http:')
-                         or hostname[0].startswith('https:'))):
-                protocol = hostname[0].split(':', 1)[0]
-
-            elif (isinstance(hostname, six.string_types)
-                  and (hostname.startswith('http:')
-                       or hostname.startswith('https:'))):
-                protocol = hostname.split(':', 1)[0]
-
-            else:
-                protocol = self._detect_protocol(hostname, port, protocol=protocol)
-
-            soptions = getsoptions(session=session, locale=locale,
-                                   nworkers=nworkers, protocol=protocol)
+            # Check for authcode authentication
+            authcode = authcode or cf.get_option('cas.authcode')
+            if protocol in ['http', 'https'] and authcode:
+                username = None
+                password = type(self)._get_token(authcode=authcode, url=hostname)
 
         # Create error handler
         try:
             if protocol in ['http', 'https']:
-                self._sw_error = rest.REST_CASError(a2n(soptions))
+                self._sw_error = rest.REST_CASError(soptions)
             else:
-                self._sw_error = clib.SW_CASError(a2n(soptions))
+                self._sw_error = clib.SW_CASError(soptions)
         except SystemError:
             raise SWATError('Could not create CAS error handler object. '
                             'Check your SAS TK path setting.')
@@ -280,13 +420,6 @@ class CAS(object):
 
             # Create a new connection
             else:
-                # Set up hostnames
-                if (protocol not in ['http', 'https']
-                        and isinstance(hostname, items_types)):
-                    hostname = a2n(' '.join(a2n(x) for x in hostname if x))
-                elif isinstance(hostname, six.string_types):
-                    hostname = a2n(hostname)
-
                 # Set up authinfo paths
                 if authinfo is not None and password is None:
                     password = ''
@@ -297,8 +430,7 @@ class CAS(object):
                     password = 'authinfo={%s}' % password
 
                 # Set up connection parameters
-                params = (hostname, int(port), a2n(username), a2n(password),
-                          a2n(soptions), self._sw_error)
+                params = (hostname, port, username, password, soptions, self._sw_error)
                 if protocol in ['http', 'https']:
                     self._sw_connection = rest.REST_CASConnection(*params)
                 else:
@@ -340,18 +472,24 @@ class CAS(object):
         # Dictionary of result hook functions
         self._results_hooks = {}
 
+        # Get server attributes
+        (self.server_type,
+         self.server_version,
+         self.server_features) = self._get_server_features()
+
         # Preload __dir__ information.  It will be extended later with action names
         self._dir = set([x for x in super_dir(CAS, self)])
 
         # Pre-populate action set attributes
-        for asname, value in self.retrieve('builtins.help',
-                                           showhidden=True,
-                                           _messagelevel='error',
-                                           _apptag='UI').items():
+        for asname, value in self._raw_retrieve('builtins.help',
+                                                showhidden=True,
+                                                _messagelevel='error',
+                                                _apptag='UI').items():
             self._actionset_classes[asname.lower()] = None
-            for actname in value['name']:
-                self._action_classes[asname.lower() + '.' + actname.lower()] = None
-                self._action_classes[actname.lower()] = None
+            if value is not None:
+                for actname in value['name']:
+                    self._action_classes[asname.lower() + '.' + actname.lower()] = None
+                    self._action_classes[actname.lower()] = None
 
         # Populate CASTable documentation and method signatures
         CASTable._bootstrap(self)
@@ -369,11 +507,13 @@ class CAS(object):
         self.add_results_hook('builtins.loadactionset', handle_loadactionset)
 
         # Set the session name
-        for resp in self._invoke_without_signature('session.sessionname',
-                                                   name=self._name,
-                                                   _messagelevel='error',
-                                                   _apptag='UI'):
-            pass
+        self._raw_retrieve('session.sessionname', name=self._name,
+                           _messagelevel='error', _apptag='UI')
+
+        # Set session options
+        if sess_opts:
+            self._raw_retrieve('sessionprop.setsessopt', _messagelevel='error',
+                               _apptag='UI', **sess_opts)
 
         # Set options
         self._set_option(print_messages=cf.get_option('cas.print_messages'))
@@ -392,9 +532,41 @@ class CAS(object):
                 num = num + 1
         self._id_generator = _id_generator()
 
-        (self.server_type,
-         self.server_version,
-         self.server_features) = self._get_server_features()
+    @classmethod
+    def _get_token(cls, username=None, password=None, authcode=None,
+                   client_id=None, client_secret=None, url=None):
+        ''' Retrieve token from Viya installation '''
+        from .rest.connection import _print_request, _setup_ssl
+
+        with requests.Session() as req_sess:
+
+            _setup_ssl(req_sess)
+
+            req_sess.headers.update({'Accept': 'application/vnd.sas.compute.session+json',
+                                     'Content-Type': 'application/x-www-form-urlencoded'})
+
+            client_id = client_id or cf.get_option('cas.client_id') or 'SWAT'
+
+            authcode = authcode or cf.get_option('cas.authcode')
+            if authcode:
+                client_secret = client_secret or cf.get_option('cas.client_secret') or ''
+                body = {'grant_type': 'authorization_code', 'code': authcode,
+                        'client_id': client_id, 'client_secret': client_secret}
+            else:
+                username = username or cf.get_option('cas.username')
+                password = password or cf.get_option('cas.token')
+                body = {'grant_type': 'password', 'username': username,
+                        'password': password}
+
+            resp = req_sess.post(urljoin(url, '/SASLogon/oauth/token'),
+                                 auth=(client_id, ''),
+                                 data=urlencode(body))
+
+            if resp.status_code >= 300:
+                raise SWATError('Token request resulted in a status of %s' %
+                                resp.status_code)
+
+            return resp.json()['access_token']
 
     def _gen_id(self):
         ''' Generate an ID unique to the session '''
@@ -412,17 +584,24 @@ class CAS(object):
         '''
         out = set()
 
-        info = self.retrieve('builtins.serverstatus', _messagelevel='error',
-                             _apptag='UI')
+        info = self._raw_retrieve('builtins.serverstatus', _messagelevel='error',
+                                  _apptag='UI')
         version = tuple([int(x) for x in info['About']['Version'].split('.')][:2])
         stype = info['About']['System']['OS Name'].lower()
 
-#       if version >= (3, 4):
-#           out.add('csv-ints')
+        # Check for reflection levels feature
+        kwargs = {}
+        if version >= (3, 5):
+            kwargs['showlabels'] = False
+        res = self._raw_retrieve('builtins.reflect', _messagelevel='error',
+                                 _apptag='UI', action='builtins.reflect', **kwargs)
+        if [x for x in res[0]['actions'][0]['params'] if x['name'] == 'levels']:
+            out.add('reflection-levels')
 
         return stype, version, out
 
-    def _detect_protocol(self, hostname, port, protocol=None):
+    @classmethod
+    def _detect_protocol(cls, hostname, port, protocol=None, timeout=3):
         '''
         Detect the protocol type for the given host and port
 
@@ -434,11 +613,13 @@ class CAS(object):
             The CAS port to connect to.
         protocol : string, optional
             The protocol override value.
+        timeout : int, optional
+            Timeout (in seconds) for checking a protocol
 
         Returns
         -------
         string
-            'cas' or 'http'
+            'cas', 'http', or 'https'
 
         '''
         if protocol is None:
@@ -447,41 +628,131 @@ class CAS(object):
         if isinstance(hostname, six.string_types):
             hostname = re.split(r'\s+', hostname.strip())
 
+        if protocol != 'auto':
+            logger.debug('Protocol specified explicitly: %s' % protocol)
+
         # Try to detect the proper protocol
+
         if protocol == 'auto':
-
+            try:
+                import queue
+            except ImportError:
+                import Queue as queue
             import socket
+            import ssl
+            import threading
 
-#           for ptype in ['http', 'https']:
             for host in hostname:
-                for ptype in ['http']:
-                    try:
-                        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                        sock.settimeout(10)
-                        sock.connect((host, port))
-                        sock.send(('GET /cas HTTP/1.1\r\n'
-                                   + ('Host: %s\r\n' % host)
-                                   + 'Connection: close\r\n'
-                                   + 'User-Agent: Python-SWAT\r\n'
-                                   + 'Cache-Control: no-cache\r\n\r\n').encode('utf8'))
 
-                        if sock.recv(4).decode('utf-8').lower() == 'http':
-                            protocol = ptype
-                            break
+                out = queue.Queue()
+
+                logger.debug('Attempting protocol auto-detect on %s:%s', host, port)
+
+                def check_cas_protocol():
+                    ''' Test port for CAS (binary) support '''
+                    proto = None
+                    try:
+                        cas_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                        cas_socket.settimeout(timeout)
+                        cas_socket.connect((host, port))
+                        cas_socket.sendall(bytearray([0, 0x53, 0x41, 0x43,
+                                                      0x10, 0, 0, 0, 0, 0, 0, 0,
+                                                      0x10, 0, 0, 0,
+                                                      0, 0, 0, 0,
+                                                      2, 0, 0, 0,
+                                                      5, 0, 0, 0]))
+
+                        if cas_socket.recv(4) == b'\x00SAC':
+                            proto = 'cas'
 
                     except Exception:
                         pass
 
                     finally:
-                        sock.close()
+                        cas_socket.close()
+                        out.put(proto)
 
-                    if protocol != 'auto':
-                        break
+                def check_https_protocol():
+                    ''' Test port for HTTPS support '''
+                    proto = None
+                    try:
+                        ssl_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                        ssl_socket.settimeout(timeout)
+                        ssl_context = ssl.create_default_context(ssl.Purpose.SERVER_AUTH)
+                        ssl_conn = ssl_context.wrap_socket(ssl_socket,
+                                                           server_hostname=host)
+                        ssl_conn.connect((host, port))
+                        ssl_conn.write(('GET /cas HTTP/1.1\r\n'
+                                        + ('Host: %s\r\n' % host)
+                                        + 'Connection: close\r\n'
+                                        + 'User-Agent: Python-SWAT\r\n'
+                                        + 'Cache-Control: no-cache\r\n\r\n')
+                                       .encode('utf8'))
+
+                    except ssl.SSLError as exc:
+                        if 'certificate verify failed' in str(exc):
+                            proto = 'https'
+
+                    except Exception:
+                        pass
+
+                    finally:
+                        ssl_socket.close()
+                        out.put(proto)
+
+                def check_http_protocol():
+                    ''' Test port for HTTP support '''
+                    proto = None
+                    try:
+                        http_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                        http_socket.settimeout(timeout)
+                        http_socket.connect((host, port))
+
+                        http_socket.send(('GET /cas HTTP/1.1\r\n'
+                                          + ('Host: %s\r\n' % host)
+                                          + 'Connection: close\r\n'
+                                          + 'User-Agent: Python-SWAT\r\n'
+                                          + 'Cache-Control: no-cache\r\n\r\n')
+                                         .encode('utf8'))
+
+                        txt = http_socket.recv(16).decode('utf-8').lower()
+                        if txt.startswith('http') and txt.split()[1] != '400':
+                            proto = 'http'
+
+                    except Exception:
+                        pass
+
+                    finally:
+                        http_socket.close()
+                        out.put(proto)
+
+                checkers = [check_cas_protocol, check_https_protocol, check_http_protocol]
+                for item in checkers:
+                    threading.Thread(target=item).start()
+
+                try:
+                    for i in range(len(checkers)):
+                        proto = out.get(block=True, timeout=timeout)
+                        if proto is not None:
+                            protocol = proto
+                            break
+                except queue.Empty:
+                    pass
 
                 if protocol != 'auto':
+                    logger.debug('Protocol detected: %s', protocol)
                     break
 
-            if protocol == 'auto':
+        # No protocol detected
+        if protocol == 'auto':
+            if port == 80:
+                logger.debug('Protocol defaulted by port 80: http')
+                protocol = 'http'
+            elif port == 443:
+                logger.debug('Protocol defaulted by port 443: http')
+                protocol = 'https'
+            else:
+                logger.debug('No protocol detected: defaulting to \'cas\'')
                 protocol = 'cas'
 
         return protocol
@@ -645,7 +916,7 @@ class CAS(object):
 
     def __dir__(self):
         # Short-circuit PyCharm's introspection
-        if 'get_names' in [x.function for x in inspect.stack()]:
+        if 'get_names' in [x[3] for x in inspect.stack()]:
             return list(self._dir)
         return list(sorted(list(self._dir) + list(self.get_action_names())))
 
@@ -803,14 +1074,15 @@ class CAS(object):
         if name in self._results_hooks:
             del self._results_hooks[name]
 
-    def close(self):
+    def close(self, close_session=False):
         ''' Close the CAS connection '''
+        if close_session:
+            self.retrieve('session.endsession', _messagelevel='error', _apptag='UI')
         errorcheck(self._sw_connection.close(), self._sw_connection)
 
     def terminate(self):
         ''' End the session and close the CAS connection '''
-        self.retrieve('session.endsession', _messagelevel='error', _apptag='UI')
-        self.close()
+        self.close(close_session=True)
 
     def _set_option(self, **kwargs):
         '''
@@ -1282,7 +1554,7 @@ class CAS(object):
                 else:
                     vars.append(item)
 
-    def upload(self, data, importoptions=None, casout=None, **kwargs):
+    def upload(self, data, importoptions=None, casout=None, date_format=None, **kwargs):
         '''
         Upload data from a local file into a CAS table
 
@@ -1318,6 +1590,8 @@ class CAS(object):
             Import options for the ``table.loadtable`` action.
         casout : dict, optional
             Output table definition for the ``table.loadtable`` action.
+        date_format : string, optional
+            Format string for datetime objects.
         **kwargs : keyword arguments, optional
             Additional parameters to the ``table.loadtable`` action.
 
@@ -1364,6 +1638,7 @@ class CAS(object):
                 data.to_csv(filename, encoding='utf-8',
                             index=False, sep=a2n(',', 'utf-8'),
                             decimal=a2n('.', 'utf-8'),
+                            date_format=a2n(date_format, 'utf-8'),
                             line_terminator=a2n('\r\n', 'utf-8'))
                 df_dtypes = self._extract_dtypes(data)
                 importoptions['locale'] = 'EN-us'
@@ -1371,6 +1646,8 @@ class CAS(object):
         elif data.startswith('http://') or \
                 data.startswith('https://') or \
                 data.startswith('ftp://'):
+            import certifi
+            import ssl
             import tempfile
             from six.moves.urllib.request import urlopen
             from six.moves.urllib.parse import urlparse
@@ -1378,7 +1655,11 @@ class CAS(object):
             ext = os.path.splitext(parts.path)[-1].lower()
             with tempfile.NamedTemporaryFile(delete=False, suffix=ext) as tmp:
                 delete = True
-                tmp.write(urlopen(data).read())
+                tmp.write(
+                    urlopen(
+                        data,
+                        context=ssl.create_default_context(cafile=certifi.where())
+                    ).read())
                 filename = tmp.name
                 if parts.path:
                     name = os.path.splitext(parts.path.split('/')[-1])[0]
@@ -1509,6 +1790,21 @@ class CAS(object):
             raise SWATError(out.status)
 
         return out['casTable']
+
+    def _raw_invoke(self, _name_, **kwargs):
+        ''' Invoke a CAS action without any parameter checking '''
+        self._invoke_without_signature(a2n(_name_), **kwargs)
+        return self
+
+    def _raw_retrieve(self, _name_, **kwargs):
+        ''' Call a CAS action without parameter checking and return results '''
+        try:
+            # Call the action and compile the results
+            self._invoke_without_signature(a2n(_name_), **kwargs)
+            return self._get_results(getnext(self))
+        except SWATCASActionRetry:
+            self._invoke_without_signature(a2n(_name_), **kwargs)
+            return self._get_results(getnext(self))
 
     def invoke(self, _name_, **kwargs):
         '''
@@ -1759,7 +2055,8 @@ class CAS(object):
                 if response.disposition.status_code == RETRY_ACTION_CODE:
                     raise SWATCASActionRetry(response.disposition.status)
                 elif response.disposition.status_code == SESSION_ABORTED_CODE:
-                    # Any new requests sent to the session will never return, so just close the connection now
+                    # Any new requests sent to the session will never return,
+                    # so just close the connection now.
                     self.close()
                     raise SWATCASActionError(response.disposition.status, response, conn)
 
@@ -1910,18 +2207,32 @@ class CAS(object):
                 return self._action_classes[name]
             return self._action_classes[name]()
 
+        # Look for actions that can't be reflected
+        if asname and actname:
+            enabled = ['yes', 'y', 'on', 't', 'true', '1']
+            if os.environ.get('CAS_ACTION_TEST_MODE', '').lower() in enabled:
+                if asname not in self._actionset_classes:
+                    self._actionset_classes[asname.lower()] = ascls
+                else:
+                    ascls = self._actionset_classes[asname.lower()]
+                if actname not in ascls.actions:
+                    ascls.actions[actname.lower()] = None
+                return getattr(ascls(), actname)
+
         raise AttributeError(origname)
 
-    def _get_action_info(self, name, showhidden=True):
+    def _get_action_info(self, name, showhidden=True, levels=None):
         '''
         Get the reflection information for the given action name
 
         Parameters
         ----------
         name : string
-           Name of the action
+            Name of the action
         showhidden : boolean
-           Should hidden actions be shown?
+            Should hidden actions be shown?
+        levels : int, optional
+            Number of levels of reflection data to return. Default is all.
 
         Returns
         -------
@@ -1933,7 +2244,9 @@ class CAS(object):
         if name in self._action_info:
             return self._action_info[name]
 
-        asname, actname, asinfo = self._get_reflection_info(name, showhidden=showhidden)
+        asname, actname, asinfo = self._get_reflection_info(name,
+                                                            showhidden=showhidden,
+                                                            levels=levels)
 
         # If action name is None, it is the same as the action set name
         if actname is None:
@@ -1953,7 +2266,7 @@ class CAS(object):
 
         return asname, actname, actinfo
 
-    def _get_actionset_info(self, name, atype=None, showhidden=True):
+    def _get_actionset_info(self, name, atype=None, showhidden=True, levels=None):
         '''
         Get the reflection information for the given action set / action name
 
@@ -1962,11 +2275,13 @@ class CAS(object):
         Parameters
         ----------
         name : string
-           Name of the action set or action
+            Name of the action set or action
         atype : string, optional
-           Specifies the type of the name ('action' or 'actionset')
+            Specifies the type of the name ('action' or 'actionset')
         showhidden : boolean, optional
-           Should hidden actions be shown?
+            Should hidden actions be shown?
+        levels : int, optional
+            Number of levels of reflection data to return. Default is all.
 
         Returns
         -------
@@ -1982,7 +2297,8 @@ class CAS(object):
             return asname, aname, self._actionset_info[asname.lower()][-1]
 
         asname, actname, asinfo = self._get_reflection_info(name, atype=atype,
-                                                            showhidden=showhidden)
+                                                            showhidden=showhidden,
+                                                            levels=levels)
 
         # Populate action set info
         self._actionset_info[asname.lower()] = asname, None, asinfo
@@ -1995,18 +2311,20 @@ class CAS(object):
 
         return asname, actname, asinfo
 
-    def _get_reflection_info(self, name, atype=None, showhidden=True):
+    def _get_reflection_info(self, name, atype=None, showhidden=True, levels=None):
         '''
         Get the full action name of the called action including the action set information
 
         Parameters
         ----------
         name : string
-           Name of the argument
+            Name of the argument
         atype : string, optional
-           Specifies the type of the name ('action' or 'actionset')
+            Specifies the type of the name ('action' or 'actionset')
         showhidden : boolean, optional
-           Should hidden actions be shown?
+            Should hidden actions be shown?
+        levels : int, optional
+            Number of levels of reflection data to return. Default is all.
 
         Returns
         -------
@@ -2053,6 +2371,16 @@ class CAS(object):
         if asname:
             asname = asname.lower()
             query = {'showhidden': showhidden, 'actionset': asname}
+
+            if not get_option('interactive_mode') and self.server_version >= (3, 5):
+                query['showlabels'] = False
+
+            if 'reflection-levels' in self.server_features:
+                if levels is not None:
+                    query['levels'] = levels
+                else:
+                    query['levels'] = get_option('cas.reflection_levels')
+
             idx = 0
             out = {}
             for response in self._invoke_without_signature('builtins.reflect',
@@ -3350,7 +3678,7 @@ def dir_actions(obj):
 
 
 def dir_members(obj):
-    ''' Return list of object members, not including associated CAS actionsets / actions '''
+    ''' Return list of members not including associated CAS actionsets / actions '''
     if hasattr(obj, '__dir_members__'):
         return obj.__dir_members__()
     return dir(obj)

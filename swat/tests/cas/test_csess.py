@@ -31,9 +31,9 @@ HOST, PORT, PROTOCOL = tm.get_host_port_proto()
 
 
 class TestCSess(tm.TestCase):
-    
+
     def setUp(self):
-        swat.reset_option() 
+        swat.reset_option()
         swat.options.cas.print_messages = False
         swat.options.interactive_mode = False
 
@@ -44,26 +44,26 @@ class TestCSess(tm.TestCase):
     # then terminate the session. Do this in a loop a few times.
     # Additional session tests are required.
 
-    def conn(self): 
-        for j in range(1, 6): 
+    def conn(self):
+        for j in range(1, 6):
             self.s = swat.CAS(HOST, PORT, USER, PASSWD)
             self.assertNotEqual(self.s, None)
-            
+
             for i in range(1, 11):
-                r,z = self.s.help(), self.s.help()                
+                r, z = self.s.help(), self.s.help()
                 if r.debug is not None:
-                    prettyprint(r.debug, 'debug_info')
-                    
-                self.assertNotEqual( r, None )
-                self.assertEqual( r.status, None ) 
-                self.assertEqual( r.debug, None ) 
-                self.assertNotEqual( z, None ) 
-                
-            self.s.endsession()    
-            del self.s                              
-       
+                    print(r.debug)
+
+                self.assertNotEqual(r, None)
+                self.assertEqual(r.status, None)
+                self.assertEqual(r.debug, None)
+                self.assertNotEqual(z, None)
+
+            self.s.endsession()
+            del self.s
+
     def test_csess_help(self):
-        self.conn()         
+        self.conn()
 
 
 if __name__ == '__main__':

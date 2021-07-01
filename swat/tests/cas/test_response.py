@@ -39,9 +39,9 @@ HOST, PORT, PROTOCOL = tm.get_host_port_proto()
 
 
 class TestCASResponse(tm.TestCase):
-    
+
     # Create a class attribute to hold the cas host type
-    server_type = None    
+    server_type = None
 
     def setUp(self):
         swat.reset_option()
@@ -50,10 +50,11 @@ class TestCASResponse(tm.TestCase):
 
         self.s = swat.CAS(HOST, PORT, USER, PASSWD, protocol=PROTOCOL)
 
-        if type(self).server_type is None: 
-            # Set once per class and have every test use it. No need to change between tests.    
+        if type(self).server_type is None:
+            # Set once per class and have every test use it.
+            # No need to change between tests.
             type(self).server_type = tm.get_cas_host_type(self.s)
-            
+
         self.srcLib = tm.get_casout_lib(self.server_type)
 
         r = tm.load_data(self.s, 'datasources/cars_single.sashdat', self.server_type)
@@ -82,21 +83,20 @@ class TestCASResponse(tm.TestCase):
 
         self.table.loadactionset('datapreprocess')
         out = self.table.histogram()
-        
+
         self.assertTrue('ByGroupInfo' in out)
         self.assertEqual(len(out), 39)
         for i in range(1, 39):
             self.assertTrue(('ByGroup%d.BinDetails' % i) in out)
 
     def test_disposition(self):
-        # The default value of the logflushtime session option causes the response 
+        # The default value of the logflushtime session option causes the response
         # messages to be flushed periodically during the action instead of all messages
-        # flushed when the action completes. Flushing periodically caused this test 
+        # flushed when the action completes. Flushing periodically caused this test
         # to fail because the test expects all the messages to arrive at once. Set
         # logflushtime so all messages will be flushed at once.
-        #
-        self.s.sessionProp.setSessOpt(logflushtime = -1)
-        
+        self.s.sessionProp.setSessOpt(logflushtime=-1)
+
         conn = self.table.invoke('loadactionset', actionset='simple')
 
         messages = []
@@ -109,14 +109,14 @@ class TestCASResponse(tm.TestCase):
 
         self.assertIn("NOTE: Added action set 'simple'.", messages)
         if not messages[0].startswith('WARNING: License for feature'):
-            self.assertEqual(disp.to_dict(), dict(debug=None, reason=None, 
+            self.assertEqual(disp.to_dict(), dict(debug=None, reason=None,
                                                   severity=0, status=None,
                                                   status_code=0))
-        self.assertEqual(set(perf.to_dict().keys()), 
-                         set(['cpu_system_time', 'cpu_user_time', 'elapsed_time', 'memory', 
-                              'memory_os', 'memory_quota', 'system_cores',
-                              'system_nodes', 'system_total_memory', 'data_movement_time',
-                              'data_movement_bytes']))
+        self.assertEqual(set(perf.to_dict().keys()),
+                         set(['cpu_system_time', 'cpu_user_time', 'elapsed_time',
+                              'memory', 'memory_os', 'memory_quota', 'system_cores',
+                              'system_nodes', 'system_total_memory',
+                              'data_movement_time', 'data_movement_bytes']))
 
     def test_str(self):
         conn = self.table.invoke('loadactionset', actionset='simple')
@@ -127,8 +127,8 @@ class TestCASResponse(tm.TestCase):
             self.assertTrue('messages=' in out)
             self.assertTrue('performance=' in out)
             self.assertTrue('disposition=' in out)
-            for item in ['cpu_system_time', 'cpu_user_time', 'elapsed_time', 'memory', 
-                         'memory_os', 'memory_quota', 'system_cores', 
+            for item in ['cpu_system_time', 'cpu_user_time', 'elapsed_time', 'memory',
+                         'memory_os', 'memory_quota', 'system_cores',
                          'system_nodes', 'system_total_memory']:
                 self.assertTrue(('%s=' % item) in out)
             for item in ['severity', 'reason', 'status', 'debug']:
@@ -139,8 +139,8 @@ class TestCASResponse(tm.TestCase):
             self.assertTrue('messages=' in out)
             self.assertTrue('performance=' in out)
             self.assertTrue('disposition=' in out)
-            for item in ['cpu_system_time', 'cpu_user_time', 'elapsed_time', 'memory', 
-                         'memory_os', 'memory_quota', 'system_cores', 
+            for item in ['cpu_system_time', 'cpu_user_time', 'elapsed_time', 'memory',
+                         'memory_os', 'memory_quota', 'system_cores',
                          'system_nodes', 'system_total_memory']:
                 self.assertTrue(('%s=' % item) in out)
             for item in ['severity', 'reason', 'status', 'debug']:

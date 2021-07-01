@@ -80,9 +80,9 @@ class TestByGroups(tm.TestCase):
         df['Model'] = ' ' + df['Model']
 
         if all_doubles:
-           for name in ['MSRP', 'Invoice', 'EngineSize', 'Cylinders', 'Horsepower',
-                        'MPG_City', 'MPG_Highway', 'Weight', 'Wheelbase', 'Length']:
-               df[name] = df[name].astype(float)
+            for name in ['MSRP', 'Invoice', 'EngineSize', 'Cylinders', 'Horsepower',
+                         'MPG_City', 'MPG_Highway', 'Weight', 'Wheelbase', 'Length']:
+                df[name] = df[name].astype(float)
 
         return df
 
@@ -120,10 +120,10 @@ class TestByGroups(tm.TestCase):
             listb = list(listb)
             if decimals is not None:
                 for i, item in enumerate(lista):
-                    if isinstance(item,  (float, np.float64)):
+                    if isinstance(item, (float, np.float64)):
                         lista[i] = float(('%%.%df' % decimals) % item)
                 for i, item in enumerate(listb):
-                    if isinstance(item,  (float, np.float64)):
+                    if isinstance(item, (float, np.float64)):
                         listb[i] = float(('%%.%df' % decimals) % item)
             self.assertEqual(lista, listb)
 
@@ -143,25 +143,28 @@ class TestByGroups(tm.TestCase):
             lb = b.tolist()
         if decimals is not None:
             for i, item in enumerate(la):
-                if isinstance(item,  (float, np.float64)):
+                if isinstance(item, (float, np.float64)):
                     la[i] = float(('%%.%df' % decimals) % item)
             for i, item in enumerate(lb):
-                if isinstance(item,  (float, np.float64)):
+                if isinstance(item, (float, np.float64)):
                     lb[i] = float(('%%.%df' % decimals) % item)
         self.assertEqual(la, lb)
         if include_index:
             if sort:
-                self.assertEqual(list(sorted(a.index.values)), list(sorted(b.index.values)))
+                self.assertEqual(list(sorted(a.index.values)),
+                                 list(sorted(b.index.values)))
             else:
                 self.assertEqual(list(a.index.values), list(b.index.values))
 
     def test_groupby(self):
         df = self.get_cars_df().sort_values(['MSRP', 'Invoice'])
         df.index = range(len(df))
-        tbl = self.table.sort_values(['MSRP', 'Invoice'])
+        self.table.sort_values(['MSRP', 'Invoice'])
 
-        grptbl = self.table.groupby('Make')
-        grpdf = df.groupby('Make')
+        self.table.groupby('Make')
+        df.groupby('Make')
+
+        # TODO: Should some sort of comparison be done here?
 
     def test_groupby_iter(self):
         df = self.get_cars_df()
@@ -190,17 +193,18 @@ class TestByGroups(tm.TestCase):
         # Pandas can't do this with groupby
         out = []
         for make, cyl in [('BMW', 6), ('BMW', 8), ('Porsche', 6), ('Porsche', 8)]:
-            out.append(df.query('Make == "%s" and Cylinders == %s' % (make, cyl)).nlargest(2,
-                       columns=['MSRP'])[['Make', 'Cylinders',
-                       'MSRP']].set_index(['Make', 'Cylinders'])['MSRP'])
+            out.append(df.query('Make == "%s" and Cylinders == %s' % (make, cyl))
+                       .nlargest(2, columns=['MSRP'])
+                       [['Make', 'Cylinders', 'MSRP']]
+                       .set_index(['Make', 'Cylinders'])['MSRP'])
         dfgrp = pd.concat(out)
 
-        tblgrp = tbl['MSRP'].groupby(['Make', 'Cylinders']).query(
-                 'Make in ("Porsche", "BMW")').nlargest(2)
+        tblgrp = tbl['MSRP'].groupby(['Make', 'Cylinders'])\
+            .query('Make in ("Porsche", "BMW")').nlargest(2)
         self.assertColsEqual(dfgrp, tblgrp, sort=None)
 
-        tblgrp = tbl['MSRP'].groupby(['Make', 'Cylinders'], as_index=False).query(
-                 'Make in ("Porsche", "BMW")').nlargest(2)
+        tblgrp = tbl['MSRP'].groupby(['Make', 'Cylinders'], as_index=False)\
+            .query('Make in ("Porsche", "BMW")').nlargest(2)
         self.assertTablesEqual(dfgrp.reset_index(), tblgrp, sortby=None)
 
         #
@@ -209,8 +213,8 @@ class TestByGroups(tm.TestCase):
         swat.options.cas.dataset.bygroup_casout_threshold = 2
 
         with self.assertRaises(NotImplementedError):
-            tblgrp = tbl['MSRP'].groupby(['Make', 'Cylinders'], as_index=False).query(
-                     'Make in ("Porsche", "BMW")').nlargest(2)
+            tblgrp = tbl['MSRP'].groupby(['Make', 'Cylinders'], as_index=False)\
+                .query('Make in ("Porsche", "BMW")').nlargest(2)
         # self.assertEqual(tblgrp.__class__.__name__, 'CASTable')
         # self.assertTablesEqual(dfgrp.reset_index(), tblgrp, sortby=None)
 
@@ -222,17 +226,20 @@ class TestByGroups(tm.TestCase):
         # Pandas can't do this with groupby
         out = []
         for make, cyl in [('BMW', 6), ('BMW', 8), ('Porsche', 6), ('Porsche', 8)]:
-            out.append(df.query('Make == "%s" and Cylinders == %s' % (make, cyl)).nlargest(2,
-                       columns=['MSRP'])[['Make', 'Cylinders', 'Model', 'MSRP',
-                                          'Horsepower']].set_index(['Make', 'Cylinders']))
+            out.append(df.query('Make == "%s" and Cylinders == %s' % (make, cyl))
+                       .nlargest(2, columns=['MSRP'])
+                       [['Make', 'Cylinders', 'Model', 'MSRP', 'Horsepower']]
+                       .set_index(['Make', 'Cylinders']))
         dfgrp = pd.concat(out)
 
-        tblgrp = tbl[['Model', 'MSRP', 'Horsepower']].groupby(['Make',
-                      'Cylinders']).query('Make in ("Porsche", "BMW")').nlargest(2, columns=['MSRP'])
+        tblgrp = tbl[['Model', 'MSRP', 'Horsepower']]\
+            .groupby(['Make', 'Cylinders'])\
+            .query('Make in ("Porsche", "BMW")').nlargest(2, columns=['MSRP'])
         self.assertTablesEqual(dfgrp, tblgrp, sortby=None)
 
-        tblgrp = tbl[['Model', 'MSRP', 'Horsepower']].groupby(['Make',
-                      'Cylinders'], as_index=False).query('Make in ("Porsche", "BMW")').nlargest(2, columns=['MSRP'])
+        tblgrp = tbl[['Model', 'MSRP', 'Horsepower']]\
+            .groupby(['Make', 'Cylinders'], as_index=False)\
+            .query('Make in ("Porsche", "BMW")').nlargest(2, columns=['MSRP'])
         self.assertTablesEqual(dfgrp.reset_index(), tblgrp, sortby=None)
 
         #
@@ -241,8 +248,9 @@ class TestByGroups(tm.TestCase):
         swat.options.cas.dataset.bygroup_casout_threshold = 2
 
         with self.assertRaises(NotImplementedError):
-            tblgrp = tbl[['Model', 'MSRP', 'Horsepower']].groupby(['Make',
-                          'Cylinders'], as_index=False).query('Make in ("Porsche", "BMW")').nlargest(2, columns=['MSRP'])
+            tblgrp = tbl[['Model', 'MSRP', 'Horsepower']]\
+                .groupby(['Make', 'Cylinders'], as_index=False)\
+                .query('Make in ("Porsche", "BMW")').nlargest(2, columns=['MSRP'])
         # self.assertEqual(tblgrp.__class__.__name__, 'CASTable')
         # self.assertTablesEqual(dfgrp.reset_index(), tblgrp, sortby=None)
 
@@ -254,17 +262,18 @@ class TestByGroups(tm.TestCase):
         # Pandas can't do this with groupby
         out = []
         for make, cyl in [('BMW', 6), ('BMW', 8), ('Porsche', 6), ('Porsche', 8)]:
-            out.append(df.query('Make == "%s" and Cylinders == %s' % (make, cyl)).nsmallest(2,
-                       columns=['MSRP'])[['Make', 'Cylinders',
-                       'MSRP']].set_index(['Make', 'Cylinders'])['MSRP'])
+            out.append(df.query('Make == "%s" and Cylinders == %s' % (make, cyl))
+                       .nsmallest(2, columns=['MSRP'])
+                       [['Make', 'Cylinders', 'MSRP']]
+                       .set_index(['Make', 'Cylinders'])['MSRP'])
         dfgrp = pd.concat(out)
 
-        tblgrp = tbl['MSRP'].groupby(['Make', 'Cylinders']).query(
-                 'Make in ("Porsche", "BMW")').nsmallest(2)
+        tblgrp = tbl['MSRP'].groupby(['Make', 'Cylinders'])\
+            .query('Make in ("Porsche", "BMW")').nsmallest(2)
         self.assertColsEqual(dfgrp, tblgrp, sort=None)
 
-        tblgrp = tbl['MSRP'].groupby(['Make', 'Cylinders'], as_index=False).query(
-                 'Make in ("Porsche", "BMW")').nsmallest(2)
+        tblgrp = tbl['MSRP'].groupby(['Make', 'Cylinders'], as_index=False)\
+            .query('Make in ("Porsche", "BMW")').nsmallest(2)
         self.assertTablesEqual(dfgrp.reset_index(), tblgrp, sortby=None)
 
         #
@@ -272,8 +281,8 @@ class TestByGroups(tm.TestCase):
         #
         swat.options.cas.dataset.bygroup_casout_threshold = 2
 
-        tblgrp = tbl['MSRP'].groupby(['Make', 'Cylinders'], as_index=False).query(
-                 'Make in ("Porsche", "BMW")').nsmallest(2)
+        tblgrp = tbl['MSRP'].groupby(['Make', 'Cylinders'], as_index=False)\
+            .query('Make in ("Porsche", "BMW")').nsmallest(2)
         self.assertEqual(tblgrp.__class__.__name__, 'CASTable')
         self.assertTablesEqual(dfgrp.reset_index(), tblgrp, sortby=None)
 
@@ -285,17 +294,20 @@ class TestByGroups(tm.TestCase):
         # Pandas can't do this with groupby
         out = []
         for make, cyl in [('BMW', 6), ('BMW', 8), ('Porsche', 6), ('Porsche', 8)]:
-            out.append(df.query('Make == "%s" and Cylinders == %s' % (make, cyl)).nsmallest(2,
-                       columns=['MSRP'])[['Make', 'Cylinders', 'Model', 'MSRP',
-                                          'Horsepower']].set_index(['Make', 'Cylinders']))
+            out.append(df.query('Make == "%s" and Cylinders == %s' % (make, cyl))
+                       .nsmallest(2, columns=['MSRP'])
+                       [['Make', 'Cylinders', 'Model', 'MSRP', 'Horsepower']]
+                       .set_index(['Make', 'Cylinders']))
         dfgrp = pd.concat(out)
 
-        tblgrp = tbl[['Model', 'MSRP', 'Horsepower']].groupby(['Make',
-                      'Cylinders']).query('Make in ("Porsche", "BMW")').nsmallest(2, columns=['MSRP'])
+        tblgrp = tbl[['Model', 'MSRP', 'Horsepower']]\
+            .groupby(['Make', 'Cylinders'])\
+            .query('Make in ("Porsche", "BMW")').nsmallest(2, columns=['MSRP'])
         self.assertTablesEqual(dfgrp, tblgrp, sortby=None)
 
-        tblgrp = tbl[['Model', 'MSRP', 'Horsepower']].groupby(['Make',
-                      'Cylinders'], as_index=False).query('Make in ("Porsche", "BMW")').nsmallest(2, columns=['MSRP'])
+        tblgrp = tbl[['Model', 'MSRP', 'Horsepower']]\
+            .groupby(['Make', 'Cylinders'], as_index=False)\
+            .query('Make in ("Porsche", "BMW")').nsmallest(2, columns=['MSRP'])
         self.assertTablesEqual(dfgrp.reset_index(), tblgrp, sortby=None)
 
         #
@@ -303,8 +315,9 @@ class TestByGroups(tm.TestCase):
         #
         swat.options.cas.dataset.bygroup_casout_threshold = 2
 
-        tblgrp = tbl[['Model', 'MSRP', 'Horsepower']].groupby(['Make',
-                      'Cylinders'], as_index=False).query('Make in ("Porsche", "BMW")').nsmallest(2, columns=['MSRP'])
+        tblgrp = tbl[['Model', 'MSRP', 'Horsepower']]\
+            .groupby(['Make', 'Cylinders'], as_index=False)\
+            .query('Make in ("Porsche", "BMW")').nsmallest(2, columns=['MSRP'])
         self.assertEqual(tblgrp.__class__.__name__, 'CASTable')
         self.assertTablesEqual(dfgrp.reset_index(), tblgrp, sortby=None)
 
@@ -321,7 +334,8 @@ class TestByGroups(tm.TestCase):
 
         dfgrp = pd.concat([df.query('Origin == "Asia"').head(),
                            df.query('Origin == "Europe"').head(),
-                           df.query('Origin == "USA"').head()]).set_index('Origin')['MSRP']
+                           df.query('Origin == "USA"').head()])
+        dfgrp = dfgrp.set_index('Origin')['MSRP']
         tblgrp = tbl['MSRP'].groupby('Origin', as_index=True).head()
         self.assertColsEqual(dfgrp, tblgrp, sort=None, include_index=False)
 
@@ -374,7 +388,8 @@ class TestByGroups(tm.TestCase):
 
         dfgrp = pd.concat([df.query('Origin == "Asia"').tail(),
                            df.query('Origin == "Europe"').tail(),
-                           df.query('Origin == "USA"').tail()]).set_index('Origin')['MSRP']
+                           df.query('Origin == "USA"').tail()])
+        dfgrp = dfgrp.set_index('Origin')['MSRP']
         tblgrp = tbl['MSRP'].groupby('Origin', as_index=True).tail()
         self.assertColsEqual(dfgrp, tblgrp, sort=None, include_index=True)
 
@@ -435,7 +450,8 @@ class TestByGroups(tm.TestCase):
 
         dfgrp = pd.concat([df.query('Origin == "Asia"').iloc[5:9],
                            df.query('Origin == "Europe"').iloc[5:9],
-                           df.query('Origin == "USA"').iloc[5:9]]).set_index('Origin')['MSRP']
+                           df.query('Origin == "USA"').iloc[5:9]])
+        dfgrp = dfgrp.set_index('Origin')['MSRP']
         tblgrp = tbl['MSRP'].groupby('Origin').slice(5, 9, bygroup_as_index=True)
         self.assertColsEqual(dfgrp, tblgrp, sort=None, include_index=True)
 
@@ -584,7 +600,8 @@ class TestByGroups(tm.TestCase):
 
         tblgrp = tbl['MSRP'].groupby(['Origin', 'Cylinders'], as_index=False).nunique()
         self.assertEqual(tblgrp.__class__.__name__, 'CASTable')
-        self.assertTablesEqual(dfgrp.reset_index(), tblgrp, sortby=['Origin', 'Cylinders', 'MSRP'])
+        self.assertTablesEqual(dfgrp.reset_index(), tblgrp,
+                               sortby=['Origin', 'Cylinders', 'MSRP'])
 
     def test_nunique(self):
         tbl = self.table.sort_values(SORT_KEYS)
@@ -613,9 +630,11 @@ class TestByGroups(tm.TestCase):
         tblgrp = tbl['EngineSize'].groupby(['Origin', 'Cylinders']).value_counts()
         self.assertColsEqual(dfgrp, tblgrp, sort=True, include_index=True)
 
-        tblgrp = tbl['EngineSize'].groupby(['Origin', 'Cylinders'], as_index=False).value_counts()
+        tblgrp = tbl['EngineSize'].groupby(['Origin', 'Cylinders'],
+                                           as_index=False).value_counts()
         dfgrp.name = None
-        self.assertTablesEqual(dfgrp.reset_index().set_index('EngineSize'), tblgrp, sortby=None)
+        self.assertTablesEqual(dfgrp.reset_index().set_index('EngineSize'),
+                               tblgrp, sortby=None)
 
         #
         # Test casout threshold
@@ -623,7 +642,8 @@ class TestByGroups(tm.TestCase):
         swat.options.cas.dataset.bygroup_casout_threshold = 2
         swat.options.cas.dataset.bygroup_columns = 'raw'
 
-        tblgrp = tbl['EngineSize'].groupby(['Origin', 'Cylinders'], as_index=False).value_counts()
+        tblgrp = tbl['EngineSize'].groupby(['Origin', 'Cylinders'],
+                                           as_index=False).value_counts()
         dfgrp = dfgrp.reset_index()[['Origin', 'Cylinders', 'EngineSize', 0]]
         dfgrp['_Frequency_'] = dfgrp[0]
         del dfgrp[0]
@@ -668,7 +688,8 @@ class TestByGroups(tm.TestCase):
 
         tblgrp = tbl['EngineSize'].groupby('Origin', as_index=False).max()
         self.assertEqual(tblgrp.__class__.__name__, 'CASTable')
-        self.assertTablesEqual(dfgrp.reset_index(), tblgrp, sortby=['Origin', 'EngineSize'])
+        self.assertTablesEqual(dfgrp.reset_index(), tblgrp,
+                               sortby=['Origin', 'EngineSize'])
 
     @unittest.skipIf(pd_version < (0, 16, 0), 'Need newer version of Pandas')
     @unittest.skipIf(pd_version >= (1, 0, 0), 'Raises AssertionError in Pandas 1')
@@ -728,7 +749,8 @@ class TestByGroups(tm.TestCase):
 
         tblgrp = tbl['EngineSize'].groupby('Origin', as_index=False).min()
         self.assertEqual(tblgrp.__class__.__name__, 'CASTable')
-        self.assertTablesEqual(dfgrp.reset_index(), tblgrp, sortby=['Origin', 'EngineSize'])
+        self.assertTablesEqual(dfgrp.reset_index(), tblgrp,
+                               sortby=['Origin', 'EngineSize'])
 
     @unittest.skipIf(pd_version < (0, 16, 0), 'Need newer version of Pandas')
     @unittest.skipIf(pd_version >= (1, 0, 0), 'Raises AssertionError in Pandas 1')
@@ -788,7 +810,8 @@ class TestByGroups(tm.TestCase):
 
         tblgrp = tbl['EngineSize'].groupby('Origin', as_index=False).mean()
         self.assertEqual(tblgrp.__class__.__name__, 'CASTable')
-        self.assertTablesEqual(dfgrp.reset_index(), tblgrp, sortby=['Origin', 'EngineSize'], decimals=5)
+        self.assertTablesEqual(dfgrp.reset_index(), tblgrp,
+                               sortby=['Origin', 'EngineSize'], decimals=5)
 
     @unittest.skipIf(sys.version_info.major < 3, 'Need newer version of Python')
     def test_mean(self):
@@ -811,7 +834,8 @@ class TestByGroups(tm.TestCase):
         dfgrp = df.groupby('Origin', as_index=False).mean()
         tblgrp = tbl.groupby('Origin', as_index=False).mean()
         self.assertEqual(tblgrp.__class__.__name__, 'CASTable')
-        self.assertTablesEqual(dfgrp, tblgrp, sortby=['Origin', 'MSRP', 'Invoice'], decimals=5)
+        self.assertTablesEqual(dfgrp, tblgrp,
+                               sortby=['Origin', 'MSRP', 'Invoice'], decimals=5)
 
     def test_column_median(self):
         df = self.get_cars_df().sort_values(SORT_KEYS)
@@ -867,11 +891,11 @@ class TestByGroups(tm.TestCase):
 
         asia = df.query('Origin == "Asia"').mode()
         asia['Origin'] = 'Asia'
-        asia = asia.set_index('Origin', append=True).reorder_levels([1,0])
+        asia = asia.set_index('Origin', append=True).reorder_levels([1, 0])
 
         europe = df.query('Origin == "Europe"').mode()
         europe['Origin'] = 'Europe'
-        europe = europe.set_index('Origin', append=True).reorder_levels([1,0])
+        europe = europe.set_index('Origin', append=True).reorder_levels([1, 0])
 
         asia = asia['EngineSize'].dropna()
         europe = europe['EngineSize'].dropna()
@@ -883,7 +907,8 @@ class TestByGroups(tm.TestCase):
         tblgrp = tbl['EngineSize'].query('Origin ^= "USA"').groupby('Origin').mode()
         self.assertColsEqual(dfgrp, tblgrp, sort=False, include_index=True)
 
-        tblgrp = tbl['EngineSize'].query('Origin ^= "USA"').groupby('Origin', as_index=False).mode()
+        tblgrp = tbl['EngineSize'].query('Origin ^= "USA"')\
+            .groupby('Origin', as_index=False).mode()
         self.assertTablesEqual(dfgrp.reset_index(level=0), tblgrp, sortby=None)
 
     @unittest.skipIf(pd_version < (0, 16, 0), 'Need newer version of Pandas')
@@ -893,11 +918,11 @@ class TestByGroups(tm.TestCase):
 
         asia = df.query('Origin == "Asia"').mode()
         asia['Origin'] = 'Asia'
-        asia = asia.set_index('Origin', append=True).reorder_levels([1,0])
+        asia = asia.set_index('Origin', append=True).reorder_levels([1, 0])
 
         europe = df.query('Origin == "Europe"').mode()
         europe['Origin'] = 'Europe'
-        europe = europe.set_index('Origin', append=True).reorder_levels([1,0])
+        europe = europe.set_index('Origin', append=True).reorder_levels([1, 0])
 
 #       usa = df.query('Origin == "USA"').mode()
 #       usa['Origin'] = 'USA'
@@ -948,9 +973,12 @@ class TestByGroups(tm.TestCase):
 
         dfgrp = df.groupby('Origin', as_index=False)[numerics].quantile()
         tblgrp = tbl.groupby('Origin', as_index=False).quantile()
-        # For some reason some versions of Pandas drop this column, but I think it should be there.
-        try: dfgrp = dfgrp.drop('Origin', axis=1)
-        except: pass
+        # For some reason some versions of Pandas drop this column,
+        # but I think it should be there.
+        try:
+            dfgrp = dfgrp.drop('Origin', axis=1)
+        except:  # noqa: E722
+            pass
         tblgrp = tblgrp.drop('Origin', axis=1)
         self.assertTablesEqual(dfgrp, tblgrp, sortby=None)
 
@@ -961,9 +989,12 @@ class TestByGroups(tm.TestCase):
 
         dfgrp = df.groupby('Origin', as_index=False)[numerics].quantile()
         tblgrp = tbl.groupby('Origin', as_index=False).quantile()
-        # For some reason some versions of Pandas drop this column, but I think it should be there.
-        try: dfgrp = dfgrp.drop('Origin', axis=1)
-        except: pass
+        # For some reason some versions of Pandas drop this column,
+        # but I think it should be there.
+        try:
+            dfgrp = dfgrp.drop('Origin', axis=1)
+        except:  # noqa: E722
+            pass
         tblgrp = tblgrp.drop('Origin', axis=1)
         self.assertEqual(tblgrp.__class__.__name__, 'CASTable')
         self.assertTablesEqual(dfgrp, tblgrp, sortby=['EngineSize'])
@@ -990,7 +1021,8 @@ class TestByGroups(tm.TestCase):
 
         tblgrp = tbl['EngineSize'].groupby('Origin', as_index=False).sum()
         self.assertEqual(tblgrp.__class__.__name__, 'CASTable')
-        self.assertTablesEqual(dfgrp.reset_index(), tblgrp, sortby=['Origin', 'EngineSize'], decimals=5)
+        self.assertTablesEqual(dfgrp.reset_index(), tblgrp,
+                               sortby=['Origin', 'EngineSize'], decimals=5)
 
     def test_sum(self):
         df = self.get_cars_df().sort_values(SORT_KEYS)
@@ -1012,7 +1044,8 @@ class TestByGroups(tm.TestCase):
         dfgrp = df.groupby('Origin', as_index=False).sum()
         tblgrp = tbl.groupby('Origin', as_index=False).sum()
         self.assertEqual(tblgrp.__class__.__name__, 'CASTable')
-        self.assertTablesEqual(dfgrp, tblgrp, decimals=5, sortby=['Origin', 'MSRP', 'Invoice'])
+        self.assertTablesEqual(dfgrp, tblgrp, decimals=5,
+                               sortby=['Origin', 'MSRP', 'Invoice'])
 
     def test_column_std(self):
         df = self.get_cars_df().sort_values(SORT_KEYS)
@@ -1036,7 +1069,8 @@ class TestByGroups(tm.TestCase):
 
         tblgrp = tbl['EngineSize'].groupby('Origin', as_index=False).std()
         self.assertEqual(tblgrp.__class__.__name__, 'CASTable')
-        self.assertTablesEqual(dfgrp.reset_index(), tblgrp, sortby=['Origin', 'EngineSize'], decimals=5)
+        self.assertTablesEqual(dfgrp.reset_index(), tblgrp,
+                               sortby=['Origin', 'EngineSize'], decimals=5)
 
     def test_std(self):
         df = self.get_cars_df().sort_values(SORT_KEYS)
@@ -1046,7 +1080,7 @@ class TestByGroups(tm.TestCase):
         tblgrp = tbl.groupby('Origin').std()
         self.assertTablesEqual(dfgrp, tblgrp, decimals=5, sortby=None)
 
-        #dfgrp = df.groupby('Origin', as_index=False).std()
+        # dfgrp = df.groupby('Origin', as_index=False).std()
         tblgrp = tbl.groupby('Origin', as_index=False).std()
         self.assertTablesEqual(dfgrp.reset_index(), tblgrp, decimals=5, sortby=None)
 
@@ -1055,10 +1089,11 @@ class TestByGroups(tm.TestCase):
         #
         swat.options.cas.dataset.bygroup_casout_threshold = 2
 
-        #dfgrp = df.groupby('Origin', as_index=False).std()
+        # dfgrp = df.groupby('Origin', as_index=False).std()
         tblgrp = tbl.groupby('Origin', as_index=False).std()
         self.assertEqual(tblgrp.__class__.__name__, 'CASTable')
-        self.assertTablesEqual(dfgrp.reset_index(), tblgrp, decimals=5, sortby=['Origin', 'MSRP', 'Invoice'])
+        self.assertTablesEqual(dfgrp.reset_index(), tblgrp, decimals=5,
+                               sortby=['Origin', 'MSRP', 'Invoice'])
 
     def test_column_var(self):
         df = self.get_cars_df().sort_values(SORT_KEYS)
@@ -1108,11 +1143,12 @@ class TestByGroups(tm.TestCase):
         dfgrp = df.groupby('Origin', as_index=False).var()
         tblgrp = tbl.groupby('Origin', as_index=False).var()
         self.assertEqual(tblgrp.__class__.__name__, 'CASTable')
-        self.assertTablesEqual(dfgrp, tblgrp, decimals=3, sortby=['Origin', 'MSRP', 'Invoice'])
+        self.assertTablesEqual(dfgrp, tblgrp, decimals=3,
+                               sortby=['Origin', 'MSRP', 'Invoice'])
 
     def test_column_nmiss(self):
         # TODO: Not supported by Pandas; need comparison values
-        df = self.get_cars_df().sort_values(SORT_KEYS)
+        # df = self.get_cars_df().sort_values(SORT_KEYS)
         tbl = self.table.sort_values(SORT_KEYS)
 
         tblgrp = tbl.groupby('Origin')['Cylinders'].nmiss()
@@ -1160,7 +1196,7 @@ class TestByGroups(tm.TestCase):
 
     def test_nmiss(self):
         # TODO: Not supported by Pandas; need comparison values
-        df = self.get_cars_df().sort_values(SORT_KEYS)
+        # df = self.get_cars_df().sort_values(SORT_KEYS)
         tbl = self.table.sort_values(SORT_KEYS)
 
         tblgrp = tbl.groupby('Origin').nmiss()
@@ -1191,7 +1227,7 @@ class TestByGroups(tm.TestCase):
 
     def test_column_stderr(self):
         # TODO: Not supported by Pandas; need comparison values
-        df = self.get_cars_df().sort_values(SORT_KEYS)
+        # df = self.get_cars_df().sort_values(SORT_KEYS)
         tbl = self.table.sort_values(SORT_KEYS)
 
         tblgrp = tbl.groupby('Origin')['EngineSize'].stderr()
@@ -1214,7 +1250,7 @@ class TestByGroups(tm.TestCase):
 
     def test_stderr(self):
         # TODO: Not supported by Pandas; need comparison values
-        df = self.get_cars_df().sort_values(SORT_KEYS)
+        # df = self.get_cars_df().sort_values(SORT_KEYS)
         tbl = self.table.sort_values(SORT_KEYS)
 
         tblgrp = tbl.groupby('Origin').stderr()
@@ -1234,7 +1270,7 @@ class TestByGroups(tm.TestCase):
 
     def test_column_uss(self):
         # TODO: Not supported by Pandas; need comparison values
-        df = self.get_cars_df().sort_values(SORT_KEYS)
+        # df = self.get_cars_df().sort_values(SORT_KEYS)
         tbl = self.table.sort_values(SORT_KEYS)
 
         tblgrp = tbl.groupby('Origin')['EngineSize'].uss()
@@ -1257,7 +1293,7 @@ class TestByGroups(tm.TestCase):
 
     def test_uss(self):
         # TODO: Not supported by Pandas; need comparison values
-        df = self.get_cars_df().sort_values(SORT_KEYS)
+        # df = self.get_cars_df().sort_values(SORT_KEYS)
         tbl = self.table.sort_values(SORT_KEYS)
 
         tblgrp = tbl.groupby('Origin').uss()
@@ -1277,7 +1313,7 @@ class TestByGroups(tm.TestCase):
 
     def test_column_css(self):
         # TODO: Not supported by Pandas; need comparison values
-        df = self.get_cars_df().sort_values(SORT_KEYS)
+        # df = self.get_cars_df().sort_values(SORT_KEYS)
         tbl = self.table.sort_values(SORT_KEYS)
 
         tblgrp = tbl.groupby('Origin')['EngineSize'].css()
@@ -1300,7 +1336,7 @@ class TestByGroups(tm.TestCase):
 
     def test_css(self):
         # TODO: Not supported by Pandas; need comparison values
-        df = self.get_cars_df().sort_values(SORT_KEYS)
+        # df = self.get_cars_df().sort_values(SORT_KEYS)
         tbl = self.table.sort_values(SORT_KEYS)
 
         tblgrp = tbl.groupby('Origin').css()
@@ -1317,7 +1353,7 @@ class TestByGroups(tm.TestCase):
 
     def test_column_cv(self):
         # TODO: Not supported by Pandas; need comparison values
-        df = self.get_cars_df().sort_values(SORT_KEYS)
+        # df = self.get_cars_df().sort_values(SORT_KEYS)
         tbl = self.table.sort_values(SORT_KEYS)
 
         tblgrp = tbl.groupby('Origin')['EngineSize'].cv()
@@ -1340,7 +1376,7 @@ class TestByGroups(tm.TestCase):
 
     def test_cv(self):
         # TODO: Not supported by Pandas; need comparison values
-        df = self.get_cars_df().sort_values(SORT_KEYS)
+        # df = self.get_cars_df().sort_values(SORT_KEYS)
         tbl = self.table.sort_values(SORT_KEYS)
 
         tblgrp = tbl.groupby('Origin').cv()
@@ -1360,7 +1396,7 @@ class TestByGroups(tm.TestCase):
 
     def test_column_tvalue(self):
         # TODO: Not supported by Pandas; need comparison values
-        df = self.get_cars_df().sort_values(SORT_KEYS)
+        # df = self.get_cars_df().sort_values(SORT_KEYS)
         tbl = self.table.sort_values(SORT_KEYS)
 
         tblgrp = tbl.groupby('Origin')['EngineSize'].tvalue()
@@ -1383,7 +1419,7 @@ class TestByGroups(tm.TestCase):
 
     def test_tvalue(self):
         # TODO: Not supported by Pandas; need comparison values
-        df = self.get_cars_df().sort_values(SORT_KEYS)
+        # df = self.get_cars_df().sort_values(SORT_KEYS)
         tbl = self.table.sort_values(SORT_KEYS)
 
         tblgrp = tbl.groupby('Origin').tvalue()
@@ -1403,7 +1439,7 @@ class TestByGroups(tm.TestCase):
 
     def test_column_probt(self):
         # TODO: Not supported by Pandas; need comparison values
-        df = self.get_cars_df().sort_values(SORT_KEYS)
+        # df = self.get_cars_df().sort_values(SORT_KEYS)
         tbl = self.table.sort_values(SORT_KEYS)
 
         tblgrp = tbl.groupby('Origin')['EngineSize'].probt()
@@ -1426,7 +1462,7 @@ class TestByGroups(tm.TestCase):
 
     def test_probt(self):
         # TODO: Not supported by Pandas; need comparison values
-        df = self.get_cars_df().sort_values(SORT_KEYS)
+        # df = self.get_cars_df().sort_values(SORT_KEYS)
         tbl = self.table.sort_values(SORT_KEYS)
 
         tblgrp = tbl.groupby('Origin').probt()
@@ -1464,8 +1500,10 @@ class TestByGroups(tm.TestCase):
             self.assertTablesEqual(dfgrp, tblgrp, sortby=None, decimals=5)
 
 # NOTE: This just seems broken in pandas
-#       dfgrp = df.groupby('Origin', as_index=False)['EngineSize'].describe(percentiles=[0.5])
-#       tblgrp = tbl['EngineSize'].groupby('Origin', as_index=False).describe(percentiles=[0.5])
+#       dfgrp = df.groupby('Origin', as_index=False)['EngineSize']\
+#           .describe(percentiles=[0.5])
+#       tblgrp = tbl['EngineSize'].groupby('Origin', as_index=False)\
+#           .describe(percentiles=[0.5])
 #       # Pandas doesn't include this column, but it seems necessary
 #       tblgrp = tblgrp.drop('Origin', axis=1)
 #       self.assertTablesEqual(dfgrp, tblgrp, sortby=False, decimals=5)
@@ -1475,9 +1513,10 @@ class TestByGroups(tm.TestCase):
         df = self.get_cars_df().sort_values(SORT_KEYS)
         tbl = self.table.sort_values(SORT_KEYS)
 
-        dfgrp = df.groupby('Origin').describe(percentiles=[0.5])[['MSRP',
-                    'Invoice', 'EngineSize', 'Cylinders', 'Horsepower', 'MPG_City',
-                    'MPG_Highway', 'Weight', 'Wheelbase', 'Length']]
+        dfgrp = df.groupby('Origin').describe(percentiles=[0.5])[
+            ['MSRP', 'Invoice', 'EngineSize', 'Cylinders', 'Horsepower',
+             'MPG_City', 'MPG_Highway', 'Weight', 'Wheelbase', 'Length']
+        ]
         tblgrp = tbl.groupby('Origin').describe(percentiles=[0.5])
         self.assertTablesEqual(dfgrp, tblgrp, sortby=None, include_index=True, decimals=5)
 
@@ -1548,5 +1587,4 @@ class TestByGroups(tm.TestCase):
 
 
 if __name__ == '__main__':
-   from swat.utils.testing import runtests
-   runtests()
+    tm.runtests()

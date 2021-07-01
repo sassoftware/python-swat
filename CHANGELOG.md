@@ -1,6 +1,44 @@
 
 # Change Log
 
+## 1.9.2 - 2021-06-18
+
+- Add authorization code as authentication method
+
+## 1.9.1 - 2021-06-11
+
+- Add Python 3.9 support
+
+## 1.9.0 - 2021-05-24
+
+- Add additional plotting method parameters for correct data fetches
+- Add `date_format=` to `CAS.upload` method for formatting CSV exported data to a specific format
+- Update TK subsystem
+
+## 1.8.1 - 2021-01-21
+
+- Fix compatibility with pandas 1.2 DataFrame rendering
+- Fix TKECERT error by locating libcrypto automatically
+
+## 1.8.0 - 2021-01-12
+
+- Use ssl module's CA list as default
+- Improve initial connection performance
+- Fix OAuth authentication in REST connections
+- Fix log truncation with messages >1000 characters
+
+## 1.7.1 - 2020-09-29
+
+- Add ability to apply SAS formats to columns in a `SASDataFrame`
+- Support timezones in data uploaded and downloaded from CAS tables
+- Fix issue with TK path on Windows when using flask
+
+## 1.7.0 - 2020-08-19
+
+- Add Python 3.8 support
+- Improve connection parameter handling (add CAS_URL= connection variable)
+- Improve connection protocol auto-detection
+
 ## 1.6.1 - 2020-02-10
 
 - Add pandas v1.0.0 support
