@@ -3879,8 +3879,8 @@ class TestCASTable(tm.TestCase):
 
         tzs = (['PST', 'PDT', 'PDT', 'PST'],
                ['PDT', 'PST', 'PST', 'PDT'])
-        self.assertIn([x.tzname() for x in df_pac.datetime], tzs)
-        self.assertIn([x.tzname() for x in tblf.datetime], tzs)
+        self.assertIn([x.tzname() for x in sorted(df_pac.datetime)], tzs)
+        self.assertIn([x.tzname() for x in sorted(tblf.datetime)], tzs)
 
     @unittest.skipIf(pd_version <= (0, 14, 0), 'Need newer version of Pandas')
     def test_dt_methods(self):
