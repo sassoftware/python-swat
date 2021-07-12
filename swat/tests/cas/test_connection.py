@@ -288,18 +288,18 @@ class TestConnection(tm.TestCase):
         # Use a unique name to avoid conflict with any pre-existing global 'CARS' table
         casoutTblName = 'CARS_' + str(uuid.uuid4()).upper()
 
-        out = self.s.upload(myFile, casout={'name':casoutTblName})
-        
+        out = self.s.upload(myFile, casout={'name': casoutTblName})
+
         tbl = out['casTable']
 
         out = self.s.tableinfo()['TableInfo']
         self.assertTrue(casoutTblName in out['Name'].tolist())
 
-        tbl = self.s.upload(myFile, casout={'name':casoutTblName, 'replace': 'True'})['casTable']
+        tbl = self.s.upload(myFile, casout={'name': casoutTblName,
+                                            'replace': 'True'})['casTable']
 
         out = self.s.tableinfo()['TableInfo']
         self.assertTrue(casoutTblName in out['Name'].tolist())
-        
 
         casoutGlobalTblName = 'GLOBAL_CARS_' + str(uuid.uuid4()).upper()
         tbl = self.s.upload(myFile, casout={'name': casoutGlobalTblName,
@@ -309,7 +309,6 @@ class TestConnection(tm.TestCase):
         out = out['TableInfo']
         self.assertTrue(casoutTblName in out['Name'].tolist())
         self.assertTrue(casoutGlobalTblName in out['Name'].tolist())
-        
 
         self.s.droptable(casoutGlobalTblName)
         self.s.droptable(casoutTblName)
@@ -345,13 +344,13 @@ class TestConnection(tm.TestCase):
         # Use a unique name to avoid conflict with any pre-existing global 'CARS' table
         casoutTblName = 'CARS_' + str(uuid.uuid4()).upper()
 
-        tbl = self.s.upload_file(myFile, casout={'name':casoutTblName})
+        tbl = self.s.upload_file(myFile, casout={'name': casoutTblName})
 
         out = self.s.tableinfo()['TableInfo']
         self.assertTrue(casoutTblName in out['Name'].tolist())
 
         with self.assertRaises(swat.SWATError):
-            self.s.upload_file(myFile, casout={'name':casoutTblName})
+            self.s.upload_file(myFile, casout={'name': casoutTblName})
 
         tbl.droptable()
 
