@@ -328,7 +328,7 @@ class TestConnection(tm.TestCase):
         # DataFrame
         casout_tbl_name = 'CARS_' + str(uuid.uuid4()).upper()
         df = pd.read_csv(myFile)
-        tbl = self.s.upload(df, 
+        tbl = self.s.upload(df,
                             casout=dict(replace=True, name=casout_tbl_name))['casTable']
 
         out = self.s.tableinfo()['TableInfo']
