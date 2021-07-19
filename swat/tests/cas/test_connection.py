@@ -286,52 +286,52 @@ class TestConnection(tm.TestCase):
         myFile = os.path.join(os.path.dirname(st.__file__), 'datasources', 'cars.csv')
 
         # Use a unique name to avoid conflict with any pre-existing global 'CARS' table
-        casoutTblName = 'CARS_' + str(uuid.uuid4()).upper()
+        casout_tbl_name = 'CARS_' + str(uuid.uuid4()).upper()
 
-        out = self.s.upload(myFile, casout={'name': casoutTblName})
+        out = self.s.upload(myFile, casout={'name': casout_tbl_name})
 
         tbl = out['casTable']
 
         out = self.s.tableinfo()['TableInfo']
-        self.assertTrue(casoutTblName in out['Name'].tolist())
+        self.assertTrue(casout_tbl_name in out['Name'].tolist())
 
-        tbl = self.s.upload(myFile, casout={'name': casoutTblName,
+        tbl = self.s.upload(myFile, casout={'name': casout_tbl_name,
                                             'replace': 'True'})['casTable']
 
         out = self.s.tableinfo()['TableInfo']
-        self.assertTrue(casoutTblName in out['Name'].tolist())
+        self.assertTrue(casout_tbl_name in out['Name'].tolist())
 
-        casoutGlobalTblName = 'GLOBAL_CARS_' + str(uuid.uuid4()).upper()
-        tbl = self.s.upload(myFile, casout={'name': casoutGlobalTblName,
+        casout_global_tbl_name = 'GLOBAL_CARS_' + str(uuid.uuid4()).upper()
+        tbl = self.s.upload(myFile, casout={'name': casout_global_tbl_name,
                                             'promote': True})['casTable']
 
         out = self.s.tableinfo()
         out = out['TableInfo']
-        self.assertTrue(casoutTblName in out['Name'].tolist())
-        self.assertTrue(casoutGlobalTblName in out['Name'].tolist())
+        self.assertTrue(casout_tbl_name in out['Name'].tolist())
+        self.assertTrue(casout_global_tbl_name in out['Name'].tolist())
 
-        self.s.droptable(casoutGlobalTblName)
-        self.s.droptable(casoutTblName)
+        self.s.droptable(casout_global_tbl_name)
+        self.s.droptable(casout_tbl_name)
 
         # URLs
-        casoutTblName = 'CLASS_' + str(uuid.uuid4()).upper()
+        casout_tbl_name = 'CLASS_' + str(uuid.uuid4()).upper()
         tbl = self.s.upload('https://raw.githubusercontent.com/sassoftware/'
                             'sas-viya-programming/master/data/class.csv',
-                            casout=dict(replace=True, name=casoutTblName))['casTable']
+                            casout=dict(replace=True, name=casout_tbl_name))['casTable']
 
         out = self.s.tableinfo()['TableInfo']
-        self.assertTrue(casoutTblName in out['Name'].tolist())
+        self.assertTrue(casout_tbl_name in out['Name'].tolist())
         self.assertEqual(len(tbl), 19)
 
         tbl.droptable()
 
         # DataFrame
-        casoutTblName = 'CARS_' + str(uuid.uuid4()).upper()
+        casout_tbl_name = 'CARS_' + str(uuid.uuid4()).upper()
         df = pd.read_csv(myFile)
-        tbl = self.s.upload(df, casout=dict(replace=True, name=casoutTblName))['casTable']
+        tbl = self.s.upload(df, casout=dict(replace=True, name=casout_tbl_name))['casTable']
 
         out = self.s.tableinfo()['TableInfo']
-        self.assertTrue(casoutTblName in out['Name'].tolist())
+        self.assertTrue(casout_tbl_name in out['Name'].tolist())
         self.assertEqual(len(tbl), 428)
 
         tbl.droptable()
@@ -342,15 +342,15 @@ class TestConnection(tm.TestCase):
         myFile = os.path.join(os.path.dirname(st.__file__), 'datasources', 'cars.csv')
 
         # Use a unique name to avoid conflict with any pre-existing global 'CARS' table
-        casoutTblName = 'CARS_' + str(uuid.uuid4()).upper()
+        casout_tbl_name = 'CARS_' + str(uuid.uuid4()).upper()
 
-        tbl = self.s.upload_file(myFile, casout={'name': casoutTblName})
+        tbl = self.s.upload_file(myFile, casout={'name': casout_tbl_name})
 
         out = self.s.tableinfo()['TableInfo']
-        self.assertTrue(casoutTblName in out['Name'].tolist())
+        self.assertTrue(casout_tbl_name in out['Name'].tolist())
 
         with self.assertRaises(swat.SWATError):
-            self.s.upload_file(myFile, casout={'name': casoutTblName})
+            self.s.upload_file(myFile, casout={'name': casout_tbl_name})
 
         tbl.droptable()
 
@@ -360,15 +360,15 @@ class TestConnection(tm.TestCase):
         myFile = os.path.join(os.path.dirname(st.__file__), 'datasources', 'cars.csv')
 
         # Use a unique name to avoid conflict with any pre-existing global 'CARS' table
-        casoutTblName = 'CARS_' + str(uuid.uuid4()).upper()
+        casout_tbl_name = 'CARS_' + str(uuid.uuid4()).upper()
 
-        tbl = self.s.upload_frame(pd.read_csv(myFile), casout=dict(name=casoutTblName))
+        tbl = self.s.upload_frame(pd.read_csv(myFile), casout=dict(name=casout_tbl_name))
 
         out = self.s.tableinfo()['TableInfo']
-        self.assertTrue(casoutTblName in out['Name'].tolist())
+        self.assertTrue(casout_tbl_name in out['Name'].tolist())
 
         with self.assertRaises(swat.SWATError):
-            self.s.upload_frame(pd.read_csv(myFile), casout=dict(name=casoutTblName))
+            self.s.upload_frame(pd.read_csv(myFile), casout=dict(name=casout_tbl_name))
 
         # Test data types
         cars = pd.read_csv(myFile)
@@ -376,7 +376,7 @@ class TestConnection(tm.TestCase):
         cars['MPG_City'] = cars['MPG_City'].astype('int32')
         cars['MPG_Highway'] = cars['MPG_Highway'].astype('int32')
 
-        tbl = self.s.upload_frame(cars, casout=dict(name=casoutTblName, replace=True))
+        tbl = self.s.upload_frame(cars, casout=dict(name=casout_tbl_name, replace=True))
 
         if 'csv-ints' in self.s.server_features:
             self.assertEqual(tbl['Make'].dtype, 'varchar')
@@ -392,7 +392,7 @@ class TestConnection(tm.TestCase):
             self.assertEqual(tbl['MPG_Highway'].dtype, 'double')
 
         # Test importoptions.vars=
-        tbl = self.s.upload_frame(cars, casout=dict(name=casoutTblName, replace=True),
+        tbl = self.s.upload_frame(cars, casout=dict(name=casout_tbl_name, replace=True),
                                   importoptions=dict(
                                       vars=dict(Make=dict(type='char', length=20),
                                                 Model=dict(type='char', length=40))))
