@@ -266,7 +266,7 @@ def main(args):
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(prog='stage-release-candidate',
+    parser = argparse.ArgumentParser(description=__doc__.strip(),
                                      formatter_class=argparse.RawTextHelpFormatter)
 
     parser.add_argument('tag', type=tag_type, metavar='tag',
