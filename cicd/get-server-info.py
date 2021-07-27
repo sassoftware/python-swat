@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 
 '''
-get-server-info
+Retrieve CAS server information from CAS log
 
-Retrieve CAS server information using CAS log.  The CAS server command
-is expected to have a -display option with a unique key for the invoked
-server.  This is used to retrieve the PID of the server process.  The
-basename of the CAS log file must match the value in the -display option.
+The CAS server command is expected to have a `-display` option with a unique
+key for the invoked server.  This is used to retrieve the PID of the server
+process.  The basename of the CAS log file must match the value in the
+`-display` option.
 
 '''
 
@@ -35,7 +35,7 @@ def main(args):
 
     '''
     if not os.path.isfile(args.log_file):
-        print_err('ERROR: File not found: {}'.format(args.log_file))
+        print_err('ERROR: File not found: {}.'.format(args.log_file))
         sys.exit(1)
 
     iters = 0
@@ -118,7 +118,8 @@ def main(args):
 
 if __name__ == '__main__':
 
-    opts = argparse.ArgumentParser(description=__doc__.strip())
+    opts = argparse.ArgumentParser(description=__doc__.strip(),
+                                   formatter_class=argparse.RawTextHelpFormatter)
 
     opts.add_argument('log_file', type=str, metavar='log-file',
                       help='path to CAS server log')

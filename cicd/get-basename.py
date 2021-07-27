@@ -78,7 +78,8 @@ def main(args):
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description=__doc__.strip())
+    parser = argparse.ArgumentParser(description=__doc__.strip(),
+                                     formatter_class=argparse.RawTextHelpFormatter)
 
     parser.add_argument('root', type=str, metavar='<directory>', nargs='?', default='.',
                         help='root directory of Python package')

@@ -3,6 +3,11 @@
 '''
 Return the WORKSPACE as a URL
 
+Some downstream commands require the path to a Jenkins `WORKSPACE` variable
+as a URL rather than a file path. This URL must be formatted differently for
+Windows than for UNIX-like operating systems. This utility does the proper
+formatting for the host type.
+
 '''
 
 import argparse
@@ -26,7 +31,8 @@ def main(args):
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description=__doc__.strip())
+    parser = argparse.ArgumentParser(description=__doc__.strip(),
+                                     formatter_class=argparse.RawTextHelpFormatter)
 
     args = parser.parse_args()
 

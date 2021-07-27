@@ -3,6 +3,20 @@
 '''
 Install TK libraries and C extensions
 
+In order to support the binary CAS protocol, the SWAT package needs both
+a C extension which surfaces the API for that protocol as well as the underlying
+support libraries (known as TK). This utility will download the TK libraries
+and the C extension from a repository and insert the extensions into the
+proper directory in the SWAT package directory structure. This location is:
+
+    swat/libs/{platform}/
+
+Where `{platform}` is `win` or `linux`.
+
+Since there may be multiple TK versions available at each release (for example,
+shipped and hot-fix versions), the libraries are searched for in the proper
+order.
+
 '''
 
 import argparse
@@ -277,7 +291,8 @@ def main(args):
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description=__doc__.strip())
+    parser = argparse.ArgumentParser(description=__doc__.strip(),
+                                     formatter_class=argparse.RawTextHelpFormatter)
 
     parser.add_argument('root', type=str, nargs='?', default='.',
                         help='root directory of Python package')

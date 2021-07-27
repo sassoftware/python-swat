@@ -1,6 +1,14 @@
 #!/usr/bin/env python
 
-''' Utitily for preparing a new release '''
+'''
+Utitily for preparing a new release
+
+This utility creates a Github release with the specified version,
+title, and assets. When the `-snapshot` option is used, a draft version
+of the current code is created. This is used to create daily builds
+that aren't full public releases.
+
+'''
 
 import argparse
 import datetime
@@ -14,7 +22,16 @@ import tempfile
 from urllib.parse import quote
 
 
-GITHUB_TOKEN = os.environ['GITHUB_TOKEN']
+if '--help' not in sys.argv and '-h' not in sys.argv:
+    try:
+        GITHUB_TOKEN = os.environ['GITHUB_TOKEN']
+    except KeyError:
+        sys.stderr.write('ERROR: This utility requires a Github '
+                         'token for accessing the Github release API.\n')
+        sys.stderr.write('       The variable should be held in an '
+                         'environment variable named GITHUB_TOKEN.\n')
+        sys.exit(1)
+
 RELEASE_TEMPLATE = '''
 Highlights include:
 
@@ -346,7 +363,8 @@ def main(args):
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(prog='stage-release-candidate')
+    parser = argparse.ArgumentParser(description=__doc__.strip(),
+                                     formatter_class=argparse.RawTextHelpFormatter)
 
     parser.add_argument('--version', '-v', type=version_type, metavar='version',
                         help='version of the package')

@@ -3,6 +3,18 @@
 '''
 Generate a Tox config file for all test configurations
 
+To create a test matrix for all supported versions of Python,
+this utility takes a template `tox.ini` file and adds additional
+Tox environments to the end of it. The version of Python and
+pandas used in the environments are determined by those available
+on Anaconda.
+
+The versions of Python on Anaconda are intesected with the versions
+of Python supported in the SWAT C extensions in the package
+(e.g., _pyswat.so (2.7), _pyswa35.so (3.5), etc.). Pandas versions
+are distributed across the version of Python to increase overall
+coverage.
+
 '''
 
 import argparse
@@ -144,7 +156,8 @@ def main(args):
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description=__doc__.strip())
+    parser = argparse.ArgumentParser(description=__doc__.strip(),
+                                     formatter_class=argparse.RawTextHelpFormatter)
 
     parser.add_argument('tox_ini', type=str, metavar='ini-file',
                         help='path to tox.ini file')

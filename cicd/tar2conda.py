@@ -1,6 +1,13 @@
 #!/usr/bin/env python
 
-''' Convert a tar.gz Python package distribution to a conda package '''
+'''
+Convert a tar.gz Python package distribution to a conda package
+
+This tool takes a `tar.gz` of the SWAT package source, C extensions, and TK
+files and converts it to a set of conda files using `conda build`. One conda
+file is created for each supported Python version on each platform.
+
+'''
 
 from __future__ import print_function, division, absolute_import, unicode_literals
 
@@ -310,7 +317,8 @@ def main(url, args):
 
 if __name__ == '__main__':
 
-    opts = argparse.ArgumentParser(description=__doc__.strip())
+    opts = argparse.ArgumentParser(description=__doc__.strip(),
+                                   formatter_class=argparse.RawTextHelpFormatter)
 
     opts.add_argument('url', type=str,
                       help='input file / url')
