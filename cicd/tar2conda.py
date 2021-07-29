@@ -306,7 +306,15 @@ def main(url, args):
                     shutil.copy(ext, os.path.join('swat', 'lib', platform, ext))
 
                 print_err('>' + ' '.join(cmd))
-                subprocess.check_call(cmd)
+                try:
+                    print_err(subprocess.check_output(cmd))
+                except subprocess.CalledProcessError as exc:
+                    out = output.encode('utf-8')
+                    print_err(out)
+                    # Conda build fails intermittently on Windows when cleaning
+                    # up at the end. Ignore these errors on Windows.
+                    if not ('WinError 32' in out and 'used by another process' in out):
+                        raise
 
                 for ext in glob.glob(os.path.join(tmpext, extbase + '.*')):
                     print_err('> remove %s' % ext)
