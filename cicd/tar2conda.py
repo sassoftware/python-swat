@@ -307,9 +307,9 @@ def main(url, args):
 
                 print_err('>' + ' '.join(cmd))
                 try:
-                    print_err(subprocess.check_output(cmd).encode('utf-8'))
+                    print_err(subprocess.check_output(cmd).decode('utf-8'))
                 except subprocess.CalledProcessError as exc:
-                    out = exc.output.encode('utf-8')
+                    out = exc.output.decode('utf-8')
                     print_err(out)
                     # Conda build fails intermittently on Windows when cleaning
                     # up at the end. Ignore these errors on Windows.
