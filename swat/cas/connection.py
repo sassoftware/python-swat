@@ -586,15 +586,27 @@ class CAS(object):
 
         info = self._raw_retrieve('builtins.serverstatus', _messagelevel='error',
                                   _apptag='UI')
-        version = tuple([int(x) for x in info['About']['Version'].split('.')][:2])
-        stype = info['About']['System']['OS Name'].lower()
+        if info.severity > 1:
+            raise SWATError(info.status)
+
+        try:
+            version = tuple([int(x) for x in info['About']['Version'].split('.')][:2])
+            stype = info['About']['System']['OS Name'].lower()
+        except KeyError:
+            import sys
+            sys.stderr.write('%s\n' % info)
+            raise
 
         # Check for reflection levels feature
         kwargs = {}
         if version >= (3, 5):
             kwargs['showlabels'] = False
+
         res = self._raw_retrieve('builtins.reflect', _messagelevel='error',
                                  _apptag='UI', action='builtins.reflect', **kwargs)
+        if res.severity > 1:
+            raise SWATError(res.status)
+
         if [x for x in res[0]['actions'][0]['params'] if x['name'] == 'levels']:
             out.add('reflection-levels')
 
