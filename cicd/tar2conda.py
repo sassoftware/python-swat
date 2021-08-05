@@ -185,9 +185,11 @@ class TemporaryDirectory(object):
 
     def __exit__(self, exc_type, exc_value, traceback):
         import atexit
+
         def onerror(func, path, excinfo):
             ''' Error function for rmtree '''
             print_err('WARNING: Could not remove file %s.' % path)
+
         atexit.register(shutil.rmtree, self.dir_name, onerror=onerror)
 
 
