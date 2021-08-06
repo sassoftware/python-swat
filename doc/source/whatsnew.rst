@@ -8,6 +8,11 @@ What’s New
 
 This document outlines features and improvements from each release.
 
+1.9.3 (August 6, 2021)
+----------------------
+
+-  Fix showlabels issue in Viya deployment before version 3.5
+
 1.9.2 (June 18, 2021)
 ---------------------
 

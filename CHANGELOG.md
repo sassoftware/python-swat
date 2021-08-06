@@ -1,6 +1,10 @@
 
 # Change Log
 
+## 1.9.3 - 2021-08-06
+
+- Fix showlabels issue in Viya deployment before version 3.5
+
 ## 1.9.2 - 2021-06-18
 
 - Add authorization code as authentication method
