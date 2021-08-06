@@ -33,7 +33,7 @@ def get_file(fname):
 setup(
     zip_safe=False,
     name='swat',
-    version='1.9.3',
+    version='1.9.4-dev',
     description='SAS Scripting Wrapper for Analytics Transfer (SWAT)',
     long_description=get_file('README.md'),
     long_description_content_type='text/markdown',
