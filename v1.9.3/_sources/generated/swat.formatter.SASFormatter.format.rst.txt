@@ -1,0 +1,6 @@
+swat.formatter.SASFormatter.format
+==================================
+
+.. currentmodule:: swat.formatter
+
+.. automethod:: SASFormatter.format

@@ -1,0 +1,6 @@
+swat.cas.table.CASTableGroupBy.min
+==================================
+
+.. currentmodule:: swat.cas.table
+
+.. automethod:: CASTableGroupBy.min

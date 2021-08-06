@@ -1,0 +1,6 @@
+swat.cas.table.SASColumnMethods.digamma
+=======================================
+
+.. currentmodule:: swat.cas.table
+
+.. automethod:: SASColumnMethods.digamma
