@@ -312,7 +312,8 @@ def main(url, args):
 
                 print_err('>' + ' '.join(cmd))
                 try:
-                    print_err(subprocess.check_output(cmd).decode('utf-8'))
+                    print_err(subprocess.check_output(cmd,
+                        stderr=subprocess.STDOUT).decode('utf-8'))
                 except subprocess.CalledProcessError as exc:
                     out = exc.output.decode('utf-8')
                     print_err(out)
