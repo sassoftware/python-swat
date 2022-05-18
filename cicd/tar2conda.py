@@ -262,8 +262,13 @@ def main(url, args):
                 if m.group(2).split('.')[0] == '_pyswat':
                     continue
                 platform = m.group(1)
+                pvlist = list(m.group(3) or '27')
+                if len(pvlist) < 2:
+                    pyv = pvlist[0]
+                else:
+                    pyv = ".".join((pvlist[0],"".join(pvlist[1:len(pvlist)])))
                 versions.append(dict(extension=m.group(2),
-                                     pyversion='.'.join(list(m.group(3) or '27'))))
+                                     pyversion=pyv))
 
 #       # Filter version list
 #       if not versions:
