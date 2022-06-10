@@ -8,6 +8,12 @@ What’s New
 
 This document outlines features and improvements from each release.
 
+1.10.0 (June 10, 2022)
+----------------------
+
+-  Add Python 3.10 support
+-  Update TK subsystem
+
 1.9.3 (August 6, 2021)
 ----------------------
 
