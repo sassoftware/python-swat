@@ -1,0 +1,6 @@
+swat.cas.table.CASTable.copy
+============================
+
+.. currentmodule:: swat.cas.table
+
+.. automethod:: CASTable.copy

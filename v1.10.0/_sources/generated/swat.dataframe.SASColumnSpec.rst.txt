@@ -1,0 +1,23 @@
+swat.dataframe.SASColumnSpec
+============================
+
+.. currentmodule:: swat.dataframe
+
+.. autoclass:: SASColumnSpec
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~SASColumnSpec.__init__
+      ~SASColumnSpec.fromtable
+   
+   
+
+   
+   
+   

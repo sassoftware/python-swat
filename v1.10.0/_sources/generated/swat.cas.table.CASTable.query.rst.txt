@@ -1,0 +1,6 @@
+swat.cas.table.CASTable.query
+=============================
+
+.. currentmodule:: swat.cas.table
+
+.. automethod:: CASTable.query
