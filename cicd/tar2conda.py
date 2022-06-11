@@ -266,7 +266,7 @@ def main(url, args):
                 if len(pvlist) < 2:
                     pyv = pvlist[0]
                 else:
-                    pyv = ".".join((pvlist[0],"".join(pvlist[1:len(pvlist)])))
+                    pyv = ".".join((pvlist[0], "".join(pvlist[1:len(pvlist)])))
                 versions.append(dict(extension=m.group(2),
                                      pyversion=pyv))
 
