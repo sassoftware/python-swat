@@ -1,0 +1,6 @@
+swat.cas.table.CASTable.cv
+==========================
+
+.. currentmodule:: swat.cas.table
+
+.. automethod:: CASTable.cv

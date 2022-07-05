@@ -1,0 +1,6 @@
+swat.cas.table.SASColumnMethods.beta
+====================================
+
+.. currentmodule:: swat.cas.table
+
+.. automethod:: SASColumnMethods.beta

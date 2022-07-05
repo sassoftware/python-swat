@@ -1,0 +1,6 @@
+swat.cas.table.CASTable.nmiss
+=============================
+
+.. currentmodule:: swat.cas.table
+
+.. automethod:: CASTable.nmiss
