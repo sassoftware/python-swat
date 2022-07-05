@@ -60,7 +60,7 @@ install SWAT.
 PyPI
 ----
 
-SWAT can be installed from PyPI using ``pip`` as follows:
+The latest release of SWAT can be installed from PyPI using ``pip`` as follows:
 
    pip install swat
 
