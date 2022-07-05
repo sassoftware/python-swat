@@ -8,6 +8,11 @@ What’s New
 
 This document outlines features and improvements from each release.
 
+1.11.0 (July 5, 2022)
+---------------------
+
+-  Update TK subsystem
+
 1.10.0 (June 10, 2022)
 ----------------------
 
