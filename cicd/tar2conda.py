@@ -1,6 +1,13 @@
 #!/usr/bin/env python
 
-''' Convert a tar.gz Python package distribution to a conda package '''
+'''
+Convert a tar.gz Python package distribution to a conda package
+
+This tool takes a `tar.gz` of the SWAT package source, C extensions, and TK
+files and converts it to a set of conda files using `conda build`. One conda
+file is created for each supported Python version on each platform.
+
+'''
 
 from __future__ import print_function, division, absolute_import, unicode_literals
 
@@ -178,7 +185,12 @@ class TemporaryDirectory(object):
 
     def __exit__(self, exc_type, exc_value, traceback):
         import atexit
-        atexit.register(shutil.rmtree, self.dir_name)
+
+        def onerror(func, path, excinfo):
+            ''' Error function for rmtree '''
+            print_err('WARNING: Could not remove file %s.' % path)
+
+        atexit.register(shutil.rmtree, self.dir_name, onerror=onerror)
 
 
 @contextlib.contextmanager
@@ -250,8 +262,13 @@ def main(url, args):
                 if m.group(2).split('.')[0] == '_pyswat':
                     continue
                 platform = m.group(1)
+                pvlist = list(m.group(3) or '27')
+                if len(pvlist) < 2:
+                    pyv = pvlist[0]
+                else:
+                    pyv = ".".join((pvlist[0], "".join(pvlist[1:len(pvlist)])))
                 versions.append(dict(extension=m.group(2),
-                                     pyversion='.'.join(list(m.group(3) or '27'))))
+                                     pyversion=pyv))
 
 #       # Filter version list
 #       if not versions:
@@ -299,7 +316,17 @@ def main(url, args):
                     shutil.copy(ext, os.path.join('swat', 'lib', platform, ext))
 
                 print_err('>' + ' '.join(cmd))
-                subprocess.check_call(cmd)
+                try:
+                    print_err(
+                        subprocess.check_output(cmd,
+                                                stderr=subprocess.STDOUT).decode('utf-8'))
+                except subprocess.CalledProcessError as exc:
+                    out = exc.output.decode('utf-8')
+                    print_err(out)
+                    # Conda build fails intermittently on Windows when cleaning
+                    # up at the end. Ignore these errors on Windows.
+                    if not ('WinError 32' in out and 'used by another process' in out):
+                        raise
 
                 for ext in glob.glob(os.path.join(tmpext, extbase + '.*')):
                     print_err('> remove %s' % ext)
@@ -310,7 +337,8 @@ def main(url, args):
 
 if __name__ == '__main__':
 
-    opts = argparse.ArgumentParser(description=__doc__.strip())
+    opts = argparse.ArgumentParser(description=__doc__.strip(),
+                                   formatter_class=argparse.RawTextHelpFormatter)
 
     opts.add_argument('url', type=str,
                       help='input file / url')

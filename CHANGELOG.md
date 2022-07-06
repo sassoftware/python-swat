@@ -1,6 +1,33 @@
 
 # Change Log
 
+## 1.11.0 - 2022-07-05
+
+- Update TK subsystem
+
+## 1.10.0 - 2022-06-10
+
+- Add Python 3.10 support
+- Update TK subsystem
+
+## 1.9.3 - 2021-08-06
+
+- Fix showlabels issue in Viya deployment before version 3.5
+
+## 1.9.2 - 2021-06-18
+
+- Add authorization code as authentication method
+
+## 1.9.1 - 2021-06-11
+
+- Add Python 3.9 support
+
+## 1.9.0 - 2021-05-24
+
+- Add additional plotting method parameters for correct data fetches
+- Add `date_format=` to `CAS.upload` method for formatting CSV exported data to a specific format
+- Update TK subsystem
+
 ## 1.8.1 - 2021-01-21
 
 - Fix compatibility with pandas 1.2 DataFrame rendering

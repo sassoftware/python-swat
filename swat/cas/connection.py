@@ -32,10 +32,11 @@ import json
 import os
 import random
 import re
+import requests
 import six
 import warnings
 import weakref
-from six.moves.urllib.parse import urlparse
+from six.moves.urllib.parse import urlparse, urlencode, urljoin
 from . import rest
 from .. import clib
 from .. import config as cf
@@ -177,6 +178,8 @@ class CAS(object):
         Base path of URL when using the REST protocol.
     ssl_ca_list : string, optional
         The path to the SSL certificates for the CAS server.
+    authcode : string, optional
+        Authorization code from SASLogon used to retrieve an OAuth token.
     **kwargs : any, optional
         Arbitrary keyword arguments used for internal purposes only.
 
@@ -346,7 +349,7 @@ class CAS(object):
     def __init__(self, hostname=None, port=None, username=None, password=None,
                  session=None, locale=None, nworkers=None, name=None,
                  authinfo=None, protocol=None, path=None, ssl_ca_list=None,
-                 **kwargs):
+                 authcode=None, **kwargs):
 
         # Filter session options allowed as parameters
         _kwargs = {}
@@ -364,19 +367,6 @@ class CAS(object):
             warnings.warn('Unrecognized keys in connection parameters: %s' %
                           ', '.join(unknown_keys))
 
-        # If a prototype exists, use it for the connection config
-        prototype = kwargs.get('prototype')
-        if prototype is not None:
-            soptions = a2n(prototype._soptions)
-            protocol = a2n(prototype._protocol)
-        else:
-            # Distill connection information from parameters, config, and environment
-            hostname, port, username, password, protocol = \
-                self._get_connection_info(hostname, port, username,
-                                          password, protocol, path)
-            soptions = a2n(getsoptions(session=session, locale=locale,
-                                       nworkers=nworkers, protocol=protocol))
-
         # Check for SSL certificate
         if ssl_ca_list is None:
             ssl_ca_list = cf.get_option('cas.ssl_ca_list')
@@ -391,6 +381,25 @@ class CAS(object):
                     authinfo = [authinfo]
                 raise OSError('None of the specified authinfo files from'
                               'list exist: %s' % ', '.join(authinfo))
+
+        # If a prototype exists, use it for the connection config
+        prototype = kwargs.get('prototype')
+        if prototype is not None:
+            soptions = a2n(prototype._soptions)
+            protocol = a2n(prototype._protocol)
+        else:
+            # Distill connection information from parameters, config, and environment
+            hostname, port, username, password, protocol = \
+                self._get_connection_info(hostname, port, username,
+                                          password, protocol, path)
+            soptions = a2n(getsoptions(session=session, locale=locale,
+                                       nworkers=nworkers, protocol=protocol))
+
+            # Check for authcode authentication
+            authcode = authcode or cf.get_option('cas.authcode')
+            if protocol in ['http', 'https'] and authcode:
+                username = None
+                password = type(self)._get_token(authcode=authcode, url=hostname)
 
         # Create error handler
         try:
@@ -523,6 +532,42 @@ class CAS(object):
                 num = num + 1
         self._id_generator = _id_generator()
 
+    @classmethod
+    def _get_token(cls, username=None, password=None, authcode=None,
+                   client_id=None, client_secret=None, url=None):
+        ''' Retrieve token from Viya installation '''
+        from .rest.connection import _print_request, _setup_ssl
+
+        with requests.Session() as req_sess:
+
+            _setup_ssl(req_sess)
+
+            req_sess.headers.update({'Accept': 'application/vnd.sas.compute.session+json',
+                                     'Content-Type': 'application/x-www-form-urlencoded'})
+
+            client_id = client_id or cf.get_option('cas.client_id') or 'SWAT'
+
+            authcode = authcode or cf.get_option('cas.authcode')
+            if authcode:
+                client_secret = client_secret or cf.get_option('cas.client_secret') or ''
+                body = {'grant_type': 'authorization_code', 'code': authcode,
+                        'client_id': client_id, 'client_secret': client_secret}
+            else:
+                username = username or cf.get_option('cas.username')
+                password = password or cf.get_option('cas.token')
+                body = {'grant_type': 'password', 'username': username,
+                        'password': password}
+
+            resp = req_sess.post(urljoin(url, '/SASLogon/oauth/token'),
+                                 auth=(client_id, ''),
+                                 data=urlencode(body))
+
+            if resp.status_code >= 300:
+                raise SWATError('Token request resulted in a status of %s' %
+                                resp.status_code)
+
+            return resp.json()['access_token']
+
     def _gen_id(self):
         ''' Generate an ID unique to the session '''
         import numpy
@@ -541,13 +586,27 @@ class CAS(object):
 
         info = self._raw_retrieve('builtins.serverstatus', _messagelevel='error',
                                   _apptag='UI')
-        version = tuple([int(x) for x in info['About']['Version'].split('.')][:2])
-        stype = info['About']['System']['OS Name'].lower()
+        if info.severity > 1:
+            raise SWATError(info.status)
+
+        try:
+            version = tuple([int(x) for x in info['About']['Version'].split('.')][:2])
+            stype = info['About']['System']['OS Name'].lower()
+        except KeyError:
+            import sys
+            sys.stderr.write('%s\n' % info)
+            raise
 
         # Check for reflection levels feature
+        kwargs = {}
+        if version >= (3, 5):
+            kwargs['showlabels'] = False
+
         res = self._raw_retrieve('builtins.reflect', _messagelevel='error',
-                                 _apptag='UI', action='builtins.reflect',
-                                 showlabels=False)
+                                 _apptag='UI', action='builtins.reflect', **kwargs)
+        if res.severity > 1:
+            raise SWATError(res.status)
+
         if [x for x in res[0]['actions'][0]['params'] if x['name'] == 'levels']:
             out.add('reflection-levels')
 
@@ -2325,7 +2384,7 @@ class CAS(object):
             asname = asname.lower()
             query = {'showhidden': showhidden, 'actionset': asname}
 
-            if not get_option('interactive_mode'):
+            if not get_option('interactive_mode') and self.server_version >= (3, 5):
                 query['showlabels'] = False
 
             if 'reflection-levels' in self.server_features:

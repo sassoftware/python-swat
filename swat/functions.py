@@ -32,6 +32,13 @@ def concat(objs, **kwargs):
     '''
     Concatenate data in given objects
 
+    All objects in the concatenation must be of the same type.
+
+    This function is simply a thin wrapper around `pandas.concat',
+    'CASTable.concat`, and `pandas.DataFrame.concat` depending on which
+    objects are in the concatenation. See the documentation for each
+    function / method for which parameters are supported.
+
     Parameters
     ----------
     objs : list, optional
@@ -41,11 +48,9 @@ def concat(objs, **kwargs):
 
     See Also
     --------
-    :func:`pd.concat`
-
-    Notes
-    -----
-    All input objects must be of the same type.
+    :func:`pandas.concat`
+    :meth:`CASTable.concat`
+    :meth:`pandas.DataFrame.concat`
 
     Returns
     -------
@@ -76,6 +81,13 @@ def merge(left, right, **kwargs):
     '''
     Merge data in given objects
 
+    All objects in the merge must be of the same type.
+
+    This function is simply a thin wrapper around `pandas.merge' or
+    'CASTable.merge` depending on which objects are in the merge.
+    See the documentation for each function / method for which parameters
+    are supported.
+
     Parameters
     ----------
     left : CASTable or SASDataFrame or DataFrame, optional
@@ -87,11 +99,8 @@ def merge(left, right, **kwargs):
 
     See Also
     --------
-    :func:`pd.merge`
-
-    Notes
-    -----
-    All input objects must be of the same type.
+    :func:`pandas.merge`
+    :meth:`CASTable.merge`
 
     Returns
     -------

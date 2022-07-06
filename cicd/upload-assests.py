@@ -1,6 +1,12 @@
 #!/usr/bin/env python
 
-''' Create a new release on Github '''
+'''
+Upload assets to a given Github release
+
+This utility uploads a set of assets to an existing Github release
+which is specified by the tag for that release.
+
+'''
 
 import argparse
 import glob
@@ -14,7 +20,15 @@ import tarfile
 from urllib.parse import quote
 
 
-GITHUB_TOKEN = os.environ['GITHUB_TOKEN']
+if '--help' not in sys.argv and '-h' not in sys.argv:
+    try:
+        GITHUB_TOKEN = os.environ['GITHUB_TOKEN']
+    except KeyError:
+        sys.stderr.write('ERROR: This utility requires a Github '
+                         'token for accessing the Github release API.\n')
+        sys.stderr.write('       The variable should be held in an '
+                         'environment variable named GITHUB_TOKEN.\n')
+        sys.exit(1)
 
 
 def print_err(*args, **kwargs):
@@ -93,7 +107,8 @@ def main(args):
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(prog='create-release')
+    parser = argparse.ArgumentParser(description=__doc__.strip(),
+                                     formatter_class=argparse.RawTextHelpFormatter)
 
     parser.add_argument('--tag', '-t', type=str, metavar='tag_name', required=True,
                         help='tag of release to upload the asset to')

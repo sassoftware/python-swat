@@ -1,6 +1,14 @@
 #!/usr/bin/env python
 
-''' Utitily for moving a release candidate to a full release '''
+'''
+Utitily for moving a release candidate to a full release
+
+When a Github release is first created, it is done as a draft release.
+This is done so that the release can be tested and verified before going
+public as an official release. This utility is used to promote a
+draft release to a public release.
+
+'''
 
 import argparse
 import datetime
@@ -18,7 +26,15 @@ from urllib.parse import quote
 from urllib.request import urlopen, urlretrieve
 
 
-GITHUB_TOKEN = os.environ['GITHUB_TOKEN']
+if '--help' not in sys.argv and '-h' not in sys.argv:
+    try:
+        GITHUB_TOKEN = os.environ['GITHUB_TOKEN']
+    except KeyError:
+        sys.stderr.write('ERROR: This utility requires a Github token '
+                         'for accessing the Github release API.\n')
+        sys.stderr.write('       The variable should be held in an '
+                         'environment variable named GITHUB_TOKEN.\n')
+        sys.exit(1)
 
 
 def get_repo():
@@ -250,7 +266,8 @@ def main(args):
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(prog='stage-release-candidate')
+    parser = argparse.ArgumentParser(description=__doc__.strip(),
+                                     formatter_class=argparse.RawTextHelpFormatter)
 
     parser.add_argument('tag', type=tag_type, metavar='tag',
                         help='tag of the release to promote')

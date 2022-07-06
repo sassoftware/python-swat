@@ -3,6 +3,9 @@
 '''
 Return the version of the package
 
+This command looks for the `__version__` attribute in the `swat/__init__.py`
+file to determine the package version.
+
 '''
 
 from __future__ import print_function, division, absolute_import, unicode_literals
@@ -25,7 +28,12 @@ def main(args):
 
     version = None
 
-    init = glob.glob(os.path.join(args.root, 'swat', '__init__.py'))[0]
+    try:
+        init = glob.glob(os.path.join(args.root, 'swat', '__init__.py'))[0]
+    except IndexError:
+        sys.stderr.write('ERROR: Could not locate swat/__init__.py file\n')
+        return 1
+
     with open(init, 'r') as init_in:
         for line in init_in:
             m = re.search(r'''^__version__\s*=\s*['"]([^'"]+)['"]''', line)

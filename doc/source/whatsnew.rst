@@ -8,6 +8,40 @@ What’s New
 
 This document outlines features and improvements from each release.
 
+1.11.0 (July 5, 2022)
+---------------------
+
+-  Update TK subsystem
+
+1.10.0 (June 10, 2022)
+----------------------
+
+-  Add Python 3.10 support
+-  Update TK subsystem
+
+1.9.3 (August 6, 2021)
+----------------------
+
+-  Fix showlabels issue in Viya deployment before version 3.5
+
+1.9.2 (June 18, 2021)
+---------------------
+
+-  Add authorization code as authentication method
+
+1.9.1 (June 11, 2021)
+---------------------
+
+-  Add Python 3.9 support
+
+1.9.0 (May 24, 2021)
+--------------------
+
+-  Add additional plotting method parameters for correct data fetches
+-  Add ``date_format=`` to ``CAS.upload`` method for formatting CSV
+   exported data to a specific format
+-  Update TK subsystem
+
 1.8.1 (January 21, 2021)
 ------------------------
 

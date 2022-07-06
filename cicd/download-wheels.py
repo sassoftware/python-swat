@@ -1,6 +1,18 @@
 #!/usr/bin/env python
 
-''' Download Wheel files from URL '''
+'''
+Download Wheel files from URL
+
+Wheel files may be stored in a staging area before being published to the
+public PyPI repository. This is done so that new packages can be tested
+before being published officially.
+
+This utility allows you to download a set of wheel files from a repository
+(optionally specifying a specific version of the package) and storing
+them in a local directory. They can then be uploaded to the final location
+using `twine`.
+
+'''
 
 import argparse
 import os
@@ -35,7 +47,8 @@ def main(args):
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(prog='download-wheels')
+    parser = argparse.ArgumentParser(description=__doc__.strip(),
+                                     formatter_class=argparse.RawTextHelpFormatter)
 
     parser.add_argument('--version', '-v', type=str, metavar='version',
                         help='version of package to download')

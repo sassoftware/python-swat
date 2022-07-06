@@ -148,7 +148,8 @@ The [LICENSE.md](https://github.com/sassoftware/python-swat/blob/master/LICENSE.
 # Additional Resources
 - [Python-SWAT API Documentation](https://sassoftware.github.io/python-swat/)
 - [SAS Viya Documentation](https://support.sas.com/documentation/onlinedoc/viya/index.html)
-- [Q&A Support](https://communities.sas.com/t5/SAS-Viya-Coders-Library/tkb-p/cas%40tkb)
+- [SAS Communities Library](https://communities.sas.com/t5/SAS-Communities-Library/tkb-p/library/label-name/Python)
+- [Q&A Support](https://communities.sas.com/t5/Developers/bd-p/developers)
 - [Python](http://www.python.org/)
 - [SAS Viya](http://www.sas.com/en_us/software/viya.html)
 
