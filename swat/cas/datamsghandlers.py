@@ -22,7 +22,7 @@ CAS data message handlers
 '''
 
 from __future__ import print_function, division, absolute_import, unicode_literals
-from pathlib import Path
+from glob import glob
 
 import base64
 import copy
@@ -1219,7 +1219,8 @@ class Image(CASDataMsgHandler):
     behavior should be similar to that of the image.loadImages_ CAS action for loading
     server-side images:
 
-    .. _image.loadImages: https://go.documentation.sas.com/doc/en/pgmsascdc/v_028/casactml/casactml_image_details22.htm  # noqa: E501
+    .. _image.loadImages: https://go.documentation.sas.com/doc/en/pgmsascdc/v_028/casactml/casactml_image_details22
+    .htm  # noqa: E501
 
     Although images will be stored in binary format to a CAS table column
     labeled "_image_", the CAS table metadata will not indicate that this column should
@@ -1237,8 +1238,12 @@ class Image(CASDataMsgHandler):
     """
 
     def __init__(self, data, nrecs=1000, subdirs=True):
-        if isinstance(data, (str, Path)):
-            path = Path(data)
+
+        # To maintain Py2.7 compatibility, use strings instead of Paths.
+        if type(data).__module__ == 'pathlib':
+            data = str(data)
+
+        if isinstance(data, str):
             files = []
 
             # Search for all images in the directory and (optionally) in subdirectories
@@ -1247,9 +1252,11 @@ class Image(CASDataMsgHandler):
                     'tif', 'tiff', 'webp'):
 
                 if subdirs:
-                    files.extend(path.glob(f'**/*.{extension}'))
+                    pattern = os.path.join(data, '**', '*.%s' % extension)
                 else:
-                    files.extend(path.glob(f'*.{extension}'))
+                    pattern = os.path.join(data, '*.%s' % extension)
+
+                files.extend(glob(pattern, recursive=subdirs))
             self._data = files
         else:
             self._data = list(data)
@@ -1286,14 +1293,18 @@ class Image(CASDataMsgHandler):
 
         record = self._data[row]
 
+        # Convert Path instances to str for Py2.7 compatibility.
+        if type(record).__module__ == 'pathlib':
+            record = str(record)
+
         # Default value.  Will be overridden if disk location is known.
         path = 'Image_%d.png' % (row + 1)
 
         # Input is path to an image on disk.  Can just read bytes directly.
-        if isinstance(record, (str, Path)):
+        if isinstance(record, str):
             with open(record, 'rb') as f:
                 image = f.read()
-            path = str(record)
+            path = record
         else:
             # Otherwise, PIL package is required to format data as an image.
             if PIL is None:
