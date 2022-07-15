@@ -26,10 +26,11 @@ from glob import glob
 
 import base64
 import copy
+import datetime
 import io
 import os
 import re
-import datetime
+import sys
 import warnings
 import numpy as np
 import pandas as pd
@@ -1236,21 +1237,23 @@ class Image(CASDataMsgHandler):
     ... CASTable('MYTABLE', caslib='CASUSER(user)')
 
     """
-
     def __init__(self, data, nrecs=1000, subdirs=True):
-
         # To maintain Py2.7 compatibility, use strings instead of Paths.
         if type(data).__module__ == 'pathlib':
             data = str(data)
 
         if isinstance(data, str):
             files = []
+            extensions = ['bmp', 'dib', 'jpg', 'jpeg', 'jpe', 'jp2', 'png', 'pbm', 'pmg',
+                          'ppm', 'tif', 'tiff', 'webp']
+
+            # Also search for uppercase file extensions if not running on a
+            # case-insensitive OS (Windows).
+            if not sys.platform.startswith('win'):
+                extensions += [x.upper() for x in extensions]
 
             # Search for all images in the directory and (optionally) in subdirectories
-            for extension in (
-                    'bmp', 'dib', 'jpg', 'jpeg', 'jpe', 'jp2', 'png', 'pbm', 'pmg', 'ppm',
-                    'tif', 'tiff', 'webp'):
-
+            for extension in extensions:
                 if subdirs:
                     pattern = os.path.join(data, '**', '*.%s' % extension)
                 else:
