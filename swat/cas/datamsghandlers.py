@@ -22,12 +22,15 @@ CAS data message handlers
 '''
 
 from __future__ import print_function, division, absolute_import, unicode_literals
+from glob import glob
 
 import base64
 import copy
-import pytz
-import re
 import datetime
+import io
+import os
+import re
+import sys
 import warnings
 import numpy as np
 import pandas as pd
@@ -51,6 +54,10 @@ from ..dataframe import SASDataFrame
 from ..utils import getsoptions
 from .connection import getone, CASRequest, CASResponse
 
+try:
+    import PIL
+except ImportError:
+    PIL = None
 
 _SIZES = {
     'char': 1,
@@ -1173,3 +1180,162 @@ class DBAPI(CASDataMsgHandler):
             del self._firstrow
             return row
         return self.cursor.fetchone()
+
+
+class Image(CASDataMsgHandler):
+    """CAS data message handler for images.
+
+    Parameters
+    ----------
+    data : str, pathlib.Path, or iterable of images
+        Multiple formats are supported for providing images:
+         - str or :class:`pathlib.Path`
+           Path to a directory containing one or more images.
+         - iterable of str or :class:`pathlib.Path`
+           a list of file paths specifying the location of each image.
+         - iterable of :class:`numpy.ndarray`
+           a list of arrays where each array contains the pixel values for the image.
+           Arrays should be (height, width) or (height, width, 3).  Channel order is
+           assumed to be RGB.
+         - iterable of :class:`PIL.Image.Image`
+           a list of Pillow Image objects.
+    nrecs : int, optional
+       The number of rows to allocate in the buffer.  This can be
+       smaller than the number of totals rows since they are uploaded
+       in batches `nrecs` long.
+    subdirs : bool, optional
+        Whether to search subdirectories for additional images.  Only applies when
+        `data` is a path to a directory.  If images are read from subdirectories, the
+        name of the subdirectory will be used as the image class label.
+
+    See Also
+    --------
+    :class:`CASDataMsgHandler`
+    :class:`numpy.ndarray`
+    :class:`PIL.Image.Image`
+
+    Notes
+    -----
+    When using this data message handler to upload client-side images to CAS, the
+    behavior should be similar to that of the image.loadImages_ CAS action for loading
+    server-side images:
+
+    .. _image.loadImages: https://go.documentation.sas.com/doc/en/pgmsascdc/v_028/casactml/casactml_image_details22
+    .htm  # noqa: E501
+
+    Although images will be stored in binary format to a CAS table column
+    labeled "_image_", the CAS table metadata will not indicate that this column should
+    be interpreted as images.  Use the altertable CAS action to update the column's type:
+
+    >>> conn.addtable(table='mytable', **imagedmh.args.addtable)
+    >>> conn.altertable(table='mytable', columns=[{'name': '_image_', 'binaryType': 'image'}])
+
+    Examples
+    --------
+    >>> dmh = Image('/path/to/images')
+    >>> conn.addtable(table='mytable', **dmh.args.addtable).casTable
+    ... CASTable('MYTABLE', caslib='CASUSER(user)')
+
+    """
+    def __init__(self, data, nrecs=1000, subdirs=True):
+        # To maintain Py2.7 compatibility, use strings instead of Paths.
+        if type(data).__module__ == 'pathlib':
+            data = str(data)
+
+        if isinstance(data, str):
+            files = []
+            extensions = ['bmp', 'dib', 'jpg', 'jpeg', 'jpe', 'jp2', 'png', 'pbm', 'pmg',
+                          'ppm', 'tif', 'tiff', 'webp']
+
+            # Also search for uppercase file extensions if not running on a
+            # case-insensitive OS (Windows).
+            if not sys.platform.startswith('win'):
+                extensions += [x.upper() for x in extensions]
+
+            # Search for all images in the directory and (optionally) in subdirectories
+            for extension in extensions:
+                if subdirs:
+                    pattern = os.path.join(data, '**', '*.%s' % extension)
+                else:
+                    pattern = os.path.join(data, '*.%s' % extension)
+
+                files.extend(glob(pattern, recursive=subdirs))
+            self._data = files
+        else:
+            self._data = list(data)
+
+        self._subdirs = subdirs
+
+        variables = [
+            dict(name='_image_', rtype='CHAR', type='VARBINARY'),
+            dict(name='_label_', rtype='CHAR', type='VARCHAR'),
+            dict(name='_size_', rtype='NUMERIC', type='INT64'),
+            dict(name='_path_', rtype='CHAR', type='VARCHAR'),
+            dict(name='_type_', rtype='CHAR', type='VARCHAR'),
+            dict(name='_id_', rtype='NUMERIC', type='INT64')
+        ]
+
+        super(Image, self).__init__(variables, nrecs=nrecs)
+
+    def getrow(self, row):
+        """Get a row of values from the data source
+
+        Parameters
+        ----------
+        row : int
+            The row index to return.
+
+        Returns
+        -------
+        list-of-any
+            One row of data values
+
+        """
+        if row >= len(self._data):
+            return
+
+        record = self._data[row]
+
+        # Convert Path instances to str for Py2.7 compatibility.
+        if type(record).__module__ == 'pathlib':
+            record = str(record)
+
+        # Default value.  Will be overridden if disk location is known.
+        path = 'Image_%d.png' % (row + 1)
+
+        # Input is path to an image on disk.  Can just read bytes directly.
+        if isinstance(record, str):
+            with open(record, 'rb') as f:
+                image = f.read()
+            path = record
+        else:
+            # Otherwise, PIL package is required to format data as an image.
+            if PIL is None:
+                raise RuntimeError(
+                    'Formatting data as images requires the Pillow package '
+                    '(https://pypi.org/project/Pillow/).')
+
+            # Convert Numpy array to Image
+            if isinstance(record, np.ndarray):
+                record = PIL.Image.fromarray(record)
+
+            # Get bytes from Image instance
+            if isinstance(record, PIL.Image.Image):
+                buffer = io.BytesIO()
+
+                # If image was loaded from disk it may have attribute with filename
+                if hasattr(record, 'filename'):
+                    record.save(buffer, format=record.format)
+                    path = record.filename
+                else:
+                    record.save(buffer, format='png')
+                buffer.seek(0)
+                image = buffer.read()
+
+        # Use folder name if images loaded from subdirectories
+        label = os.path.basename(os.path.dirname(path)) if self._subdirs else ''
+
+        image_type = os.path.splitext(path)[-1].lower().lstrip('.')
+        size = len(image)
+
+        return [image, label, size, path, image_type, row + 1]

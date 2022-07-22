@@ -847,6 +847,7 @@ handle the piece-wise loading of data into the server.
    Excel
    Clipboard
    DBAPI
+   Image
 
 
 Date and Time Functions
