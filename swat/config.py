@@ -458,6 +458,13 @@ register_option('display.apply_formats', 'boolean', check_boolean, False,
                          'CAS_DISPLAY_APPLY_FORMATS',
                          'SAS_DISPLAY_APPLY_FORMATS'])
 
+#
+# authentication options
+#
+
+register_option('cas.allow_basic_auth', 'boolean', check_boolean, True,
+                'Allow userid and password authentication.\n'
+                'This option will be deprecated in a future release.\n')
 
 #
 # IPython notebook options

@@ -46,6 +46,7 @@ from ...utils.keyword import keywordify
 from ...utils.compat import (a2u, a2b, int_types, int32_types, int64_types, dict_types,
                              float64_types, items_types, int32, int64, float64)
 from ...utils.authinfo import query_authinfo
+import warnings
 
 # pylint: disable=C0330
 
@@ -66,6 +67,7 @@ def _print_request(rtype, url, headers, data=None):
 
 def _print_response(text):
     ''' Print the response for debugging '''
+    sys.stderr.write("RESPONSE text: \n")
     sys.stderr.write(a2u(text, 'utf-8'))
     sys.stderr.write('\n')
 
@@ -206,7 +208,8 @@ class REST_CASConnection(object):
     username : string
         The CAS username
     password : string
-        The CAS password
+        The CAS password or an OAuth token
+        If an OAuth token is specified, do not specify username
     soptions : string
         The string containing connection options
     error : REST_CASError
@@ -291,13 +294,31 @@ class REST_CASConnection(object):
         self._error = error
         self._results = None
 
+        allow_basic_auth = get_option('cas.allow_basic_auth')
+        # add in the following when allow_basic_auth default is changed to False
+        # if allow_basic_auth:
+        #     logger.warning("allow_basic_auth has been deprecated and will be removed "
+        #                 "in a future release")
+        #     warnings.warn("allow_basic_auth has been deprecated and will be removed "
+        #                 "in a future release", category=FutureWarning)
+
         if username and password:
             logger.debug('Using Basic authentication')
+#           if allow_basic_auth:
+#               logger.warning("Basic authentication has been deprecated in servers that "
+#                              "support OAuth tokens. It will be removed "
+#                              "in a future release")
+#               warnings.warn("Basic authentication has been deprecated in servers that "
+#                             "support OAuth tokens. It will be removed "
+#                             "in a future release.", category=FutureWarning)
+
             self._auth = b'Basic ' + base64.b64encode(
                 ('%s:%s' % (username, password)).encode('utf-8')).strip()
+            self._isBearer = False
         elif password:
             logger.debug('Using Bearer token authentication')
             self._auth = b'Bearer ' + a2b(password).strip()
+            self._isBearer = True
         else:
             raise SWATError('Either username and password, or OAuth token in the '
                             'password parameter must be specified.')
@@ -310,8 +331,14 @@ class REST_CASConnection(object):
             'Accept': 'application/json',
             'Content-Type': 'application/json',
             'Content-Length': '0',
-            'Authorization': self._auth,
         })
+
+        if allow_basic_auth or self._isBearer:
+            # user is using an OAuth token, or the allow_basic_auth option is set to
+            # allow Basic Auth
+            self._req_sess.headers.update({
+                'Authorization': self._auth,
+            })
 
         self._connect(session=session, locale=locale, wait_until_idle=False)
 
@@ -358,6 +385,11 @@ class REST_CASConnection(object):
                             time.sleep(connection_retry_interval)
                             get_retries += 1
                             continue
+
+                        if res.status_code == 401:
+                            if self._check_authorization_method(res):
+                                continue
+
                         break
 
                 else:
@@ -376,6 +408,11 @@ class REST_CASConnection(object):
                             time.sleep(connection_retry_interval)
                             put_retries += 1
                             continue
+
+                        if res.status_code == 401:
+                            if self._check_authorization_method(res):
+                                continue
+
                         break
 
                 if 'tkhttp-id' in res.cookies:
@@ -420,14 +457,68 @@ class REST_CASConnection(object):
             except KeyError:
                 raise SWATError(str(out))
 
-            except Exception as exc:
-                raise SWATError(str(exc))
-
             except SWATError:
                 raise
 
+            except Exception as exc:
+                raise SWATError(str(exc))
+
         if wait_until_idle:
             self._wait_until_idle()
+
+    def _check_authorization_method(self, res):
+        '''
+        Check whether Bearer auth is supported
+
+        Notes
+        -----
+        This method may modify the request session headers.
+
+        Parameters
+        ----------
+        res : requests.models.Response
+            The http response from the /cas/sessions request
+
+        Returns
+        -------
+        boolean
+            Whether or not the /cas/sessions should be
+            retried with the new Authorization header
+        '''
+        logger.debug('HTTP 401 error : checking Authorization header')
+        retry_auth = False
+
+        if 'Authorization' in self._req_sess.headers:
+            # we've already sent an Authorization header and
+            # the server didn't like it, bail.
+            logger.debug("Authorization header previously sent")
+        else:
+            # < Viya 4 does not return correct info in www-authenticate
+            # Hack check : Is this a viya 4 server:
+            if 'tkhttp-id' in res.cookies:
+                # Does the server support Bearer auth ?
+                wwwauth = res.headers.get('WWW-Authenticate')
+                if wwwauth:
+                    supported_auths = wwwauth.split(', ')
+                    for supported_auth in supported_auths:
+                        if supported_auth.lower().startswith('bearer'):
+                            # OAuth is supported and the user
+                            # is using userid/password.
+                            raise SWATError('You must use an OAuth token '
+                                            'to connect to this server.')
+            else:
+                logger.debug("Server does not appear to be a viya4 server, "
+                             "allowing basic auth")
+
+            # There was no www-authenticate, or OAuth is not
+            # supported on this server, or server is < viya4.
+            # Add the basic auth header and retry with basic auth
+            self._req_sess.headers.update({
+                'Authorization': self._auth,
+            })
+            retry_auth = True
+
+        return retry_auth
 
     def _set_next_connection(self):
         ''' Iterate to the next available controller '''
