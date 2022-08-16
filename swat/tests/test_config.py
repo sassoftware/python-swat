@@ -255,7 +255,7 @@ class TestConfig(tm.TestCase):
 
     def test_suboptions(self):
         self.assertEqual(list(sorted(get_suboptions('cas').keys())),
-                         ['authcode', 'client_id', 'client_secret',
+                         ['allow_basic_auth', 'authcode', 'client_id', 'client_secret',
                           'connection_retries', 'connection_retry_interval',
                           'dataset', 'debug', 'exception_on_severity',
                           'hostname', 'missing',
