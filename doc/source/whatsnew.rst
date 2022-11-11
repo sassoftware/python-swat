@@ -8,6 +8,13 @@ What’s New
 
 This document outlines features and improvements from each release.
 
+1.12.0 (November 11, 2022)
+--------------------------
+
+-  New Image CASDataMsgHandler to allow easy uploading of client-side
+   images to a CAS table
+-  Update TK subsystem
+
 1.11.0 (July 5, 2022)
 ---------------------
 

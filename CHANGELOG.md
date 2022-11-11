@@ -1,6 +1,11 @@
 
 # Change Log
 
+## 1.12.0 - 2022-11-11
+
+- New Image CASDataMsgHandler to allow easy uploading of client-side images to a CAS table
+- Update TK subsystem
+
 ## 1.11.0 - 2022-07-05
 
 - Update TK subsystem
