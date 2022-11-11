@@ -1,0 +1,361 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>swat.cas.datamsghandlers.Image &mdash; SWAT 1.12.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script type="text/javascript" src="../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="swat.cas.utils.datetime.cas2python_timestamp" href="swat.cas.utils.datetime.cas2python_timestamp.html" />
+    <link rel="prev" title="swat.cas.datamsghandlers.DBAPI" href="swat.cas.datamsghandlers.DBAPI.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> SWAT
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.12.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../whatsnew.html">What’s New</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting-started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../workflows.html">Workflows</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../binary-vs-rest.html">Binary vs. REST</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../encryption.html">Encryption (SSL)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../loading-data.html">Loading Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../table-vs-dataframe.html">CASTable vs. DataFrame vs. SASDataFrame</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../indexing.html">Indexing and Data Selection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../bygroups.html">Handling By Groups</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../sorting.html">Sorting</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../api.html">API Reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../api.html#utility-functions">Utility Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#cas">CAS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#casresults">CASResults</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#sasdataframe">SASDataFrame</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#sasformatter">SASFormatter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#castable">CASTable</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#cascolumn">CASColumn</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#castablegroupby">CASTableGroupBy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#casresponse">CASResponse</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../api.html#data-message-handlers">Data Message Handlers</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="swat.cas.datamsghandlers.CASDataMsgHandler.html">swat.cas.datamsghandlers.CASDataMsgHandler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="swat.cas.datamsghandlers.PandasDataFrame.html">swat.cas.datamsghandlers.PandasDataFrame</a></li>
+<li class="toctree-l3"><a class="reference internal" href="swat.cas.datamsghandlers.SAS7BDAT.html">swat.cas.datamsghandlers.SAS7BDAT</a></li>
+<li class="toctree-l3"><a class="reference internal" href="swat.cas.datamsghandlers.CSV.html">swat.cas.datamsghandlers.CSV</a></li>
+<li class="toctree-l3"><a class="reference internal" href="swat.cas.datamsghandlers.Text.html">swat.cas.datamsghandlers.Text</a></li>
+<li class="toctree-l3"><a class="reference internal" href="swat.cas.datamsghandlers.FWF.html">swat.cas.datamsghandlers.FWF</a></li>
+<li class="toctree-l3"><a class="reference internal" href="swat.cas.datamsghandlers.JSON.html">swat.cas.datamsghandlers.JSON</a></li>
+<li class="toctree-l3"><a class="reference internal" href="swat.cas.datamsghandlers.HTML.html">swat.cas.datamsghandlers.HTML</a></li>
+<li class="toctree-l3"><a class="reference internal" href="swat.cas.datamsghandlers.SQLTable.html">swat.cas.datamsghandlers.SQLTable</a></li>
+<li class="toctree-l3"><a class="reference internal" href="swat.cas.datamsghandlers.SQLQuery.html">swat.cas.datamsghandlers.SQLQuery</a></li>
+<li class="toctree-l3"><a class="reference internal" href="swat.cas.datamsghandlers.Excel.html">swat.cas.datamsghandlers.Excel</a></li>
+<li class="toctree-l3"><a class="reference internal" href="swat.cas.datamsghandlers.Clipboard.html">swat.cas.datamsghandlers.Clipboard</a></li>
+<li class="toctree-l3"><a class="reference internal" href="swat.cas.datamsghandlers.DBAPI.html">swat.cas.datamsghandlers.DBAPI</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">swat.cas.datamsghandlers.Image</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#date-and-time-functions">Date and Time Functions</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../gotchas.html">Programming Gotchas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../troubleshooting.html">Troubleshooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../sas-tk.html">SAS TK</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../licenses.html">Licenses</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">SWAT</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../api.html">API Reference</a> &raquo;</li>
+        
+      <li>swat.cas.datamsghandlers.Image</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/generated/swat.cas.datamsghandlers.Image.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="swat-cas-datamsghandlers-image">
+<h1>swat.cas.datamsghandlers.Image<a class="headerlink" href="#swat-cas-datamsghandlers-image" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="swat.cas.datamsghandlers.Image">
+<em class="property">class </em><code class="sig-prename descclassname">swat.cas.datamsghandlers.</code><code class="sig-name descname">Image</code><span class="sig-paren">(</span><em class="sig-param">data</em>, <em class="sig-param">nrecs=1000</em>, <em class="sig-param">subdirs=True</em><span class="sig-paren">)</span><a class="headerlink" href="#swat.cas.datamsghandlers.Image" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="swat.cas.datamsghandlers.CASDataMsgHandler.html#swat.cas.datamsghandlers.CASDataMsgHandler" title="swat.cas.datamsghandlers.CASDataMsgHandler"><strong>swat.cas.datamsghandlers.CASDataMsgHandler</strong></a></p>
+<p>CAS data message handler for images.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>data</strong><span class="classifier">str, pathlib.Path, or iterable of images</span></dt><dd><dl class="simple">
+<dt>Multiple formats are supported for providing images:</dt><dd><ul class="simple">
+<li><p>str or <a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.11)"><strong>pathlib.Path</strong></a>
+Path to a directory containing one or more images.</p></li>
+<li><p>iterable of str or <a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.11)"><strong>pathlib.Path</strong></a>
+a list of file paths specifying the location of each image.</p></li>
+<li><p>iterable of <a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.23)"><strong>numpy.ndarray</strong></a>
+a list of arrays where each array contains the pixel values for the image.
+Arrays should be (height, width) or (height, width, 3).  Channel order is
+assumed to be RGB.</p></li>
+<li><p>iterable of <strong>PIL.Image.Image</strong>
+a list of Pillow Image objects.</p></li>
+</ul>
+</dd>
+</dl>
+</dd>
+<dt><strong>nrecs</strong><span class="classifier">int</span><span class="opt-sep">, </span><span class="optional">optional</span></dt><dd><p>The number of rows to allocate in the buffer.  This can be
+smaller than the number of totals rows since they are uploaded
+in batches <cite>nrecs</cite> long.</p>
+</dd>
+<dt><strong>subdirs</strong><span class="classifier">bool</span><span class="opt-sep">, </span><span class="optional">optional</span></dt><dd><p>Whether to search subdirectories for additional images.  Only applies when
+<cite>data</cite> is a path to a directory.  If images are read from subdirectories, the
+name of the subdirectory will be used as the image class label.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="swat.cas.datamsghandlers.CASDataMsgHandler.html#swat.cas.datamsghandlers.CASDataMsgHandler" title="swat.cas.datamsghandlers.CASDataMsgHandler"><strong>CASDataMsgHandler</strong></a></dt><dd></dd>
+<dt><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.23)"><strong>numpy.ndarray</strong></a></dt><dd></dd>
+<dt><strong>PIL.Image.Image</strong></dt><dd></dd>
+</dl>
+</div>
+<p class="rubric">Notes</p>
+<p>When using this data message handler to upload client-side images to CAS, the
+behavior should be similar to that of the <a class="reference external" href="https://go.documentation.sas.com/doc/en/pgmsascdc/v_028/casactml/casactml_image_details22">image.loadImages</a> CAS action for loading
+server-side images:</p>
+<p>.htm  # noqa: E501</p>
+<p>Although images will be stored in binary format to a CAS table column
+labeled “_image_”, the CAS table metadata will not indicate that this column should
+be interpreted as images.  Use the altertable CAS action to update the column’s type:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">conn</span><span class="o">.</span><span class="n">addtable</span><span class="p">(</span><span class="n">table</span><span class="o">=</span><span class="s1">&#39;mytable&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">imagedmh</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">addtable</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">conn</span><span class="o">.</span><span class="n">altertable</span><span class="p">(</span><span class="n">table</span><span class="o">=</span><span class="s1">&#39;mytable&#39;</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="p">[{</span><span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="s1">&#39;_image_&#39;</span><span class="p">,</span> <span class="s1">&#39;binaryType&#39;</span><span class="p">:</span> <span class="s1">&#39;image&#39;</span><span class="p">}])</span>
+</pre></div>
+</div>
+<p class="rubric">Examples</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">dmh</span> <span class="o">=</span> <span class="n">Image</span><span class="p">(</span><span class="s1">&#39;/path/to/images&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">conn</span><span class="o">.</span><span class="n">addtable</span><span class="p">(</span><span class="n">table</span><span class="o">=</span><span class="s1">&#39;mytable&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">dmh</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">addtable</span><span class="p">)</span><span class="o">.</span><span class="n">casTable</span>
+<span class="gp">... </span><span class="n">CASTable</span><span class="p">(</span><span class="s1">&#39;MYTABLE&#39;</span><span class="p">,</span> <span class="n">caslib</span><span class="o">=</span><span class="s1">&#39;CASUSER(user)&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="method">
+<dt id="swat.cas.datamsghandlers.Image.__init__">
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">data</em>, <em class="sig-param">nrecs=1000</em>, <em class="sig-param">subdirs=True</em><span class="sig-paren">)</span><a class="headerlink" href="#swat.cas.datamsghandlers.Image.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize self.  See help(type(self)) for accurate signature.</p>
+</dd></dl>
+
+<p class="rubric">Methods</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#swat.cas.datamsghandlers.Image.__init__" title="swat.cas.datamsghandlers.Image.__init__"><strong>__init__</strong></a>(self, data[, nrecs, subdirs])</p></td>
+<td><p>Initialize self.</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>finish</strong>(self, connection)</p></td>
+<td><p>Finish the data sending operation</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>getone</strong>(self, connection, \*\*kwargs)</p></td>
+<td><p>Get a single response from the server</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>getrow</strong>(self, row)</p></td>
+<td><p>Get a row of values from the data source</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>send</strong>(self, connection, nrecs)</p></td>
+<td><p>Send the records to the connection</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>write</strong>(self, row, values)</p></td>
+<td><p>Write the value to the row and column specified in the buffer</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Attributes</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><strong>args</strong></p></td>
+<td><p>Property that generates the CAS action parameters for CAS actions that use a data message handler.</p></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="swat.cas.utils.datetime.cas2python_timestamp.html" class="btn btn-neutral float-right" title="swat.cas.utils.datetime.cas2python_timestamp" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="swat.cas.datamsghandlers.DBAPI.html" class="btn btn-neutral float-left" title="swat.cas.datamsghandlers.DBAPI" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016 SAS Institute Inc. All Rights Reserved.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

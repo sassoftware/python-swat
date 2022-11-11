@@ -1,0 +1,6 @@
+swat.cas.table.CASTable.nlargest
+================================
+
+.. currentmodule:: swat.cas.table
+
+.. automethod:: CASTable.nlargest

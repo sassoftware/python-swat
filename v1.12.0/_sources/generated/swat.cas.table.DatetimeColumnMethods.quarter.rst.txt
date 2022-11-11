@@ -1,0 +1,6 @@
+swat.cas.table.DatetimeColumnMethods.quarter
+============================================
+
+.. currentmodule:: swat.cas.table
+
+.. autoproperty:: DatetimeColumnMethods.quarter
