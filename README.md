@@ -92,6 +92,10 @@ you can import swat and create a connection::
 
 Note the default port for the Python SWAT connection is 5570.
 
+If you are using python-swat version 1.8.0 or later to connect to a SAS Viya 3.5 CAS server using Kerberos, prior to connecting you must set the Service Principal Name (SPN) using the CASSPN environment variable.  For SAS Viya 3.5, the SPN string must start with 'sascas@', followed by the hostname.
+
+    export CASSPN=sascas@host
+
 If you get an error message about the **TCP/IP negClientSSL support routine**, you 
 likely have an issue with your SSL certificate configuration.  See the 
 [Encryption](https://sassoftware.github.io/python-swat/encryption.html) documentation
