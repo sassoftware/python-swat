@@ -236,10 +236,19 @@ close it.
 Authentication
 ==============
 
+The SWAT package supports three types of authentication when connecting to the CAS server:
+
+- Userid and Password
+- OAuth token
+- Kerberos ( binary protocol only )
+
+Userid and Password
+~~~~~~~~~~~~~~~~~~~~~
+
 While it is possible to put your username and password in the :class:`CAS` constructor,
 it's generally not a good idea to have a password in your code.  To get around this issue,
-the :class:`CAS` class supports authinfo files.  Authinfo files are a a file used to
-store username and password information for specified hostname and port.  They are 
+the :class:`CAS` class supports authinfo files.  Authinfo files are a file used to
+store username and password information for specified hostname and port.  They are
 protected by file permissions so that only you can read them.  This allows you to set
 and protect your passwords in one place and have them used by all of your programs.
 
@@ -256,7 +265,7 @@ Hostnames much match the hostname used in the :class:`CAS` constructor exactly. 
 not do any DNS expanding of the names.  So 'host1' and 'host1.my-company.com' are
 considered two different hosts.
 
-Here is an exmaple for a user named 'user01' and password '!s3cret' on host 
+Here is an example for a user named 'user01' and password '!s3cret' on host 
 'cas.my-company.com' and port 12354::
 
     host cas.my-company.com port 12354 user user01 password !s3cret
@@ -283,3 +292,71 @@ of a file explicitly using the ``authinfo=`` parameter.
    :suppress:
 
    conn.close()
+
+The username can also be specified using one of the following environment variables
+
+- CAS_USER
+- CAS_USERNAME
+- CASUSER
+- CASUSERNAME
+
+The password can be specified using one of the following environment variables
+
+- CAS_TOKEN
+- CAS_PASSWORD
+- CASTOKEN
+- CASPASSWORD
+
+.. note:: Userid and Password authentication will be deprecated in a future release.
+          OAuth authentication should be used instead when possible.
+
+OAuth Token
+~~~~~~~~~~~~~~~~~~~~~
+
+Authentication to the CAS server can be performed by using an OAuth token.
+The OAuth token can be specified in the :class:`CAS` constructor using the password parameter.
+When specifying the OAuth token in the :class:`CAS` constructor, do not specify the username parameter.
+
+.. ipython:: python
+   :verbatim:
+
+   conn = swat.CAS('cas.my-company.com', 12354, password='...')
+
+The OAuth token can also be specified using one of the following environment variables
+
+- CAS_TOKEN
+- CAS_PASSWORD
+- CASTOKEN
+- CASPASSWORD
+
+When using the HTTP protocol, the SWAT package can obtain an OAuth token on your behalf by
+specifying an authentication code in the :class:`CAS` constructor using the authcode parameter.
+
+.. ipython:: python
+   :verbatim:
+
+   conn = swat.CAS('https://my-cas-host.com:443/cas-shared-default-http/',
+                   authcode='...')
+
+The authentication code can also be specified using one of the following environment variables
+
+- CAS_AUTHCODE
+- VIYA_AUTHCODE
+- CASAUTHCODE
+- VIYAAUTHCODE
+
+Kerberos
+~~~~~~~~~~~~~~~~~~~~~
+
+The Kerberos Service Principal Name used by Viya 4 is different from the Kerberos Service Principal
+Name used by Viya 3.5.
+Releases of the SWAT package starting with 1.8.0 and later use the Viya 4 Service Principal Name.
+If you wish to connect to a Viya 3.5 CAS server using the SWAT package release 1.8.0 or later,
+you must use the CASSPN environment variable to specify the service principal name in the format
+recognized by Viya 3.5 .  This value should start with 'sascas@' and be followed by the hostname.
+
+.. ipython:: python
+   :verbatim:
+
+   import os
+   os.environ["CASSPN"] = "sascas@host"
