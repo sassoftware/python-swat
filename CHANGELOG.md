@@ -1,6 +1,10 @@
 
 # Change Log
 
+## 1.12.1 - 2023-01-09
+
+- Update Authentication documentation
+
 ## 1.12.0 - 2022-11-11
 
 - New Image CASDataMsgHandler to allow easy uploading of client-side images to a CAS table

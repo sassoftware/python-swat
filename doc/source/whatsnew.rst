@@ -8,6 +8,11 @@ What’s New
 
 This document outlines features and improvements from each release.
 
+1.12.1 (January 9, 2023)
+------------------------
+
+-  Update Authentication documentation
+
 1.12.0 (November 11, 2022)
 --------------------------
 
