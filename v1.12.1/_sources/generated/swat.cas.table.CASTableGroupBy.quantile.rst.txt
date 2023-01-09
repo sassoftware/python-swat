@@ -1,0 +1,6 @@
+swat.cas.table.CASTableGroupBy.quantile
+=======================================
+
+.. currentmodule:: swat.cas.table
+
+.. automethod:: CASTableGroupBy.quantile

@@ -1,0 +1,6 @@
+swat.cas.table.CASTableGroupBy.max
+==================================
+
+.. currentmodule:: swat.cas.table
+
+.. automethod:: CASTableGroupBy.max

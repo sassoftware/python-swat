@@ -1,0 +1,6 @@
+swat.cas.connection.CAS.read\_sql\_table
+========================================
+
+.. currentmodule:: swat.cas.connection
+
+.. automethod:: CAS.read_sql_table

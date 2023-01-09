@@ -1,0 +1,6 @@
+swat.cas.utils.datetime.cas2python\_timestamp
+=============================================
+
+.. currentmodule:: swat.cas.utils.datetime
+
+.. autofunction:: cas2python_timestamp

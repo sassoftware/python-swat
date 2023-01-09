@@ -1,0 +1,6 @@
+swat.cas.table.SASColumnMethods.lgamma
+======================================
+
+.. currentmodule:: swat.cas.table
+
+.. automethod:: SASColumnMethods.lgamma
