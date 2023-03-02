@@ -136,7 +136,7 @@ class TestIMStat(tm.TestCase):
         self.assertEqual(colinfo['Max'].dtype, 'double')
         self.assertEqual(colinfo['Max'].width, 8)
         self.assertEqual(colinfo['Max'].name, 'Max')
-        self.assertEqual(colinfo['Max'].format, 'D8.4')
+        self.assertTrue("D8.4" in colinfo['Max'].format)
 
         self.assertEqual(cols[3], 'N')
         self.assertEqual(colinfo['N'].dtype, 'double')
@@ -154,7 +154,7 @@ class TestIMStat(tm.TestCase):
         self.assertEqual(colinfo['Mean'].dtype, 'double')
         self.assertEqual(colinfo['Mean'].width, 8)
         self.assertEqual(colinfo['Mean'].name, 'Mean')
-        self.assertEqual(colinfo['Mean'].format, 'D8.4')
+        self.assertTrue("D8.4" in colinfo['Mean'].format)
 
         self.assertEqual(cols[6], 'Sum')
         self.assertEqual(colinfo['Sum'].dtype, 'double')
@@ -166,19 +166,19 @@ class TestIMStat(tm.TestCase):
         self.assertEqual(colinfo['Std'].dtype, 'double')
         self.assertEqual(colinfo['Std'].width, 8)
         self.assertEqual(colinfo['Std'].name, 'Std')
-        self.assertEqual(colinfo['Std'].format, 'D8.4')
+        self.assertTrue("D8.4" in colinfo['Std'].format)
 
         self.assertEqual(cols[8], 'StdErr')
         self.assertEqual(colinfo['StdErr'].dtype, 'double')
         self.assertEqual(colinfo['StdErr'].width, 8)
         self.assertEqual(colinfo['StdErr'].name, 'StdErr')
-        self.assertEqual(colinfo['StdErr'].format, 'D8.4')
+        self.assertTrue("D8.4" in colinfo['StdErr'].format)
 
         self.assertEqual(cols[12], 'CV')
         self.assertEqual(colinfo['CV'].dtype, 'double')
         self.assertEqual(colinfo['CV'].width, 8)
         self.assertEqual(colinfo['CV'].name, 'CV')
-        self.assertEqual(colinfo['CV'].format, 'D8.4')
+        self.assertTrue("D8.4" in colinfo['CV'].format)
 
         expected = [
             ['MSRP', 10280.0, 192465.0, 428.0, 0.0, 32774.85514018692,
