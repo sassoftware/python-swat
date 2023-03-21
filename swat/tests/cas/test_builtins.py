@@ -151,7 +151,11 @@ class TestBuiltins(tm.TestCase):
             self.assertIn(r.status, ['Error parsing action parameters.',
                                      "Authorization",
                                      "Nodes cannot be added when the server "
-                                     + "is running with in SMP mode."])
+                                     + "is running with in SMP mode.",
+                                     "The addNode action is not supported "
+                                     + "when executing in Kubernetes. "
+                                     + "To increase workers, adjust the CAS "
+                                     + "Operator workers value."])
 
         r = self.s.addnode(salt='controller', node=['pepper'])
         self.assertContainsMessage(r, "ERROR: The action stopped due to errors.")
