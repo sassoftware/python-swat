@@ -36,6 +36,7 @@ import requests
 import six
 import warnings
 import weakref
+import pandas as pd
 from six.moves.urllib.parse import urlparse, urlencode, urljoin
 from . import rest
 from .. import clib
@@ -62,6 +63,9 @@ from .utils.misc import super_dir, any_file_exists
 
 RETRY_ACTION_CODE = 0x280034
 SESSION_ABORTED_CODE = 0x2D51AC
+
+pd_version = tuple([int(x) for x in re.match(r'^(\d+)\.(\d+)\.(\d+)',
+                                             pd.__version__).groups()])
 
 
 def _option_handler(key, value):
@@ -282,8 +286,8 @@ class CAS(object):
         port = port or cf.get_option('cas.port')
 
         logger.debug('Connection info: hostname=%s port=%s protocol=%s '
-                     'username=%s password=%s path=%s',
-                     hostname, port, protocol, username, password, path)
+                     'username=%s path=%s',
+                     hostname, port, protocol, username, path)
 
         # Always make hostname a list
         if not isinstance(hostname, items_types):
@@ -1480,7 +1484,12 @@ class CAS(object):
         '''
         out = collections.OrderedDict()
 
-        for key, value in df.dtypes.iteritems():
+        # iteritems is deprecated in pandas 1.5.0, use items instead;
+        # items available in 0.21.1
+        dtype_iter = (df.dtypes.items() if pd_version >= (0, 21, 1)
+                      else df.dtypes.iteritems())
+
+        for key, value in dtype_iter:
             value = value.name
 
             if value == 'object':
@@ -1647,11 +1656,21 @@ class CAS(object):
                 delete = True
                 filename = tmp.name
                 name = os.path.splitext(os.path.basename(filename))[0]
-                data.to_csv(filename, encoding='utf-8',
-                            index=False, sep=a2n(',', 'utf-8'),
-                            decimal=a2n('.', 'utf-8'),
-                            date_format=a2n(date_format, 'utf-8'),
-                            line_terminator=a2n('\r\n', 'utf-8'))
+
+                # line_terminator changed to lineterminator in pandas 1.5.0
+                if pd_version >= (1, 5, 0):
+                    data.to_csv(filename, encoding='utf-8',
+                                index=False, sep=a2n(',', 'utf-8'),
+                                decimal=a2n('.', 'utf-8'),
+                                date_format=a2n(date_format, 'utf-8'),
+                                lineterminator=a2n('\r\n', 'utf-8'))
+                else:
+                    data.to_csv(filename, encoding='utf-8',
+                                index=False, sep=a2n(',', 'utf-8'),
+                                decimal=a2n('.', 'utf-8'),
+                                date_format=a2n(date_format, 'utf-8'),
+                                line_terminator=a2n('\r\n', 'utf-8'))
+
                 df_dtypes = self._extract_dtypes(data)
                 importoptions['locale'] = 'EN-us'
 

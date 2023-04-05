@@ -295,7 +295,7 @@ def merge(left, right, how='inner', on=None, left_on=None, right_on=None,
         The key from `left` to join on.  This is used if the
         column names to join on are different in each table.
     right_on : string, optional
-        The key from `right` to join on.  This s used if the
+        The key from `right` to join on.  This is used if the
         column names to join on are different in each table.
     left_index : boolean, optional
         Not supported.
@@ -337,11 +337,17 @@ def merge(left, right, how='inner', on=None, left_on=None, right_on=None,
     if on is None and left_on is None and right_on is None:
         raise SWATError('A column name is required for joining tables.')
     elif left_on is None and right_on is None:
+        if not isinstance(on, str):
+            raise TypeError('`on` parameter must be a string')
         left_on = on
         right_on = on
     elif left_on is None and right_on is not None:
+        if not isinstance(right_on, str):
+            raise TypeError('`right_on` parameter must be a string')
         left_on = right_on or on
     elif left_on is not None and right_on is None:
+        if not isinstance(left_on, str):
+            raise TypeError('`left_on` parameter must be a string')
         right_on = left_on or on
 
     # Find overlapping columns
@@ -3506,7 +3512,13 @@ class CASTable(ParamManager, ActionParamManager):
         '''
         tbl = self._materialize(prefix='_ABS')
         code = []
-        for name, dtype in tbl.dtypes.iteritems():
+
+        # iteritems is deprecated in pandas 1.5.0, use items instead;
+        # items available in 0.21.1
+        dtype_iter = (tbl.dtypes.items() if pd_version >= (0, 21, 1)
+                      else tbl.dtypes.iteritems())
+
+        for name, dtype in dtype_iter:
             if dtype not in ['char', 'varchar', 'binary', 'varbinary',
                              'date', 'time', 'datetime']:
                 code.append('    %s = ABS(%s);' % (_nlit(name), _nlit(name)))
@@ -3524,7 +3536,13 @@ class CASTable(ParamManager, ActionParamManager):
         cvars = []
         ccode = []
         groups = self.get_groupby_vars()
-        for name, dtype in self.dtypes.iteritems():
+
+        # iteritems is deprecated in pandas 1.5.0, use items instead;
+        # items available in 0.21.1
+        dtype_iter = (self.dtypes.items() if pd_version >= (0, 21, 1)
+                      else self.dtypes.iteritems())
+
+        for name, dtype in dtype_iter:
             if name in groups:
                 continue
             boolname = _nlit('%s__bool__' % name)
@@ -3665,7 +3683,12 @@ class CASTable(ParamManager, ActionParamManager):
 
         tbl = self._materialize(prefix='_CLIP')
         code = []
-        for name, dtype in tbl.dtypes.iteritems():
+
+        # iteritems is deprecated in 1.5.0, use items instead;
+        dtype_iter = (tbl.dtypes.items() if pd_version >= (0, 21, 1)
+                      else tbl.dtypes.iteritems())
+
+        for name, dtype in dtype_iter:
             if dtype not in ['char', 'varchar', 'binary', 'varbinary',
                              'date', 'time', 'datetime']:
                 code.append(fmt % (_nlit(name), _nlit(name), _nlit(name)))
@@ -3857,7 +3880,7 @@ class CASTable(ParamManager, ActionParamManager):
         out = out.unstack()
 
         if len(out.index.names) > 1:
-            if pd_version >= (1, 0, 0):
+            if pd_version >= (0, 24, 0):
                 out = out.set_index(pd.MultiIndex(levels=out.index.levels,
                                                   codes=out.index.codes,
                                                   names=out.index.names[:-1] + [None]))
@@ -6212,8 +6235,11 @@ class CASTable(ParamManager, ActionParamManager):
             # Cache column list
             if col is None and columns is None:
                 dtypes = self.dtypes
-                columns = [x[0] for x in dtypes.iteritems()]
-                dtypes = [x[1] for x in dtypes.iteritems()]
+                # iteritems is deprecated in pandas 1.5.0, use items instead;
+                columns = [x[0] for x in (dtypes.items()
+                           if pd_version >= (0, 21, 1) else dtypes.iteritems())]
+                dtypes = [x[1] for x in (dtypes.items()
+                          if pd_version >= (0, 21, 1) else dtypes.iteritems())]
 
             # Apply replacements for each column
             for from_, to in repl_dict.items():
@@ -10187,7 +10213,8 @@ class CASColumn(CASTable):
             groups = self.get_groupby_vars()
             if groups:
                 out.name = tmpname
-                sum = out.sum(level=list(range(len(out.index.names) - 1))).to_frame()
+                sum = out.groupby(level=list(range(len(out.index.names) - 1))).\
+                    sum().to_frame()
                 out = out.reset_index(level=-1)
                 out = pd.merge(out, sum, left_index=True, right_index=True, how='inner')
                 out[tmpname] = out[tmpname + '_x'] / out[tmpname + '_y']

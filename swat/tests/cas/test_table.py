@@ -509,7 +509,7 @@ class TestCASTable(tm.TestCase):
         self.assertEqual(type(data.dtypes.index), type(tbl.dtypes.index))
         self.assertEqual(data.dtypes.index.tolist(), columns)
 
-        if pd_version[0] < 1:
+        if pd_version < (0, 25, 0):
             self.assertEqual(data.ftypes.index.tolist(), columns)
 
     def test_type_counts(self):
@@ -903,9 +903,15 @@ class TestCASTable(tm.TestCase):
         df = self.get_cars_df()
         tbl = self.table
 
-        self.assertEqual(sorted(df['Model'].iteritems()),
+        # iteritems is deprecated in pandas 1.5.0, use items instead;
+        dfiters = (df['Model'].items() if pd_version >= (0, 21, 1)
+                   else df['Model'].iteritems())
+
+        self.assertEqual(sorted(dfiters),
                          sorted(tbl['Model'].iteritems()))
-        self.assertEqual(len(list(df['Model'].iteritems())),
+        dfiters = (df['Model'].items() if pd_version >= (0, 21, 1)
+                   else df['Model'].iteritems())
+        self.assertEqual(len(list(dfiters)),
                          len(list(tbl['Model'].iteritems())))
 
     def test_iterrows(self):
@@ -967,6 +973,7 @@ class TestCASTable(tm.TestCase):
         self.assertEqual(df['Model'].get(99), tbl['Model'].get(99))
         self.assertEqual(df['Model'].get(500), tbl['Model'].get(500))
 
+    @unittest.skipIf(pd_version >= (1, 2, 0), 'Deprecated in pandas')
     def test_lookup(self):
         look = self.table.lookup([0, 5, 10], ['Make', 'Make', 'MSRP'])
         head = self.table.head(n=15).lookup([0, 5, 10], ['Make', 'Make', 'MSRP'])
@@ -1029,7 +1036,10 @@ class TestCASTable(tm.TestCase):
                    'MPG_City', 'MPG_Highway', 'Weight', 'Wheelbase', 'Length']
 
         corr = self.table.corr()
-        dfcorr = self.get_cars_df().corr()
+        if pd_version >= (1, 5, 0):
+            dfcorr = self.get_cars_df().corr(numeric_only=True)
+        else:
+            dfcorr = self.get_cars_df().corr()
 
         self.assertEqual(corr.columns.tolist(), dfcorr.columns.tolist())
         self.assertEqual(corr.columns.tolist(), columns)
@@ -1303,7 +1313,7 @@ class TestCASTable(tm.TestCase):
         #     tm.TestCase.skipTest(self, 'Skip on WX6 until defect S1240339 fixed')
 
         mean = self.table.mean()
-        dfmean = self.get_cars_df().mean()
+        dfmean = self.get_cars_df().mean(numeric_only=True)
 
         self.assertAlmostEqual(mean.loc['MSRP'], dfmean.loc['MSRP'], 4)
         self.assertAlmostEqual(mean.loc['Invoice'], dfmean.loc['Invoice'], 4)
@@ -1340,7 +1350,7 @@ class TestCASTable(tm.TestCase):
             skew = self.table.skew()
         except KeyError:
             return unittest.skip('CAS server does not support skew')
-        dfskew = self.get_cars_df().skew()
+        dfskew = self.get_cars_df().skew(numeric_only=True)
         self.assertTablesEqual(skew, dfskew, precision=4)
 
         skew = self.table.skew(numeric_only=True)
@@ -1352,7 +1362,7 @@ class TestCASTable(tm.TestCase):
             self.table.datastep('keep Make Model Type Origin').skew().tolist()
 
         skew = self.table.groupby('Origin').skew()
-        dfskew = self.get_cars_df().groupby('Origin').skew()
+        dfskew = self.get_cars_df().groupby('Origin').skew(numeric_only=True)
         # Pandas messes up the column order
         dfskew = dfskew[[x for x in self.table.columns if x in dfskew.columns]]
         self.assertTablesEqual(skew, dfskew, precision=4)
@@ -1363,7 +1373,7 @@ class TestCASTable(tm.TestCase):
             kurt = self.table.kurt()
         except KeyError:
             return unittest.skip('CAS server does not support kurtosis')
-        dfkurt = self.get_cars_df().kurt()
+        dfkurt = self.get_cars_df().kurt(numeric_only=True)
         self.assertTablesEqual(kurt, dfkurt, precision=4)
 
         kurt = self.table.kurt(numeric_only=True)
@@ -1491,7 +1501,7 @@ class TestCASTable(tm.TestCase):
         df = self.get_cars_df()
         tbl = self.table
 
-        dfmed = df.median()
+        dfmed = df.median(numeric_only=True)
         tblmed = tbl.median()
 
         self.assertEqual(dfmed.tolist(), tblmed.tolist())
@@ -1504,7 +1514,7 @@ class TestCASTable(tm.TestCase):
         tbl = self.table
 
         # Single quantile
-        dfqnt = df.quantile(interpolation='nearest')
+        dfqnt = df.quantile(interpolation='nearest', numeric_only=True)
         tblqnt = tbl.quantile()
 
         # NOTE: These differ slightly from Pandas
@@ -1514,7 +1524,7 @@ class TestCASTable(tm.TestCase):
         self.assertEqual(dfqnt.tolist(), tblqnt.tolist())
 
         # Multiple quantiles
-        dfqnt = df.quantile([0.1, 0.5, 1], interpolation='nearest')
+        dfqnt = df.quantile([0.1, 0.5, 1], interpolation='nearest', numeric_only=True)
         tblqnt = tbl.quantile([0.1, 0.5, 1])
 
         # NOTE: These differ slightly from Pandas
@@ -2155,7 +2165,8 @@ class TestCASTable(tm.TestCase):
         # with self.assertRaises(TypeError):
         #     tbl.iloc['Make']
 
-    @unittest.skipIf(pd_version >= (1, 0, 0), 'Need newer version of Pandas')
+    # ix is deprecated in 0.20.1 and removed in 1.0.0
+    @unittest.skipIf(pd_version >= (0, 20, 1), 'Deprecated in pandas')
     def test_ix(self):
         df = self.get_cars_df().sort_values(SORT_KEYS)
         tbl = self.table.sort_values(SORT_KEYS)
@@ -2253,10 +2264,9 @@ class TestCASTable(tm.TestCase):
             self.assertTablesEqual(df.ix[:, :],
                                    tbl.ix[:, :], sortby=None)
 
-    @unittest.skipIf(pd_version >= (1, 0, 0), 'Need newer version of Pandas')
     def test_column_ix(self):
-        df = self.get_cars_df().sort_values(['Make', 'Model'])
-        df.index = range(len(df))
+        # df = self.get_cars_df().sort_values(['Make', 'Model'])
+        # df.index = range(len(df))
         tbl = self.table.sort_values(['Make', 'Model'])
 
         with self.assertRaises(NotImplementedError):
@@ -3159,11 +3169,10 @@ class TestCASTable(tm.TestCase):
         self.assertColsEqual(df['MSRP'].clip(40000, 50000),
                              tbl['MSRP'].clip(40000, 50000))
 
-        if pd_version < (1, 0, 0):
-            self.assertColsEqual(df['MSRP'].clip_lower(40000),
-                                 tbl['MSRP'].clip_lower(40000))
-            self.assertColsEqual(df['MSRP'].clip_upper(40000),
-                                 tbl['MSRP'].clip_upper(40000))
+        self.assertColsEqual(df['MSRP'].clip(lower=40000),
+                             tbl['MSRP'].clip_lower(40000))
+        self.assertColsEqual(df['MSRP'].clip(upper=40000),
+                             tbl['MSRP'].clip_upper(40000))
 
         self.assertAlmostEqual(df['MSRP'].corr(df['Invoice']),
                                tbl['MSRP'].corr(tbl['Invoice']), 4)
@@ -3955,21 +3964,40 @@ class TestCASTable(tm.TestCase):
         self.assertColsEqual(df.datetime.dt.nanosecond,
                              tbl.datetime.dt.nanosecond, sort=True)
 
-        # week
-        self.assertColsEqual(df.date.dt.week,
-                             tbl.date.dt.week, sort=True)
-        self.assertColsEqual(df.time.dt.week,
-                             tbl.time.dt.week, sort=True)
-        self.assertColsEqual(df.datetime.dt.week,
-                             tbl.datetime.dt.week, sort=True)
+        # Series.dt.weekofyear and Series.dt.week have been deprecated.
+        # use Series.dt.isocalendar().week instead. ( pandas 1.1.0 )
+        if pd_version >= (1, 1, 0):
+            # week
+            self.assertColsEqual(df.date.dt.isocalendar().week,
+                                 tbl.date.dt.week, sort=True)
+            self.assertColsEqual(df.time.dt.isocalendar().week,
+                                 tbl.time.dt.week, sort=True)
+            self.assertColsEqual(df.datetime.dt.isocalendar().week,
+                                 tbl.datetime.dt.week, sort=True)
 
-        # weekofyear
-        self.assertColsEqual(df.date.dt.weekofyear,
-                             tbl.date.dt.weekofyear, sort=True)
-        self.assertColsEqual(df.time.dt.weekofyear,
-                             tbl.time.dt.weekofyear, sort=True)
-        self.assertColsEqual(df.datetime.dt.weekofyear,
-                             tbl.datetime.dt.weekofyear, sort=True)
+            # weekofyear
+            self.assertColsEqual(df.date.dt.isocalendar().week,
+                                 tbl.date.dt.weekofyear, sort=True)
+            self.assertColsEqual(df.time.dt.isocalendar().week,
+                                 tbl.time.dt.weekofyear, sort=True)
+            self.assertColsEqual(df.datetime.dt.isocalendar().week,
+                                 tbl.datetime.dt.weekofyear, sort=True)
+        else:
+            # week
+            self.assertColsEqual(df.date.dt.week,
+                                 tbl.date.dt.week, sort=True)
+            self.assertColsEqual(df.time.dt.week,
+                                 tbl.time.dt.week, sort=True)
+            self.assertColsEqual(df.datetime.dt.week,
+                                 tbl.datetime.dt.week, sort=True)
+
+            # weekofyear
+            self.assertColsEqual(df.date.dt.weekofyear,
+                                 tbl.date.dt.weekofyear, sort=True)
+            self.assertColsEqual(df.time.dt.weekofyear,
+                                 tbl.time.dt.weekofyear, sort=True)
+            self.assertColsEqual(df.datetime.dt.weekofyear,
+                                 tbl.datetime.dt.weekofyear, sort=True)
 
         # dayofweek
         self.assertColsEqual(df.date.dt.dayofweek,
@@ -4148,21 +4176,40 @@ class TestCASTable(tm.TestCase):
         self.assertColsEqual(df.datetime.dt.nanosecond,
                              tbl.datetime.dt.nanosecond, sort=True)
 
-        # week
-        self.assertColsEqual(df.date.dt.week,
-                             tbl.date.dt.week, sort=True)
-        self.assertColsEqual(df.time.dt.week,
-                             tbl.time.dt.week, sort=True)
-        self.assertColsEqual(df.datetime.dt.week,
-                             tbl.datetime.dt.week, sort=True)
+        # Series.dt.weekofyear and Series.dt.week have been deprecated.
+        # use Series.dt.isocalendar().week instead. ( pandas 1.1.0 )
+        if pd_version >= (1, 1, 0):
+            # week
+            self.assertColsEqual(df.date.dt.isocalendar().week,
+                                 tbl.date.dt.week, sort=True)
+            self.assertColsEqual(df.time.dt.isocalendar().week,
+                                 tbl.time.dt.week, sort=True)
+            self.assertColsEqual(df.datetime.dt.isocalendar().week,
+                                 tbl.datetime.dt.week, sort=True)
 
-        # weekofyear
-        self.assertColsEqual(df.date.dt.weekofyear,
-                             tbl.date.dt.weekofyear, sort=True)
-        self.assertColsEqual(df.time.dt.weekofyear,
-                             tbl.time.dt.weekofyear, sort=True)
-        self.assertColsEqual(df.datetime.dt.weekofyear,
-                             tbl.datetime.dt.weekofyear, sort=True)
+            # weekofyear
+            self.assertColsEqual(df.date.dt.isocalendar().week,
+                                 tbl.date.dt.weekofyear, sort=True)
+            self.assertColsEqual(df.time.dt.isocalendar().week,
+                                 tbl.time.dt.weekofyear, sort=True)
+            self.assertColsEqual(df.datetime.dt.isocalendar().week,
+                                 tbl.datetime.dt.weekofyear, sort=True)
+        else:
+            # week
+            self.assertColsEqual(df.date.dt.week,
+                                 tbl.date.dt.week, sort=True)
+            self.assertColsEqual(df.time.dt.week,
+                                 tbl.time.dt.week, sort=True)
+            self.assertColsEqual(df.datetime.dt.week,
+                                 tbl.datetime.dt.week, sort=True)
+
+            # weekofyear
+            self.assertColsEqual(df.date.dt.weekofyear,
+                                 tbl.date.dt.weekofyear, sort=True)
+            self.assertColsEqual(df.time.dt.weekofyear,
+                                 tbl.time.dt.weekofyear, sort=True)
+            self.assertColsEqual(df.datetime.dt.weekofyear,
+                                 tbl.datetime.dt.weekofyear, sort=True)
 
         # dayofweek
         self.assertColsEqual(df.date.dt.dayofweek,
@@ -4564,7 +4611,7 @@ class TestCASTable(tm.TestCase):
 
         os.remove(tmp.name)
 
-    @unittest.skipIf(pd_version >= (1, 0, 0), 'Need newer version of Pandas')
+    @unittest.skipIf(pd_version >= (0, 25, 0), 'Deprecated in Pandas')
     def test_to_msgpack(self):
         df = self.get_cars_df()
         df.index = range(len(df))
@@ -5660,12 +5707,11 @@ class TestCASTable(tm.TestCase):
         self.assertTablesEqual(df.clip(lower=-10, upper=15).sort_values(cols),
                                tbl.clip(lower=-10, upper=15).sort_values(cols))
 
-        if pd_version < (1, 0, 0):
-            self.assertTablesEqual(df.clip_lower(-5).sort_values(cols),
-                                   tbl.clip_lower(-5).sort_values(cols))
+        self.assertTablesEqual(df.clip(lower=-5).sort_values(cols),
+                               tbl.clip_lower(-5).sort_values(cols))
 
-            self.assertTablesEqual(df.clip_upper(30).sort_values(cols),
-                                   tbl.clip_upper(30).sort_values(cols))
+        self.assertTablesEqual(df.clip(upper=30).sort_values(cols),
+                               tbl.clip_upper(30).sort_values(cols))
 
     def _get_merge_data(self):
         import swat.tests as st
