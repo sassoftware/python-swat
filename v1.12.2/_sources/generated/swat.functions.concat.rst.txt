@@ -1,0 +1,6 @@
+swat.functions.concat
+=====================
+
+.. currentmodule:: swat.functions
+
+.. autofunction:: concat

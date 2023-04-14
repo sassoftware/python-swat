@@ -1,0 +1,6 @@
+swat.cas.table.SASColumnMethods.sqrt
+====================================
+
+.. currentmodule:: swat.cas.table
+
+.. automethod:: SASColumnMethods.sqrt

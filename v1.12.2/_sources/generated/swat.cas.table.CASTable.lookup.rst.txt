@@ -1,0 +1,6 @@
+swat.cas.table.CASTable.lookup
+==============================
+
+.. currentmodule:: swat.cas.table
+
+.. automethod:: CASTable.lookup
