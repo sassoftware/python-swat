@@ -818,11 +818,17 @@ class TestByGroups(tm.TestCase):
         df = self.get_cars_df().sort_values(SORT_KEYS)
         tbl = self.table.sort_values(SORT_KEYS)
 
-        dfgrp = df.groupby('Origin').mean()
+        if pd_version >= (1, 1, 0):
+            dfgrp = df.groupby('Origin').mean(numeric_only=True)
+        else:
+            dfgrp = df.groupby('Origin').mean()
         tblgrp = tbl.groupby('Origin').mean()
         self.assertTablesEqual(dfgrp, tblgrp, sortby=None, include_index=True, decimals=5)
 
-        dfgrp = df.groupby('Origin', as_index=False).mean()
+        if pd_version >= (1, 1, 0):
+            dfgrp = df.groupby('Origin', as_index=False).mean(numeric_only=True)
+        else:
+            dfgrp = df.groupby('Origin', as_index=False).mean()
         tblgrp = tbl.groupby('Origin', as_index=False).mean()
         self.assertTablesEqual(dfgrp, tblgrp, sortby=None, decimals=5)
 
@@ -831,7 +837,10 @@ class TestByGroups(tm.TestCase):
         #
         swat.options.cas.dataset.bygroup_casout_threshold = 2
 
-        dfgrp = df.groupby('Origin', as_index=False).mean()
+        if pd_version >= (1, 1, 0):
+            dfgrp = df.groupby('Origin', as_index=False).mean(numeric_only=True)
+        else:
+            dfgrp = df.groupby('Origin', as_index=False).mean()
         tblgrp = tbl.groupby('Origin', as_index=False).mean()
         self.assertEqual(tblgrp.__class__.__name__, 'CASTable')
         self.assertTablesEqual(dfgrp, tblgrp,
@@ -866,11 +875,17 @@ class TestByGroups(tm.TestCase):
         df = self.get_cars_df().sort_values(SORT_KEYS)
         tbl = self.table.sort_values(SORT_KEYS)
 
-        dfgrp = df.groupby('Origin').median()
+        if pd_version >= (1, 1, 0):
+            dfgrp = df.groupby('Origin').median(numeric_only=True)
+        else:
+            dfgrp = df.groupby('Origin').median()
         tblgrp = tbl.groupby('Origin').median()
         self.assertTablesEqual(dfgrp, tblgrp, sortby=None, include_index=True)
 
-        dfgrp = df.groupby('Origin', as_index=False).median()
+        if pd_version >= (1, 1, 0):
+            dfgrp = df.groupby('Origin', as_index=False).median(numeric_only=True)
+        else:
+            dfgrp = df.groupby('Origin', as_index=False).median()
         tblgrp = tbl.groupby('Origin', as_index=False).median()
         self.assertTablesEqual(dfgrp, tblgrp, sortby=None)
 
@@ -879,7 +894,10 @@ class TestByGroups(tm.TestCase):
         #
         swat.options.cas.dataset.bygroup_casout_threshold = 2
 
-        dfgrp = df.groupby('Origin', as_index=False).median()
+        if pd_version >= (1, 1, 0):
+            dfgrp = df.groupby('Origin', as_index=False).median(numeric_only=True)
+        else:
+            dfgrp = df.groupby('Origin', as_index=False).median()
         tblgrp = tbl.groupby('Origin', as_index=False).median()
         self.assertEqual(tblgrp.__class__.__name__, 'CASTable')
         self.assertTablesEqual(dfgrp, tblgrp, sortby=['Origin'])
@@ -1028,11 +1046,17 @@ class TestByGroups(tm.TestCase):
         df = self.get_cars_df().sort_values(SORT_KEYS)
         tbl = self.table.sort_values(SORT_KEYS)
 
-        dfgrp = df.groupby('Origin').sum()
+        if pd_version >= (1, 1, 0):
+            dfgrp = df.groupby('Origin').sum(numeric_only=True)
+        else:
+            dfgrp = df.groupby('Origin').sum()
         tblgrp = tbl.groupby('Origin').sum()
         self.assertTablesEqual(dfgrp, tblgrp, sortby=None, decimals=5)
 
-        dfgrp = df.groupby('Origin', as_index=False).sum()
+        if pd_version >= (1, 1, 0):
+            dfgrp = df.groupby('Origin', as_index=False).sum(numeric_only=True)
+        else:
+            dfgrp = df.groupby('Origin', as_index=False).sum()
         tblgrp = tbl.groupby('Origin', as_index=False).sum()
         self.assertTablesEqual(dfgrp, tblgrp, decimals=5, sortby=None)
 
@@ -1041,7 +1065,10 @@ class TestByGroups(tm.TestCase):
         #
         swat.options.cas.dataset.bygroup_casout_threshold = 2
 
-        dfgrp = df.groupby('Origin', as_index=False).sum()
+        if pd_version >= (1, 1, 0):
+            dfgrp = df.groupby('Origin', as_index=False).sum(numeric_only=True)
+        else:
+            dfgrp = df.groupby('Origin', as_index=False).sum()
         tblgrp = tbl.groupby('Origin', as_index=False).sum()
         self.assertEqual(tblgrp.__class__.__name__, 'CASTable')
         self.assertTablesEqual(dfgrp, tblgrp, decimals=5,
@@ -1076,7 +1103,10 @@ class TestByGroups(tm.TestCase):
         df = self.get_cars_df().sort_values(SORT_KEYS)
         tbl = self.table.sort_values(SORT_KEYS)
 
-        dfgrp = df.groupby('Origin').std()
+        if pd_version >= (1, 5, 0):
+            dfgrp = df.groupby('Origin').std(numeric_only=True)
+        else:
+            dfgrp = df.groupby('Origin').std()
         tblgrp = tbl.groupby('Origin').std()
         self.assertTablesEqual(dfgrp, tblgrp, decimals=5, sortby=None)
 
@@ -1127,11 +1157,17 @@ class TestByGroups(tm.TestCase):
         df = self.get_cars_df().sort_values(SORT_KEYS)
         tbl = self.table.sort_values(SORT_KEYS)
 
-        dfgrp = df.groupby('Origin').var()
+        if pd_version >= (1, 5, 0):
+            dfgrp = df.groupby('Origin').var(numeric_only=True)
+        else:
+            dfgrp = df.groupby('Origin').var()
         tblgrp = tbl.groupby('Origin').var()
         self.assertTablesEqual(dfgrp, tblgrp, decimals=3, sortby=None)
 
-        dfgrp = df.groupby('Origin', as_index=False).var()
+        if pd_version >= (1, 5, 0):
+            dfgrp = df.groupby('Origin', as_index=False).var(numeric_only=True)
+        else:
+            dfgrp = df.groupby('Origin', as_index=False).var()
         tblgrp = tbl.groupby('Origin', as_index=False).var()
         self.assertTablesEqual(dfgrp, tblgrp, decimals=3, sortby=None)
 
@@ -1140,7 +1176,10 @@ class TestByGroups(tm.TestCase):
         #
         swat.options.cas.dataset.bygroup_casout_threshold = 2
 
-        dfgrp = df.groupby('Origin', as_index=False).var()
+        if pd_version >= (1, 5, 0):
+            dfgrp = df.groupby('Origin', as_index=False).var(numeric_only=True)
+        else:
+            dfgrp = df.groupby('Origin', as_index=False).var()
         tblgrp = tbl.groupby('Origin', as_index=False).var()
         self.assertEqual(tblgrp.__class__.__name__, 'CASTable')
         self.assertTablesEqual(dfgrp, tblgrp, decimals=3,

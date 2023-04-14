@@ -90,11 +90,12 @@ class RendererMixin(object):
         try:
             import IPython
             from pandas.io.formats import console
-            from distutils.version import LooseVersion
+            import packaging.version
         except ImportError:
             pass
         else:
-            if LooseVersion(IPython.__version__) < LooseVersion('3.0'):
+            if (packaging.version.parse(IPython.__version__)
+                    < packaging.version.parse('3.0')):
                 if console.in_qtconsole():
                     # 'HTML output is disabled in QtConsole'
                     return None
