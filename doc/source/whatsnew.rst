@@ -8,6 +8,15 @@ What’s New
 
 This document outlines features and improvements from each release.
 
+1.12.2 (April 14, 2023)
+-----------------------
+
+-  updates to swat/tests/cas/test_imstat.py for benchmark changes
+-  updates to swat/tests/cas/test_builtins.py for benchmark changes
+-  cleanup deprecation warning messages
+-  improve error message when on, onleft, onright merge parameters
+   contain a list rather than a string
+
 1.12.1 (January 9, 2023)
 ------------------------
 
