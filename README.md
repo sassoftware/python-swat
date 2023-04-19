@@ -56,6 +56,9 @@ dependencies of Pandas.  If you do not already have version 0.16.0 or greater
 of Pandas installed, `pip` will install or update it for you when you
 install SWAT.
 
+If you are using `pip` version 23.1 or later to install from a tar.gz file, the
+python wheel package is required.  If you do not have this package installed,
+you can install it using `pip`.
 
 # Installation
 
