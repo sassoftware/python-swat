@@ -1,0 +1,6 @@
+swat.cas.table.CharacterColumnMethods.isalpha
+=============================================
+
+.. currentmodule:: swat.cas.table
+
+.. automethod:: CharacterColumnMethods.isalpha
