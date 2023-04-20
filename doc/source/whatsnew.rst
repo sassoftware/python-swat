@@ -8,6 +8,12 @@ What’s New
 
 This document outlines features and improvements from each release.
 
+1.13.0 (April 20, 2023)
+-----------------------
+
+-  Add Python 3.11 support
+-  Update TK subsystem
+
 1.12.2 (April 14, 2023)
 -----------------------
 

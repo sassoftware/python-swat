@@ -1,6 +1,11 @@
 
 # Change Log
 
+## 1.13.0 - 2023-04-20
+
+- Add Python 3.11 support 
+- Update TK subsystem
+
 ## 1.12.2 - 2023-04-14
 
 - updates to swat/tests/cas/test_imstat.py for benchmark changes 
