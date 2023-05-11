@@ -38,6 +38,9 @@ from swat.dataframe import SASDataFrame, reshape_bygroups
 from swat.utils.compat import text_types
 from bs4 import BeautifulSoup
 
+pd_version = tuple([int(x) for x in re.match(r'^(\d+)\.(\d+)\.(\d+)',
+                                             pd.__version__).groups()])
+
 USER, PASSWD = tm.get_user_pass()
 HOST, PORT, PROTOCOL = tm.get_host_port_proto()
 
@@ -859,6 +862,50 @@ class TestDataFrame(tm.TestCase):
 #       data = out['Fetch']
 
 #       html = data._repr_javascript_()
+
+    # Bug in Pandas 1.2.0-1.5.3 returns NaN
+    # Pandas <= 1.1.5 rounds correctly, but does not propagate attributes
+    @unittest.skipIf((pd_version >= (1, 2, 0) and pd_version < (2, 0, 0)),
+                     'Need newer version of Pandas')
+    def test_round(self):
+        descdf = self.table.describe()
+        # BUG - some versions of python/pandas table.describe()
+        # returns pandas.DataFrame, not swat.SASDataFrame
+        if not isinstance(descdf, swat.SASDataFrame):
+            descdf = swat.SASDataFrame(descdf)
+        descdf.name = "test_round_df_name"
+        descdf.label = "test_round_df_label"
+        descdf.title = "test round title"
+        descdf.formatter = swat.SASFormatter(soptions='locale=fr-FR')
+        descdf.attrs = {'ByVar1': 'Make'}
+        descdf.colinfo['MSRP'] = swat.dataframe.SASColumnSpec('MSRP',
+                                                              dtype='double',
+                                                              width=8)
+        result = descdf.round(decimals=1)
+        if pd_version >= (2, 0, 0):
+            # pandas does not propagate df properties until 2.0.0
+            self.assertEqual(result.name, "test_round_df_name")
+            self.assertEqual(result.label, "test_round_df_label")
+            self.assertEqual(result.title, "test round title")
+            self.assertEqual(result.formatter._soptions, 'locale=fr-FR')
+            self.assertEqual(result.attrs['ByVar1'], 'Make')
+            self.assertEqual(len(result.colinfo), 1)
+            self.assertNotEqual(result.colinfo.get('MSRP', None), None)
+        # spot check results
+        self.assertFalse(result.isnull().values.any())
+        self.assertEqual(result.iloc[0, 0], 428.0)
+        self.assertEqual(result.iloc[1, 1], 30014.7)
+        self.assertEqual(result.iloc[2, 2], 1.1)
+        self.assertEqual(result.iloc[3, 3], 3.0)
+        self.assertEqual(result.iloc[4, 1], 18851.0)
+        self.assertEqual(result.iloc[4, 2], 2.3)
+        self.assertEqual(result.iloc[5, 7], 3474.5)
+        self.assertEqual(result.iloc[6, 2], 3.9)
+        self.assertEqual(result.iloc[7, 9], 238.0)
+        self.assertEqual(result.iloc[1, 4], 215.9)
+        self.assertEqual(result.iloc[6, 5], 21.5)
+        self.assertEqual(result.iloc[2, 6], 5.7)
+        self.assertEqual(result.iloc[2, 8], 8.3)
 
 
 if __name__ == '__main__':
