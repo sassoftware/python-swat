@@ -3354,12 +3354,16 @@ class CASTable(ParamManager, ActionParamManager):
         :class:`pandas .Series`
             If By groups are specified.
         '''
-        distinct_table = self._retrieve('simple.distinct', includeMissing=not skipna)['Distinct']
-        # Reduce table to a Series based off the NDistinct column
-        distinct_table = distinct_table.set_index('Column').loc[:,'NDistinct'].astype('int64')
-        # Strip names from Series to match pandas nunique
-        distinct_table.index.name = None
-        distinct_table.name = None
+        #If we have a groupby table, we need to consider that
+        if self.get_groupby_vars:
+            return self._retrieve('simple.distinct', includeMissing=not skipna)
+        else:
+            distinct_table = self._retrieve('simple.distinct', includeMissing=not skipna)['Distinct']
+            # Reduce table to a Series based off the NDistinct column
+            distinct_table = distinct_table.set_index('Column').loc[:,'NDistinct'].astype('int64')
+            # Strip names from Series to match pandas nunique
+            distinct_table.index.name = None
+            distinct_table.name = None
 
         return distinct_table
 
