@@ -3334,9 +3334,9 @@ class CASTable(ParamManager, ActionParamManager):
 
         Returns
         -------
-        int
+        :class:`pandas.Series`
             If no By groups are specified.
-        :class:`pandas .Series`
+        :class:`swat.CASResults`
             If By groups are specified.
 
         '''
@@ -3351,11 +3351,14 @@ class CASTable(ParamManager, ActionParamManager):
 
         Returns
         -------
-        :class:`pandas .Series`
+        :class:`pandas.Series`
+            If By groups are not specified.
+        :class:`swat.CASResults`
             If By groups are specified.
         '''
-        #If we have a groupby table, we need to consider that
+        #If we have a groupby table, we will have multiple tables in our CASResults
         if self.get_groupby_vars():
+            #Just return the CASResults object
             return self._retrieve('simple.distinct', includeMissing=not skipna)
         else:
             distinct_table = self._retrieve('simple.distinct', includeMissing=not skipna)['Distinct']
@@ -3365,7 +3368,7 @@ class CASTable(ParamManager, ActionParamManager):
             distinct_table.index.name = None
             distinct_table.name = None
 
-        return distinct_table
+            return distinct_table
 
 #   def isin(self, values, casout=None):
 #       raise NotImplementedError
