@@ -3323,6 +3323,46 @@ class CASTable(ParamManager, ActionParamManager):
 
         raise SWATError(out.status)
 
+    def nunique(self, dropna=True, casout=None):
+        '''
+        Return number of unique elements per column in the CASTable
+
+        See Also
+        --------
+        :meth:`CASColumn.nunique`
+        :meth:`pandas.DataFrame.nunique`
+
+        Returns
+        -------
+        int
+            If no By groups are specified.
+        :class:`pandas .Series`
+            If By groups are specified.
+
+        '''
+        if self._use_casout_for_stat(casout):
+            return self._get_casout_stat('nunique', skipna=dropna, casout=casout)
+
+        return self._nunique(skipna=dropna)
+
+    def _nunique(self, skipna=True):
+        '''
+        Return number of unique elements per column in the CASTable.
+
+        Returns
+        -------
+        :class:`pandas .Series`
+            If By groups are specified.
+        '''
+        distinct_table = self._retrieve('simple.distinct', includeMissing=not skipna)['Distinct']
+        # Reduce table to a Series based off the NDistinct column
+        distinct_table = distinct_table.set_index('Column').loc[:,'NDistinct'].astype('int64')
+        # Strip names from Series to match pandas nunique
+        distinct_table.index.name = None
+        distinct_table.name = None
+
+        return distinct_table
+
 #   def isin(self, values, casout=None):
 #       raise NotImplementedError
 
