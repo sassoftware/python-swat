@@ -4482,7 +4482,7 @@ class CASTable(ParamManager, ActionParamManager):
         # NOTE: Only works with a single column
         elif stat == 'nunique':
             out = self._retrieve('simple.distinct', includemissing=not skipna,
-                                 inputs=[inputs[0]], casout=casout, **kwargs)
+                                 inputs=inputs, casout=casout, **kwargs)
             return self._normalize_distinct_casout(out['OutputCasTables']['casTable'][0],
                                                    skipna=skipna)
 
