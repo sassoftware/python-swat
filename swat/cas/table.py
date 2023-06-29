@@ -3355,7 +3355,7 @@ class CASTable(ParamManager, ActionParamManager):
             If By groups are specified.
         '''
         #If we have a groupby table, we need to consider that
-        if self.get_groupby_vars:
+        if self.get_groupby_vars():
             return self._retrieve('simple.distinct', includeMissing=not skipna)
         else:
             distinct_table = self._retrieve('simple.distinct', includeMissing=not skipna)['Distinct']
