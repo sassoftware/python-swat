@@ -5822,6 +5822,22 @@ class CASTable(ParamManager, ActionParamManager):
         return out
 
     def drop_duplicates(self, casout, subset=[]):
+        '''
+        Remove duplicate rows from a CASTable. Optionally, consider only a subset of columns
+        when checking for duplicate rows.
+
+        Parameters
+        --------
+        casout : string or :class:`CASTable` or dict
+            The output table.
+        subset : string or list-of-strings, optional
+            The subset of columns to consider when checking for duplicate rows.
+
+        Returns
+        --------
+        :class:`CASTable`
+            The input table without duplicate rows.
+        '''
         self._loadactionset('deduplication')
 
         cols = [x for x in list(self.columns)]
