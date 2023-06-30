@@ -5821,8 +5821,38 @@ class CASTable(ParamManager, ActionParamManager):
         out._sortby = list(self._sortby)
         return out
 
-#   def drop_duplicates(self, *args, **kwargs):
-#       raise NotImplementedError
+    def drop_duplicates(self, casout, subset=[]):
+        self._loadactionset('deduplication')
+
+        cols = [x for x in list(self.columns)]
+        # Determine what columns/combo of columns we are looking for duplicates
+        if not subset:
+            # Subset empty -> we look in all columns for duplicates
+            for col in cols:
+                subset.append(col)
+        else:
+            # If subset is just a string, iteration will be through characters
+            if isinstance(subset, six.string_types):
+                subset = [subset]
+            # Determine if all provided columns in subset are in the table
+            for col in subset:
+                if col not in cols:
+                    raise ValueError("Provided column " + col + " is not in the table.")
+
+        # We run this aciton to drop duplicates from the original table
+        # It is not returned -> we have to manually grab results from casout
+        self.groupby(subset)._retrieve('deduplication.deduplicate', casout=casout, noDuplicateKeys=True)
+
+        # Fetch the output table
+        # out = self._retrieve('table.fetch', table={'name': casout.get('name'), 'caslib': casout.get('caslib')})['Fetch']
+        if isinstance(casout, CASTable):
+            out = casout
+        elif isinstance(casout, dict):
+            out = self.get_connection().CASTable(**casout)
+        else:
+            out = self.get_connection().CASTable(casout)
+
+        return out
 
 #   def duplicated(self, *args, **kwargs):
 #       raise NotImplementedError
