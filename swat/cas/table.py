@@ -3356,19 +3356,21 @@ class CASTable(ParamManager, ActionParamManager):
         :class:`swat.CASResults`
             If By groups are specified.
         '''
-        #If we have a groupby table, we will have multiple tables in our CASResults
+        # If we have a groupby table, we will have multiple tables in our CASResults
         if self.get_groupby_vars():
-            #Just return the CASResults object
+            # Just return the CASResults object
             return self._retrieve('simple.distinct', includeMissing=not skipna)
         else:
-            distinct_table = self._retrieve('simple.distinct', includeMissing=not skipna)['Distinct']
+            distinct_table = self._retrieve('simple.distinct',
+                                            includeMissing=not skipna)['Distinct']
             # Reduce table to a Series based off the NDistinct column
-            distinct_table = distinct_table.set_index('Column').loc[:,'NDistinct'].astype('int64')
+            distinct_table = distinct_table.set_index('Column')
+            distinct_series = distinct_table.loc[:, 'NDistinct'].astype('int64')
             # Strip names from Series to match pandas nunique
-            distinct_table.index.name = None
-            distinct_table.name = None
+            distinct_series.index.name = None
+            distinct_series.name = None
 
-            return distinct_table
+            return distinct_series
 
 #   def isin(self, values, casout=None):
 #       raise NotImplementedError

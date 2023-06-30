@@ -3269,7 +3269,7 @@ class TestCASTable(tm.TestCase):
         for col in tbl.columns:
             self.assertEquals(tbl_nunique[col], df_nunique[col])
 
-        #Now counting NaN
+        # Now counting NaN
         tbl_nunique_nan = tbl.nunique(dropna=False)
         df_nunique_nan = df.nunique(dropna=False)
         # Length of Series are equal
