@@ -3256,6 +3256,30 @@ class TestCASTable(tm.TestCase):
         # self.assertEqual(dfgrp['Horsepower'].value_counts(dropna=False).tolist(),
         #                  tblgrp['Horsepower'].value_counts(dropna=False).tolist())
 
+    def test_nunique(self):
+        tbl = self.table
+        df = self.get_cars_df()
+        tbl_nunique = tbl.nunique()
+        df_nunique = df.nunique()
+        # Length of Series are equal
+        self.assertEquals(len(tbl_nunique), len(df_nunique))
+        # Indices are equal
+        self.assertTrue(sorted(tbl_nunique) == sorted(df_nunique))
+        # Values are equal
+        for col in tbl.columns:
+            self.assertEquals(tbl_nunique[col], df_nunique[col])
+
+        #Now counting NaN
+        tbl_nunique_nan = tbl.nunique(dropna=False)
+        df_nunique_nan = df.nunique(dropna=False)
+        # Length of Series are equal
+        self.assertEquals(len(tbl_nunique_nan), len(df_nunique_nan))
+        # Indices are equal
+        self.assertEquals(sorted(tbl_nunique_nan), sorted(df_nunique_nan))
+        # Values are equal
+        for col in tbl.columns:
+            self.assertEquals(tbl_nunique_nan[col], df_nunique_nan[col])
+
     def test_column_unique(self):
         df = self.get_cars_df()
         tbl = self.table
