@@ -867,6 +867,48 @@ class TestCASTable(tm.TestCase):
             data.append(col)
         self.assertEqual(data, columns)
 
+    def test_drop_duplicates(self):
+        tbl = self.table
+        df = self.get_cars_df
+        # drop duplicates for single subset
+        tbl_dropped = tbl.drop_duplicates(casout={'replace':True}, subset='Make')
+        df_dropped = df.drop_duplicates(subset='Make')
+
+        # Equivalent to pandas in size
+        self.assertEquals(len(tbl_dropped), len(df_dropped))
+        # Number of elements in 'Make' column should be same as number of unique elements
+        self.assertEquals(tbl_dropped['Make'].nunique(), len(tbl_dropped['Make']))
+        self.assertEquals(tbl_dropped['Make'].nunique(), len(tbl_dropped))
+
+        # drop duplicates for multi-element subset
+        tbl_dropped_multi = tbl.drop_duplicates(casout={'replace':True}, subset=['Country', 'Type'])
+        df_dropped_multi = df.drop_duplicates(subset=['Country', 'Type'])
+
+        # Equivalent to pandas in size
+        self.assertEquals(len(tbl_dropped_multi), len(df_dropped_multi))
+
+        # We need some rows where all values for each col are duplicate
+        nDuplicates = 7
+        fetchTable = self.s.fetch(table=self.table, to=nDuplicates)['Fetch']
+        # Really wants to convert char to varChar, we need to specify our way out of this
+        subset = self.s.upload_frame(fetchTable, casout={'replace':True},
+                                     importOptions={'fileType':'CSV',
+                                                    'vars':[{'name':'Make', 'type':'CHAR', 'length':13},
+                                                            {'name':'Model', 'type':'CHAR', 'length':40},
+                                                            {'name':'Type', 'type':'CHAR', 'length':8},
+                                                            {'name':'Origin', 'type':'CHAR', 'length':6},
+                                                            {'name':'DriveTrain', 'type':'CHAR', 'length':5}
+                                                            ]})
+        # This table is like tbl, but with nDuplicate fully duplicate rows
+        duplicate_table = tbl.append(subset)
+
+        # Drop duplicates without subset (checks all cols)
+        tbl_dropped_all = duplicate_table.drop_duplicates(casout={'replace':True})
+
+        # Make sure that the correct amount of rows were dropped
+        self.assertEquals(len(tbl), len(tbl_dropped_all))
+        self.assertEquals(len(duplicate_table), len(tbl_dropped_all) + nDuplicates)
+
     def test_column_iter(self):
         df = self.get_cars_df()
         tbl = self.table
