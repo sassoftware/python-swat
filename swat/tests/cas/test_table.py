@@ -871,7 +871,7 @@ class TestCASTable(tm.TestCase):
         tbl = self.table
         df = self.get_cars_df
         # drop duplicates for single subset
-        tbl_dropped = tbl.drop_duplicates(casout={'replace':True}, subset='Make')
+        tbl_dropped = tbl.drop_duplicates(casout={'replace': True}, subset='Make')
         df_dropped = df.drop_duplicates(subset='Make')
 
         # Equivalent to pandas in size
@@ -881,7 +881,8 @@ class TestCASTable(tm.TestCase):
         self.assertEquals(tbl_dropped['Make'].nunique(), len(tbl_dropped))
 
         # drop duplicates for multi-element subset
-        tbl_dropped_multi = tbl.drop_duplicates(casout={'replace':True}, subset=['Country', 'Type'])
+        tbl_dropped_multi = tbl.drop_duplicates(casout={'replace': True},
+                                                subset=['Country', 'Type'])
         df_dropped_multi = df.drop_duplicates(subset=['Country', 'Type'])
 
         # Equivalent to pandas in size
@@ -890,20 +891,22 @@ class TestCASTable(tm.TestCase):
         # We need some rows where all values for each col are duplicate
         nDuplicates = 7
         fetchTable = self.s.fetch(table=self.table, to=nDuplicates)['Fetch']
-        # Really wants to convert char to varChar, we need to specify our way out of this
-        subset = self.s.upload_frame(fetchTable, casout={'replace':True},
-                                     importOptions={'fileType':'CSV',
-                                                    'vars':[{'name':'Make', 'type':'CHAR', 'length':13},
-                                                            {'name':'Model', 'type':'CHAR', 'length':40},
-                                                            {'name':'Type', 'type':'CHAR', 'length':8},
-                                                            {'name':'Origin', 'type':'CHAR', 'length':6},
-                                                            {'name':'DriveTrain', 'type':'CHAR', 'length':5}
-                                                            ]})
+        # Must specify char type and explicit length
+        importOptions = {'fileType': 'CSV',
+                         'vars': [{'name': 'Make', 'type': 'CHAR', 'length': 13},
+                                  {'name': 'Model', 'type': 'CHAR', 'length': 40},
+                                  {'name': 'Type', 'type': 'CHAR', 'length': 8},
+                                  {'name': 'Origin', 'type': 'CHAR', 'length': 6},
+                                  {'name': 'DriveTrain', 'type': 'CHAR', 'length': 5}
+                                  ]}
+        subset = self.s.upload_frame(fetchTable, casout={'replace': True},
+                                     importOptions=importOptions)
+
         # This table is like tbl, but with nDuplicate fully duplicate rows
         duplicate_table = tbl.append(subset)
 
         # Drop duplicates without subset (checks all cols)
-        tbl_dropped_all = duplicate_table.drop_duplicates(casout={'replace':True})
+        tbl_dropped_all = duplicate_table.drop_duplicates(casout={'replace': True})
 
         # Make sure that the correct amount of rows were dropped
         self.assertEquals(len(tbl), len(tbl_dropped_all))
