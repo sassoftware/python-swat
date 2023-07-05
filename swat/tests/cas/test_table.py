@@ -868,6 +868,7 @@ class TestCASTable(tm.TestCase):
         self.assertEqual(data, columns)
 
     def test_drop_duplicates(self):
+        # pull in table as CASTable and as pandas DataFrame
         tbl = self.table
         df = self.get_cars_df
         # drop duplicates for single subset
