@@ -3257,6 +3257,7 @@ class TestCASTable(tm.TestCase):
         #                  tblgrp['Horsepower'].value_counts(dropna=False).tolist())
 
     def test_nunique(self):
+        # Pull in data as CASTable and pandas DataFrame
         tbl = self.table
         df = self.get_cars_df()
         tbl_nunique = tbl.nunique()
