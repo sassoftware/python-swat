@@ -865,8 +865,7 @@ class TestDataFrame(tm.TestCase):
 
     # Bug in Pandas 1.2.0-1.5.3 returns NaN
     # Pandas <= 1.1.5 rounds correctly, but does not propagate attributes
-
-    @unittest.skipIf((pd_version >= (1, 2, 0) and pd_version < (2, 0, 0)),
+    @unittest.skipIf((pd_version >= (1, 2, 0) and pd_version < (2, 0, 0)),  # noqa: E301
                      'Need newer version of Pandas')
     def test_round(self):
         descdf = self.table.describe()
