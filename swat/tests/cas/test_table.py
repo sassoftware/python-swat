@@ -872,7 +872,7 @@ class TestCASTable(tm.TestCase):
         tbl = self.table
         df = self.get_cars_df
         # drop duplicates for single subset
-        tbl_dropped = tbl.drop_duplicates(casout={'replace': True}, subset='Make')
+        tbl_dropped = tbl.drop_duplicates(casout={'replace': True, 'name':'drop-test-1'}, subset='Make')
         df_dropped = df.drop_duplicates(subset='Make')
 
         # Equivalent to pandas in size
@@ -882,7 +882,7 @@ class TestCASTable(tm.TestCase):
         self.assertEquals(tbl_dropped['Make'].nunique(), len(tbl_dropped))
 
         # drop duplicates for multi-element subset
-        tbl_dropped_multi = tbl.drop_duplicates(casout={'replace': True},
+        tbl_dropped_multi = tbl.drop_duplicates(casout={'replace': True, 'name':'drop-test-2'},
                                                 subset=['Country', 'Type'])
         df_dropped_multi = df.drop_duplicates(subset=['Country', 'Type'])
 
@@ -900,14 +900,14 @@ class TestCASTable(tm.TestCase):
                                   {'name': 'Origin', 'type': 'CHAR', 'length': 6},
                                   {'name': 'DriveTrain', 'type': 'CHAR', 'length': 5}
                                   ]}
-        subset = self.s.upload_frame(fetchTable, casout={'replace': True},
+        subset = self.s.upload_frame(fetchTable, casout={'replace': True, 'name':'drop-test-3'},
                                      importOptions=importOptions)
 
         # This table is like tbl, but with nDuplicate fully duplicate rows
         duplicate_table = tbl.append(subset)
 
         # Drop duplicates without subset (checks all cols)
-        tbl_dropped_all = duplicate_table.drop_duplicates(casout={'replace': True})
+        tbl_dropped_all = duplicate_table.drop_duplicates(casout={'replace': True, 'name':'drop-test-4'})
 
         # Make sure that the correct amount of rows were dropped
         self.assertEquals(len(tbl), len(tbl_dropped_all))
