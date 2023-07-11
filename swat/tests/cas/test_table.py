@@ -883,8 +883,8 @@ class TestCASTable(tm.TestCase):
 
         # drop duplicates for multi-element subset
         tbl_dropped_multi = tbl.drop_duplicates(casout={'replace': True, 'name':'drop-test-2'},
-                                                subset=['Country', 'Type'])
-        df_dropped_multi = df.drop_duplicates(subset=['Country', 'Type'])
+                                                subset=['Origin', 'Type'])
+        df_dropped_multi = df.drop_duplicates(subset=['Origin', 'Type'])
 
         # Equivalent to pandas in size
         self.assertEquals(len(tbl_dropped_multi), len(df_dropped_multi))
