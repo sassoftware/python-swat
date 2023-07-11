@@ -3358,10 +3358,10 @@ class CASTable(ParamManager, ActionParamManager):
         '''
         # If we have a groupby table, we need to flatten down to one DataFrame
         if self.get_groupby_vars():
-            distinct_results = self._retrieve('simple.distinct', includeMissing=not skipna)
-            distinct_results.pop('ByGroupInfo', None)
+            results = self._retrieve('simple.distinct', includeMissing=not skipna)
+            results.pop('ByGroupInfo', None)
             # Same bygroups flattening as CASTable.nmiss
-            out = pd.concat(list(distinct_results.values()))
+            out = pd.concat(list(results.values()))
             out = out.set_index('Column', append=True)['NDistinct']
             out = out.unstack(level=-1)
             out = out.astype('int64')
