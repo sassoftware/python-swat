@@ -870,7 +870,7 @@ class TestCASTable(tm.TestCase):
     def test_drop_duplicates(self):
         # pull in table as CASTable and as pandas DataFrame
         tbl = self.table
-        df = self.get_cars_df
+        df = self.get_cars_df()
         # drop duplicates for single subset
         tbl_dropped = tbl.drop_duplicates(casout={'replace': True, 'name':'drop-test-1'}, subset='Make')
         df_dropped = df.drop_duplicates(subset='Make')
