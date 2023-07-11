@@ -3356,10 +3356,20 @@ class CASTable(ParamManager, ActionParamManager):
         :class:`swat.CASResults`
             If By groups are specified.
         '''
-        # If we have a groupby table, we will have multiple tables in our CASResults
+        # If we have a groupby table, we need to flatten down to one DataFrame
         if self.get_groupby_vars():
-            # Just return the CASResults object
-            return self._retrieve('simple.distinct', includeMissing=not skipna)
+            distinct_results = self._retrieve('simple.distinct', includeMissing=not skipna)
+            distinct_results.pop('ByGroupInfo', None)
+            # Same bygroups flattening as CASTable.nmiss
+            out = pd.concat(list(distinct_results.values()))
+            out = out.set_index('Column', append=True)['NDistinct']
+            out = out.unstack(level=-1)
+            out = out.astype('int64')
+            # The columns that match the groupby vars will be useless
+            out = out.drop(labels=self.get_groupby_vars(), axis=1)
+            if isinstance(out, pd.DataFrame):
+                out.columns.name = None
+            return out
         else:
             distinct_table = self._retrieve('simple.distinct',
                                             includeMissing=not skipna)['Distinct']
