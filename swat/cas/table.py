@@ -5823,8 +5823,8 @@ class CASTable(ParamManager, ActionParamManager):
 
     def drop_duplicates(self, casout, subset=[]):
         '''
-        Remove duplicate rows from a CASTable. Optionally, consider only a subset of columns
-        when checking for duplicate rows.
+        Remove duplicate rows from a CASTable. Optionally, consider only
+        a subset of columns when checking for duplicate rows.
 
         Parameters
         --------
@@ -5857,10 +5857,10 @@ class CASTable(ParamManager, ActionParamManager):
 
         # We run this aciton to drop duplicates from the original table
         # It is not returned -> we have to manually grab results from casout
-        self.groupby(subset)._retrieve('deduplication.deduplicate', casout=casout, noDuplicateKeys=True)
+        self.groupby(subset)._retrieve('deduplication.deduplicate',
+                                       casout=casout, noDuplicateKeys=True)
 
         # Fetch the output table
-        # out = self._retrieve('table.fetch', table={'name': casout.get('name'), 'caslib': casout.get('caslib')})['Fetch']
         if isinstance(casout, CASTable):
             out = casout
         elif isinstance(casout, dict):
