@@ -3323,6 +3323,65 @@ class CASTable(ParamManager, ActionParamManager):
 
         raise SWATError(out.status)
 
+    def nunique(self, dropna=True, casout=None):
+        '''
+        Return number of unique elements per column in the CASTable
+
+        See Also
+        --------
+        :meth:`CASColumn.nunique`
+        :meth:`pandas.DataFrame.nunique`
+
+        Returns
+        -------
+        :class:`pandas.Series`
+            If no By groups are specified.
+        :class:`swat.CASResults`
+            If By groups are specified.
+
+        '''
+        if self._use_casout_for_stat(casout):
+            return self._get_casout_stat('nunique', skipna=dropna, casout=casout)
+
+        return self._nunique(skipna=dropna)
+
+    def _nunique(self, skipna=True):
+        '''
+        Return number of unique elements per column in the CASTable.
+
+        Returns
+        -------
+        :class:`pandas.Series`
+            If By groups are not specified.
+        :class:`swat.CASResults`
+            If By groups are specified.
+        '''
+        # If we have a groupby table, we need to flatten down to one DataFrame
+        if self.get_groupby_vars():
+            results = self._retrieve('simple.distinct', includeMissing=not skipna)
+            results.pop('ByGroupInfo', None)
+            # Same bygroups flattening as CASTable.nmiss
+            out = pd.concat(list(results.values()))
+            out = out.set_index('Column', append=True)['NDistinct']
+            out = out.unstack(level=-1)
+            out = out.astype('int64')
+            # The columns that match the groupby vars will be useless
+            out = out.drop(labels=self.get_groupby_vars(), axis=1)
+            if isinstance(out, pd.DataFrame):
+                out.columns.name = None
+            return out
+        else:
+            distinct_table = self._retrieve('simple.distinct',
+                                            includeMissing=not skipna)['Distinct']
+            # Reduce table to a Series based off the NDistinct column
+            distinct_table = distinct_table.set_index('Column')
+            distinct_series = distinct_table.loc[:, 'NDistinct'].astype('int64')
+            # Strip names from Series to match pandas nunique
+            distinct_series.index.name = None
+            distinct_series.name = None
+
+            return distinct_series
+
 #   def isin(self, values, casout=None):
 #       raise NotImplementedError
 
@@ -4442,7 +4501,7 @@ class CASTable(ParamManager, ActionParamManager):
         # NOTE: Only works with a single column
         elif stat == 'nunique':
             out = self._retrieve('simple.distinct', includemissing=not skipna,
-                                 inputs=[inputs[0]], casout=casout, **kwargs)
+                                 inputs=inputs, casout=casout, **kwargs)
             return self._normalize_distinct_casout(out['OutputCasTables']['casTable'][0],
                                                    skipna=skipna)
 
