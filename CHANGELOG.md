@@ -1,6 +1,12 @@
 
 # Change Log
 
+## 1.13.1 - 2023-07-14
+
+- Add nunique method for CASTable
+- Add drop_duplicates method for CASTable
+- Add new testcases to swat/tests/test_dataframe.py and swat/tests/cas/test_table.py 
+
 ## 1.13.0 - 2023-04-20
 
 - Add Python 3.11 support 

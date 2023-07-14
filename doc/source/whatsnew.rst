@@ -8,6 +8,14 @@ What’s New
 
 This document outlines features and improvements from each release.
 
+1.13.1 (July 14, 2023)
+----------------------
+
+-  Add nunique method for CASTable
+-  Add drop_duplicates method for CASTable
+-  Add new testcases to swat/tests/test_dataframe.py and
+   swat/tests/cas/test_table.py
+
 1.13.0 (April 20, 2023)
 -----------------------
 
