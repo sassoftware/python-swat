@@ -1,0 +1,6 @@
+swat.cas.table.DatetimeColumnMethods.month
+==========================================
+
+.. currentmodule:: swat.cas.table
+
+.. autoproperty:: DatetimeColumnMethods.month
