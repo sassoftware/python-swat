@@ -5959,8 +5959,46 @@ class CASTable(ParamManager, ActionParamManager):
 #   def reindex_like(self, *args, **kwargs):
 #       raise NotImplementedError
 
-#   def rename(self, *args, **kwargs):
-#       raise NotImplementedError
+    def rename(self, columns, errors='ignore', inplace=True, **kwargs):
+        '''
+        Rename columns of the CASTable.
+
+        Parameters
+        ----------
+        columns : dict or function
+            Transformations to apply to the columns of the CASTable.
+        errors : 'ignore' or 'raise', default 'ignore'
+            Given a dict with a key that does not match one of the columns
+            in the CASTable, this determines whether to ignore that key or
+            raise a KeyError.
+
+        Returns
+        -------
+        :class:`CASTable`
+        '''
+
+        #Columns is a dict:
+        alterTable = []
+        if isinstance(columns, dict):
+            #Errors to be raised -> check all keys upfront
+            if errors == 'raise':
+                for key in columns.keys():
+                    if key not in self.columns:
+                        raise KeyError("Column is not found in CASTable: " + key)
+
+            #Convert Pandas-style dict to CAS-style list of dicts
+            for oldName, newName in columns.items():
+                alterTable.append({'name': oldName, 'rename': newName})
+        #Columns is a function:
+        elif callable(columns):
+            #Iterate through all table columns and apply function
+            for col in self.columns:
+                alterTable.append({'name': col, 'rename': columns(col)})
+        else:
+            raise TypeError("Columns must be a dict or function")
+
+        #Use list of dicts to rename using alterTable action
+        return self._retrieve('alterTable', columns=alterTable)
 
     def reset_index(self, level=None, drop=False, inplace=False,
                     col_level=0, col_fill='', **kwargs):
