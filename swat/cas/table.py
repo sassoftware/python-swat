@@ -5980,15 +5980,15 @@ class CASTable(ParamManager, ActionParamManager):
         #Columns is a dict:
         alterTable = []
         if isinstance(columns, dict):
-            #Errors to be raised -> check all keys upfront
-            if errors == 'raise':
-                for key in columns.keys():
-                    if key not in self.columns:
-                        raise KeyError("Column is not found in CASTable: " + key)
-
             #Convert Pandas-style dict to CAS-style list of dicts
             for oldName, newName in columns.items():
-                alterTable.append({'name': oldName, 'rename': newName})
+                if oldName in self.columns:
+                    alterTable.append({'name': oldName, 'rename': newName})
+                #If we encounter a key that doesn't exist as column
+                #and we are raising errors, we do that here
+                elif errors == 'raise':
+                    raise KeyError("Column is not found in CASTable: " + oldName)
+
         #Columns is a function:
         elif callable(columns):
             #Iterate through all table columns and apply function
