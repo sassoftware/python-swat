@@ -5998,7 +5998,8 @@ class CASTable(ParamManager, ActionParamManager):
             raise TypeError("Columns must be a dict or function")
 
         #Use list of dicts to rename using alterTable action
-        return self._retrieve('alterTable', columns=alterTable)
+        self._invoke('alterTable', columns=alterTable)
+        return self
 
     def reset_index(self, level=None, drop=False, inplace=False,
                     col_level=0, col_fill='', **kwargs):
