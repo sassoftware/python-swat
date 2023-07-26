@@ -5977,27 +5977,27 @@ class CASTable(ParamManager, ActionParamManager):
         :class:`CASTable`
         '''
 
-        #Columns is a dict:
+        # Columns is a dict:
         alterTable = []
         if isinstance(columns, dict):
-            #Convert Pandas-style dict to CAS-style list of dicts
+            # Convert Pandas-style dict to CAS-style list of dicts
             for oldName, newName in columns.items():
                 if oldName in self.columns:
                     alterTable.append({'name': oldName, 'rename': newName})
-                #If we encounter a key that doesn't exist as column
-                #and we are raising errors, we do that here
+                # If we encounter a key that doesn't exist as column
+                # and we are raising errors, we do that here
                 elif errors == 'raise':
                     raise KeyError("Column is not found in CASTable: " + oldName)
 
-        #Columns is a function:
+        # Columns is a function:
         elif callable(columns):
-            #Iterate through all table columns and apply function
+            # Iterate through all table columns and apply function
             for col in self.columns:
                 alterTable.append({'name': col, 'rename': columns(col)})
         else:
             raise TypeError("Columns must be a dict or function")
 
-        #Use list of dicts to rename using alterTable action
+        # Use list of dicts to rename using alterTable action
         self._retrieve('alterTable', columns=alterTable)
         return self
 
