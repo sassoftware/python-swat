@@ -5176,30 +5176,38 @@ class TestCASTable(tm.TestCase):
 
     def test_rename(self):
         tbl = self.table
+        df = self.get_cars_df()
 
         # Rename by name:
         makeCol = tbl['Make']
         self.assertTrue(any(col in 'Make' for col in list(tbl.columns)))
         tbl.rename({'Make': 'Manufacturer'})
+        df.rename(columns={'Make': 'Manufacturer'}, inplace=True)
         # No column named "Make" and a column named "Manufacturer"
         self.assertFalse(any(col in 'Make' for col in list(tbl.columns)))
         self.assertTrue(any(col in 'Manufacturer' for col in list(tbl.columns)))
         # Shouldn't be a "new" column, just 'Make' renamed
         self.assertEqual(makeCol, tbl['Manufacturer'])
+        # Shoud be same as pandas
+        self.assertTablesEqual(tbl, df)
 
         # Rename by function:
         # Column Manufacturer -> Manufacturer_0
         tbl.rename(lambda col: col + "_0")
+        df.rename(columns=lambda col: col + "_0", inplace=True)
         for col in list(tbl.columns):
             # Last two characters should be _0 for each col
             self.assertEqual(col[-2:], "_0")
+        self.assertTablesEqual(tbl, df)
 
         # Rename by name for col that doesn't exist
         # errors='ignore'
         originalCols = list(copy.deepcopy(tbl.columns))
         tbl.rename({'nope': 'nuh uh'})
+        df.rename(columns={'nope': 'nuh uh'}, inplace=True)
         self.assertFalse(any(col in 'nope' for col in list(tbl.columns)))
         self.assertListEqual(originalCols, list(tbl.columns))
+        self.assertTablesEqual(tbl, df)
 
         # Rename by name for col that doesn't exist
         # errors='raise'
