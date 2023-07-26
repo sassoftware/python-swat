@@ -5976,6 +5976,7 @@ class CASTable(ParamManager, ActionParamManager):
         -------
         :class:`CASTable`
         '''
+
         #Columns is a dict:
         alterTable = []
         if isinstance(columns, dict):

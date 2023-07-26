@@ -5182,6 +5182,7 @@ class TestCASTable(tm.TestCase):
         makeCol = tbl['Make']
         self.assertTrue(any(col in 'Make' for col in list(tbl.columns)))
         tbl.rename({'Make': 'Manufacturer'})
+        # We use inplace=True as that's what CASTable.rename is doing
         df.rename(columns={'Make': 'Manufacturer'}, inplace=True)
         # No column named "Make" and a column named "Manufacturer"
         self.assertFalse(any(col in 'Make' for col in list(tbl.columns)))
@@ -5203,6 +5204,7 @@ class TestCASTable(tm.TestCase):
         # Rename by name for col that doesn't exist
         # errors='ignore'
         originalCols = list(copy.deepcopy(tbl.columns))
+        # This column doesn't exist, so it'll just ignore it
         tbl.rename({'nope': 'nuh uh'})
         df.rename(columns={'nope': 'nuh uh'}, inplace=True)
         self.assertFalse(any(col in 'nope' for col in list(tbl.columns)))
@@ -5212,6 +5214,7 @@ class TestCASTable(tm.TestCase):
         # Rename by name for col that doesn't exist
         # errors='raise'
         with self.assertRaises(KeyError):
+            # This column doesn't exist and errors='raise', it'll raise an exception
             tbl.rename(tbl.rename({'nope': 'nuh uh'}, errors='raise'))
 
     def test_reset_index(self):
