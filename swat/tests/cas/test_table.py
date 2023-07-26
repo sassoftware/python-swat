@@ -5180,7 +5180,7 @@ class TestCASTable(tm.TestCase):
         # Rename by name:
         makeCol = tbl['Make']
         self.assertTrue(any(col in 'Make' for col in list(tbl.columns)))
-        tbl.rename({'Make':'Manufacturer'})
+        tbl.rename({'Make': 'Manufacturer'})
         # No column named "Make" and a column named "Manufacturer"
         self.assertFalse(any(col in 'Make' for col in list(tbl.columns)))
         self.assertTrue(any(col in 'Manufacturer' for col in list(tbl.columns)))
@@ -5189,7 +5189,7 @@ class TestCASTable(tm.TestCase):
 
         # Rename by function:
         # Column Manufacturer -> Manufacturer_0
-        tbl.rename(lambda col : col + "_0")
+        tbl.rename(lambda col: col + "_0")
         for col in list(tbl.columns):
             # Last two characters should be _0 for each col
             self.assertEqual(col[-2:], "_0")
@@ -5197,14 +5197,14 @@ class TestCASTable(tm.TestCase):
         # Rename by name for col that doesn't exist
         # errors='ignore'
         originalCols = list(copy.deepcopy(tbl.columns))
-        tbl.rename({'nope':'nuh uh'})
+        tbl.rename({'nope': 'nuh uh'})
         self.assertFalse(any(col in 'nope' for col in list(tbl.columns)))
         self.assertListEqual(originalCols, list(tbl.columns))
 
         # Rename by name for col that doesn't exist
         # errors='raise'
         with self.assertRaises(KeyError):
-            tbl.rename(tbl.rename({'nope':'nuh uh'}, errors='raise'))
+            tbl.rename(tbl.rename({'nope': 'nuh uh'}, errors='raise'))
 
     def test_reset_index(self):
         tbl = self.table
