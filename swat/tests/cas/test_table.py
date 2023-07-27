@@ -5175,6 +5175,7 @@ class TestCASTable(tm.TestCase):
         self.assertTablesEqual(colinfo[['Two', 'Model', 'One', 'MSRP']], pcolinfo)
 
     def test_rename(self):
+        # Pull in CASTable and Pandas Dataframe
         tbl = self.table
         df = self.get_cars_df()
 
