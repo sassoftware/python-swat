@@ -1,0 +1,23 @@
+swat.formatter.SASFormatter
+===========================
+
+.. currentmodule:: swat.formatter
+
+.. autoclass:: SASFormatter
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~SASFormatter.__init__
+      ~SASFormatter.format
+   
+   
+
+   
+   
+   
