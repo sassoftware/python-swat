@@ -158,12 +158,12 @@ class TestConnection(tm.TestCase):
     def test_str(self):
         s = str(self.s)
 
-        self.assertTrue(type(s) == str)
+        self.assertTrue(type(s) is str)
         self.assertRegex(s, r'''^CAS\(.+?, name=u?'[^\']+', session=u?'[^\']+'\)$''')
 
         r = repr(self.s)
 
-        self.assertTrue(type(r) == str)
+        self.assertTrue(type(r) is str)
         self.assertRegex(r, r'''^CAS\(.+?, name=u?'[^\']+', session=u?'[^\']+'\)$''')
 
     def test_formatter(self):

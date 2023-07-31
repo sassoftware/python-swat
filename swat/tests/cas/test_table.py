@@ -210,13 +210,13 @@ class TestCASTable(tm.TestCase):
     def test_str(self):
         s = str(self.table)
 
-        self.assertTrue(type(s) == str)
+        self.assertTrue(type(s) is str)
         self.assertTrue('DATASOURCES.CARS_SINGLE' in s)
         self.assertRegex(s, r"^.+? caslib=u?'%s(\([^\)]+\))?'.+?" % self.srcLib.upper())
 
         r = repr(self.table)
 
-        self.assertTrue(type(r) == str)
+        self.assertTrue(type(r) is str)
         self.assertTrue('DATASOURCES.CARS_SINGLE' in s)
         self.assertRegex(s, r"^.+? caslib=u?'%s(\([^\)]+\))?'.+?" % self.srcLib.upper())
 
