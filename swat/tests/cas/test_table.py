@@ -5174,6 +5174,50 @@ class TestCASTable(tm.TestCase):
         pcolinfo = pcolinfo.drop('ID', errors='ignore').drop('Label', errors='ignore')
         self.assertTablesEqual(colinfo[['Two', 'Model', 'One', 'MSRP']], pcolinfo)
 
+    def test_rename(self):
+        # Pull in CASTable and Pandas Dataframe
+        tbl = self.table
+        df = self.get_cars_df()
+
+        # Rename by name:
+        makeCol = tbl['Make']
+        self.assertTrue(any(col in 'Make' for col in list(tbl.columns)))
+        tbl.rename({'Make': 'Manufacturer'})
+        # We use inplace=True as that's what CASTable.rename is doing
+        df.rename(columns={'Make': 'Manufacturer'}, inplace=True)
+        # No column named "Make" and a column named "Manufacturer"
+        self.assertFalse(any(col in 'Make' for col in list(tbl.columns)))
+        self.assertTrue(any(col in 'Manufacturer' for col in list(tbl.columns)))
+        # Shouldn't be a "new" column, just 'Make' renamed
+        self.assertEqual(makeCol, tbl['Manufacturer'])
+        # Shoud be same as pandas
+        self.assertTablesEqual(tbl, df)
+
+        # Rename by function:
+        # Column Manufacturer -> Manufacturer_0
+        tbl.rename(lambda col: col + "_0")
+        df.rename(columns=lambda col: col + "_0", inplace=True)
+        for col in list(tbl.columns):
+            # Last two characters should be _0 for each col
+            self.assertEqual(col[-2:], "_0")
+        self.assertTablesEqual(tbl, df)
+
+        # Rename by name for col that doesn't exist
+        # errors='ignore'
+        originalCols = list(copy.deepcopy(tbl.columns))
+        # This column doesn't exist, so it'll just ignore it
+        tbl.rename({'nope': 'nuh uh'})
+        df.rename(columns={'nope': 'nuh uh'}, inplace=True)
+        self.assertFalse(any(col in 'nope' for col in list(tbl.columns)))
+        self.assertListEqual(originalCols, list(tbl.columns))
+        self.assertTablesEqual(tbl, df)
+
+        # Rename by name for col that doesn't exist
+        # errors='raise'
+        with self.assertRaises(KeyError):
+            # This column doesn't exist and errors='raise', it'll raise an exception
+            tbl.rename(tbl.rename({'nope': 'nuh uh'}, errors='raise'))
+
     def test_reset_index(self):
         tbl = self.table
 
