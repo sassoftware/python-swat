@@ -1245,7 +1245,7 @@ class Image(CASDataMsgHandler):
         if isinstance(data, str):
             files = []
             extensions = ['bmp', 'dib', 'jpg', 'jpeg', 'jpe', 'jp2', 'png', 'pbm', 'pmg',
-                          'ppm', 'tif', 'tiff', 'webp', 'hdr', 'pic', 'dcm', 'dicom',
+                          'ppm', 'tif', 'tiff', 'webp', 'pic', 'dcm', 'dicom',
                           'nrrd', 'nhdr', 'raw', 'nii', 'img', 'hdr', 'mha', 'mhd',
                           'saswimg', 'sastimg']
 
