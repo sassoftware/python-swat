@@ -1,6 +1,11 @@
 
 # Change Log
 
+## 1.13.2 - 2023-07-31
+
+- Add CASTable.rename() to rename the columns of a table
+- Add biomedical image filetypes to the Image Data Message Handler 
+
 ## 1.13.1 - 2023-07-14
 
 - Add nunique method for CASTable

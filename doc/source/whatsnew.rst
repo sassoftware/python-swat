@@ -8,6 +8,12 @@ What’s New
 
 This document outlines features and improvements from each release.
 
+1.13.2 (July 31, 2023)
+----------------------
+
+-  Add CASTable.rename() to rename the columns of a table
+-  Add biomedical image filetypes to the Image Data Message Handler
+
 1.13.1 (July 14, 2023)
 ----------------------
 
