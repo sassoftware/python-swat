@@ -179,6 +179,74 @@ def dir2pypi(directory, pkg_name='swat'):
             shutil.move(f, os.path.join(directory, 'simple', pkg_name))
 
 
+def createwheels(tag, platform, version, versions, build, names, root, top_level,
+                 outdir, metadata, metadata_json):
+    wheel = '%s\n' % '\n'.join([
+        'Wheel-Version: 1.0',
+        'Generator: tar2wheel (0.1.0)',
+        'Root-Is-Purelib: %s' % (platform == 'any' and 'true' or 'false'),
+        'Tag: %s' % tag,
+        'Build: %s' % build,
+    ])
+
+    # Create wheel for each extension found
+    for pyver in sorted(versions, key=lambda x: x['abi']):
+
+        # Create wheel file
+        zip_name = '%s-%s-%s-%s.whl' % (top_level, version, build, tag % pyver)
+        zip_name = os.path.join(outdir, zip_name)
+
+        print_err('Creating %s' % zip_name)
+
+        with zipfile.ZipFile(zip_name, 'w', compression=zipfile.ZIP_DEFLATED) as zip:
+
+            # Add files and create record information
+            record = []
+            for name in names:
+                # Always use forward slash; even on Windows.
+                if not name.startswith('%s/%s' % (root, top_level)):
+                    continue
+                if name.endswith('.pyc'):
+                    continue
+                if re.search(r'[\\/]_py\d*swatw?\.\w+$', name):
+                    if not name.endswith(pyver['extension']):
+                        continue
+                if os.path.isfile(name):
+                    # Always use forward slash; even on Windows.
+                    zip.write(name, name.split('/', 1)[-1])
+                    record.append('%s,sha256=%s,%s' % (name.split(os.sep, 1)[-1],
+                                                       sha256_file(name),
+                                                       os.path.getsize(name)))
+
+            # Add metadata files
+            dist_info = '%s-%s.dist-info' % (top_level, version)
+
+            record.append('%s,sha256=%s,%s' % (os.path.join(dist_info, 'METADATA'),
+                                               sha256_string(metadata),
+                                               len(metadata)))
+            record.append('%s,sha256=%s,%s' % (os.path.join(dist_info, 'metadata.json'),
+                                               sha256_string(metadata_json),
+                                               len(metadata_json)))
+            record.append('%s,sha256=%s,%s' % (os.path.join(dist_info, 'WHEEL'),
+                                               sha256_string(wheel % pyver),
+                                               len(wheel % pyver)))
+            record.append('%s,sha256=%s,%s' % (os.path.join(dist_info, 'top_level.txt'),
+                                               sha256_string(top_level),
+                                               len(top_level)))
+            record.append(
+                '%s,,' % os.path.join(dist_info, 'RECORD'))
+
+            record = '%s\n' % '\n'.join(record)
+
+            zip.writestr(os.path.join(dist_info, 'top_level.txt'), top_level)
+            zip.writestr(os.path.join(dist_info, 'METADATA'),
+                         metadata.encode('utf-8'))
+            zip.writestr(os.path.join(dist_info, 'metadata.json'),
+                         metadata_json.encode('utf-8'))
+            zip.writestr(os.path.join(dist_info, 'WHEEL'), wheel % pyver)
+            zip.writestr(os.path.join(dist_info, 'RECORD'), record)
+
+
 class TemporaryDirectory(object):
     '''
     Context manager for tempfile.mkdtemp()
@@ -371,75 +439,19 @@ def main(url, args):
                 tag = '%(pyversion)s-%(abi)s-manylinux2014_ppc64le'
             else:
                 tag = '%(pyversion)s-%(abi)s-manylinux1_x86_64'
+            createwheels(tag, platform, version, versions, args.build, names, root,
+                         top_level, outdir, metadata, metadata_json)
         elif platform == 'win':
             tag = '%(pyversion)s-%(abi)s-win_amd64'
+            createwheels(tag, platform, version, versions, args.build, names, root,
+                         top_level, outdir, metadata, metadata_json)
         elif platform == 'mac':
             tag = '%(pyversion)s-%(abi)s-macosx_10_9_x86_64'
-
-        wheel = '%s\n' % '\n'.join([
-            'Wheel-Version: 1.0',
-            'Generator: tar2wheel (0.1.0)',
-            'Root-Is-Purelib: %s' % (platform == 'any' and 'true' or 'false'),
-            'Tag: %s' % tag,
-            'Build: %s' % args.build,
-        ])
-
-        # Create wheel for each extension found
-        for pyver in sorted(versions, key=lambda x: x['abi']):
-
-            # Create wheel file
-            zip_name = '%s-%s-%s-%s.whl' % (top_level, version, args.build, tag % pyver)
-            zip_name = os.path.join(outdir, zip_name)
-
-            print_err('Creating %s' % zip_name)
-
-            with zipfile.ZipFile(zip_name, 'w', compression=zipfile.ZIP_DEFLATED) as zip:
-
-                # Add files and create record information
-                record = []
-                for name in names:
-                    # Always use forward slash; even on Windows.
-                    if not name.startswith('%s/%s' % (root, top_level)):
-                        continue
-                    if name.endswith('.pyc'):
-                        continue
-                    if re.search(r'[\\/]_py\d*swatw?\.\w+$', name):
-                        if not name.endswith(pyver['extension']):
-                            continue
-                    if os.path.isfile(name):
-                        # Always use forward slash; even on Windows.
-                        zip.write(name, name.split('/', 1)[-1])
-                        record.append('%s,sha256=%s,%s' % (name.split(os.sep, 1)[-1],
-                                                           sha256_file(name),
-                                                           os.path.getsize(name)))
-
-                # Add metadata files
-                dist_info = '%s-%s.dist-info' % (top_level, version)
-
-                record.append('%s,sha=%s,%s' % (os.path.join(dist_info, 'METADATA'),
-                                                sha256_string(metadata),
-                                                len(metadata)))
-                record.append('%s,sha=%s,%s' % (os.path.join(dist_info, 'metadata.json'),
-                                                sha256_string(metadata_json),
-                                                len(metadata_json)))
-                record.append('%s,sha=%s,%s' % (os.path.join(dist_info, 'WHEEL'),
-                                                sha256_string(wheel % pyver),
-                                                len(wheel % pyver)))
-                record.append('%s,sha=%s,%s' % (os.path.join(dist_info, 'top_level.txt'),
-                                                sha256_string(top_level),
-                                                len(top_level)))
-                record.append(
-                    '%s,,' % os.path.join(dist_info, 'RECORD').split(os.sep, 1)[-1])
-
-                record = '%s\n' % '\n'.join(record)
-
-                zip.writestr(os.path.join(dist_info, 'top_level.txt'), top_level)
-                zip.writestr(os.path.join(dist_info, 'METADATA'),
-                             metadata.encode('utf-8'))
-                zip.writestr(os.path.join(dist_info, 'metadata.json'),
-                             metadata_json.encode('utf-8'))
-                zip.writestr(os.path.join(dist_info, 'WHEEL'), wheel % pyver)
-                zip.writestr(os.path.join(dist_info, 'RECORD'), record)
+            createwheels(tag, platform, version, versions, args.build, names, root,
+                         top_level, outdir, metadata, metadata_json)
+            tag = '%(pyversion)s-%(abi)s-macosx_11_0_arm64'
+            createwheels(tag, platform, version, versions, args.build, names, root,
+                         top_level, outdir, metadata, metadata_json)
 
     # Convert directory to pypi form if requested
     if args.pypi:
