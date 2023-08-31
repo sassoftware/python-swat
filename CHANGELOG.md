@@ -1,6 +1,10 @@
 
 # Change Log
 
+## 1.13.3 - 2023-08-31
+
+- add wheel files for macosx_11_0_arm64
+
 ## 1.13.2 - 2023-07-31
 
 - Add CASTable.rename() to rename the columns of a table

@@ -8,6 +8,11 @@ What’s New
 
 This document outlines features and improvements from each release.
 
+1.13.3 (August 31, 2023)
+------------------------
+
+-  add wheel files for macosx_11_0_arm64
+
 1.13.2 (July 31, 2023)
 ----------------------
 
