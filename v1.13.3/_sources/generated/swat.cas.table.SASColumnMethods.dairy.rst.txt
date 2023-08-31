@@ -1,0 +1,6 @@
+swat.cas.table.SASColumnMethods.dairy
+=====================================
+
+.. currentmodule:: swat.cas.table
+
+.. automethod:: SASColumnMethods.dairy

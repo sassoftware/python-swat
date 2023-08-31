@@ -1,0 +1,6 @@
+swat.cas.table.SASColumnMethods.sign
+====================================
+
+.. currentmodule:: swat.cas.table
+
+.. automethod:: SASColumnMethods.sign

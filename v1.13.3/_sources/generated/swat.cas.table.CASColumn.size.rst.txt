@@ -1,0 +1,6 @@
+swat.cas.table.CASColumn.size
+=============================
+
+.. currentmodule:: swat.cas.table
+
+.. autoattribute:: CASColumn.size

@@ -1,0 +1,6 @@
+swat.cas.table.CASTablePlotter.scatter
+======================================
+
+.. currentmodule:: swat.cas.table
+
+.. automethod:: CASTablePlotter.scatter
