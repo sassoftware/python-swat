@@ -261,6 +261,13 @@ def main(url, args):
                 # Anaconda doesn't do narrow character builds; just use _pyswatw for 2.7
                 if m.group(2).split('.')[0] == '_pyswat':
                     continue
+
+                if ((m.group(3) == '') or (int(m.group(3)) < 37)):
+                    # Don't create wheel file for Python 2.7, 3.5, or 3.6
+                    msg = "tar2conda.main : m.group(3) {} is empty or < 37, skipping"
+                    print_err(msg.format(m.group(3)))
+                    continue
+
                 platform = m.group(1)
                 pvlist = list(m.group(3) or '27')
                 if len(pvlist) < 2:

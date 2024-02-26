@@ -54,6 +54,12 @@ def get_supported_versions(root):
     out = set()
     for ver in glob.glob(os.path.join(root, 'swat', 'lib', '*', '_py*swat*.*')):
         ver = re.match(r'_py(\d*)swat', os.path.basename(ver)).group(1) or '27'
+        if (ver[0] == '2'):
+            # print_err("get_supported_versions: skipping {}".format(ver))
+            continue
+        if ((int(ver[1:]) < 7) and (ver[0] == '3')):
+            # print_err("get_supported_versions: skipping {}".format(ver))
+            continue
         out.add('{}.{}'.format(ver[0], ver[1:]))
     return list(sorted(out))
 
