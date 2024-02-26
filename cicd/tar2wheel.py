@@ -404,11 +404,19 @@ def main(url, args):
         for name in names:
             m = re.search(r'(\w+)[\\/](_py(\d*)swat(w?)\.\w+)$', name)
             if m:
+                if ((m.group(3) == '') or (int(m.group(3)) < 37)):
+                    # Don't create wheel file for Python 2.7, 3.5, or 3.6
+                    msg = "tar2wheel.main : m.group(3) {} is empty or < 37, skipping"
+                    print_err(msg.format(m.group(3)))
+                    continue
+
                 platform = m.group(1)
                 versions.append(dict(extension=m.group(2),
-                                     pyversion='cp%s' % (m.group(3) or '27'),
-                                     abi='cp%sm%s' % ((m.group(3) or '27'),
-                                                      m.group(4) and 'u' or '')))
+                                     pyversion='cp%s' % (m.group(3)),
+                                     abi='cp%sm' % (m.group(3))))
+# special handling for python 2.7, no longer needed
+#                                     abi='cp%sm%s' % ((m.group(3) or '27'),
+#                                                      m.group(4) and 'u' or '')))
                 if int(versions[-1]['pyversion'].replace('cp', '')) >= 38:
                     versions[-1]['abi'] = versions[-1]['abi'].replace('m', '')
 
