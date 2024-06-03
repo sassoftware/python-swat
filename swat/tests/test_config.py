@@ -259,7 +259,7 @@ class TestConfig(tm.TestCase):
                           'connection_retries', 'connection_retry_interval',
                           'dataset', 'debug', 'exception_on_severity',
                           'hostname', 'missing',
-                          'port', 'print_messages', 'protocol',
+                          'pkce', 'port', 'print_messages', 'protocol',
                           'reflection_levels', 'ssl_ca_list', 'token',
                           'trace_actions', 'trace_ui_actions', 'username'])
 

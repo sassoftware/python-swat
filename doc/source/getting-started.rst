@@ -345,6 +345,28 @@ The authentication code can also be specified using one of the following environ
 - CASAUTHCODE
 - VIYAAUTHCODE
 
+Beginning with release v1.14.0, the SWAT package supports using Proof Key for Code Exchange ( PKCE )
+when using authentication codes to obtain an OAuth token with HTTP.  Python 3.6 or later is required
+for PKCE.
+
+To use PKCE, specify the pkce=True parameter in the :class:`CAS` constructor.  When specifying pkce=True,
+do not specify the authcode parameter.  You will be provided a URL to use to obtain the
+authentication code and prompted to enter the authentication code obtained from that URL.
+
+.. ipython:: python
+   :verbatim:
+
+   conn = swat.CAS('https://my-cas-host.com:443/cas-shared-default-http/',
+                   pkce=True)
+
+
+The pkce parameter can also be specified using one of the following environment variables
+
+- CAS_PKCE
+- VIYA_PKCE
+- CASPKCE
+- VIYAPKCE
+
 Kerberos
 ~~~~~~~~~~~~~~~~~~~~~
 
