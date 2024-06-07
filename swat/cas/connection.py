@@ -184,6 +184,8 @@ class CAS(object):
         The path to the SSL certificates for the CAS server.
     authcode : string, optional
         Authorization code from SASLogon used to retrieve an OAuth token.
+    pkce : boolean, optional
+        Use Proof Key for Code Exchange to obtain the Authorization code
     **kwargs : any, optional
         Arbitrary keyword arguments used for internal purposes only.
 
@@ -353,7 +355,7 @@ class CAS(object):
     def __init__(self, hostname=None, port=None, username=None, password=None,
                  session=None, locale=None, nworkers=None, name=None,
                  authinfo=None, protocol=None, path=None, ssl_ca_list=None,
-                 authcode=None, **kwargs):
+                 authcode=None, pkce=False, **kwargs):
 
         # Filter session options allowed as parameters
         _kwargs = {}
@@ -399,11 +401,23 @@ class CAS(object):
             soptions = a2n(getsoptions(session=session, locale=locale,
                                        nworkers=nworkers, protocol=protocol))
 
+            # Check for Proof Key for Code Exchange
+            pkce = pkce or cf.get_option('cas.pkce')
             # Check for authcode authentication
             authcode = authcode or cf.get_option('cas.authcode')
-            if protocol in ['http', 'https'] and authcode:
+            if protocol in ['http', 'https'] and (authcode or pkce):
                 username = None
-                password = type(self)._get_token(authcode=authcode, url=hostname)
+                verifystring = None
+                if pkce:
+                    if authcode:
+                        # User will be prompted for authcode,
+                        # do not enter it in CAS() when using pkce
+                        raise SWATError('Do not specify authcode with pkce')
+                    # Get the authcode from SASLogon using Proof Key for Code Exchange
+                    authcode, verifystring = type(self)._get_authcode(url=hostname)
+                # Get the OAuth token from SASLogon
+                password = type(self)._get_token(authcode=authcode, url=hostname,
+                                                 verifystring=verifystring, pkce=pkce)
 
         # Create error handler
         try:
@@ -538,7 +552,8 @@ class CAS(object):
 
     @classmethod
     def _get_token(cls, username=None, password=None, authcode=None,
-                   client_id=None, client_secret=None, url=None):
+                   client_id=None, client_secret=None, url=None,
+                   verifystring=None, pkce=False):
         ''' Retrieve token from Viya installation '''
         from .rest.connection import _print_request, _setup_ssl
 
@@ -552,10 +567,21 @@ class CAS(object):
             client_id = client_id or cf.get_option('cas.client_id') or 'SWAT'
 
             authcode = authcode or cf.get_option('cas.authcode')
+            pkce = pkce or cf.get_option('cas.pkce')
+
             if authcode:
                 client_secret = client_secret or cf.get_option('cas.client_secret') or ''
-                body = {'grant_type': 'authorization_code', 'code': authcode,
-                        'client_id': client_id, 'client_secret': client_secret}
+
+                if pkce:
+                    if verifystring is None:
+                        raise SWATError('A code verifier must be supplied for pkce')
+
+                    body = {'grant_type': 'authorization_code',
+                            'code': authcode, 'code_verifier': verifystring,
+                            'client_id': client_id, 'client_secret': client_secret}
+                else:
+                    body = {'grant_type': 'authorization_code', 'code': authcode,
+                            'client_id': client_id, 'client_secret': client_secret}
             else:
                 username = username or cf.get_option('cas.username')
                 password = password or cf.get_option('cas.token')
@@ -567,10 +593,57 @@ class CAS(object):
                                  data=urlencode(body))
 
             if resp.status_code >= 300:
+                logger.debug('Token request resulted in status code %d : \n %s',
+                             resp.status_code, resp.json())
                 raise SWATError('Token request resulted in a status of %s' %
                                 resp.status_code)
 
             return resp.json()['access_token']
+
+    @classmethod
+    def _get_authcode(cls, url=None, client_id=None, client_secret=None):
+        '''
+        Generate the Proof Key for Code Exchange URL to retrieve the authentication code
+        from the Viya installation.
+        Wait for the user to provide the authentication code
+        '''
+        try:
+            # The secrets package was introduced in Python 3.6
+            import secrets
+        except ImportError:
+            raise SWATError("Python 3.6 or later is required for "
+                            "Proof Key for Code Exchange.")
+
+        import hashlib
+        import base64
+
+        client_id = client_id or cf.get_option('cas.client_id') or 'SWAT'
+        client_secret = client_secret or cf.get_option('cas.client_secret') or ''
+
+        # Generate the URL for the authcode request
+        cv = secrets.token_urlsafe(32)
+        cvh = hashlib.sha256(cv.encode('ascii')).digest()
+        cvhe = base64.urlsafe_b64encode(cvh)
+        cc = cvhe.decode('ascii')[:-1]
+        # Note, for pkce "cc" is provided in the authcode request
+        # and "cv" is provided in the OAuth token request
+        purl = ("/SASLogon/oauth/authorize?client_id={}&response_type=code"
+                "&code_challenge_method=S256&code_challenge={}").format(client_id, cc)
+        authurl = urljoin(url, purl)
+
+        # Display the URL to the user and wait while they go off and get the authcode
+        # to respond to the prompt
+        msg = ("Please enter the authorization code obtained from the following url : "
+               "\n {} \n").format(authurl)
+        authcode = input(msg)
+
+        # trim leading trailing whitespace and verify something was entered
+        authcode = authcode.strip()
+        if len(authcode) == 0:
+            raise SWATError(
+                "You must provide an authorization code to connect to the CAS server")
+
+        return authcode, cv
 
     def _gen_id(self):
         ''' Generate an ID unique to the session '''

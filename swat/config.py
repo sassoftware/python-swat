@@ -197,6 +197,11 @@ register_option('cas.protocol', 'string',
                 'Using "http" or "https" will use the REST interface.',
                 environ='CAS_PROTOCOL')
 
+register_option('cas.pkce', 'boolean', check_boolean, False,
+                'Indicates whether or not Proof Key for Code Exchange should\n'
+                'be used to obtain an authorization code.',
+                environ=['CAS_PKCE', 'VIYA_PKCE'])
+
 
 def get_default_cafile():
     ''' Retrieve the default CA file in the ssl module '''
