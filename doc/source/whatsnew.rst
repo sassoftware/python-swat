@@ -8,6 +8,13 @@ What’s New
 
 This document outlines features and improvements from each release.
 
+1.14.0 (June 7, 2024)
+---------------------
+
+-  Add support for Proof Key for Code Exchange (PKCE)
+-  Update TK subsystem
+-  Wheel and Conda files for Python releases < 3.7 are no longer created
+
 1.13.3 (August 31, 2023)
 ------------------------
 

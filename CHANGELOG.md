@@ -1,6 +1,12 @@
 
 # Change Log
 
+## 1.14.0 - 2024-06-07
+ 
+- Add support for Proof Key for Code Exchange (PKCE) 
+- Update TK subsystem
+- Wheel and Conda files for Python releases < 3.7 are no longer created
+
 ## 1.13.3 - 2023-08-31
 
 - add wheel files for macosx_11_0_arm64
