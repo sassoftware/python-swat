@@ -1,0 +1,6 @@
+swat.cas.table.CASColumn.rfloordiv
+==================================
+
+.. currentmodule:: swat.cas.table
+
+.. automethod:: CASColumn.rfloordiv

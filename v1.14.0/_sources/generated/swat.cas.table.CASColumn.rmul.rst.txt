@@ -1,0 +1,6 @@
+swat.cas.table.CASColumn.rmul
+=============================
+
+.. currentmodule:: swat.cas.table
+
+.. automethod:: CASColumn.rmul

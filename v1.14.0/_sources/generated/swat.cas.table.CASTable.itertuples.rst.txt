@@ -1,0 +1,6 @@
+swat.cas.table.CASTable.itertuples
+==================================
+
+.. currentmodule:: swat.cas.table
+
+.. automethod:: CASTable.itertuples

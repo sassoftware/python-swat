@@ -1,0 +1,6 @@
+swat.cas.table.CASTableGroupBy.to\_frame
+========================================
+
+.. currentmodule:: swat.cas.table
+
+.. automethod:: CASTableGroupBy.to_frame
