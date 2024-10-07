@@ -247,15 +247,17 @@ def get_python_versions(platform):
     be used.
 
     '''
-    cmd = ['conda', 'search', '-q', '--json', '--subdir', platform, 'defaults::pandas']
-    out = subprocess.check_output(cmd)
 
     versions = set()
-    for item in json.loads(out)['pandas']:
-        pyver = [x for x in item['depends'] if x.startswith('python')][0]
-        pyver = re.findall(r'(\d+\.\d+)(?:\.\d+)?', pyver)[0]
-        versions.add(pyver)
-
+    versions.add('2.7')
+    versions.add('3.4')
+    versions.add('3.6')
+    versions.add('3.7')
+    versions.add('3.8')
+    versions.add('3.9')
+    versions.add('3.10')
+    versions.add('3.11')
+    versions.add('3.12')
     return versions
 
 
