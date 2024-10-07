@@ -7,7 +7,7 @@ Installation
 The SWAT package is installed using the ``pip`` command.  The requirements
 for using the binary protocol of CAS (recommended) are as follows.
 
-* **64-bit** Python 2.7 or 3.5+ on Linux or Windows
+* **64-bit** Python 3.7 - 3.11 on Linux or Windows
 
 See additional shared library notes below.
 
@@ -25,11 +25,6 @@ For more information, see :ref:`Binary vs. REST <binaryvsrest>`.
 
 Note that this package is merely a client to a CAS server.  It has no utility unless
 you have a licensed CAS server to connect to.
-
-If you do not already have a modern Python installation, it is highly recommended
-that you install the `Anaconda Python distribution <https://www.continuum.io/downloads>`_
-from Continuum Analytics.  This distribution includes dozens of commonly used Python
-packages, and can even be installed without administrator privileges.
 
 If you do not have ``pip`` installed, you can use ``easy_install pip`` to add
 it to your current Python installation.
@@ -53,7 +48,7 @@ Python Dependencies
 
 The SWAT package uses many features of the Pandas Python package and other
 dependencies of Pandas.  If you do not already have version 0.16 or greater
-of Pandas installed, ``pip`` or ``conda`` will install or update it for you when you
+of Pandas installed, ``pip`` will install or update it for you when you
 install SWAT.
 
 If you are using ``pip`` version 23.1 or later to install from a tar.gz file, the python
@@ -66,14 +61,6 @@ PyPI
 The latest release of SWAT can be installed from PyPI using ``pip`` as follows:
 
    pip install swat
-
-
-Conda
------
-
-If you use an Anaconda distribution of Python, you can use ``conda`` to install SWAT:
-
-    conda install -c sas-institute swat
 
 
 Github
