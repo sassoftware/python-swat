@@ -62,11 +62,9 @@ you can install it using `pip`.
 
 # Installation
 
-SWAT can be installed using `pip` or `conda` (if you are using Anaconda)::
+SWAT can be installed using `pip`:
 
     pip install swat
-    
-    conda install -c sas-institute swat
     
 You can also install from the files on the 
 [SWAT project releases page](https://github.com/sassoftware/python-swat/releases).
