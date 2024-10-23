@@ -25,7 +25,10 @@ import json
 import os
 import platform
 import re
-import requests
+try:
+    import requests
+except ImportError:
+    pass
 import subprocess
 import sys
 import zipfile
@@ -130,6 +133,8 @@ def extract_zip(root, data, py_versions=None):
             if py_versions and re.match(r'_py\d*swat', basename):
                 ver = re.match(r'_py(\d*)swat', basename).group(1) or '27'
                 if ver not in py_versions:
+                    print_err("***** extract_zip : version {} not in py_versions"
+                              .format(ver))
                     continue
 
             # Write file
@@ -152,10 +157,37 @@ def create_placeholders(root, data, py_versions=None):
             if py_versions:
                 ver = re.match(r'_py(\d*)swat', basename).group(1) or '27'
                 if ver not in py_versions:
+                    print_err("***** create_placeholders : version {} not in py_versions"
+                              .format(ver))
                     continue
 
             # Write placeholder file
             out_path = os.path.join(root, basename.split('.')[0] + '.na')
+            with open(out_path, 'wb') as out_file:
+                out_file.write(b'')
+
+
+def create_restonly_placeholders(root):
+    ''' Write placeholder files for each Python extension file '''
+    py_versions = [x.replace('.', '')
+                   for x in get_python_versions()]
+
+    for ver in py_versions:
+        if ver == '27':
+            out_path = os.path.join(root, "_pyswat.na")
+            print_err("***** create_restonly_placeholders : write placeholder file {}"
+                      .format(out_path))
+            with open(out_path, 'wb') as out_file:
+                out_file.write(b'')
+            out_path = os.path.join(root, "_pyswatw.na")
+            print_err("***** create_restonly_placeholders : write placeholder file {}"
+                      .format(out_path))
+            with open(out_path, 'wb') as out_file:
+                out_file.write(b'')
+        else:
+            out_path = os.path.join(root, "_py{}swat.na".format(ver))
+            print_err("***** create_restonly_placeholders : write placeholder file {}"
+                      .format(out_path))
             with open(out_path, 'wb') as out_file:
                 out_file.write(b'')
 
@@ -220,7 +252,7 @@ def get_packages(lib_root, tk_base, release, platform, pkgs, versions_only=False
 
             if not py_versions:
                 py_versions = [x.replace('.', '')
-                               for x in get_python_versions(platform)]
+                               for x in get_python_versions()]
 
             if versions_only:
                 create_placeholders(lib_root, resp.content, py_versions=py_versions)
@@ -231,21 +263,18 @@ def get_packages(lib_root, tk_base, release, platform, pkgs, versions_only=False
 
         # Package was not found, bail out
         if resp.status_code == 404:
+            print_err(("***** get_packages : resp.status_code was 404, "
+                       "bail out and set is_installed to False"))
             is_installed = False
             break
 
     return is_installed
 
 
-def get_python_versions(platform):
+def get_python_versions():
     '''
-    Retrieve all possible Python versions for the given platform
-
-    This function actually uses information about the pandas library
-    instead of Python itself. Pandas is the primary dependency of
-    SWAT, so it is the limiting factor on what Python versions can
-    be used.
-
+    Retrieve all possible Python versions.
+    Currently, every platform supports the same python versions.
     '''
 
     versions = set()
@@ -282,12 +311,20 @@ def main(args):
     # Create output directory
     os.makedirs(lib_root, exist_ok=True)
 
-    is_installed = get_packages(lib_root, args.tk_base, args.release,
-                                args.platform, TK_PKGS)
+    if args.platform.lower() in ("linux-64", "win-64"):
+        print_err("***** main : binary supported on platform {}".format(args.platform))
+        is_installed = get_packages(lib_root, args.tk_base, args.release,
+                                    args.platform, TK_PKGS)
 
-    if not is_installed:
-        get_packages(lib_root, args.tk_base, args.release, 'linux-64',
-                     [TK_PACKAGE_NAME], versions_only=True)
+        if not is_installed:
+            print_err(("***** main : get_packages failed to get TK packages.  "
+                       "Retrying with just placeholder files."))
+            get_packages(lib_root, args.tk_base, args.release, 'linux-64',
+                         [TK_PACKAGE_NAME], versions_only=True)
+    else:
+        print_err("***** main : REST ONLY platform {}".format(args.platform))
+        is_installed = False
+        create_restonly_placeholders(lib_root)
 
     update_tk_version(args.root, is_installed and args.release or 'none')
 
