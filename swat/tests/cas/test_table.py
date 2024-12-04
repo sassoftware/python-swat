@@ -878,10 +878,10 @@ class TestCASTable(tm.TestCase):
         df_dropped = df.drop_duplicates(subset='Make')
 
         # Equivalent to pandas in size
-        self.assertEquals(len(tbl_dropped), len(df_dropped))
+        self.assertEqual(len(tbl_dropped), len(df_dropped))
         # Number of elements in 'Make' column should be same as number of unique elements
-        self.assertEquals(tbl_dropped['Make'].nunique(), len(tbl_dropped['Make']))
-        self.assertEquals(tbl_dropped['Make'].nunique(), len(tbl_dropped))
+        self.assertEqual(tbl_dropped['Make'].nunique(), len(tbl_dropped['Make']))
+        self.assertEqual(tbl_dropped['Make'].nunique(), len(tbl_dropped))
 
         # drop duplicates for multi-element subset
         tbl_dropped_multi = tbl.drop_duplicates(casout={'replace': True,
@@ -890,7 +890,7 @@ class TestCASTable(tm.TestCase):
         df_dropped_multi = df.drop_duplicates(subset=['Origin', 'Type'])
 
         # Equivalent to pandas in size
-        self.assertEquals(len(tbl_dropped_multi), len(df_dropped_multi))
+        self.assertEqual(len(tbl_dropped_multi), len(df_dropped_multi))
 
         # We need some rows where all values for each col are duplicate
         nDuplicates = 7
@@ -915,8 +915,8 @@ class TestCASTable(tm.TestCase):
                                                                   'name': 'drop-test-4'})
 
         # Make sure that the correct amount of rows were dropped
-        self.assertEquals(len(tbl), len(tbl_dropped_all))
-        self.assertEquals(len(duplicate_table), len(tbl_dropped_all) + nDuplicates)
+        self.assertEqual(len(tbl), len(tbl_dropped_all))
+        self.assertEqual(len(duplicate_table), len(tbl_dropped_all) + nDuplicates)
 
     def test_column_iter(self):
         df = self.get_cars_df()
@@ -3314,23 +3314,23 @@ class TestCASTable(tm.TestCase):
         tbl_nunique = tbl.nunique()
         df_nunique = df.nunique()
         # Length of Series are equal
-        self.assertEquals(len(tbl_nunique), len(df_nunique))
+        self.assertEqual(len(tbl_nunique), len(df_nunique))
         # Indices are equal
         self.assertTrue(sorted(tbl_nunique) == sorted(df_nunique))
         # Values are equal
         for col in tbl.columns:
-            self.assertEquals(tbl_nunique[col], df_nunique[col])
+            self.assertEqual(tbl_nunique[col], df_nunique[col])
 
         # Now counting NaN
         tbl_nunique_nan = tbl.nunique(dropna=False)
         df_nunique_nan = df.nunique(dropna=False)
         # Length of Series are equal
-        self.assertEquals(len(tbl_nunique_nan), len(df_nunique_nan))
+        self.assertEqual(len(tbl_nunique_nan), len(df_nunique_nan))
         # Indices are equal
-        self.assertEquals(sorted(tbl_nunique_nan), sorted(df_nunique_nan))
+        self.assertEqual(sorted(tbl_nunique_nan), sorted(df_nunique_nan))
         # Values are equal
         for col in tbl.columns:
-            self.assertEquals(tbl_nunique_nan[col], df_nunique_nan[col])
+            self.assertEqual(tbl_nunique_nan[col], df_nunique_nan[col])
 
     def test_column_unique(self):
         df = self.get_cars_df()

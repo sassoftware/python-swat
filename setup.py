@@ -43,7 +43,7 @@ setup(
     license='Apache v2.0 (SWAT) + SAS Additional Functionality (SAS TK)',
     packages=find_packages(),
     package_data={
-        'swat': ['lib/*/*.*', 'tests/datasources/*.*'],
+        'swat': ['lib/*/*.*', 'tests/datasources/*.*', 'readme.md'],
     },
     install_requires=[
         'pandas >= 0.16.0',
@@ -68,6 +68,7 @@ setup(
         'Programming Language :: Python :: 3.9',
         'Programming Language :: Python :: 3.10',
         'Programming Language :: Python :: 3.11',
+        'Programming Language :: Python :: 3.12',
         'Topic :: Scientific/Engineering',
     ],
 )
