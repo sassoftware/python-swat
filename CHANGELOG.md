@@ -1,6 +1,12 @@
 
 # Change Log
 
+## 1.15.0 - 2024-12-05
+
+- Add Python 3.12 support
+- Update TK subsystem
+- Conda packages will no longer be generated
+
 ## 1.14.0 - 2024-06-07
  
 - Add support for Proof Key for Code Exchange (PKCE) 

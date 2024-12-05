@@ -8,6 +8,13 @@ What’s New
 
 This document outlines features and improvements from each release.
 
+1.15.0 (December 5, 2024)
+-------------------------
+
+-  Add Python 3.12 support
+-  Update TK subsystem
+-  Conda packages will no longer be generated
+
 1.14.0 (June 7, 2024)
 ---------------------
 
