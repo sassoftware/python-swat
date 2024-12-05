@@ -1,0 +1,6 @@
+swat.cas.table.CASColumn.ftype
+==============================
+
+.. currentmodule:: swat.cas.table
+
+.. autoattribute:: CASColumn.ftype

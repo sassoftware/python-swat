@@ -1,0 +1,6 @@
+swat.cas.table.CASTableGroupBy.stderr
+=====================================
+
+.. currentmodule:: swat.cas.table
+
+.. automethod:: CASTableGroupBy.stderr

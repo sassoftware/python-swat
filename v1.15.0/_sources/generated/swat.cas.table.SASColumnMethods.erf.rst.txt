@@ -1,0 +1,6 @@
+swat.cas.table.SASColumnMethods.erf
+===================================
+
+.. currentmodule:: swat.cas.table
+
+.. automethod:: SASColumnMethods.erf
