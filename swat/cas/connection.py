@@ -170,6 +170,8 @@ class CAS(object):
         User-definable name for the session.
     nworkers : int or long, optional
         Number of worker nodes to use.
+        This parameter is only valid
+        with the binary (not REST) protocol.
     authinfo : string or list-of-strings, optional
         The filename or list of filenames of authinfo/netrc files used
         for authentication.
@@ -240,7 +242,7 @@ class CAS(object):
     >>> conn = swat.CAS('mycashost.com', 5570, locale='es_US')
 
     To limit the number of worker nodes in a grid, you use the nworkers=
-    parameter.
+    parameter (binary protocol only).
 
     >>> conn = swat.CAS('mycashost.com', 5570, nworkers=4)
 
@@ -1142,7 +1144,7 @@ class CAS(object):
         Delete all post-processing functions for an action
 
         Parameters
-        ---------
+        ----------
         name : string
            Full name of action (actionset.actionname)
 

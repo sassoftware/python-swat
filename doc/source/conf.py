@@ -47,7 +47,7 @@ extensions = [
 
 autosummary_generate = True
 numpydoc_show_class_members = False
-autodoc_default_flags = ['show-inheritance']
+autodoc_default_options = {'show-inheritance': True}
 autoclass_content = 'class'
 
 intersphinx_mapping = {
@@ -55,7 +55,7 @@ intersphinx_mapping = {
     'pandas': ('http://pandas.pydata.org/pandas-docs/version/0.19.2/', None),
     'numpy': ('http://docs.scipy.org/doc/numpy/', None),
     'scipy': ('http://docs.scipy.org/doc/scipy/reference/', None),
-    'matplotlib': ('http://matplotlib.sourceforge.net/', None)
+    'matplotlib': ('https://matplotlib.org/stable/', None),
 }
 
 # Add any paths that contain templates here, relative to this directory.
@@ -74,7 +74,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'SWAT'
-copyright = '2016 SAS Institute Inc. All Rights Reserved.'
+copyright = '%Y SAS Institute Inc. All Rights Reserved.'
 author = 'SAS'
 
 # The version info for the project you're documenting, acts as replacement for
@@ -94,7 +94,7 @@ release = swat.__version__
 #
 # This is also used if you do content translation via gettext catalogs.
 # Usually you set "language" from the command line for these cases.
-language = None
+# language = None
 
 # There are two options for replacing |today|: either, you set today to some
 # non-false value, then it is used:
@@ -142,9 +142,9 @@ import sphinx_rtd_theme  # noqa: E402
 
 html_theme = 'sphinx_rtd_theme'
 
-html_context = {
-    'css_files': ['_static/custom.css'],
-}
+# html_context = {
+#     'css_files': ['_static/custom.css'],
+# }
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
@@ -152,7 +152,7 @@ html_context = {
 # html_theme_options = {}
 
 # Add any paths that contain custom themes here, relative to this directory.
-html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
+# html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 
 # The name for this set of Sphinx documents.  If None, it defaults to
 # "<project> v<release> documentation".
