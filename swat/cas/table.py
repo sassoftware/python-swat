@@ -5886,14 +5886,14 @@ class CASTable(ParamManager, ActionParamManager):
         a subset of columns when checking for duplicate rows.
 
         Parameters
-        --------
+        ----------
         casout : string or :class:`CASTable` or dict
             The output table.
         subset : string or list-of-strings, optional
             The subset of columns to consider when checking for duplicate rows.
 
         Returns
-        --------
+        -------
         :class:`CASTable`
             The input table without duplicate rows.
         '''

@@ -1183,7 +1183,8 @@ class DBAPI(CASDataMsgHandler):
 
 
 class Image(CASDataMsgHandler):
-    """CAS data message handler for images.
+    '''
+    Create an Image data message handler.
 
     Parameters
     ----------
@@ -1220,8 +1221,7 @@ class Image(CASDataMsgHandler):
     behavior should be similar to that of the image.loadImages_ CAS action for loading
     server-side images:
 
-    .. _image.loadImages: https://go.documentation.sas.com/doc/en/pgmsascdc/v_028/casactml/casactml_image_details22
-    .htm  # noqa: E501
+    .. _image.loadImages: https://go.documentation.sas.com/doc/en/pgmsascdc/v_028/casactml/casactml_image_details22.htm
 
     Although images will be stored in binary format to a CAS table column
     labeled "_image_", the CAS table metadata will not indicate that this column should
@@ -1236,7 +1236,8 @@ class Image(CASDataMsgHandler):
     >>> conn.addtable(table='mytable', **dmh.args.addtable).casTable
     ... CASTable('MYTABLE', caslib='CASUSER(user)')
 
-    """
+    '''   # noqa: E501
+
     def __init__(self, data, nrecs=1000, subdirs=True):
         # To maintain Py2.7 compatibility, use strings instead of Paths.
         if type(data).__module__ == 'pathlib':

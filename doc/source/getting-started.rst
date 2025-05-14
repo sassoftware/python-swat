@@ -261,7 +261,7 @@ synonyms for ``user``, and ``protocol`` is a synonym for ``port``.
 
 You can specify as many of the ``host`` lines as possible.  The ``port`` field
 is optional.  If it is left off, all ports will use the same password.
-Hostnames much match the hostname used in the :class:`CAS` constructor exactly.  It does
+Hostnames must match the hostname used in the :class:`CAS` constructor exactly.  It does
 not do any DNS expanding of the names.  So 'host1' and 'host1.my-company.com' are
 considered two different hosts.
 
