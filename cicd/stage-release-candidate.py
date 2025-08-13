@@ -41,11 +41,6 @@ To install the {name} package, use the `pip` command as follows::
 ```
 pip install {pkg_name}
 ```
-
-Or, if you are using Anaconda::
-```
-conda install -c sas-institute {pkg_name}
-```
 '''
 
 
