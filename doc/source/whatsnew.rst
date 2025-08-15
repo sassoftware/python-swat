@@ -8,6 +8,12 @@ What’s New
 
 This document outlines features and improvements from each release.
 
+1.16.0 (August 15, 2025)
+------------------------
+
+-  Update TK subsystem
+-  PowerPC is no longer supported
+
 1.15.0 (December 5, 2024)
 -------------------------
 

@@ -1,6 +1,11 @@
 
 # Change Log
 
+## 1.16.0 - 2025-08-15
+
+- Update TK subsystem
+- PowerPC is no longer supported
+
 ## 1.15.0 - 2024-12-05
 
 - Add Python 3.12 support
