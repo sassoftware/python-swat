@@ -24,7 +24,7 @@ Utilities for Zeppelin Notebook integration
 from __future__ import print_function, division, absolute_import, unicode_literals
 
 import base64
-import cgi
+import html
 import pandas as pd
 import pprint
 import six
@@ -77,7 +77,7 @@ def show(obj, **kwargs):
         show_svg(obj, **kwargs)
 
     else:
-        print('%%html <pre>%s</pre>' % cgi.escape(pprint.pformat(obj)))
+        print('%%html <pre>%s</pre>' % html.escape(pprint.pformat(obj)))
 
 
 def show_image(img, fmt='png', width='auto', height='auto'):

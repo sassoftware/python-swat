@@ -788,10 +788,7 @@ class SASDataFrame(pd.DataFrame):
 
     def _post_process_html(self, html):
         ''' Add SAS-isms to generated HTML table '''
-        try:
-            from html import escape
-        except ImportError:
-            from cgi import escape
+        from html import escape
 
         # Add table label
         if self.label:
