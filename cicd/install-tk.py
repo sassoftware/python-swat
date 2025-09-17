@@ -287,6 +287,7 @@ def get_python_versions():
     versions.add('3.10')
     versions.add('3.11')
     versions.add('3.12')
+    versions.add('3.13')
     return versions
 
 

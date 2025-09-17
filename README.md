@@ -28,7 +28,7 @@ To view updates to this project see the [Change Log](https://github.com/sassoftw
 
 To access the CAS binary protocol (recommended), you need the following:
 
-* **64-bit** Python 3.7 to 3.12 on Windows or Linux (see shared library notes below)
+* **64-bit** Python 3.7 to 3.13 on Windows or Linux (see shared library notes below)
 
 The binary protocol requires pre-compiled components found in the
 `pip` installer only.  These pieces are not available as source code and

@@ -5049,7 +5049,7 @@ class CASTable(ParamManager, ActionParamManager):
         -------
         :class:`pandas.Series`
             If no by groups are specified.
-        :class:`pandas.Dataframe`
+        :class:`pandas.DataFrame`
             If by groups are specified.
 
         '''
@@ -5086,7 +5086,7 @@ class CASTable(ParamManager, ActionParamManager):
         -------
         :class:`pandas.Series`
             If no by groups are specified.
-        :class:`pandas.Dataframe`
+        :class:`pandas.DataFrame`
             If by groups are specified.
 
         '''
@@ -5270,7 +5270,7 @@ class CASTable(ParamManager, ActionParamManager):
         -------
         :class:`pandas.Series`
             If no By groups are specified.
-        :class:`pandas.Dataframe`
+        :class:`pandas.DataFrame`
             If By groups are specified.
 
         '''
@@ -5387,7 +5387,7 @@ class CASTable(ParamManager, ActionParamManager):
         -------
         :class:`pandas.Series`
             If no By groups are specified, or only a single quantile is requested.
-        :class:`pandas.Dataframe`
+        :class:`pandas.DataFrame`
             If By groups are specified.
 
         '''

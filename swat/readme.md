@@ -1,4 +1,4 @@
-For **Python 3.12 on Windows only**, the following modification was made to the `pyport.h` file while building the SWAT C extensions:  
+For **Python 3.12+ on Windows only**, the following modification was made to the `pyport.h` file while building the SWAT C extensions:
 
 * Updated the `#define` for `ALWAYS_INLINE`
   <br>**Previous Definition :**
