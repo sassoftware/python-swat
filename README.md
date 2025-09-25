@@ -38,7 +38,7 @@ amounts of data.  It also offers more advanced data loading from the client
 and data formatting features.
 
 To access the CAS REST interface only, you can use the pure Python code
-which runs in Python 3.7 to 3.12 on all platforms.  While not as fast as the
+which runs in Python 3.7 to 3.13 on all platforms.  While not as fast as the
 binary protocol, the pure Python interface is more portable.
 
 ## Linux Library Dependencies
