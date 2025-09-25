@@ -7,7 +7,7 @@ Installation
 The SWAT package is installed using the ``pip`` command.  The requirements
 for using the binary protocol of CAS (recommended) are as follows.
 
-* **64-bit** Python 3.7 - 3.12 on Linux or Windows
+* **64-bit** Python 3.7 - 3.13 on Linux or Windows
 
 See additional shared library notes below.
 
@@ -19,7 +19,7 @@ amounts of data.  It also offers more advanced data loading from the client
 and data formatting features.
 
 To access the CAS REST interface only, you can use the pure Python code which
-runs in Python 3.7 - 3.12.  You will still need Pandas installed.  While not as
+runs in Python 3.7 - 3.13.  You will still need Pandas installed.  While not as
 fast as the binary protocol, the pure Python interface is more portable.
 For more information, see :ref:`Binary vs. REST <binaryvsrest>`.
 
