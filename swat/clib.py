@@ -79,6 +79,9 @@ def _import_pyswat():
         '/usr/lib64/libssl.so.1.1*',
         '/usr/lib/x86_64-linux-gnu/libssl.so.1.1*',
         os.path.join(sys.prefix, 'lib', 'libssl.so.1.1*'),
+        '/usr/lib64/libssl.so.3',
+        '/usr/lib/x86_64-linux-gnu/libssl.so.3',
+        os.path.join(sys.prefix, 'lib', 'libssl.so.3'),
     ]
 
     libcrypto_locs = [
