@@ -3,10 +3,18 @@
 
 .. _whatsnew:
 
+
 What’s New
 ==========
 
 This document outlines features and improvements from each release.
+
+1.17.0 (September 30, 2025)
+---------------------------
+
+-  Add Python 3.13 support
+-  Update TK subsystem
+-  Add Openssl 3 support
 
 1.16.0 (August 15, 2025)
 ------------------------

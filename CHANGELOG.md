@@ -1,6 +1,12 @@
 
 # Change Log
 
+## 1.17.0 - 2025-09-30
+
+- Add Python 3.13 support
+- Update TK subsystem
+- Add Openssl 3 support
+
 ## 1.16.0 - 2025-08-15
 
 - Update TK subsystem
