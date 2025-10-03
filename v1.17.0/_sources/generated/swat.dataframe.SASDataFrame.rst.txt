@@ -1,0 +1,236 @@
+﻿swat.dataframe.SASDataFrame
+===========================
+
+.. currentmodule:: swat.dataframe
+
+.. autoclass:: SASDataFrame
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~SASDataFrame.__init__
+      ~SASDataFrame.abs
+      ~SASDataFrame.add
+      ~SASDataFrame.add_prefix
+      ~SASDataFrame.add_suffix
+      ~SASDataFrame.agg
+      ~SASDataFrame.aggregate
+      ~SASDataFrame.align
+      ~SASDataFrame.all
+      ~SASDataFrame.any
+      ~SASDataFrame.apply
+      ~SASDataFrame.apply_labels
+      ~SASDataFrame.applymap
+      ~SASDataFrame.asfreq
+      ~SASDataFrame.asof
+      ~SASDataFrame.assign
+      ~SASDataFrame.astype
+      ~SASDataFrame.at_time
+      ~SASDataFrame.backfill
+      ~SASDataFrame.between_time
+      ~SASDataFrame.bfill
+      ~SASDataFrame.bool
+      ~SASDataFrame.boxplot
+      ~SASDataFrame.clip
+      ~SASDataFrame.combine
+      ~SASDataFrame.combine_first
+      ~SASDataFrame.compare
+      ~SASDataFrame.convert_dtypes
+      ~SASDataFrame.copy
+      ~SASDataFrame.corr
+      ~SASDataFrame.corrwith
+      ~SASDataFrame.count
+      ~SASDataFrame.cov
+      ~SASDataFrame.cummax
+      ~SASDataFrame.cummin
+      ~SASDataFrame.cumprod
+      ~SASDataFrame.cumsum
+      ~SASDataFrame.describe
+      ~SASDataFrame.diff
+      ~SASDataFrame.div
+      ~SASDataFrame.divide
+      ~SASDataFrame.dot
+      ~SASDataFrame.drop
+      ~SASDataFrame.drop_duplicates
+      ~SASDataFrame.droplevel
+      ~SASDataFrame.dropna
+      ~SASDataFrame.duplicated
+      ~SASDataFrame.eq
+      ~SASDataFrame.equals
+      ~SASDataFrame.eval
+      ~SASDataFrame.ewm
+      ~SASDataFrame.expanding
+      ~SASDataFrame.explode
+      ~SASDataFrame.ffill
+      ~SASDataFrame.fillna
+      ~SASDataFrame.filter
+      ~SASDataFrame.first
+      ~SASDataFrame.first_valid_index
+      ~SASDataFrame.floordiv
+      ~SASDataFrame.from_dict
+      ~SASDataFrame.from_records
+      ~SASDataFrame.ge
+      ~SASDataFrame.get
+      ~SASDataFrame.groupby
+      ~SASDataFrame.gt
+      ~SASDataFrame.head
+      ~SASDataFrame.hist
+      ~SASDataFrame.idxmax
+      ~SASDataFrame.idxmin
+      ~SASDataFrame.infer_objects
+      ~SASDataFrame.info
+      ~SASDataFrame.insert
+      ~SASDataFrame.interpolate
+      ~SASDataFrame.isetitem
+      ~SASDataFrame.isin
+      ~SASDataFrame.isna
+      ~SASDataFrame.isnull
+      ~SASDataFrame.items
+      ~SASDataFrame.iterrows
+      ~SASDataFrame.itertuples
+      ~SASDataFrame.join
+      ~SASDataFrame.keys
+      ~SASDataFrame.kurt
+      ~SASDataFrame.kurtosis
+      ~SASDataFrame.last
+      ~SASDataFrame.last_valid_index
+      ~SASDataFrame.le
+      ~SASDataFrame.lt
+      ~SASDataFrame.map
+      ~SASDataFrame.mask
+      ~SASDataFrame.max
+      ~SASDataFrame.mean
+      ~SASDataFrame.median
+      ~SASDataFrame.melt
+      ~SASDataFrame.memory_usage
+      ~SASDataFrame.merge
+      ~SASDataFrame.min
+      ~SASDataFrame.mod
+      ~SASDataFrame.mode
+      ~SASDataFrame.mul
+      ~SASDataFrame.multiply
+      ~SASDataFrame.ne
+      ~SASDataFrame.nlargest
+      ~SASDataFrame.notna
+      ~SASDataFrame.notnull
+      ~SASDataFrame.nsmallest
+      ~SASDataFrame.nunique
+      ~SASDataFrame.pad
+      ~SASDataFrame.pct_change
+      ~SASDataFrame.pipe
+      ~SASDataFrame.pivot
+      ~SASDataFrame.pivot_table
+      ~SASDataFrame.pop
+      ~SASDataFrame.pow
+      ~SASDataFrame.prod
+      ~SASDataFrame.product
+      ~SASDataFrame.quantile
+      ~SASDataFrame.query
+      ~SASDataFrame.radd
+      ~SASDataFrame.rank
+      ~SASDataFrame.rdiv
+      ~SASDataFrame.reindex
+      ~SASDataFrame.reindex_like
+      ~SASDataFrame.rename
+      ~SASDataFrame.rename_axis
+      ~SASDataFrame.reorder_levels
+      ~SASDataFrame.replace
+      ~SASDataFrame.resample
+      ~SASDataFrame.reset_index
+      ~SASDataFrame.reshape_bygroups
+      ~SASDataFrame.rfloordiv
+      ~SASDataFrame.rmod
+      ~SASDataFrame.rmul
+      ~SASDataFrame.rolling
+      ~SASDataFrame.round
+      ~SASDataFrame.rpow
+      ~SASDataFrame.rsub
+      ~SASDataFrame.rtruediv
+      ~SASDataFrame.sample
+      ~SASDataFrame.select_dtypes
+      ~SASDataFrame.sem
+      ~SASDataFrame.set_axis
+      ~SASDataFrame.set_flags
+      ~SASDataFrame.set_index
+      ~SASDataFrame.shift
+      ~SASDataFrame.skew
+      ~SASDataFrame.sort_index
+      ~SASDataFrame.sort_values
+      ~SASDataFrame.squeeze
+      ~SASDataFrame.stack
+      ~SASDataFrame.std
+      ~SASDataFrame.sub
+      ~SASDataFrame.subtract
+      ~SASDataFrame.sum
+      ~SASDataFrame.swapaxes
+      ~SASDataFrame.swaplevel
+      ~SASDataFrame.tail
+      ~SASDataFrame.take
+      ~SASDataFrame.to_clipboard
+      ~SASDataFrame.to_csv
+      ~SASDataFrame.to_dict
+      ~SASDataFrame.to_excel
+      ~SASDataFrame.to_feather
+      ~SASDataFrame.to_gbq
+      ~SASDataFrame.to_hdf
+      ~SASDataFrame.to_html
+      ~SASDataFrame.to_json
+      ~SASDataFrame.to_latex
+      ~SASDataFrame.to_markdown
+      ~SASDataFrame.to_numpy
+      ~SASDataFrame.to_orc
+      ~SASDataFrame.to_parquet
+      ~SASDataFrame.to_period
+      ~SASDataFrame.to_pickle
+      ~SASDataFrame.to_records
+      ~SASDataFrame.to_sql
+      ~SASDataFrame.to_stata
+      ~SASDataFrame.to_string
+      ~SASDataFrame.to_timestamp
+      ~SASDataFrame.to_xarray
+      ~SASDataFrame.to_xml
+      ~SASDataFrame.transform
+      ~SASDataFrame.transpose
+      ~SASDataFrame.truediv
+      ~SASDataFrame.truncate
+      ~SASDataFrame.tz_convert
+      ~SASDataFrame.tz_localize
+      ~SASDataFrame.unstack
+      ~SASDataFrame.update
+      ~SASDataFrame.value_counts
+      ~SASDataFrame.var
+      ~SASDataFrame.where
+      ~SASDataFrame.xs
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~SASDataFrame.T
+      ~SASDataFrame.at
+      ~SASDataFrame.attrs
+      ~SASDataFrame.axes
+      ~SASDataFrame.columns
+      ~SASDataFrame.dtypes
+      ~SASDataFrame.empty
+      ~SASDataFrame.flags
+      ~SASDataFrame.iat
+      ~SASDataFrame.iloc
+      ~SASDataFrame.index
+      ~SASDataFrame.loc
+      ~SASDataFrame.ndim
+      ~SASDataFrame.shape
+      ~SASDataFrame.size
+      ~SASDataFrame.style
+      ~SASDataFrame.values
+   
+   

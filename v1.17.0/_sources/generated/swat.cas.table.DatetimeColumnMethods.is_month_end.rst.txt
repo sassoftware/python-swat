@@ -1,0 +1,6 @@
+﻿swat.cas.table.DatetimeColumnMethods.is\_month\_end
+===================================================
+
+.. currentmodule:: swat.cas.table
+
+.. autoproperty:: DatetimeColumnMethods.is_month_end

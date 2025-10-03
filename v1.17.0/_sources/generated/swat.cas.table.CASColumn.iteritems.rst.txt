@@ -1,0 +1,6 @@
+﻿swat.cas.table.CASColumn.iteritems
+==================================
+
+.. currentmodule:: swat.cas.table
+
+.. automethod:: CASColumn.iteritems

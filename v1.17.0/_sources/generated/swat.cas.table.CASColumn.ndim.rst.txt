@@ -1,0 +1,6 @@
+﻿swat.cas.table.CASColumn.ndim
+=============================
+
+.. currentmodule:: swat.cas.table
+
+.. autoattribute:: CASColumn.ndim

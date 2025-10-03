@@ -1,0 +1,6 @@
+﻿swat.cas.table.CASColumn.unique
+===============================
+
+.. currentmodule:: swat.cas.table
+
+.. automethod:: CASColumn.unique

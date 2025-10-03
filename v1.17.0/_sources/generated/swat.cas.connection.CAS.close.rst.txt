@@ -1,0 +1,6 @@
+﻿swat.cas.connection.CAS.close
+=============================
+
+.. currentmodule:: swat.cas.connection
+
+.. automethod:: CAS.close

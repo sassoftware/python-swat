@@ -1,0 +1,6 @@
+﻿swat.cas.table.CASTable.size
+============================
+
+.. currentmodule:: swat.cas.table
+
+.. autoattribute:: CASTable.size

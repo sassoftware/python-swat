@@ -1,0 +1,6 @@
+﻿swat.cas.table.CharacterColumnMethods.isspace
+=============================================
+
+.. currentmodule:: swat.cas.table
+
+.. automethod:: CharacterColumnMethods.isspace

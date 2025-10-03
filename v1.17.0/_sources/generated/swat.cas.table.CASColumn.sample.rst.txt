@@ -1,0 +1,6 @@
+﻿swat.cas.table.CASColumn.sample
+===============================
+
+.. currentmodule:: swat.cas.table
+
+.. automethod:: CASColumn.sample

@@ -1,0 +1,33 @@
+﻿swat.cas.datamsghandlers.SAS7BDAT
+=================================
+
+.. currentmodule:: swat.cas.datamsghandlers
+
+.. autoclass:: SAS7BDAT
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~SAS7BDAT.__init__
+      ~SAS7BDAT.finish
+      ~SAS7BDAT.getone
+      ~SAS7BDAT.getrow
+      ~SAS7BDAT.send
+      ~SAS7BDAT.write
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~SAS7BDAT.args
+   
+   

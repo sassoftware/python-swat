@@ -1,0 +1,6 @@
+﻿swat.cas.table.CASTable.stderr
+==============================
+
+.. currentmodule:: swat.cas.table
+
+.. automethod:: CASTable.stderr

@@ -1,0 +1,6 @@
+﻿swat.cas.table.CASColumn.truediv
+================================
+
+.. currentmodule:: swat.cas.table
+
+.. automethod:: CASColumn.truediv

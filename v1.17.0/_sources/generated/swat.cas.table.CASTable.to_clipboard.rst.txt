@@ -1,0 +1,6 @@
+﻿swat.cas.table.CASTable.to\_clipboard
+=====================================
+
+.. currentmodule:: swat.cas.table
+
+.. automethod:: CASTable.to_clipboard

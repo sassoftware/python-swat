@@ -1,0 +1,6 @@
+﻿swat.cas.table.CASColumn.clip\_lower
+====================================
+
+.. currentmodule:: swat.cas.table
+
+.. automethod:: CASColumn.clip_lower
