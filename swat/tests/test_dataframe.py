@@ -55,6 +55,9 @@ class TestDataFrame(tm.TestCase):
         swat.options.cas.print_messages = False
         swat.options.interactive_mode = False
 
+        pd.reset_option('display.max_columns')
+        pd.reset_option('display.notebook.repr_html')
+
         self.s = swat.CAS(HOST, PORT, USER, PASSWD, protocol=PROTOCOL)
 
         if type(self).server_type is None:
@@ -800,21 +803,21 @@ class TestDataFrame(tm.TestCase):
 
         f = ['Acura', '3.5', 'RL', '4dr', 'Sedan', 'Asia', 'Front', '$43,755',
              '$39,014', '3.5', '6', '225', '18', '24', '3880', '115', '197']
-        ft = ['Acura', '3.5', 'RL', '4dr', 'Sedan', 'Asia', 'Front', '...',
+        ft = ['Acura', '3.5', 'RL', '4dr', 'Sedan', 'Asia', 'Front',
               '18', '24', '3880', '115', '197']
 
         # __str__
         pd.set_option('display.max_columns', 10000)
         s = [re.split(r'\s+', x[1:].strip())
              for x in str(out).split('\n') if x.startswith('0')]
-        s = [item for sublist in s for item in sublist]
+        s = [item for sublist in s for item in sublist if item != '\\' and item != '...']
         self.assertEqual(s, f)
 
         # truncated __str__
         pd.set_option('display.max_columns', 10)
         s = [re.split(r'\s+', x[1:].strip())
              for x in str(out).split('\n') if x.startswith('0')]
-        s = [item for sublist in s for item in sublist]
+        s = [item for sublist in s for item in sublist if item != '\\' and item != '...']
         self.assertEqual(s, ft)
 
         pd.set_option('display.max_columns', 10000)
@@ -822,13 +825,13 @@ class TestDataFrame(tm.TestCase):
         # __repr__
         s = [re.split(r'\s+', x[1:].strip())
              for x in repr(out).split('\n') if x.startswith('0')]
-        s = [item for sublist in s for item in sublist]
+        s = [item for sublist in s for item in sublist if item != '\\' and item != '...']
         self.assertEqual(s, f)
 
         # to_string
         s = [re.split(r'\s+', x[1:].strip())
              for x in out.to_string().split('\n') if x.startswith('0')]
-        s = [item for sublist in s for item in sublist]
+        s = [item for sublist in s for item in sublist if item != '\\' and item != '...']
         self.assertEqual(s, f)
 
         f = ('''<tr> <td>0</td> <td>Acura</td> <td>3.5 RL 4dr</td> <td>Sedan</td> '''
@@ -898,7 +901,8 @@ class TestDataFrame(tm.TestCase):
         self.assertEqual(result.iloc[2, 2], 1.1)
         self.assertEqual(result.iloc[3, 3], 3.0)
         self.assertEqual(result.iloc[4, 1], 18851.0)
-        self.assertEqual(result.iloc[4, 2], 2.3)
+        self.assertEqual(result.iloc[4, 0], 20329.5)
+        self.assertEqual(result.iloc[3, 2], 1.3)
         self.assertEqual(result.iloc[5, 7], 3474.5)
         self.assertEqual(result.iloc[6, 2], 3.9)
         self.assertEqual(result.iloc[7, 9], 238.0)
