@@ -495,12 +495,20 @@ class TestByGroups(tm.TestCase):
         columns = [x for x in df.columns if x != 'Origin']
         dfgrp = df.groupby('Origin').nth(6)[columns]
         tblgrp = tbl.groupby('Origin').nth(6)
-        self.assertTablesEqual(dfgrp, tblgrp, sortby=None, include_index=True)
+        if pd_version < (2, 0, 0):
+            self.assertTablesEqual(dfgrp, tblgrp, sortby=None, include_index=True)
+        else:
+            # pandas >= 2.0.0 returns index as a number rather than the value
+            self.assertTablesEqual(dfgrp, tblgrp, sortby=None, include_index=False)
 
         columns = [x for x in df.columns if x != 'Origin']
         dfgrp = df.groupby('Origin').nth([5, 7])[columns]
         tblgrp = tbl.groupby('Origin').nth([5, 7])
-        self.assertTablesEqual(dfgrp, tblgrp, sortby=None, include_index=True)
+        if pd_version < (2, 0, 0):
+            self.assertTablesEqual(dfgrp, tblgrp, sortby=None, include_index=True)
+        else:
+            # pandas >= 2.0.0 returns index as a number rather than the value
+            self.assertTablesEqual(dfgrp, tblgrp, sortby=None, include_index=False)
 
         #
         # Test casout threshold
@@ -1564,6 +1572,12 @@ class TestByGroups(tm.TestCase):
         tblgrp = tbl.groupby('Origin', as_index=False).describe(percentiles=[0.5])
         # Not sure why Pandas doesn't include this
         tblgrp = tblgrp.drop('Origin', axis=1)
+        # Starting with Pandas 2.0.0, Pandas does include the index column,
+        # but it names it ('Origin','') instead of 'Origin', so while it is
+        # present, the column name does not match.  Go ahead and remove the
+        # 'Origin' column from pandas dataframe in 2.0.0 and later
+        if pd_version >= (2, 0, 0):
+            dfgrp = dfgrp.drop(('Origin', ''), axis=1)
         self.assertTablesEqual(dfgrp, tblgrp, sortby=None, decimals=5)
 
     @unittest.skipIf(pd_version < (0, 16, 0), 'Need newer version of Pandas')

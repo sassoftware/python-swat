@@ -121,28 +121,30 @@ class TestDataMsgHandlers(tm.TestCase):
     def test_dataframe(self):
         # Boolean
         s_bool_ = pd.Series([True, False], dtype=np.bool_)
-        s_bool8 = pd.Series([True, False], dtype=np.bool8)
+        s_bool8 = pd.Series([True, False], dtype=np.bool_)
 
         # Integers
-        s_byte = pd.Series([100, 999], dtype=np.byte)
+        # Note starting with numpy 2.0, large positive throws error
+        # instead of converting to negative
+        s_byte = pd.Series([100, -25], dtype=np.byte)
         s_short = pd.Series([100, 999], dtype=np.short)
         s_intc = pd.Series([100, 999], dtype=np.intc)
         s_int_ = pd.Series([100, 999], dtype=np.int_)
         s_longlong = pd.Series([100, 999], dtype=np.longlong)
         s_intp = pd.Series([100, 999], dtype=np.intp)
-        s_int8 = pd.Series([100, 999], dtype=np.int8)
+        s_int8 = pd.Series([100, -25], dtype=np.int8)
         s_int16 = pd.Series([100, 999], dtype=np.int16)
         s_int32 = pd.Series([100, 999], dtype=np.int32)
         s_int64 = pd.Series([100, 999], dtype=np.int64)
 
         # Unsigned integers
-        s_ubyte = pd.Series([100, 999], dtype=np.ubyte)
+        s_ubyte = pd.Series([100, 231], dtype=np.ubyte)
         s_ushort = pd.Series([100, 999], dtype=np.ushort)
         s_uintc = pd.Series([100, 999], dtype=np.uintc)
-        s_uint = pd.Series([100, 999], dtype=np.uint)
+        s_uint = pd.Series([100, 231], dtype=np.uint)
         s_ulonglong = pd.Series([100, 999], dtype=np.ulonglong)
         s_uintp = pd.Series([100, 999], dtype=np.uintp)
-        s_uint8 = pd.Series([100, 999], dtype=np.uint8)
+        s_uint8 = pd.Series([100, 231], dtype=np.uint8)
         s_uint16 = pd.Series([100, 999], dtype=np.uint16)
         s_uint32 = pd.Series([100, 999], dtype=np.uint32)
         s_uint64 = pd.Series([100, 999], dtype=np.uint64)
@@ -151,7 +153,10 @@ class TestDataMsgHandlers(tm.TestCase):
         s_half = pd.Series([12.3, 456.789], dtype=np.half)
         s_single = pd.Series([12.3, 456.789], dtype=np.single)
         s_double = pd.Series([12.3, 456.789], dtype=np.double)
-        s_longfloat = pd.Series([12.3, 456.789], dtype=np.longfloat)
+        if hasattr(np, 'longfloat'):
+            s_longfloat = pd.Series([12.3, 456.789], dtype=np.longfloat)
+        else:
+            s_longfloat = pd.Series([12.3, 456.789], dtype=np.longdouble)
         s_float16 = pd.Series([12.3, 456.789], dtype=np.float16)
         s_float32 = pd.Series([12.3, 456.789], dtype=np.float32)
         s_float64 = pd.Series([12.3, 456.789], dtype=np.float64)
@@ -172,7 +177,12 @@ class TestDataMsgHandlers(tm.TestCase):
         # Python object
         s_object_ = pd.Series([('tuple', 'type'), ('another', 'tuple')], dtype=np.object_)
         s_str_ = pd.Series([u'hello', u'world'], dtype=np.str_)  # ASCII only
-        s_unicode_ = pd.Series([u'hello', u'\u2603 (snowman)'], dtype=np.unicode_)
+        # AttributeError:
+        #  `np.unicode_` was removed in the NumPy 2.0 release. Use `np.str_` instead.
+        if hasattr(np, 'unicode_'):
+            s_unicode_ = pd.Series([u'hello', u'\u2603 (snowman)'], dtype=np.unicode_)
+        else:
+            s_unicode_ = pd.Series([u'hello', u'\u2603 (snowman)'], dtype=np.str_)
 #       s_void = pd.Series(..., dtype=np.void)
 
         # Datetime

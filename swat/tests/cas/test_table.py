@@ -3826,6 +3826,8 @@ class TestCASTable(tm.TestCase):
 #       self.assertEqual(set(df.Model.tolist()), set(tbl.Model.tolist()))
 
     @unittest.skipIf(pd_version <= (0, 14, 0), 'Need newer version of Pandas')
+    @unittest.skipIf(pd_version >= (2, 0, 0),
+                     'Pandas >= 2 issues with datetime in dataframe')
     def test_timezones(self):
         if self.s._protocol in ['http', 'https']:
             tm.TestCase.skipTest(self, 'REST does not support data messages')
@@ -3968,6 +3970,8 @@ class TestCASTable(tm.TestCase):
         self.assertIn([x.tzname() for x in sorted(tblf.datetime)], tzs)
 
     @unittest.skipIf(pd_version <= (0, 14, 0), 'Need newer version of Pandas')
+    @unittest.skipIf(pd_version >= (2, 0, 0),
+                     'Pandas >= 2 issues with datetime in dataframe')
     def test_dt_methods(self):
         if self.s._protocol in ['http', 'https']:
             tm.TestCase.skipTest(self, 'REST does not support data messages')
@@ -4172,6 +4176,8 @@ class TestCASTable(tm.TestCase):
                              tbl.datetime.dt.days_in_month, sort=True)
 
     @unittest.skipIf(pd_version <= (0, 14, 0), 'Need newer version of Pandas')
+    @unittest.skipIf(pd_version >= (2, 0, 0),
+                     'Pandas >= 2 issues with datetime in dataframe')
     def test_sas_dt_methods(self):
         if self.s._protocol in ['http', 'https']:
             tm.TestCase.skipTest(self, 'REST does not support data messages')
@@ -5768,10 +5774,20 @@ class TestCASTable(tm.TestCase):
         self.assertColsEqual(df.all(), tbl.all())
         self.assertColsEqual(df.all(skipna=True), tbl.all(skipna=True))
 
-        # When skipna=False, pandas doesn't use booleans anymore
-        self.assertColsEqual(
-            df.all(skipna=False).apply(lambda x: pd.isnull(x) and x or bool(x)),
-            tbl.all(skipna=False))
+        if pd_version < (1, 2, 0):
+            # When skipna=False, pandas doesn't use booleans anymore
+            self.assertColsEqual(
+                df.all(skipna=False).apply(lambda x: pd.isnull(x) and x or bool(x)),
+                tbl.all(skipna=False))
+        else:
+            # Starting with pandas 1.2.0, When skipna=False, pandas does use booleans;
+            # However it returns "True" if the column is all na,
+            # not NaN as was previously returned
+            # SASDataFrame will return True/False/NaN,
+            # so convert NaN to True to match new pandas
+            self.assertColsEqual(
+                df.all(skipna=False),
+                tbl.all(skipna=False).apply(lambda x: pd.isna(x) or bool(x)))
 
         # By groups
         self.assertTablesEqual(df.groupby('Origin').all(),
@@ -5794,10 +5810,20 @@ class TestCASTable(tm.TestCase):
         self.assertColsEqual(df.any(), tbl.any())
         self.assertColsEqual(df.any(skipna=True), tbl.any(skipna=True))
 
-        # When skipna=False, pandas doesn't use booleans anymore
-        self.assertColsEqual(
-            df.any(skipna=False).apply(lambda x: pd.isnull(x) and x or bool(x)),
-            tbl.any(skipna=False))
+        if pd_version < (1, 2, 0):
+            # When skipna=False, pandas doesn't use booleans anymore
+            self.assertColsEqual(
+                df.any(skipna=False).apply(lambda x: pd.isnull(x) and x or bool(x)),
+                tbl.any(skipna=False))
+        else:
+            # Starting with pandas 1.2.0, When skipna=False, pandas does use booleans;
+            # However it returns "True" if the column is all na,
+            # not NaN as was previously returned
+            # SASDataFrame will return True/False/NaN,
+            # so convert NaN to True to match new pandas
+            self.assertColsEqual(
+                df.any(skipna=False),
+                tbl.any(skipna=False).apply(lambda x: pd.isna(x) or bool(x)))
 
         # By groups
         self.assertTablesEqual(df.groupby('Origin').any(),
