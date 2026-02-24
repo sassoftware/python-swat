@@ -547,7 +547,16 @@ class PandasDataFrame(CASDataMsgHandler):
                 elif typ == 'TIME':
                     return (8, 'NUMERIC', 'TIME')
             else:
-                match = re.match(r'^\W?([A-Za-z])(\d*)', typ.str)
+                # In Pandas 3.0 the DType for Strings changed
+                # from Object to StringDType.
+                # StringDType does not have an .str attribute.
+                # this api check is the recommended way to
+                # check for a String column across Pandas versions
+                if pd.api.types.is_string_dtype(typ):
+                    thetype = "S"
+                else:
+                    thetype = typ.str
+                match = re.match(r'^\W?([A-Za-z])(\d*)', thetype)
                 if match:
                     out = None
                     dtype = match.group(1)
