@@ -42,6 +42,8 @@ class TestEcho(tm.TestCase):
 
         out = self.s.loadactionset(actionset='actionTest')
         if out.severity != 0:
+            self.s.endsession()
+            del self.s
             self.skipTest("actionTest failed to load")
 
     def tearDown(self):

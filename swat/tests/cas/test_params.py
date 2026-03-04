@@ -44,6 +44,8 @@ class TestParams(tm.TestCase):
 
         r = self.s.loadactionset(actionset='actionTest')
         if r.severity != 0:
+            self.s.endsession()
+            del self.s
             self.skipTest("actionTest failed to load")
 
         self.s.loadactionset(actionset='simple')

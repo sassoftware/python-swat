@@ -53,10 +53,10 @@ class TestDataMsgHandlers(tm.TestCase):
         swat.options.interactive_mode = False
         swat.options.cas.missing.int64 = -999999
 
-        self.s = swat.CAS(HOST, PORT, USER, PASSWD, protocol=PROTOCOL)
-
-        if self.s._protocol in ['http', 'https']:
+        if PROTOCOL in ['http', 'https']:
             tm.TestCase.skipTest(self, 'REST does not support data messages')
+
+        self.s = swat.CAS(HOST, PORT, USER, PASSWD, protocol=PROTOCOL)
 
         if type(self).server_type is None:
             # Set once per class and have every test use it.
