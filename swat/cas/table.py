@@ -3982,7 +3982,7 @@ class CASTable(ParamManager, ActionParamManager):
         out = out.drop('Rank', axis=1)
 
         if 'NumVar' in out.columns and 'CharVar' in out.columns:
-            out['NumVar'].fillna(out['CharVar'], inplace=True)
+            out.fillna({'NumVar': out['CharVar']}, inplace=True)
             out.drop('CharVar', axis=1, inplace=True)
             out.rename(columns=dict(NumVar='top'), inplace=True)
 
@@ -4379,7 +4379,7 @@ class CASTable(ParamManager, ActionParamManager):
             minmax = pd.concat(minmax)
             minmax.loc[:, 'stat'] = ['max', 'min'] * int(len(minmax) / 2)
             if 'NumVar' in minmax.columns and 'CharVar' in minmax.columns:
-                minmax['NumVar'].fillna(minmax['CharVar'], inplace=True)
+                minmax.fillna({'NumVar': minmax['CharVar']}, inplace=True)
                 minmax.rename(columns=dict(NumVar='value', Column='column'),
                               inplace=True)
             elif 'NumVar' in minmax.columns:
