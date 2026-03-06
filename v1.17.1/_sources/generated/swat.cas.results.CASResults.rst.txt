@@ -1,0 +1,38 @@
+﻿swat.cas.results.CASResults
+===========================
+
+.. currentmodule:: swat.cas.results
+
+.. autoclass:: CASResults
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~CASResults.__init__
+      ~CASResults.clear
+      ~CASResults.concat_bygroups
+      ~CASResults.copy
+      ~CASResults.fromkeys
+      ~CASResults.get
+      ~CASResults.get_group
+      ~CASResults.get_set
+      ~CASResults.get_tables
+      ~CASResults.items
+      ~CASResults.keys
+      ~CASResults.move_to_end
+      ~CASResults.pop
+      ~CASResults.popitem
+      ~CASResults.setdefault
+      ~CASResults.update
+      ~CASResults.values
+   
+   
+
+   
+   
+   

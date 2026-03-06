@@ -1,0 +1,6 @@
+﻿swat.cas.table.CASColumn.ix
+===========================
+
+.. currentmodule:: swat.cas.table
+
+.. autoattribute:: CASColumn.ix

@@ -1,0 +1,6 @@
+﻿swat.cas.table.CASTable.probt
+=============================
+
+.. currentmodule:: swat.cas.table
+
+.. automethod:: CASTable.probt

@@ -1,0 +1,33 @@
+﻿swat.cas.datamsghandlers.Text
+=============================
+
+.. currentmodule:: swat.cas.datamsghandlers
+
+.. autoclass:: Text
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~Text.__init__
+      ~Text.finish
+      ~Text.getone
+      ~Text.getrow
+      ~Text.send
+      ~Text.write
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~Text.args
+   
+   

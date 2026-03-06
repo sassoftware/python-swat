@@ -1,0 +1,6 @@
+﻿swat.cas.table.CASTable.clip\_lower
+===================================
+
+.. currentmodule:: swat.cas.table
+
+.. automethod:: CASTable.clip_lower
