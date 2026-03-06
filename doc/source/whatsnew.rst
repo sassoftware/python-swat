@@ -9,6 +9,13 @@ What’s New
 
 This document outlines features and improvements from each release.
 
+1.17.1 (March 6, 2026)
+----------------------
+
+-  Cleanup miscellaneous test suite issues
+-  Fix AttributeError: ‘StringDtype’ object has no attribute ‘str’
+-  Fix warning about chained assignment using an inplace method
+
 1.17.0 (September 30, 2025)
 ---------------------------
 

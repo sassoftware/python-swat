@@ -1,6 +1,12 @@
 
 # Change Log
 
+## 1.17.1 - 2026-03-06
+
+- Cleanup miscellaneous test suite issues
+- Fix AttributeError: 'StringDtype' object has no attribute 'str'
+- Fix warning about chained assignment using an inplace method
+
 ## 1.17.0 - 2025-09-30
 
 - Add Python 3.13 support
