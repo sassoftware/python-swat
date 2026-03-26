@@ -4767,8 +4767,17 @@ class TestCASTable(tm.TestCase):
 
         self.assertColsEqual(df['NegMSRP'], tbl['NegMSRP'])
 
+        dfabs = df['NegMSRP'].abs()
+        tblabs = tbl['NegMSRP'].abs()
+
+        self.assertColsEqual(dfabs, tblabs)
+        self.assertColsEqual(tbl['MSRP'], tblabs)
+
         with self.assertRaises(TypeError):
-            df['Make'].abs()
+            df['Make'].astype(object).abs()
+
+        with self.assertRaises(TypeError):
+            tbl['Make'].abs()
 
     def test_column_any(self):
         df = self.get_cars_df()
