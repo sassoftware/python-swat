@@ -1570,6 +1570,9 @@ class CAS(object):
             if value == 'object':
                 value = 'varchar'
 
+            elif value == 'str':
+                value = 'varchar'
+
             elif value.startswith('float'):
                 value = 'double'
 

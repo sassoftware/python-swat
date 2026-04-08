@@ -772,7 +772,8 @@ class TestByGroups(tm.TestCase):
                                sortby=['Origin', 'EngineSize'])
 
     @unittest.skipIf(pd_version < (0, 16, 0), 'Need newer version of Pandas')
-    @unittest.skipIf(pd_version >= (1, 0, 0), 'Raises AssertionError in Pandas 1')
+    @unittest.skipIf(pd_version >= (1, 0, 0) and pd_version < (2, 0, 0),
+                     'Raises AssertionError in Pandas 1')
     def test_min(self):
         df = self.get_cars_df().sort_values(SORT_KEYS)
         tbl = self.table.sort_values(SORT_KEYS)
