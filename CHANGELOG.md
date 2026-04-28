@@ -1,6 +1,10 @@
 
 # Change Log
 
+## 1.17.2 - 2026-04-28
+
+- miscellaneous updates for Pandas 3 changes
+
 ## 1.17.1 - 2026-03-06
 
 - Cleanup miscellaneous test suite issues

@@ -9,6 +9,11 @@ What’s New
 
 This document outlines features and improvements from each release.
 
+1.17.2 (April 28, 2026)
+-----------------------
+
+-  miscellaneous updates for Pandas 3 changes
+
 1.17.1 (March 6, 2026)
 ----------------------
 
