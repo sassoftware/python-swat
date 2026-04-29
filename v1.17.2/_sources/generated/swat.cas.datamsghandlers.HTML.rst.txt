@@ -1,0 +1,33 @@
+﻿swat.cas.datamsghandlers.HTML
+=============================
+
+.. currentmodule:: swat.cas.datamsghandlers
+
+.. autoclass:: HTML
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~HTML.__init__
+      ~HTML.finish
+      ~HTML.getone
+      ~HTML.getrow
+      ~HTML.send
+      ~HTML.write
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~HTML.args
+   
+   

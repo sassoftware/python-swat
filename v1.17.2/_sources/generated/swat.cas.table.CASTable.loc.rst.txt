@@ -1,0 +1,6 @@
+﻿swat.cas.table.CASTable.loc
+===========================
+
+.. currentmodule:: swat.cas.table
+
+.. autoattribute:: CASTable.loc

@@ -1,0 +1,6 @@
+﻿swat.cas.table.CASColumn.count
+==============================
+
+.. currentmodule:: swat.cas.table
+
+.. automethod:: CASColumn.count

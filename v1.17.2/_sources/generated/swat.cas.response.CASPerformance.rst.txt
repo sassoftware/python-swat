@@ -1,0 +1,41 @@
+﻿swat.cas.response.CASPerformance
+================================
+
+.. currentmodule:: swat.cas.response
+
+.. autoclass:: CASPerformance
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~CASPerformance.__init__
+      ~CASPerformance.to_dict
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~CASPerformance.cpu_system_time
+      ~CASPerformance.cpu_user_time
+      ~CASPerformance.data_movement_bytes
+      ~CASPerformance.data_movement_time
+      ~CASPerformance.elapsed_time
+      ~CASPerformance.memory
+      ~CASPerformance.memory_os
+      ~CASPerformance.memory_quota
+      ~CASPerformance.rows_read
+      ~CASPerformance.rows_written
+      ~CASPerformance.system_cores
+      ~CASPerformance.system_nodes
+      ~CASPerformance.system_total_memory
+   
+   

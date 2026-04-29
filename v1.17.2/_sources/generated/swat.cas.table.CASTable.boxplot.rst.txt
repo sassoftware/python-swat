@@ -1,0 +1,6 @@
+﻿swat.cas.table.CASTable.boxplot
+===============================
+
+.. currentmodule:: swat.cas.table
+
+.. automethod:: CASTable.boxplot
