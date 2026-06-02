@@ -271,6 +271,8 @@ Indexing, Iteration
    :toctree: generated/
 
    CASTable.drop
+   CASTable.dropna
+   CASTable.fillna
    CASTable.head
    CASTable.ix
    CASTable.loc
@@ -282,6 +284,7 @@ Indexing, Iteration
    CASTable.lookup
    CASTable.tail
    CASTable.query
+   CASTable.replace
 
 For more information on ``.ix``, ``.loc``, and ``.iloc``,
 see the :ref:`indexing documentation <indexing>`.
@@ -438,6 +441,7 @@ Serialization / IO / Conversion
    CASTable.info
    CASTable.to_pickle
    CASTable.to_csv
+   CASTable.to_frame
    CASTable.to_hdf
    CASTable.to_sql
    CASTable.to_dict
