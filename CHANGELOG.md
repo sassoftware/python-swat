@@ -1,6 +1,11 @@
 
 # Change Log
 
+## 1.18.0 - 2026-06-23
+
+- Add Python 3.14 support
+- Update TK subsystem
+
 ## 1.17.2 - 2026-04-28
 
 - miscellaneous updates for Pandas 3 changes

@@ -9,6 +9,12 @@ What’s New
 
 This document outlines features and improvements from each release.
 
+1.18.0 (June 23, 2026)
+----------------------
+
+-  Add Python 3.14 support
+-  Update TK subsystem
+
 1.17.2 (April 28, 2026)
 -----------------------
 
