@@ -1,0 +1,6 @@
+﻿swat.cas.results.CASResults.get\_group
+======================================
+
+.. currentmodule:: swat.cas.results
+
+.. automethod:: CASResults.get_group

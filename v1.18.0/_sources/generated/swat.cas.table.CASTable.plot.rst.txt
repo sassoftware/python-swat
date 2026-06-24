@@ -1,0 +1,6 @@
+﻿swat.cas.table.CASTable.plot
+============================
+
+.. currentmodule:: swat.cas.table
+
+.. autoattribute:: CASTable.plot

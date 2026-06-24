@@ -1,0 +1,6 @@
+﻿swat.cas.table.CASTable.fillna
+==============================
+
+.. currentmodule:: swat.cas.table
+
+.. automethod:: CASTable.fillna

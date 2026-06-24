@@ -1,0 +1,6 @@
+﻿swat.cas.table.CASTable.dropna
+==============================
+
+.. currentmodule:: swat.cas.table
+
+.. automethod:: CASTable.dropna

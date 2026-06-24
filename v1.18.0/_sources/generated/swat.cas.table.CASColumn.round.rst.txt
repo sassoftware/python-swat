@@ -1,0 +1,6 @@
+﻿swat.cas.table.CASColumn.round
+==============================
+
+.. currentmodule:: swat.cas.table
+
+.. automethod:: CASColumn.round

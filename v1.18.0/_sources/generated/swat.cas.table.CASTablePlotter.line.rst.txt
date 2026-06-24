@@ -1,0 +1,6 @@
+﻿swat.cas.table.CASTablePlotter.line
+===================================
+
+.. currentmodule:: swat.cas.table
+
+.. automethod:: CASTablePlotter.line

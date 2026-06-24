@@ -1,0 +1,6 @@
+﻿swat.cas.table.CASTableGroupBy.std
+==================================
+
+.. currentmodule:: swat.cas.table
+
+.. automethod:: CASTableGroupBy.std

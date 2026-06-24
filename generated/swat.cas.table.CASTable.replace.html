@@ -1,0 +1,246 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>swat.cas.table.CASTable.replace &mdash; SWAT 1.18.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=256cef93"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="swat.cas.table.CASTable.groupby" href="swat.cas.table.CASTable.groupby.html" />
+    <link rel="prev" title="swat.cas.table.CASTable.query" href="swat.cas.table.CASTable.query.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            SWAT
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../whatsnew.html">What’s New</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting-started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../workflows.html">Workflows</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../binary-vs-rest.html">Binary vs. REST</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../encryption.html">Encryption (SSL)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../loading-data.html">Loading Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../table-vs-dataframe.html">CASTable vs. DataFrame vs. SASDataFrame</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../indexing.html">Indexing and Data Selection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../bygroups.html">Handling By Groups</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../sorting.html">Sorting</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../api.html">API Reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../api.html#utility-functions">Utility Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#cas">CAS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#casresults">CASResults</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#sasdataframe">SASDataFrame</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#sasformatter">SASFormatter</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../api.html#castable">CASTable</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../api.html#id4">Constructor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../api.html#cas-connections">CAS Connections</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../api.html#setters-and-getters">Setters and Getters</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../api.html#attributes-and-underlying-data">Attributes and Underlying Data</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="../api.html#indexing-iteration">Indexing, Iteration</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="swat.cas.table.CASTable.drop.html">swat.cas.table.CASTable.drop</a></li>
+<li class="toctree-l4"><a class="reference internal" href="swat.cas.table.CASTable.dropna.html">swat.cas.table.CASTable.dropna</a></li>
+<li class="toctree-l4"><a class="reference internal" href="swat.cas.table.CASTable.fillna.html">swat.cas.table.CASTable.fillna</a></li>
+<li class="toctree-l4"><a class="reference internal" href="swat.cas.table.CASTable.head.html">swat.cas.table.CASTable.head</a></li>
+<li class="toctree-l4"><a class="reference internal" href="swat.cas.table.CASTable.ix.html">swat.cas.table.CASTable.ix</a></li>
+<li class="toctree-l4"><a class="reference internal" href="swat.cas.table.CASTable.loc.html">swat.cas.table.CASTable.loc</a></li>
+<li class="toctree-l4"><a class="reference internal" href="swat.cas.table.CASTable.iloc.html">swat.cas.table.CASTable.iloc</a></li>
+<li class="toctree-l4"><a class="reference internal" href="swat.cas.table.CASTable.__iter__.html">swat.cas.table.CASTable.__iter__</a></li>
+<li class="toctree-l4"><a class="reference internal" href="swat.cas.table.CASTable.iteritems.html">swat.cas.table.CASTable.iteritems</a></li>
+<li class="toctree-l4"><a class="reference internal" href="swat.cas.table.CASTable.iterrows.html">swat.cas.table.CASTable.iterrows</a></li>
+<li class="toctree-l4"><a class="reference internal" href="swat.cas.table.CASTable.itertuples.html">swat.cas.table.CASTable.itertuples</a></li>
+<li class="toctree-l4"><a class="reference internal" href="swat.cas.table.CASTable.lookup.html">swat.cas.table.CASTable.lookup</a></li>
+<li class="toctree-l4"><a class="reference internal" href="swat.cas.table.CASTable.tail.html">swat.cas.table.CASTable.tail</a></li>
+<li class="toctree-l4"><a class="reference internal" href="swat.cas.table.CASTable.query.html">swat.cas.table.CASTable.query</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">swat.cas.table.CASTable.replace</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../api.html#groupby">GroupBy</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../api.html#computations-descriptive-stats">Computations / Descriptive Stats</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../api.html#reindexing-selection-label-manipulation">Reindexing / Selection / Label manipulation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../api.html#sorting">Sorting</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../api.html#combining-merging">Combining / Merging</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../api.html#plotting">Plotting</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../api.html#serialization-io-conversion">Serialization / IO / Conversion</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../api.html#id5">Utilities</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#cascolumn">CASColumn</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#castablegroupby">CASTableGroupBy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#casresponse">CASResponse</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#data-message-handlers">Data Message Handlers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#date-and-time-functions">Date and Time Functions</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../gotchas.html">Programming Gotchas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../troubleshooting.html">Troubleshooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../sas-tk.html">SAS TK</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../licenses.html">Licenses</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">SWAT</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../api.html">API Reference</a></li>
+      <li class="breadcrumb-item active">swat.cas.table.CASTable.replace</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/generated/swat.cas.table.CASTable.replace.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="swat-cas-table-castable-replace">
+<h1>swat.cas.table.CASTable.replace<a class="headerlink" href="#swat-cas-table-castable-replace" title="Link to this heading"></a></h1>
+<dl class="py method">
+<dt class="sig sig-object py" id="swat.cas.table.CASTable.replace">
+<span class="sig-prename descclassname"><span class="pre">CASTable.</span></span><span class="sig-name descname"><span class="pre">replace</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">to_replace</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inplace</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">limit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">regex</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'pad'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#swat.cas.table.CASTable.replace" title="Link to this definition"></a></dt>
+<dd><p>Replace values in the data set</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>to_replace</strong><span class="classifier">str or regex or list or dict or Series or Numeric or None</span><span class="opt-sep">, </span><span class="optional">optional</span></dt><dd><ul class="simple">
+<li><dl class="simple">
+<dt>str or regex</dt><dd><ul>
+<li><p>str : string matching this value will be replaced with <cite>value</cite></p></li>
+<li><p>regex : string matching this pattern will be replaced with <cite>value</cite></p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>list-of-strings or list-of-regexes or list-of-numerics</dt><dd><ul>
+<li><p>This list <strong>must</strong> be the same length as <cite>value</cite>.</p></li>
+<li><p>If <cite>regex=True</cite>, both this list and <cite>value</cite> are regexes.</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>dict</dt><dd><ul>
+<li><p>Dictionaries are of the form {‘col’: {‘value’: rep-value}}.
+The top-level contains the column names to match, the inner
+dictionary specifies the values to match and the replacement
+values.</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>None</dt><dd><ul>
+<li><p>This means that the <cite>regex=</cite> parameter contains the patterns
+to match.</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+</dd>
+<dt><strong>value</strong><span class="classifier">scalar or dict or list or string or regex or None</span></dt><dd><p>Values to use as replacements.  If a dict is specified, it takes
+the same form as a dictionary in the <cite>to_replace=</cite> parameter.</p>
+</dd>
+<dt><strong>inplace</strong><span class="classifier">boolean</span><span class="opt-sep">, </span><span class="optional">optional</span></dt><dd><p>If True, the table is modified in-place. If False, a new table is created.</p>
+</dd>
+<dt><strong>limit</strong><span class="classifier">int</span><span class="opt-sep">, </span><span class="optional">optional</span></dt><dd><p>Not supported</p>
+</dd>
+<dt><strong>regex</strong><span class="classifier">boolean or same types as <cite>to_replace</cite></span><span class="opt-sep">, </span><span class="optional">optional</span></dt><dd><p>If True, the <cite>to_replace=</cite> and/or <cite>value=</cite> values are interpreted
+as regular expressions.</p>
+</dd>
+<dt><strong>method</strong><span class="classifier">string</span><span class="opt-sep">, </span><span class="optional">optional</span></dt><dd><p>Not supported</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><a class="reference internal" href="swat.cas.table.CASTable.html#swat.cas.table.CASTable" title="swat.cas.table.CASTable"><strong>CASTable</strong></a> object</dt><dd></dd>
+</dl>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt>AssertionError</dt><dd><p>If regex is not a boolean and <cite>to_replace</cite> is not None.</p>
+</dd>
+<dt>TypeError</dt><dd><p>If <cite>to_replace</cite> is None and <cite>value</cite> is not a list, dict, or Series.
+If <cite>to_replace</cite> is None and <cite>regex</cite> is a list, dict, or Series.</p>
+</dd>
+<dt>ValueError</dt><dd><p>If <cite>to_replace</cite> and <cite>value</cite> are lists, but are not the same length.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="swat.cas.table.CASTable.query.html" class="btn btn-neutral float-left" title="swat.cas.table.CASTable.query" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="swat.cas.table.CASTable.groupby.html" class="btn btn-neutral float-right" title="swat.cas.table.CASTable.groupby" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026 SAS Institute Inc. All Rights Reserved..</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
