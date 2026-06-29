@@ -766,12 +766,35 @@ class REST_CASConnection(object):
 
     def copy(self):
         ''' Copy the connection object '''
-        username, password = base64.b64decode(
-            self._auth.split(b' ', 1)[-1]).split(b':', 1)
-        return type(self)(self._orig_hostname, self._orig_port,
-                          a2u(username), a2u(password),
-                          self._soptions,
-                          self._error)
+        scheme, auth_value = self._auth.split(b' ', 1)
+
+        if scheme == b'Basic':
+            logger.debug("Using Basic authentication credentials for the request.")
+            username, password = base64.b64decode(
+                self._auth.split(b' ', 1)[-1]).split(b':', 1)
+
+            return type(self)(
+                self._orig_hostname,
+                self._orig_port,
+                a2u(username),
+                a2u(password),
+                self._soptions,
+                self._error
+            )
+
+        elif scheme == b'Bearer':
+            logger.debug("Using Bearer token authentication for the request.")
+            return type(self)(
+                self._orig_hostname,
+                self._orig_port,
+                None,
+                a2u(auth_value),
+                self._soptions,
+                self._error
+            )
+
+        else:
+            raise SWATError("Unsupported authentication scheme: %s" % scheme)
 
     def getHostname(self):
         ''' Get the connection hostname '''
