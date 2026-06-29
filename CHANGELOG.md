@@ -1,6 +1,10 @@
 
 # Change Log
 
+## 1.18.1 - 2026-06-29
+
+- Update OAuth authentication logic and related code. 
+
 ## 1.18.0 - 2026-06-23
 
 - Add Python 3.14 support

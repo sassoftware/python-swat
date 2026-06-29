@@ -9,259 +9,263 @@ What’s New
 
 This document outlines features and improvements from each release.
 
+1.18.1 (June 29, 2026)
+----------------------
+
+- Update OAuth authentication logic and related code.
+
 1.18.0 (June 23, 2026)
 ----------------------
 
--  Add Python 3.14 support
--  Update TK subsystem
+- Add Python 3.14 support
+- Update TK subsystem
 
 1.17.2 (April 28, 2026)
 -----------------------
 
--  miscellaneous updates for Pandas 3 changes
+- miscellaneous updates for Pandas 3 changes
 
 1.17.1 (March 6, 2026)
 ----------------------
 
--  Cleanup miscellaneous test suite issues
--  Fix AttributeError: ‘StringDtype’ object has no attribute ‘str’
--  Fix warning about chained assignment using an inplace method
+- Cleanup miscellaneous test suite issues
+- Fix AttributeError: ‘StringDtype’ object has no attribute ‘str’
+- Fix warning about chained assignment using an inplace method
 
 1.17.0 (September 30, 2025)
 ---------------------------
 
--  Add Python 3.13 support
--  Update TK subsystem
--  Add Openssl 3 support
+- Add Python 3.13 support
+- Update TK subsystem
+- Add Openssl 3 support
 
 1.16.0 (August 15, 2025)
 ------------------------
 
--  Update TK subsystem
--  PowerPC is no longer supported
+- Update TK subsystem
+- PowerPC is no longer supported
 
 1.15.0 (December 5, 2024)
 -------------------------
 
--  Add Python 3.12 support
--  Update TK subsystem
--  Conda packages will no longer be generated
+- Add Python 3.12 support
+- Update TK subsystem
+- Conda packages will no longer be generated
 
 1.14.0 (June 7, 2024)
 ---------------------
 
--  Add support for Proof Key for Code Exchange (PKCE)
--  Update TK subsystem
--  Wheel and Conda files for Python releases < 3.7 are no longer created
+- Add support for Proof Key for Code Exchange (PKCE)
+- Update TK subsystem
+- Wheel and Conda files for Python releases < 3.7 are no longer created
 
 1.13.3 (August 31, 2023)
 ------------------------
 
--  add wheel files for macosx_11_0_arm64
+- add wheel files for macosx_11_0_arm64
 
 1.13.2 (July 31, 2023)
 ----------------------
 
--  Add CASTable.rename() to rename the columns of a table
--  Add biomedical image filetypes to the Image Data Message Handler
+- Add CASTable.rename() to rename the columns of a table
+- Add biomedical image filetypes to the Image Data Message Handler
 
 1.13.1 (July 14, 2023)
 ----------------------
 
--  Add nunique method for CASTable
--  Add drop_duplicates method for CASTable
--  Add new testcases to swat/tests/test_dataframe.py and
-   swat/tests/cas/test_table.py
+- Add nunique method for CASTable
+- Add drop_duplicates method for CASTable
+- Add new testcases to swat/tests/test_dataframe.py and
+  swat/tests/cas/test_table.py
 
 1.13.0 (April 20, 2023)
 -----------------------
 
--  Add Python 3.11 support
--  Update TK subsystem
+- Add Python 3.11 support
+- Update TK subsystem
 
 1.12.2 (April 14, 2023)
 -----------------------
 
--  updates to swat/tests/cas/test_imstat.py for benchmark changes
--  updates to swat/tests/cas/test_builtins.py for benchmark changes
--  cleanup deprecation warning messages
--  improve error message when on, onleft, onright merge parameters
-   contain a list rather than a string
+- updates to swat/tests/cas/test_imstat.py for benchmark changes
+- updates to swat/tests/cas/test_builtins.py for benchmark changes
+- cleanup deprecation warning messages
+- improve error message when on, onleft, onright merge parameters
+  contain a list rather than a string
 
 1.12.1 (January 9, 2023)
 ------------------------
 
--  Update Authentication documentation
+- Update Authentication documentation
 
 1.12.0 (November 11, 2022)
 --------------------------
 
--  New Image CASDataMsgHandler to allow easy uploading of client-side
-   images to a CAS table
--  Update TK subsystem
+- New Image CASDataMsgHandler to allow easy uploading of client-side
+  images to a CAS table
+- Update TK subsystem
 
 1.11.0 (July 5, 2022)
 ---------------------
 
--  Update TK subsystem
+- Update TK subsystem
 
 1.10.0 (June 10, 2022)
 ----------------------
 
--  Add Python 3.10 support
--  Update TK subsystem
+- Add Python 3.10 support
+- Update TK subsystem
 
 1.9.3 (August 6, 2021)
 ----------------------
 
--  Fix showlabels issue in Viya deployment before version 3.5
+- Fix showlabels issue in Viya deployment before version 3.5
 
 1.9.2 (June 18, 2021)
 ---------------------
 
--  Add authorization code as authentication method
+- Add authorization code as authentication method
 
 1.9.1 (June 11, 2021)
 ---------------------
 
--  Add Python 3.9 support
+- Add Python 3.9 support
 
 1.9.0 (May 24, 2021)
 --------------------
 
--  Add additional plotting method parameters for correct data fetches
--  Add ``date_format=`` to ``CAS.upload`` method for formatting CSV
-   exported data to a specific format
--  Update TK subsystem
+- Add additional plotting method parameters for correct data fetches
+- Add ``date_format=`` to ``CAS.upload`` method for formatting CSV
+  exported data to a specific format
+- Update TK subsystem
 
 1.8.1 (January 21, 2021)
 ------------------------
 
--  Fix compatibility with pandas 1.2 DataFrame rendering
--  Fix TKECERT error by locating libcrypto automatically
+- Fix compatibility with pandas 1.2 DataFrame rendering
+- Fix TKECERT error by locating libcrypto automatically
 
 1.8.0 (January 12, 2021)
 ------------------------
 
--  Use ssl module’s CA list as default
--  Improve initial connection performance
--  Fix OAuth authentication in REST connections
--  Fix log truncation with messages >1000 characters
+- Use ssl module’s CA list as default
+- Improve initial connection performance
+- Fix OAuth authentication in REST connections
+- Fix log truncation with messages >1000 characters
 
 1.7.1 (September 29, 2020)
 --------------------------
 
--  Add ability to apply SAS formats to columns in a ``SASDataFrame``
--  Support timezones in data uploaded and downloaded from CAS tables
--  Fix issue with TK path on Windows when using flask
+- Add ability to apply SAS formats to columns in a ``SASDataFrame``
+- Support timezones in data uploaded and downloaded from CAS tables
+- Fix issue with TK path on Windows when using flask
 
 1.7.0 (August 19, 2020)
 -----------------------
 
--  Add Python 3.8 support
--  Improve connection parameter handling (add CAS_URL= connection
-   variable)
--  Improve connection protocol auto-detection
+- Add Python 3.8 support
+- Improve connection parameter handling (add CAS_URL= connection
+  variable)
+- Improve connection protocol auto-detection
 
 1.6.1 (February 10, 2020)
 -------------------------
 
--  Add pandas v1.0.0 support
+- Add pandas v1.0.0 support
 
 1.6.0 (November 21, 2019)
 -------------------------
 
--  Fix letter-casing in ``has_action`` and ``has_actionset`` methods
--  Remove usage of deprecated ``ix`` accessor
--  Explicitly specify column and line delimiters and locale in uploaded
-   CSV files
--  Fix TKPATH issues in Windows and PPC
+- Fix letter-casing in ``has_action`` and ``has_actionset`` methods
+- Remove usage of deprecated ``ix`` accessor
+- Explicitly specify column and line delimiters and locale in uploaded
+  CSV files
+- Fix TKPATH issues in Windows and PPC
 
 1.5.2 (September 9, 2019)
 -------------------------
 
--  Fix issue with nulls in REST parameters
--  Add fallback default configuration for SSL
--  Add ``CASTable.get`` method
+- Fix issue with nulls in REST parameters
+- Add fallback default configuration for SSL
+- Add ``CASTable.get`` method
 
 1.5.1 (March 1, 2019)
 ---------------------
 
--  Fix Authinfo matching when using base URLs in REST interface
--  Fix compatibility with pandas 0.24
--  Fix blob parameters in REST interface
--  Add ``CASTable.last_modified_date``, ``CASTable.last_accessed_date``,
-   and ``CASTable.created_date`` properties
--  Add reverse operator methods to ``CASColumn``
+- Fix Authinfo matching when using base URLs in REST interface
+- Fix compatibility with pandas 0.24
+- Fix blob parameters in REST interface
+- Add ``CASTable.last_modified_date``, ``CASTable.last_accessed_date``,
+  and ``CASTable.created_date`` properties
+- Add reverse operator methods to ``CASColumn``
 
 1.5.0 (September 18, 2018)
 --------------------------
 
--  Windows support for binary CAS protocol
--  Added ``with_params`` method to ``CASTable`` to create one-off
-   parameter object
--  Set appropriate column data types when uploading a ``DataFrame``
+- Windows support for binary CAS protocol
+- Added ``with_params`` method to ``CASTable`` to create one-off
+  parameter object
+- Set appropriate column data types when uploading a ``DataFrame``
 
 1.4.0 (July 25, 2018)
 ---------------------
 
--  Automatic CAS table creation when large number of By groups are
-   generated in some DataFrame methods
--  Debugging options for REST interface
--  Python 3.7 support
+- Automatic CAS table creation when large number of By groups are
+  generated in some DataFrame methods
+- Debugging options for REST interface
+- Python 3.7 support
 
 1.3.1 (June 4, 2018)
 --------------------
 
--  Increase compatibility with older and newer versions of pandas
--  Automatically convert columns with SAS date/time formats to Python
-   date/time objects
--  Improve ``CASTable.merge`` algorithm
--  Fix autocompletion on ``CAS`` and ``CASTable`` objects
+- Increase compatibility with older and newer versions of pandas
+- Automatically convert columns with SAS date/time formats to Python
+  date/time objects
+- Improve ``CASTable.merge`` algorithm
+- Fix autocompletion on ``CAS`` and ``CASTable`` objects
 
 1.3.0 (December 12, 2017)
 -------------------------
 
--  Add new summary statistics for new version of CAS
--  Improve missing value support in ``CASTable`` ``describe`` method
--  Add controller failover support
--  Improve encrypted communication support
--  Add ``add``, ``any``, ``all``, ``merge``, and ``append`` methods to
-   ``CASTable``
--  Add ``merge`` and ``concat`` functions with ``CASTable`` support
+- Add new summary statistics for new version of CAS
+- Improve missing value support in ``CASTable`` ``describe`` method
+- Add controller failover support
+- Improve encrypted communication support
+- Add ``add``, ``any``, ``all``, ``merge``, and ``append`` methods to
+  ``CASTable``
+- Add ``merge`` and ``concat`` functions with ``CASTable`` support
 
 1.2.1 (September 13, 2017)
 --------------------------
 
--  Better support for binary data in table uploads and parameters
--  Add integer missing value support
--  Allow list parameters to also be sets
--  Improve connection protocol detection
--  Add ``eval`` method to ``CASTable``
+- Better support for binary data in table uploads and parameters
+- Add integer missing value support
+- Allow list parameters to also be sets
+- Improve connection protocol detection
+- Add ``eval`` method to ``CASTable``
 
 1.2.0 (May 2, 2017)
 -------------------
 
--  Use ``upload`` action rather than ``addtable`` for ``read_*``
-   methods.
--  Add basic Zeppelin notebook support
-   (``from swat.notebook.zeppelin import show``)
+- Use ``upload`` action rather than ``addtable`` for ``read_*`` methods.
+- Add basic Zeppelin notebook support
+  (``from swat.notebook.zeppelin import show``)
 
 1.1.0 (March 21, 2017)
 ----------------------
 
--  Add support for Python 3.6 (Linux extension)
--  Implement ``sample`` method on ``CASTable``
--  Add sampling support to plotting methods
--  ``cas.dataset.max_rows_fetched`` increased to 10,000
--  Add ``terminate`` method to ``CAS`` object to end session and close
-   connection
--  Implement ``fillna``, ``replace``, and ``dropna`` methods on
-   ``CASTable``
--  Add ``apply_labels`` method on ``SASDataFrame`` to set column labels
-   as column names
+- Add support for Python 3.6 (Linux extension)
+- Implement ``sample`` method on ``CASTable``
+- Add sampling support to plotting methods
+- ``cas.dataset.max_rows_fetched`` increased to 10,000
+- Add ``terminate`` method to ``CAS`` object to end session and close
+  connection
+- Implement ``fillna``, ``replace``, and ``dropna`` methods on
+  ``CASTable``
+- Add ``apply_labels`` method on ``SASDataFrame`` to set column labels
+  as column names
 
 1.0.0 (September 27, 2016)
 --------------------------
 
--  Initial Release
+- Initial Release
