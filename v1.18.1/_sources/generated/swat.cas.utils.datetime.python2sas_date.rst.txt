@@ -1,0 +1,6 @@
+﻿swat.cas.utils.datetime.python2sas\_date
+========================================
+
+.. currentmodule:: swat.cas.utils.datetime
+
+.. autofunction:: python2sas_date

@@ -1,0 +1,6 @@
+﻿swat.cas.table.CASTable.replace
+===============================
+
+.. currentmodule:: swat.cas.table
+
+.. automethod:: CASTable.replace

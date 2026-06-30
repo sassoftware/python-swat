@@ -1,0 +1,6 @@
+﻿swat.cas.table.CASTable.ndim
+============================
+
+.. currentmodule:: swat.cas.table
+
+.. autoattribute:: CASTable.ndim

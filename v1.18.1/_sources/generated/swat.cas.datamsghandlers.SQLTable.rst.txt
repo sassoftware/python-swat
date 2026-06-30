@@ -1,0 +1,34 @@
+﻿swat.cas.datamsghandlers.SQLTable
+=================================
+
+.. currentmodule:: swat.cas.datamsghandlers
+
+.. autoclass:: SQLTable
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~SQLTable.__init__
+      ~SQLTable.create_engine
+      ~SQLTable.finish
+      ~SQLTable.getone
+      ~SQLTable.getrow
+      ~SQLTable.send
+      ~SQLTable.write
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~SQLTable.args
+   
+   

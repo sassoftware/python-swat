@@ -1,0 +1,6 @@
+﻿swat.cas.table.CASTable.\_\_iter\_\_
+====================================
+
+.. currentmodule:: swat.cas.table
+
+.. automethod:: CASTable.__iter__

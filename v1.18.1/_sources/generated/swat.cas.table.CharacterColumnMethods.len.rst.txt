@@ -1,0 +1,6 @@
+﻿swat.cas.table.CharacterColumnMethods.len
+=========================================
+
+.. currentmodule:: swat.cas.table
+
+.. automethod:: CharacterColumnMethods.len
