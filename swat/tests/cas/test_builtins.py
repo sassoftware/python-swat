@@ -253,7 +253,7 @@ class TestBuiltins(tm.TestCase):
         r = self.s.builtins.loadactionset(actionset='neuralNet')
         if r.severity != 0:
             self.pp.pprint(r.messages)
-            self.assertEquals(r.status, None)
+            self.assertEqual(r.status, None)
 
         # List an actionSet that is loaded.
         out = self.s.builtins.help(actionSet='neuralNet')
